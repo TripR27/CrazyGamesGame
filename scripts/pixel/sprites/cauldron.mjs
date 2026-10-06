@@ -1,0 +1,26 @@
+export const cauldron = {
+  palette: {
+    k: 0x1a1a22, d: 0x2b2b33, m: 0x45454f, h: 0x6a6a78,
+    g: 0x7be05a, G: 0xb6f58f, o: 0xe8641a, y: 0xf5c542, r: 0xb03a10,
+  },
+  rows: [
+    '....kkkkkkkkkkkkkkkk....',
+    '..kkmmmmmmmmmmmmmmmmkk..',
+    '.kmmggggGGggggggggggmmk.',
+    'kddmmmmmmmmmmmmmmmmmmddk',
+    'kdmhhddddddddddddddddddk',
+    'kdmhdddddddddddddddddddk',
+    'kdmhdddddddddddddddddddk',
+    'kdmddddddddddddddddddddk',
+    'kdmddddddddddddddddddddk',
+    'kddddddddddddddddddddddk',
+    'kddddddddddddddddddddddk',
+    '.kddddddddddddddddddddk.',
+    '.kddddddddddddddddddddk.',
+    '..kkddddddddddddddddkk..',
+    '....kkkkkkkkkkkkkkkk....',
+    '....kk...o....o...kk....',
+    '....kk..ooyoooyo..kk....',
+    '....kkrooyyyyyyoorkk....',
+  ],
+};

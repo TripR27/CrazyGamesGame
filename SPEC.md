@@ -35,7 +35,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
 | 20 | CrazyGames SDK | ⬜ | |
-| 21 | Art-pass | ⬜ | |
+| 21 | Art-pass in pixel art + animaties | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
 
@@ -211,6 +211,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 ### Rendering
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
+- **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, winkel, receptenboek, instellingen.
@@ -218,9 +219,9 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 
 ### Assets
 
-- **Eerlijke kanttekening:** ik kan geen geschilderde/AI-afbeeldingen genereren. Wel kan ik **SVG-sprites schrijven** (cartoon, vlakke kleuren, past bij absurde stijl) en **CC0/vrije assets opzoeken** (bijv. Kenney.nl, OpenGameArt; per asset de licentie checken). Downloaden doe ik alleen na jouw akkoord per bestand.
+- **Eerlijke kanttekening:** ik kan geen geschilderde/AI-afbeeldingen genereren. Wel kan ik **pixel-art-sprites schrijven als tekstrasters met een palet** (zie `scripts/pixel/` en `art/pixel/`; een script maakt er PNG's van, zonder dependencies) en **CC0/vrije assets opzoeken** (bijv. Kenney.nl, OpenGameArt; per asset de licentie checken). Downloaden doe ik alleen na jouw akkoord per bestand. Ingewikkelde sprites (zeldzame klanten, helden, gebouwen) kun je beter via een beeldtool of CC0-pakket laten maken; eenvoudige klanten, ingrediënten en meubels lukken in dit formaat.
 - Stap 1 t/m 20: **placeholders** (gekleurde vormen + emoji) zodat spelen niet op art wacht.
-- Stap 21: art-pass met SVG's en eventueel CC0-pakketten.
+- Stap 21: volledige styling-stap in pixel art, met animaties (zie stap 21 in hoofdstuk 12).
 - Elke gebruikte externe asset komt met bron en licentie in `ASSETS.md`.
 - Budget: alle assets samen < 5 MB. Muziek: korte loopbare mp3/ogg (jij levert), < 2 MB per track.
 
@@ -380,7 +381,8 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Zie IDEAS.md.
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
-- [ ] **Stap 21: Art-pass.** Placeholders vervangen door SVG-sprites (en eventueel CC0-assets, na akkoord), klantanimaties, tutorial-mascotte, juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `ASSETS.md` bijwerken.
+- [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `ASSETS.md` bijwerken.
+  *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
 - [ ] **Stap 22: Performance, QA en indienklaar maken.** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
 
@@ -397,7 +399,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 | 100-regelsregel leidt tot veel kleine bestanden | Bewust; duidelijke mappen en indexbestanden |
 | Balans te traag/snel | Simulator (stap 13), alle getallen in `data/` |
 | Twee tabs tegelijk overschrijven elkaars save (zelfde `localStorage`) | CrazyGames toont de game normaal in één iframe; de data-module van de SDK (stap 20) synchroniseert per account. Eventueel later: `storage`-event of een tab-lock als dit een probleem blijkt |
-| Art-kwaliteit met alleen SVG | Stijlkeuze: eenvoudige vlakke cartoon-vormen; thumbnail apart aandacht |
+| Art-kwaliteit van zelfgeschreven pixel art | Eenvoudige sprites lukken (experiment gelukt); complexe sprites extern laten maken of CC0 gebruiken; thumbnail apart aandacht |
 | Tutorial irriteert of loopt vast | Altijd overslaanbaar, beloont echte acties i.p.v. klikken op "volgende", test op vastlopers |
 
 ---
@@ -414,6 +416,14 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Chore: pixel-art-experiment (2026-10-06, `chore-pixel-art-experiment`)
+- **Gedaan:** `scripts/pixel/` met een PNG-encoder op alleen Node-bordmiddelen (`png.mjs`), een canvas met opschalen zonder vervaging (`canvas.mjs`), sprites als tekstrasters met palet (`sprite.mjs`, `sprites/cauldron.mjs`, `sprites/knight.mjs`), een achtergrond (`backdrop.mjs`) en `preview.mjs`. `npm run pixel:preview` schrijft naar `art/pixel/`: de taverne op 320×180 (4× opgeschaald) en de twee sprites op 12×.
+- **Waarom:** de eigenaar wilde zien hoe pixel art eruit zou zien voordat de stijl wordt vastgelegd. Geen nieuwe dependencies; het spel zelf is niet aangepast.
+- **Besluit:** de eigenaar vond het resultaat goed. De eindstijl wordt pixel art, maar de omschakeling is een volledige styling-stap aan het eind (stap 21, nu inclusief animaties). Tot dan blijven placeholders en 1280×720 gelden; zie hoofdstuk 4 (Rendering en Assets) en stap 21.
+- **Afwijkingen van het plan:** SVG-sprites uit het oorspronkelijke plan zijn vervangen door pixel art.
+- **Nu te proberen:** `npm run pixel:preview` en open `art/pixel/tavern-preview-4x.png`.
+- **Nog te doen / volgende stap:** stap 6, Klanten.
 
 ### Stap 5: Taverne-scene (placeholder) (2026-10-06, `step-05-tavern-scene`)
 - **Gedaan:** (code in `src/scene/` en `src/ui/`, tests in `tests/scene/` en `tests/ui/`)
