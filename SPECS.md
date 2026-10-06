@@ -1,6 +1,6 @@
 # SPEC: Brewmaster's Tavern (technische specificatie)
 
-> Dit document hoort bij [GAME_ANALYSE.md](GAME_ANALYSE.md) (het "wat"). Dit is het "hoe". Ideeën die nog niet in het plan zitten (achievements via CrazyGames, weekly leaderboard) staan in [IDEAS.md](IDEAS.md).
+> Dit document hoort bij [GAME_ANALYSE.md](GAME_ANALYSE.md) (het "wat"). Dit is het "hoe". Ideeën die nog niet in het plan zitten (weekly leaderboard, punten voor de art-pass) staan in [IDEAS.md](IDEAS.md).
 > **Regel voor Claude:** lees dit bestand volledig vóór je code schrijft of wijzigt. Werk één stap tegelijk af (hoofdstuk 12) en stop daarna.
 
 ---
@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (stap 14a wacht op akkoord om te mergen). **Laatst afgerond:** stap 14a (Kamers). **Volgende stap:** 14b (Decoraties).
+**Nu bezig:** niets. **Laatst afgerond:** stap 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -35,8 +35,11 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 13c | Ingrediënten in de winkel | ✅ | `step-13c-ingredients` |
 | 14a | Kamers (bovenverdieping) | ✅ | `step-14a-rooms` |
 | 14b | Decoraties (goud-sink) | ⬜ | |
-| 15 | Helden | ⬜ | |
-| 16 | Expedities en kerkers | ⬜ | |
+| 14c | Legenda van effecten in het receptenboek | ⬜ | |
+| 14d | Night Shift: offline verdienen kopen | ⬜ | |
+| 15 | Helden, gildekamer en uitrusting | ⬜ | |
+| 16 | Expedities met keuzes en drankjes | ⬜ | |
+| 16b | Baasgevecht (timing-minigame) | ⬜ | |
 | 17 | Prestige | ⬜ | |
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
@@ -57,7 +60,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 6. **Game-logica kent geen Phaser en geen DOM** (zie lagen, hoofdstuk 4).
 7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
 8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
-9. **Na elke stap wordt SPEC.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
+9. **Na elke stap wordt SPECS.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
 10. **Git:** één branch per stap, een paar logische commits (ongeveer 2 tot 3), mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
 
 ### Hoe dwing je dit af (voor jou)
@@ -140,7 +143,7 @@ platform/  audio/  i18n/   (diensten; mogen door ui/scene gebruikt worden,
 
 ```
 crazyGamesGame/
-  CLAUDE.md  SPEC.md  GAME_ANALYSE.md  ASSETS.md
+  CLAUDE.md  SPECS.md  GAME_ANALYSE.md  ASSETS.md
   index.html  package.json  vite.config.ts  tsconfig.json  eslint.config.js
   scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/sim/)
   public/         assets (svg, spritesheets, audio)
@@ -284,19 +287,40 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 - **Tutorial-hint** (les `room`, na de VIP-les): start zodra een kamer te bouwen én betaalbaar is; wijst Menu, Shop en de bouwknop aan, en daarna de nieuwe kamer.
 - **Decoraties** komen in stap 14b.
 
+### Besluiten uit de ideeënronde (eigenaar, 2026-10-06)
+
+Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
+
+- **Legenda van effecten (stap 14c):** bovenaan het receptenboek een legenda met de vier effecten (icoon, naam en wat het doet). Bij elk recept staat dan alleen nog het icoon, niet meer de tekst "Speed: drinks faster". Klantkaartje bij hover en uitleg bij de eerste keer zijn niet gekozen.
+- **Night Shift, offline verdienen kopen (stap 14d):** offline verdienen gebeurt niet meer vanzelf. Zodra de speler een eerste medewerker heeft, staat "Night Shift" (werknaam) in de winkel als eenmalige aankoop; daarna komen upgrades voor het offline-aandeel (nu vast 50%, wordt een stat) en de duur (stat `offlineHours`). Zonder aankoop telt afwezig niets, maar het welkom-venster toont wat het personeel had kunnen verdienen ("Your staff could have earned 1.2K…") met een verwijzing naar de winkel. Prijs met de simulator afstellen. Later kan een rewarded ad (stap 20) de opbrengst verdubbelen.
+- **Helden (stap 15, 16, 16b), zie ook Helden hieronder.**
+- **Achievements (stap 18):** zoals gepland.
+- **Niet in het plan:** het weekly leaderboard (pas als CrazyGames ons uitnodigt, zie IDEAS.md punt 2), de punten over de schermindeling (checklist voor stap 21 en 22, IDEAS.md punt 3), en de poster (vervallen).
+
+### Helden (besluit eigenaar, 2026-10-06; stap 15, 16 en 16b)
+
+- **Niet alleen idle:** de eigenaar wil bij de helden echte gameplay. Actief meespelen levert duidelijk meer op; idle blijft mogelijk (standaardkeuzes, ook offline) en levert minder, net als bij brouwen (idle ongeveer 30-40% van actief).
+- **Zichtbaar:** de helden wonen in een **gildekamer** op de bovenverdieping (een vierde kamer, te bouwen zoals de andere; de indeling van de bovenverdieping moet daarvoor opnieuw verdeeld worden). Je ziet ze vertrekken en terugkomen.
+- **Actieve onderdelen (alle vier gekozen):**
+  1. **Uitrusting zelf kiezen** (zwaard, schild, helm, amulet), met keuzes per kerker (stap 15).
+  2. **Drankjes meegeven als keuze:** de speler brouwt zelf wat de held meeneemt; het effect (kracht, snelheid, geluk, charme) helpt in bepaalde kerkers (stap 16).
+  3. **Keuzes onderweg:** tijdens een expeditie korte keuzekaartjes (pad links of rechts, vechten of sluipen, welk drankje nu drinken) met invloed op buit en duur (stap 16).
+  4. **Baasgevecht:** een korte **timing-klik**-minigame aan het eind van een kerker (stap 16b).
+- **Klein beginnen:** 2 klassen en 1 kerker in de eerste versie; meer klassen en kerkers als data zodra het leuk blijkt. Helden kunnen niet sterven (gewond = cooldown).
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
 - **Ontdekt recept:** naam, ingrediënten (met hun plaatje of kleur), brouwtijd, prijs, effect en zeldzaamheid. Zo hoeft de speler niets te onthouden en kan hij het recept zonder gokken opnieuw brouwen.
 - **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
 - Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
-- **Idee van de eigenaar (2026-10-06): de recepten als poster op de muur** van de taverne, in plaats van of naast een knop. Klik op de poster opent het receptenboek-paneel. Zie IDEAS.md, punt 5.
+- ~~Poster op de muur~~: **vervallen** (besluit eigenaar, 2026-10-06, ideeënronde): het receptenboek in het menu is genoeg.
 - **Gebouwd in stap 12 (keuzes van Claude, de eigenaar liet de aanbevolen keuze over):**
   - **Ontdekken:** een niveau maakt recepten *ontdekbaar* (`unlocks` in `data/reputation/levels.ts`), niet bekend. Past de inhoud van de ketel precies op een ontdekbaar recept, dan komt er "Eureka! <drankje>!" en begint het meteen te brouwen; het recept is vanaf dan bekend (`systems/recipes/discovery.ts`, event `recipe:discovered`). Een combinatie die op geen bekend of ontdekbaar recept kan uitkomen, mislukt zoals voorheen. Klanten bestellen alleen bekende recepten.
   - **Niveau 1 maakt niets ontdekbaar:** in tier 1 is elke combinatie van twee ingrediënten een recept, en een nieuwe speler zou tijdens de basisles per ongeluk iets kunnen brouwen wat niemand besteld heeft. De eerste ontdekkingen komen op niveau 2.
   - **Het schap** toonde de ingrediënten tot de hoogste tier van de bekende én ontdekbare recepten. *Sinds stap 13c:* het schap toont de basisingrediënten plus de gekochte (zie Speelbaarheid, "Gebouwd in stap 13c").
   - **Paneel en knop:** een zijpaneel met een eigen knop "Recipes" links van Shop. Er is steeds maar één paneel open (`ui/side-panels.ts`; opent de speler het ene, dan sluit het andere). Per recept een kaartje: **bekend** (naam, zeldzaamheid, ingrediënten met hun kleur van het schap, brouwtijd, prijs en effect), **ontdekbaar** (silhouet "???" met zeldzaamheid en hint) of **op slot** ("Unlocks at <niveau>"). Bovenaan X/N. De melding bij een nieuw niveau noemt het aantal nieuwe recepten, niet de namen.
-  - **Poster op de muur:** nog niet gebouwd; dat hoort bij de art-pass (stap 21), omdat de poster pas leesbaar en mooi wordt met echte art. Het paneel is de basis waar de poster later naartoe linkt (IDEAS.md, punt 5).
+  - **Poster op de muur:** niet gebouwd en later vervallen (ideeënronde 2026-10-06).
   - **Tutorial-hint:** een les `book` (na de plekken-les, vóór personeel) die start bij het eerste nieuwe niveau (`reputation:levelUp`, of meteen als het niveau al bereikt is): de ketel wijst de knop aan en daarna de kop van het open boek.
 
 - **Balans-simulator** (gebouwd in stap 13): `npm run simulate [-- minuten [seed]]` (standaard 60 minuten, seed 1). `scripts/simulate.mjs` laat de bestaande Vite de TypeScript-code laden (`ssrLoadModule`, geen nieuwe dependency); de logica staat in `src/sim/`: een speler-bot (`bot.ts`: serveert klaarstaande drankjes, probeert eerst nieuwe recepten, brouwt dan bestellingen, koopt de goedkoopste betaalbare upgrade; één klik per 0,7 s), een tijdlijn uit de spelgebeurtenissen (`timeline.ts`), de runner (`run.ts`: het echte spel via `createServices`, vaste seed, gesimuleerde klok, tutorial overgeslagen) en het rapport (`report.ts`). Het rapport toont de eerste keer van elke mijlpaal, een tabel per minuut en de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6. **Idle versus actief:** dezelfde run (zelfde seed) waarin de speler de laatste 10 minuten niets doet; doel 30-40%. Doel later: eerste prestige na ~1 tot 2 uur (prestige komt in stap 17).
@@ -305,7 +329,7 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
-- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging.
+- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft nu 3 kamervakken (stap 14a); de gildekamer (stap 15) wordt de vierde.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `ui/side-layout.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
@@ -402,7 +426,7 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 3. Visuele stappen: in de browser gecontroleerd, geen console-fouten.
 4. Geen bestand > 120 regels, en bestanden boven 100 regels zijn bewust (en gemeld) of worden gesplitst. SOLID gecontroleerd.
 5. Heeft de stap een nieuwe speler-functie? Dan hoort daar een korte **tutorial-hint** bij (zie hoofdstuk 4, Tutorial).
-6. **SPEC.md is bijgewerkt (verplicht, laatste commit van de stap):**
+6. **SPECS.md is bijgewerkt (verplicht, laatste commit van de stap):**
    - Voortgangsoverzicht bovenaan: status van de stap, branch, wat de volgende stap is.
    - Stap afgevinkt in hoofdstuk 12.
    - Logboek (hoofdstuk 14): nieuwe entry met *wat er gedaan is*, *waarom* (gemaakte keuzes), *afwijkingen van het plan*, *wat je nu kunt proberen* en *wat er nog moet gebeuren*.
@@ -425,7 +449,7 @@ Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 
 1. **Branch per stap:** `step-NN-korte-naam` (bijv. `step-07-brew-and-serve`), aangemaakt vanaf een bijgewerkte `main`.
 2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven. Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
-3. **Laatste commit van de stap** is de SPEC.md-update (hoofdstuk 10, punt 6).
+3. **Laatste commit van de stap** is de SPECS.md-update (hoofdstuk 10, punt 6).
 4. **Terug mergen naar `main`:** alleen nadat jij het resultaat hebt bekeken en zegt dat het mag ("merge stap N"). Standaard `--no-ff`, zodat elke stap als blok in de geschiedenis zichtbaar blijft.
 5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Besluit 2026-10-06: mergen en pushen alleen als jij het **per stap** zegt; een eerdere toestemming geldt niet automatisch voor de volgende stap. Geen force-push, geen herschrijven van geschiedenis op `main`.
 6. **Auteur:** commits gebruiken de `user.name` en `user.email` uit jouw git-configuratie, dus jij staat als auteur. **Besluit: geen enkele vermelding van Claude of AI in git of GitHub.** Dus geen `Co-Authored-By`-regel, geen "Generated with Claude Code" in commitberichten, PR-beschrijvingen of branchnamen, en geen `--author`-override. Alleen jouw naam staat erin. Gebruik `git config` nooit aanpassen om een andere identiteit in te stellen.
@@ -479,12 +503,17 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
 - [x] **Stap 14a: Kamers.** Uitbreidingen (uitbouw met extra tafels, alchemielab, VIP-lounge) als kamervakken op een bovenverdieping in de scene, te bouwen in de winkel. Tutorial-hint: eerste kamer. Zie hoofdstuk 4, Kamers. (Stap 14 is op 2026-10-06 gesplitst in 14a en 14b, keuze eigenaar.)
 - [ ] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie.
-- [ ] **Stap 15: Helden.** Inhuren, klassen, levelen, uitrusting, held-paneel. Tutorial-hint: eerste held.
-- [ ] **Stap 16: Expedities en kerkers.** Held + kerker + meegenomen drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
+- [ ] **Stap 14c: Legenda van effecten in het receptenboek.** Bovenaan het receptenboek een legenda met de vier effecten (icoon, naam, wat het doet); bij elk recept alleen nog het icoon in plaats van de tekst. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
+  *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
+- [ ] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
+  *Klaar wanneer:* zonder Night Shift levert afwezig zijn niets op en toont het welkom-venster het gemiste bedrag, met Night Shift werkt offline zoals nu, upgrades verhogen aandeel en duur, tests slagen.
+- [ ] **Stap 15: Helden, gildekamer en uitrusting.** Een gildekamer op de bovenverdieping (te bouwen zoals de andere kamers) waar de helden wonen; inhuren, 2 klassen om mee te beginnen, levelen, uitrusting zelf kiezen (zwaard, schild, helm, amulet), Heroes-tabblad in het zijpaneel. Tutorial-hint: eerste held. Zie hoofdstuk 4, Helden.
+- [ ] **Stap 16: Expedities met keuzes en drankjes.** Held + kerker (1 om mee te beginnen) + zelf gebrouwen meegegeven drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); onderweg keuzekaartjes (pad, vechten of sluipen, drankje drinken) met invloed op buit en duur; idle kan met standaardkeuzes, actief meespelen levert duidelijk meer op; offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
+- [ ] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een korte timing-klik-minigame tegen de baas (muis en touch). Wie niet meespeelt, krijgt de standaard-uitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
 - [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
 ### Fase D: Afwerking
-- [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Zie IDEAS.md.
+- [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten.
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 - [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `ASSETS.md` bijwerken.
@@ -523,6 +552,11 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nog te doen / volgende stap:** ...
 ```
 
+### Chore: ideeënronde (2026-10-06, `chore-ideas-review`)
+- **Gedaan:** alle punten uit IDEAS.md met de eigenaar doorgenomen (vragen in vier rondes), de besluiten vastgelegd in hoofdstuk 4 ("Besluiten uit de ideeënronde" en "Helden") en in het stappenplan (nieuwe stappen 14c, 14d en 16b; 15 en 16 aangescherpt). IDEAS.md bijgewerkt: per punt wat er besloten is en wat er nog openstaat. De hernoeming van SPEC.md naar SPECS.md (door de eigenaar) is vastgelegd en alle verwijzingen zijn bijgewerkt.
+- **Waarom:** de eigenaar wilde eerst samen bepalen wat er van de ideeën in het plan komt, voordat er verder gebouwd wordt. Geen code.
+- **Nog te doen / volgende stap:** stap 14b, Decoraties.
+
 ### Stap 14a: Kamers (2026-10-06, `step-14a-rooms`)
 - **Gedaan:** (code in `src/data/rooms/`, `src/systems/rooms/`, `src/systems/purchases/`, `src/systems/actions/room-actions.ts`, `src/scene/layout-rooms.ts`, `src/scene/rooms/`, `src/ui/shop/one-time-*.ts`, `src/ui/shop/room-view-model.ts`, `src/data/tutorial/room.ts`, `src/data/validate/room-table.ts`, `src/sim/shopping.ts`; tests in `tests/systems/rooms/`, `tests/scene/layout-rooms.test.ts`, `tests/ui/room-view-model.test.ts`, `tests/wiring/room-flow.test.ts`, `tests/data/validate-rooms.test.ts`)
   - **Kamers op een bovenverdieping:** zie hoofdstuk 4, Kamers.
@@ -534,7 +568,7 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. Simulator, 60 minuten: Extension op 8:40 / 9:03 / 9:06, Alchemy Lab op 13:12 / 13:29 / 14:03, VIP Lounge op 21:31 / 22:25 / 22:45 (seeds 1/2/3; doel: eerste kamer binnen 30 minuten); idle 28% / 33% / 35% (doel 30-40%; seed 1 net eronder); 16 aankopen in de eerste 5 minuten, eerste medewerker op 4:26, eerste ontdekking op 1:20 (ongewijzigd). In de browser: drie dichtgetimmerde kamers met bordjes; klikken op de Extension opende het paneel op Shop met de groep Rooms; na het bouwen een ingerichte kamer met drie klanten boven; met alle kamers gebouwd: lab met flesjes, lounge met tapijt, lijst en bank, klanten boven en beneden door elkaar. Geen consolefouten.
 - **Afwijkingen van het plan:** stap 14 is gesplitst in 14a en 14b (keuze eigenaar). Het personeel kan nu tot niveau 7 trainen (balans, zie boven). Klanten lopen nog dwars door de muur naar boven; dat lost de art-pass op (stap 21).
 - **Nu te proberen:** speel tot Cozy Inn en spaar 1.500 goud; de ketel wijst de Extension aan. Klik op een dichtgetimmerde kamer om de winkel te openen.
-- **Nog te doen / volgende stap:** stap 14b, Decoraties (na akkoord van de eigenaar om 14a te mergen).
+- **Nog te doen / volgende stap:** stap 14b, Decoraties.
 
 ### Stap 13c: Ingrediënten in de winkel (2026-10-06, `step-13c-ingredients`)
 - **Gedaan:** (code in `src/data/ingredients/`, `src/systems/ingredients/`, `src/systems/recipes/discovery.ts`, `src/systems/actions/ingredient-actions.ts`, `src/wiring/ingredient-shelf.ts`, `src/ui/shop/ingredient-*.ts`, `src/ui/recipe-book/`, `src/ui/level-up/`, `src/data/tutorial/ingredient.ts`, `src/data/validate/ingredient-table.ts`, `src/sim/`; tests in `tests/systems/ingredients/`, `tests/ui/ingredient-view-model.test.ts`, `tests/wiring/ingredient-flow.test.ts` en aangepaste bestaande tests)
