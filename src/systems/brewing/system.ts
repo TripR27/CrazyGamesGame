@@ -4,7 +4,8 @@ import { advanceBrewing } from './advance';
 import type { BrewEvent, BrewStation } from './types';
 
 export function publishBrewEvent(bus: EventBus<GameEvents>, event: BrewEvent): void {
-  if (event.kind === 'started') bus.emit('brew:started', { recipeId: event.recipeId });
+  if (event.kind === 'discovered') bus.emit('recipe:discovered', { recipeId: event.recipeId });
+  else if (event.kind === 'started') bus.emit('brew:started', { recipeId: event.recipeId });
   else if (event.kind === 'done') bus.emit('brew:done', { recipeId: event.recipeId });
   else bus.emit('brew:notice', { notice: event.notice, messageKey: event.messageKey });
 }

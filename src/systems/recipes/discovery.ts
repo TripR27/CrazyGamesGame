@@ -1,0 +1,30 @@
+import type { EventBus } from '@/core/events';
+import type { GameEvents } from '@/core/game-events';
+import type { RecipeDef } from '@/data/recipes';
+import { levelFor, recipesUnlockedUpTo } from '@/systems/reputation';
+
+/** The part of the state discovery looks at and changes (interface segregation: not the whole state). */
+export interface DiscoveryState {
+  reputation: number;
+  recipesDiscovered: string[];
+}
+
+export interface DiscoveryStore {
+  getState(): DiscoveryState;
+  update(mutator: (state: DiscoveryState) => void): void;
+}
+
+/** Recipes the player can discover right now: unlocked by their reputation level, but not known yet. */
+export function discoverableRecipes(state: DiscoveryState, recipes: readonly RecipeDef[]): RecipeDef[] {
+  const unlocked = recipesUnlockedUpTo(levelFor(state.reputation));
+  return recipes.filter((r) => unlocked.includes(r.id) && !state.recipesDiscovered.includes(r.id));
+}
+
+/** Writes every discovery into the state (and asks for a save), so customers can order it from now on. */
+export function recordDiscoveries(store: DiscoveryStore, bus: EventBus<GameEvents>): () => void {
+  return bus.on('recipe:discovered', ({ recipeId }) => {
+    if (store.getState().recipesDiscovered.includes(recipeId)) return;
+    store.update((state) => void state.recipesDiscovered.push(recipeId));
+    bus.emit('saveRequested', {});
+  });
+}

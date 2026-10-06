@@ -5,7 +5,7 @@ import { newGame, playBasics } from './helpers';
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'staff_hire', 'staff_done',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'staff_hire', 'staff_done',
 ];
 
 /** Every lesson before the VIP one is done, and the player has `reputation`. */
@@ -17,9 +17,11 @@ function withReputation(reputation: number) {
 }
 
 describe('reputation levels in the real game', () => {
-  it('teach the recipes of a level the save already reached, so customers can order them', () => {
+  it('only make recipes discoverable: customers keep ordering what the player knows', () => {
     const game = withReputation(25);
-    expect(game.state.recipesDiscovered).toContain('dragons_hiccup');
+    game.tick(120_000);
+    expect(game.state.recipesDiscovered).toEqual(['slime_sap', 'glowcap_stout']);
+    expect(game.world.scene.floor.customers.every((c) => game.state.recipesDiscovered.includes(c.recipeId))).toBe(true);
   });
 
   it('announce a new level when serving pushes the reputation over the threshold', () => {
@@ -33,12 +35,12 @@ describe('reputation levels in the real game', () => {
 });
 
 describe('the VIP hint, played in the real game', () => {
-  it('points at the first VIP, who wants the priciest drink, and finishes once they are served', () => {
+  it('points at the first VIP, who wants the priciest known drink, and finishes once they are served', () => {
     const game = withReputation(25);
     for (let t = 0; t < 1_200_000 && game.shown() === null; t += 1_000) game.tick(1_000);
     expect(game.shown()).toBe('vip_spot');
     const vip = game.world.scene.floor.customers.find((c) => c.vip);
-    expect(vip?.recipeId).toBe('dragons_hiccup');
+    expect(vip?.recipeId).toBe('glowcap_stout');
     expect(resolveTarget('guide-vip', game.guide())).toBe(`customer:${vip?.id}`);
 
     playBasics(game); // brew the VIP's drink and serve them

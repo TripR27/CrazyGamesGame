@@ -9,6 +9,8 @@ export const tutorial: Messages = {
   'tutorial.basics_gold.text': 'Gold! Shiny. Keep the drinks coming and I will keep bubbling.',
   'tutorial.likes_spot.text': 'See the ♥ on that order? This one loves what {liked} does, so its effect counts double. Serve it!',
   'tutorial.likes_done.text': 'Strength pays more, speed frees the seat, luck brings tips, charm adds reputation. A ♥ makes it double.',
+  'tutorial.book_open.text': 'New level, new drinks to discover! Open the recipe book, it remembers what you forget.',
+  'tutorial.book_read.text': 'Grey cards are drinks nobody has brewed yet. Read the hint, then throw things into me. Eureka guaranteed. Mostly.',
   'tutorial.upgrade_open.text': 'Psst. You have gold burning a hole in your pocket. Open the shop.',
   'tutorial.upgrade_buy.text': 'Buy {upgrade}. Gold only counts when it is spent. That is the whole joke.',
   'tutorial.seats_buy.text': 'One customer at a time? Buy an Extra Seat in the shop. More chairs, more thirst.',

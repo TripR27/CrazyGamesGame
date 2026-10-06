@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 11c (Reputatieniveaus, gates en VIP-klanten). **Volgende stap:** 12 (Receptenontdekking en receptenboek).
+**Nu bezig:** niets. **Laatst afgerond:** stap 12 (Receptenontdekking en receptenboek). **Volgende stap:** 13 (Balans-simulator).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -29,7 +29,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 11a | Plekken en geleidelijke klanten | ✅ | `step-11a-seats` |
 | 11b | Voorkeuren en drankeffecten | ✅ | `step-11b-effects` |
 | 11c | Reputatieniveaus, gates en VIP-klanten | ✅ | `step-11c-reputation` |
-| 12 | Receptenontdekking + receptenboek | ⬜ | |
+| 12 | Receptenontdekking + receptenboek | ✅ | `step-12-recipe-book` |
 | 13 | Balans-simulator | ⬜ | |
 | 14 | Kamers en visuele groei | ⬜ | |
 | 15 | Helden | ⬜ | |
@@ -204,7 +204,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, personeel, VIP. Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, personeel, VIP. Ze lopen één voor één.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
 
@@ -233,22 +233,27 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 ### Reputatieniveaus en VIP-klanten (besluit eigenaar, 2026-10-06; gebouwd in stap 11c)
 
 - **6 niveaus** (`data/reputation/levels.ts`, namen in i18n `reputation.<id>.name`): Shabby Shack (0), Local Haunt (10), Cozy Inn (25), Popular Pub (50), Famous Tavern (100), Legendary Hall (200). Niveau 1 is het eerste. `levelFor`, `levelProgress` en `recipesTaughtUpTo` staan in `systems/reputation/level.ts`.
-- **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau kan recepten leren (`teaches`): niveau 3 Dragon's Hiccup, 4 Moonlight Merlot, 5 Troll's Toll. **Tot stap 12 betekent dat "je kent het recept"**; in stap 12 wordt het "het recept is te ontdekken" (de receptenontdekking bepaalt hoe). De ingrediënten van een nieuwe tier komen op het schap zodra een recept van die tier bekend is. Kamers (stap 14) krijgen ook een niveau-eis.
+- **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau maakt recepten ontdekbaar (`unlocks`, sinds stap 12; in 11c leerde het ze direct). Welke recepten bij welk niveau horen, staat in hoofdstuk 4, Receptenboek, en in het logboek van stap 12. Kamers (stap 14) krijgen ook een niveau-eis.
 - **Bewaker** (`systems/reputation/watch.ts`): leert bij een nieuw niveau de recepten en meldt `reputation:levelUp` (één keer per niveau, ook na een grote sprong, bijvoorbeeld offline). Een save die al voorbij een niveau is, krijgt de recepten stil bij het laden.
 - **HUD:** naast de reputatie de naam van het niveau en een balkje naar het volgende. Bij een nieuw niveau verschijnt 4,5 s een melding met wat erbij komt (nieuwe klant, nieuw recept) (`ui/level-up/`).
 - **VIP-klanten:** gewone klanttypes met `vip: true` en een eigen `reputationBonus` (nu King Grumblebeard: niveau 3, betaalt 3x, +3 reputatie, 30 s geduld). Zodra een VIP open is, is elke nieuwe klant met kans `VIP_SPAWN.chance` (10%) een VIP (`systems/customers/pick-type.ts`). Een VIP bestelt het **duurste bekende drankje**, heeft een kroon in de bubbel en een gouden kleur. Boos vertrekken kost niets. Een nieuwe VIP is alleen data.
 - **Offline** telt niveaus en VIP's mee: de gewone klanten van het niveau en de VIP's naar hun kans.
 - Alle getallen zijn placeholders (stap 13).
 
-### Receptenboek (wens eigenaar, 2026-10-06; hoort bij stap 12)
+### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`, met een eigen knop naast Shop) met een grid van alle drankjes.
 - **Ontdekt recept:** naam, ingrediënten (met hun plaatje of kleur), brouwtijd, prijs, effect en zeldzaamheid. Zo hoeft de speler niets te onthouden en kan hij het recept zonder gokken opnieuw brouwen.
 - **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
 - Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
-- Later (open vraag): een vereenvoudigde versie al eerder bouwen, bijvoorbeeld direct na stap 11b, omdat de speler nu na de les alleen de plank en de bestellingen heeft om uit te leren.
-- **Idee van de eigenaar (2026-10-06): de recepten als poster op de muur** van de taverne, in plaats van of naast een knop. Klik op de poster opent het receptenboek-paneel. Zie IDEAS.md, punt 5. Beslissen bij het begin van stap 12.
-- Hoort bij de tutorial-hint "eerste ontdekking" (stap 12): bij de eerste keer openen wijst de ketel de knop aan.
+- **Idee van de eigenaar (2026-10-06): de recepten als poster op de muur** van de taverne, in plaats van of naast een knop. Klik op de poster opent het receptenboek-paneel. Zie IDEAS.md, punt 5.
+- **Gebouwd in stap 12 (keuzes van Claude, de eigenaar liet de aanbevolen keuze over):**
+  - **Ontdekken:** een niveau maakt recepten *ontdekbaar* (`unlocks` in `data/reputation/levels.ts`), niet bekend. Past de inhoud van de ketel precies op een ontdekbaar recept, dan komt er "Eureka! <drankje>!" en begint het meteen te brouwen; het recept is vanaf dan bekend (`systems/recipes/discovery.ts`, event `recipe:discovered`). Een combinatie die op geen bekend of ontdekbaar recept kan uitkomen, mislukt zoals voorheen. Klanten bestellen alleen bekende recepten.
+  - **Niveau 1 maakt niets ontdekbaar:** in tier 1 is elke combinatie van twee ingrediënten een recept, en een nieuwe speler zou tijdens de basisles per ongeluk iets kunnen brouwen wat niemand besteld heeft. De eerste ontdekkingen komen op niveau 2.
+  - **Het schap** toont de ingrediënten tot de hoogste tier van de bekende én ontdekbare recepten (anders kan een recept nooit ontdekt worden).
+  - **Paneel en knop:** een zijpaneel met een eigen knop "Recipes" links van Shop. Er is steeds maar één paneel open (`ui/side-panels.ts`; opent de speler het ene, dan sluit het andere). Per recept een kaartje: **bekend** (naam, zeldzaamheid, ingrediënten met hun kleur van het schap, brouwtijd, prijs en effect), **ontdekbaar** (silhouet "???" met zeldzaamheid en hint) of **op slot** ("Unlocks at <niveau>"). Bovenaan X/N. De melding bij een nieuw niveau noemt het aantal nieuwe recepten, niet de namen.
+  - **Poster op de muur:** nog niet gebouwd; dat hoort bij de art-pass (stap 21), omdat de poster pas leesbaar en mooi wordt met echte art. Het paneel is de basis waar de poster later naartoe linkt (IDEAS.md, punt 5).
+  - **Tutorial-hint:** een les `book` (na de plekken-les, vóór personeel) die start bij het eerste nieuwe niveau (`reputation:levelUp`, of meteen als het niveau al bereikt is): de ketel wijst de knop aan en daarna de kop van het open boek.
 
 - **Balans-simulator** (`scripts/simulate.ts`, draait in Node dankzij de pure `systems/`): simuleert een speler-strategie en print wanneer mijlpalen worden gehaald. Doel: eerste prestige na ~1 tot 2 uur.
 
@@ -421,7 +426,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* elk effect is merkbaar bij serveren, een voorkeur verdubbelt het en is zichtbaar (♥), een bediende klant drinkt eerst en maakt dan de plek vrij, de hint start bij de eerste ♥-bestelling, tests slagen.
 - [x] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
   *Klaar wanneer:* niveaus staan in de HUD met een melding bij elk nieuw niveau, klanten en recepten komen per niveau, VIP's verschijnen vanaf hun niveau en vragen het duurste drankje, de hint start bij de eerste VIP, tests slagen.
-- [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
+- [x] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
 - [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
@@ -468,6 +473,19 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 12: Receptenontdekking en receptenboek (2026-10-06, `step-12-recipe-book`)
+- **Gedaan:** (code in `src/systems/recipes/`, `src/systems/brewing/add-ingredient.ts`, `src/data/recipes/`, `src/data/reputation/levels.ts`, `src/ui/recipe-book/`, `src/ui/side-panels.ts`, `src/data/tutorial/book.ts`, `src/wiring/tutorial-already-holds.ts`, `src/wiring/start-customers.ts`; tests in `tests/systems/recipes/`, `tests/ui/book-view-model.test.ts`, `tests/wiring/discovery-flow.test.ts` en aangepaste bestaande tests)
+  - **Ontdekken in de ketel,** het **receptenboek**, de **poster-beslissing** en de **tutorial-hint:** zie hoofdstuk 4, Receptenboek.
+  - **Content:** 13 recepten (was 5): Bog Lantern (tier 1, geluk) en in tier 2 Swamp Fire, Honeyed Moon, Gym Sock Mead, Spicy Spores, Troll Torch, en de zeldzame Dusk Sangria en Berserker Brew (`tier02-rare.ts`). Elke combinatie van twee van de 6 ingrediënten is nu een recept, plus Troll's Toll met drie. Niveaus: 2 opent Bog Lantern, Dragon's Hiccup en Swamp Fire; 3 Moonlight Merlot en Honeyed Moon; 4 Troll's Toll, Gym Sock Mead en Spicy Spores; 5 Troll Torch en Dusk Sangria; 6 Berserker Brew.
+  - **Niveaus leren niets meer:** `teaches` is `unlocks` geworden en de bewaker uit 11c meldt alleen nog nieuwe niveaus. Wie in 11c al recepten kreeg, houdt ze.
+  - **Opgeruimd:** de winkel gebruikt de gedeelde paneelschakelaar (geen eigen `panel-toggle.ts` meer, gedeelde stijl in `side-panels.css`); de voorwaarden "geldt al" van de tutorial zijn een tabel in een eigen bestand in plaats van een if-keten; `startCustomers` staat in een eigen bestand.
+  - 13 nieuwe tests (344 totaal).
+- **Waarom (keuzes):** de eigenaar was weg en liet de aanbevolen keuze over waar de documentatie niets zei. Ontdekbaar per niveau volgt het plan uit 11c. Pas vanaf niveau 2 ontdekken voorkomt een vastlopende basisles (in tier 1 is elke combinatie een recept). De boek-les start op het eerste nieuwe niveau, zodat hij de upgrade- en plekken-hints niet tegenhoudt.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser op Local Haunt: de boek-les wees de knop Recipes aan; het boek toonde 2/13, de twee bekende recepten met gekleurde ingrediënten, brouwtijd, prijs en effect, hints voor de drie ontdekbare en "Unlocks at …" voor de rest. Slijm plus glowcap gaf "Eureka! Bog Lantern!", de ketel begon te brouwen en het boek stond op 3/13. Geen nieuwe consolefouten (alleen oude `?t=`-restanten van tussenversies).
+- **Afwijkingen van het plan:** 13 recepten in plaats van ~15: meer kan alleen met extra ingrediënten, en het schap heeft 6 plekken (meer ingrediënten horen bij de kerkers in stap 16, of bij een groter schap in stap 14). De poster is uitgesteld naar stap 21.
+- **Nu te proberen:** speel tot 10 reputatie: je krijgt de melding "New recipes to discover: 3" en de ketel wijst het boek aan. Lees de hints en probeer combinaties: Fire Pepper met Wild Honey, Swamp Slime met Glowcap. Open de winkel terwijl het boek open is: het boek sluit vanzelf.
+- **Nog te doen / volgende stap:** stap 13, Balans-simulator. Daar ook: drempels, prijzen en brouwtijden van de nieuwe recepten afstellen.
 
 ### Stap 11c: Reputatieniveaus, gates en VIP-klanten (2026-10-06, `step-11c-reputation`)
 - **Gedaan:** (code in `src/data/reputation/`, `src/data/customers/`, `src/systems/reputation/`, `src/systems/customers/pick-type.ts`, `src/systems/offline/earnings.ts`, `src/ui/hud*.ts`, `src/ui/level-up/`, `src/ui/tutorial/speech.ts`, `src/data/tutorial/vip.ts`, `src/data/validate/reputation-table.ts`; tests in `tests/systems/reputation/`, `tests/systems/customers/vip.test.ts`, `tests/data/validate-reputation.test.ts`, `tests/ui/level-up-view-model.test.ts`, `tests/wiring/vip-flow.test.ts`)

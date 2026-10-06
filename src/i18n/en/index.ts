@@ -1,4 +1,5 @@
 import type { Messages } from '@/i18n/translator';
+import { book } from './book';
 import { customers } from './customers';
 import { effects } from './effects';
 import { feedback } from './feedback';
@@ -24,4 +25,5 @@ export const en: Messages = {
   ...shop,
   ...upgrades,
   ...welcome,
+  ...book,
 };

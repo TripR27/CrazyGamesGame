@@ -12,9 +12,9 @@ describe('game content', () => {
     expect(validateContent(hasKey)).toEqual([]);
   });
 
-  it('has the first content set: 6 ingredients, 5 recipes, 3 customer types and a VIP', () => {
+  it('has the content of step 12: 6 ingredients, 13 recipes, 3 customer types and a VIP', () => {
     expect(ingredients).toHaveLength(6);
-    expect(recipes).toHaveLength(5);
+    expect(recipes).toHaveLength(13);
     expect(customers.filter((c) => c.vip !== true)).toHaveLength(3);
     expect(customers.filter((c) => c.vip === true)).toHaveLength(1);
   });

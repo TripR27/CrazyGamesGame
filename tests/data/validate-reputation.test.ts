@@ -11,7 +11,7 @@ const levelProblems = (...levels: Parameters<typeof reputationTable>[0]): string
 
 describe('validating reputation levels', () => {
   it('accepts levels that start at 0, climb and teach existing recipes', () => {
-    expect(levelProblems({ id: 'one', minReputation: 0 }, { id: 'two', minReputation: 5, teaches: ['r1'] })).toEqual([]);
+    expect(levelProblems({ id: 'one', minReputation: 0 }, { id: 'two', minReputation: 5, unlocks: ['r1'] })).toEqual([]);
   });
 
   it('reports a first level above 0, a level that does not climb and an unknown recipe', () => {
@@ -19,8 +19,8 @@ describe('validating reputation levels', () => {
     expect(levelProblems({ id: 'one', minReputation: 0 }, { id: 'two', minReputation: 0 })).toEqual([
       'reputation: level two must need more reputation than the one before',
     ]);
-    expect(levelProblems({ id: 'one', minReputation: 0, teaches: ['nope'] })).toEqual([
-      'reputation.one: teaches unknown recipe "nope"',
+    expect(levelProblems({ id: 'one', minReputation: 0, unlocks: ['nope'] })).toEqual([
+      'reputation.one: unlocks unknown recipe "nope"',
     ]);
   });
 
