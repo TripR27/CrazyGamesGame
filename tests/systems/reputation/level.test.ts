@@ -29,8 +29,8 @@ describe('reputation levels', () => {
     expect(recipesUnlockedUpTo(3, LEVELS)).toEqual(['a', 'b', 'c']);
   });
 
-  it('use the game levels by default: the elf level at 10, the dwarf level at 25', () => {
+  it('use the game levels by default: the elf level at 10, the dwarf level at 40', () => {
     expect(levelFor(10)).toBe(2);
-    expect(levelFor(25)).toBe(3);
+    expect(levelFor(40)).toBe(3);
   });
 });

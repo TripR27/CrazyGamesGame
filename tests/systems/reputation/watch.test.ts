@@ -18,10 +18,10 @@ function setup(reputation: number) {
 
 describe('watching reputation levels', () => {
   it('announces a new level once, exactly at the threshold', () => {
-    const { levelUps, saves, gain } = setup(20);
+    const { levelUps, saves, gain } = setup(35);
     gain(4);
     expect(levelUps).not.toHaveBeenCalled();
-    gain(1); // 25: Cozy Inn
+    gain(1); // 40: Cozy Inn
     expect(levelUps).toHaveBeenCalledWith({ level: 3 });
     expect(saves).toHaveBeenCalled();
     gain(10);
@@ -30,7 +30,7 @@ describe('watching reputation levels', () => {
 
   it('announces every level on the way after a big jump', () => {
     const { levelUps, gain } = setup(0);
-    gain(120);
+    gain(300);
     expect(levelUps.mock.calls.map(([e]) => e.level)).toEqual([2, 3, 4, 5]);
   });
 

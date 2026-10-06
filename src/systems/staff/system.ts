@@ -2,12 +2,14 @@ import type { EventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import type { Rng } from '@/core/rng';
 import type { RecipeDef } from '@/data/recipes';
-import { publishBrewEvent, type BrewStation } from '@/systems/brewing';
+import { BREWING } from '@/data/brewing';
+import { emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { serveAndPublish, type ServeDeps } from '@/systems/serving';
 import { startWantedBrew } from './auto-brew';
 import { readyCustomer } from './auto-serve';
 import { createCharge } from './charge';
+import { createStaleWatch } from './stale-cauldron';
 
 export interface StaffDeps {
   bus: EventBus<GameEvents>;
@@ -26,8 +28,10 @@ export interface StaffDeps {
 export function startStaff(deps: StaffDeps): () => void {
   const brewCharge = createCharge();
   const serveCharge = createCharge();
+  const stale = createStaleWatch(BREWING.staleCauldronMs);
   return deps.bus.on('tick', ({ deltaMs }) => {
     const rates = deps.getRates();
+    if (stale.isStale(deps.station.contents, deltaMs) && rates.brew > 0) emptyCauldron(deps.station);
     brewCharge.fill(deltaMs, rates.brew);
     serveCharge.fill(deltaMs, rates.serve);
 

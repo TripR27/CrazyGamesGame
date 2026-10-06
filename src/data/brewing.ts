@@ -4,6 +4,8 @@ export const BREWING = {
   maxIngredients: 3,
   /** Finished drinks that can wait on the bar. Storage upgrades raise this in step 9. */
   storageCapacity: 3,
+  /** Unfinished ingredients the player left for this long may be cleared by the brewer, so it is never stuck. */
+  staleCauldronMs: 15_000,
 } as const;
 
 export const SERVING = {

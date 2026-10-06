@@ -24,7 +24,7 @@ describe('average reward', () => {
   it('leaves out customers whose reputation is not reached and counts the sell multiplier', () => {
     const vip = { ...rich, id: 'vip', minLevel: 4 };
     expect(averageReward(recipes, [plain, vip], 0, num(2)).gold.toNumber()).toBe(40);
-    expect(averageReward(recipes, [plain, vip], 50, num(1)).gold.toNumber()).toBe(25);
+    expect(averageReward(recipes, [plain, vip], 120, num(1)).gold.toNumber()).toBe(25);
   });
 
   it('is zero when nobody can order anything', () => {
@@ -54,7 +54,7 @@ describe('average reward with VIPs', () => {
   it('mixes in VIPs by their chance once their level is reached; they order the priciest drink', () => {
     expect(averageReward(recipes, [plain, king], 0, num(1)).gold.toNumber()).toBe(20); // level 1: no VIP yet
     // Level 3: 90% regular (avg 20) and 10% king (30 x 3 = 90): 18 + 9.
-    const mixed = averageReward(recipes, [plain, king], 25, num(1));
+    const mixed = averageReward(recipes, [plain, king], 40, num(1));
     expect(mixed.gold.toNumber()).toBeCloseTo(27);
     expect(mixed.reputation).toBeCloseTo(0.9 * 1 + 0.1 * 4);
   });

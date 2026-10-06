@@ -14,7 +14,7 @@ export const tier01Upgrades: readonly UpgradeDef[] = [
     id: 'better_prices',
     kind: 'tavern',
     baseCost: 30,
-    growth: 1.25,
+    growth: 1.7,
     effect: { stat: 'sellPrice', mode: 'multiply', perLevel: 0.15 },
   },
   {

@@ -13,7 +13,7 @@ describe('toHudView', () => {
   });
 
   it('shows the reputation level and how far it is to the next one', () => {
-    expect(toHudView({ currencies: { gold: num(0) }, reputation: 15 })).toMatchObject({ level: 'Local Haunt', levelFraction: 1 / 3 });
+    expect(toHudView({ currencies: { gold: num(0) }, reputation: 25 })).toMatchObject({ level: 'Local Haunt', levelFraction: 0.5 });
     expect(toHudView({ currencies: { gold: num(0) }, reputation: 999 })).toMatchObject({ level: 'Legendary Hall', levelFraction: 1 });
   });
 
