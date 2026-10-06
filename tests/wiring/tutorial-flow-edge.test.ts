@@ -43,6 +43,7 @@ describe('the first tutorial: replaying, skipping, mistakes and reloads', () => 
     first.world.scene.actions.clickIngredient(nextIngredient(first.guide()) ?? '');
     first.tick(15_000); // drink ready: the open step is the one that needs the bar
     const saved = JSON.parse(JSON.stringify(first.state)) as GameState;
+    saved.currencies.gold = first.state.currencies.gold; // the real save codec restores numbers; plain JSON does not
     expect(saved.tutorial.completedSteps).toEqual(['basics_add', 'basics_finish', 'basics_wait']);
 
     const second = newGame(saved);

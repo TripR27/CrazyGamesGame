@@ -12,6 +12,7 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
     const id = readyCustomerId(ctx);
     return id === undefined ? null : `customer:${id}`;
   },
+  'guide-upgrade': (ctx) => (ctx.affordableUpgradeId === null ? null : `upgrade:${ctx.affordableUpgradeId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */

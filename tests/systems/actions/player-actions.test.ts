@@ -3,7 +3,7 @@ import { createEventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import { startBrewSystem } from '@/systems/brewing';
 import { createPlayerActions } from '@/systems/actions';
-import { catalog, economy, floorWith, rng, station } from '../fixtures';
+import { catalog, economy, floorWith, noUpgrades, rng, station } from '../fixtures';
 
 function game(knownIds: string[] = ['ab', 'cde']) {
   const bus = createEventBus<GameEvents>();
@@ -11,7 +11,7 @@ function game(knownIds: string[] = ['ab', 'cde']) {
   const eco = economy();
   const floor = floorWith(['plain', 'ab']);
   const actions = createPlayerActions({
-    bus, station: s, floor, economy: eco, catalog, rng: rng(), getKnownRecipeIds: () => knownIds,
+    bus, station: s, floor, economy: eco, upgradeStore: eco, ...noUpgrades, catalog, rng: rng(), getKnownRecipeIds: () => knownIds,
   });
   startBrewSystem(s, bus);
   const seen = {

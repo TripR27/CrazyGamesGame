@@ -4,8 +4,10 @@ import type { GameState } from '@/core/state';
 import type { Store } from '@/core/store';
 import { recipes } from '@/data/recipes';
 import { TUTORIAL_STEPS, type TutorialEvent } from '@/data/tutorial';
+import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import type { CustomerFloor } from '@/systems/customers';
+import { firstAffordable } from '@/systems/upgrades';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
 
 export interface TutorialDeps {
@@ -32,8 +34,11 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     get: () => store.getState().tutorial,
     update: (mutator) => store.update((state) => mutator(state.tutorial)),
   };
-  // A customer who sat down before the tutorial (re)started counts as the start of the lesson.
-  const alreadyHolds = (event: TutorialEvent): boolean => event === 'customer:arrived' && floor.customers.length > 0;
+  const affordable = (): string | null => firstAffordable(store.getState(), upgrades)?.id ?? null;
+  // A situation that already holds counts as the start of a lesson: a customer who sat down before the
+  // tutorial (re)started, or gold that was already enough for an upgrade (the event would not fire again).
+  const alreadyHolds = (event: TutorialEvent): boolean =>
+    (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null);
   const machine = createTutorialMachine(TUTORIAL_STEPS, progress, alreadyHolds);
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
@@ -47,6 +52,7 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     brewingRecipeId: station.brewing?.recipeId ?? null,
     readyRecipeIds: station.ready,
     customers: floor.customers,
+    affordableUpgradeId: affordable(),
   });
   return { machine, getGuideContext };
 }

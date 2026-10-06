@@ -78,6 +78,7 @@ export const upgradeTable = (items: readonly UpgradeDef[]): ContentTable =>
     textFields: ['name', 'description'],
     check: (u) => [
       ...positive(u.baseCost, 'baseCost'),
+      ...positive(u.effect.perLevel, 'effect.perLevel'),
       ...(u.growth > 1 ? [] : [`growth must be > 1, got ${u.growth}`]),
       ...(u.maxLevel === undefined || isTier(u.maxLevel) ? [] : ['maxLevel must be a whole number >= 1']),
     ],

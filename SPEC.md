@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 8 (Interactieve tutorial). **Volgende stap:** 9 (Economie en upgrades).
+**Nu bezig:** niets. **Laatst afgerond:** stap 9 (Economie en upgrades). **Volgende stap:** 10 (Personeel en idle/offline).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -23,7 +23,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 6 | Klanten | ✅ | `step-06-customers` |
 | 7 | Brouwen en serveren | ✅ | `step-07-brew-and-serve` |
 | 8 | Interactieve tutorial (basis) | ✅ | `step-08-tutorial` |
-| 9 | Economie en upgrades | ⬜ | |
+| 9 | Economie en upgrades | ✅ | `step-09-economy-upgrades` |
 | 10 | Personeel en idle/offline | ⬜ | |
 | 11 | Reputatie, gates, drankeffecten | ⬜ | |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
@@ -191,7 +191,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - `startWhen`/`completeOn` luisteren naar **echte spel-events** uit de event-bus (bijv. `ingredient:clicked`, `brew:done`, `customer:served`, `upgrade:bought`) of naar een state-conditie (bijv. "genoeg goud voor eerste upgrade").
   - De speler klikt dus nooit op "volgende"; de tutorial gaat verder wanneer de speler de actie echt uitvoert.
 - **Registry van doelen (`target`):** `core/target-registry.ts`. DOM-elementen en Phaser-objecten melden zich aan met een id en een functie die hun huidige positie in ontwerp-pixels geeft (`ingredient:<id>`, `customer:<id>`, `cauldron`, `hud-gold`, later `shop-button`). Bewegende doelen worden gevolgd. Een stap kan ook een **gids-alias** als doel hebben (`guide-ingredient`, `guide-customer`) die `systems/tutorial/guide.ts` tijdens het spelen omzet naar het juiste doel, zodat de tutorial altijd het drankje van een echt wachtende klant uitlegt.
-- **Tijdens een les:** maximaal **één klant** in de taverne en het **geduld staat stil** (de balk blijft vol), zodat niemand midden in de les vertrekt. Daarna loopt alles normaal.
+- **Tijdens een les:** maximaal **één klant** in de taverne en het **geduld staat stil** (de balk blijft vol), zodat niemand midden in de les vertrekt. Daarna loopt alles normaal. Dit geldt alleen zolang een stap **zichtbaar** is: een les die nog op haar moment wacht (de upgrade-hint wacht op genoeg goud) houdt het spel niet tegen.
 - **UI in `ui/tutorial`:** gedimde overlay met een "spotlight"-gat om het doel, een pulserende pijl en een korte spraakbel van een mascotte. Maximaal 1 à 2 korte zinnen per stap, in humoristische toon (i18n-sleutels).
 - **Mascotte (werktitel):** een chagrijnige pratende ketel. Placeholder tot stap 21.
 - **Nooit blokkerend of vervelend:**
@@ -201,14 +201,21 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.).
+- **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
 
 ### Economie (code-kant)
 
-- Upgradekosten: `kosten(n) = basis × groeifactor^n`, groeifactor per upgrade-type in `data/`.
-- Multipliers worden samengevoegd in één functie `getMultipliers(state)` zodat bronnen (prestige, upgrades, achievements, events) op één plek optellen/vermenigvuldigen.
+- Upgradekosten: `kosten(n) = round(basis × groeifactor^n)` (hele munten), groeifactor per upgrade in `data/upgrades/`. Een pakket van k niveaus kost de geometrische som in één formule (`systems/upgrades/cost.ts`), zodat de getoonde prijs voor x10 en max exact is wat er afgaat. Niveaus staan in `state.upgrades` (open map id → niveau).
+- Multipliers worden samengevoegd in één functie `getMultipliers(state)` (`systems/economy/`) zodat bronnen (prestige, upgrades, achievements, events) op één plek optellen/vermenigvuldigen. Eerst telt 'add', dan 'multiply'. Basiswaarden per stat staan in `data/upgrades/base-stats.ts`; de bar en de ketel lezen hun waarden via `wiring/sync-station.ts`.
 - Alle balansgetallen staan in `data/`, nooit in `systems/`.
+
+### Klanteninstroom en plekken (besluit eigenaar, 2026-10-06; **nog niet gebouwd**)
+
+- Klanten komen **geleidelijk**: aan het begin niet meteen veel en niet snel achter elkaar. De eerste klant mag snel komen (5 seconden tot plezier), maar de speler krijgt de tijd om te brouwen en te serveren. Het tempo groeit mee met reputatie en met het aantal plekken.
+- De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden **gekocht** met een upgrade ("plekken": een stat `seats`, basiswaarde 1, mode `add`, kosten stijgen; eventueel later). De 7 bestaande klantplekken (`CUSTOMER_SLOTS`) zijn dan de bovengrens tot kamers (stap 14) er plekken bij zetten.
+- Bouwwijze: nieuwe stat in `UpgradeStat` en `BASE_STATS`, een upgrade in `data/upgrades/`, en `maxCustomers = min(plekken, tutorialgrens)` in `wiring/create-services.ts`. Spawn-getallen staan in `data/customers/spawning.ts`. De huidige placeholders (eerste klant na 1,5 s, interval 8 s, 7 plekken) zijn te snel en te druk en worden hiermee vervangen.
+- Inplannen: bij stap 11 (klantgedrag) of eerder als de eigenaar dat wil; tuning in stap 13. Hoort er een tutorial-hint bij (eerste plekkenupgrade) en de tutorial (1 klant tegelijk) moet blijven kloppen met 1 plek.
 - **Balans-simulator** (`scripts/simulate.ts`, draait in Node dankzij de pure `systems/`): simuleert een speler-strategie en print wanneer mijlpalen worden gehaald. Doel: eerste prestige na ~1 tot 2 uur.
 
 ### Rendering
@@ -217,7 +224,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
-- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, winkel, receptenboek, instellingen.
+- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (nu de winkel, later o.a. receptenboek en instellingen) staan **rechts van het spel binnen dezelfde overlay**: `ui/side-layout.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
 
 ### Assets
@@ -365,13 +372,13 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* alle handelingen werken. **Mijlpaal: is dit leuk?** (De uitleg komt in stap 8.)
 - [x] **Stap 8: Interactieve tutorial (framework + basis).** Zie hoofdstuk 4, Tutorial. Tutorial-statemachine (`systems/tutorial`), target-register, spotlight/pijl/spraakbel-UI, eerste tutorial: ingrediënt klikken → ketel → wachten → serveren → eerste goud. Overslaan-knop, opslaan van voortgang, opnieuw afspelen via debug-commando (Settings-knop komt in stap 18).
   *Klaar wanneer:* een nieuwe speler die niets weet, kan zonder tekstmuur of apart scherm de basis doen; tutorial overleeft herladen; vastlopen is onmogelijk (verkeerde volgorde of overslaan breekt niets); tests voor de statemachine.
-- [ ] **Stap 9: Economie en upgrades.** Kostenformule, `getMultipliers`, winkelpaneel (DOM) met koop x1/x10/max, eerste upgrades (ketel-snelheid, prijs, opslag). Tutorial-hint: eerste upgrade kopen.
+- [x] **Stap 9: Economie en upgrades.** Kostenformule, `getMultipliers`, winkelpaneel (DOM) met koop x1/x10/max, eerste upgrades (ketel-snelheid, prijs, opslag). Tutorial-hint: eerste upgrade kopen.
   *Klaar wanneer:* upgrades werken, kosten stijgen, tests slagen.
 - [ ] **Stap 10: Personeel en idle.** Barman/serveerster/brouwer-assistent automatiseren stappen; idle-inkomen ≈ 30 tot 40% van actief spelen; offline-voortgang met limiet en "welkom terug"-venster. Tutorial-hint: eerste medewerker inhuren.
   *Klaar wanneer:* tabblad 5 min weg of sluiten/openen levert correcte offline-opbrengst; tests voor `systems/offline`.
 
 ### Fase C: Diepte
-- [ ] **Stap 11: Reputatie, gates en drankeffecten.** Reputatieniveaus ontgrendelen klanten/kamers/recepten; klantvoorkeuren en effecten (kracht/snelheid/geluk/charme); VIP-klanten. Tutorial-hint: klantvoorkeur.
+- [ ] **Stap 11: Reputatie, gates en drankeffecten.** Reputatieniveaus ontgrendelen klanten/kamers/recepten; klantvoorkeuren en effecten (kracht/snelheid/geluk/charme); VIP-klanten. Tutorial-hint: klantvoorkeur. **Ook:** geleidelijke klanteninstroom en de plekken-upgrade met start op 1 plek (zie hoofdstuk 4, Klanteninstroom en plekken), tenzij de eigenaar het eerder wil.
 - [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
@@ -419,6 +426,30 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 9: Economie en upgrades (2026-10-06, `step-09-economy-upgrades`)
+- **Gedaan:** (code in `src/systems/economy|upgrades/`, `src/data/upgrades/`, `src/ui/shop/`, `src/ui/side-layout.ts`, `src/wiring/sync-station.ts`; tests in `tests/systems/upgrades|economy/`, `tests/ui/` en `tests/wiring/upgrade-flow.test.ts`)
+  - **Kosten en kopen** (puur TS): `levelCost` (`round(basis × groei^n)`), `packCost` (de som van k niveaus in één formule), `affordableCount` (max zonder lus, daarna exact bijgesteld), `quote` (x1, x10, max; alles-of-niets voor een vast aantal, max koopt wat kan of toont het volgende niveau), `buyUpgrade` (haalt goud af en verhoogt het niveau; verandert niets en meldt niets als het niet kan).
+  - **`getMultipliers(state)`** (`systems/economy`): brewSpeed, sellPrice en storage als `Num`; 'add' telt vóór 'multiply'; onbekende ids en niveaus boven het maximum tellen niet mee. Hier komen later prestige, achievements en events bij.
+  - **State en data:** `state.upgrades` (open map id → niveau; oude saves krijgen `{}` via `reconcile`, geen migratie nodig). Drie upgrades als placeholders: **Swift Cauldron** (+10% brouwsnelheid per niveau, kosten 20, groei 1,15, max 15), **Better Prices** (+15% verkoopprijs per niveau, kosten 30, groei 1,25) en **Bigger Bar** (+1 plek voor klare drankjes per niveau, kosten 60, groei 2, max 2). Teksten in `i18n/en/upgrades.ts` en `shop.ts`; de beschrijving vult het effect per niveau in uit de data.
+  - **Effecten in het spel:** `BrewStation.speed` (brouwtijd gedeeld door de factor) en `capacity` worden na elke state-wijziging bijgewerkt (`wiring/sync-station.ts`); een lopend brouwsel houdt zijn snelheid. `computePayout` en `serveCustomer` kregen de verkoopprijsfactor. De bar in de scene heeft nu 5 plekken (het maximum) met om-en-om gestaggerde labels.
+  - **Acties en events:** `PlayerActions.buyUpgrade(id, amount)` en `openShop()`; nieuwe bus-events `upgrade:bought`, `shop:opened` en `upgrade:affordable` (de laatste door `watchAffordable`, bij elke overgang van "kan niets kopen" naar "kan iets kopen"). Een aankoop vraagt om een save.
+  - **Winkel** (`ui/shop/`): een Shop-knop rechtsboven in het spel en een paneel met x1/x10/Max, per upgrade naam, niveau, effect en koopknop met prijs (uitgegrijsd als het niet kan, "Maxed" aan het eind). Het paneel staat **rechts van het spel, in hetzelfde kader** (380 ontwerp-pixels breed): spel en paneel passen samen in het venster, het spel wordt dus kleiner zodra de winkel open gaat en je kunt blijven serveren. Het paneel is even hoog als het spel en loopt niet door de lege balken van een venster dat niet 16:9 is. De pure rij-opmaak (`shop-view-model.ts`) is getest.
+  - **Tutorial-hint** (`data/tutorial/upgrade.ts`, 3 stappen): start zodra de speler zijn eerste upgrade kan betalen, wijst de Shop-knop aan, dan de koopknop van de upgrade die hij kan betalen (nieuw gids-alias `guide-upgrade`), en sluit af met een zin bij het goud. Een speler die bij laden al genoeg goud heeft, krijgt hem meteen (`alreadyHolds`).
+  - **Een echte bug voorkomen:** `isActive()` blijft waar zolang er stappen open staan; de nieuwe les wacht lang op haar moment en zou de klanten op één en het geduld bevroren hebben. De bedrading beperkt nu alleen als een stap zichtbaar is (`visibleStep() !== null`).
+  - Validator: een upgrade moet een positief effect per niveau hebben. 39 nieuwe tests (235 totaal): kosten en offertes (ook met 1e200 goud), kopen, wachten op betaalbaarheid, multipliers, brouwsnelheid en verkoopprijs, acties, de winkelrij, zijlayout, validatie en een volledige upgrade-les in het echte spel.
+- **Waarom (keuzes):**
+  - **Geometrische som voor packs:** de prijs van x10 en max is exact wat er afgaat en kost geen lus, ook bij enorme getallen.
+  - **`getMultipliers` met `Num`:** past bij "Decimal overal in de economie"; de verkoopprijs kan later door prestige groot worden.
+  - **De Shop-knop is altijd zichtbaar** (pijler 3: altijd iets te kopen). De tutorial wijst hem pas aan als het zover is.
+  - **Ingrediënten blijven gratis.** Ze staan niet in de stapbeschrijving, en met 0 goud bij de start zou betalen de basisles blokkeren. Een keuze voor later (zie "Nog te doen").
+  - **Winkel naast het spel, als één kader** (op verzoek van de eigenaar, in twee rondes): eerst een kolom over het venster, daarna binnen het spelkader zodat hij niet door de balken loopt. Phaser leest de grootte van zijn container alleen bij een venster-resize; `main.ts` roept daarom `getParentBounds()` en `refresh()` aan.
+  - **Alle getallen zijn placeholders** (balans volgt in stap 13).
+- **Wensen van de eigenaar tijdens de stap (vastgelegd, niet gebouwd):** klanten moeten **geleidelijk** komen, niet snel in het begin, en er hoort een upgrade om **plekken in de bar** te kopen (misschien later), met **1 klant tegelijk** als start. Dit staat nu in hoofdstuk 4 (Klanteninstroom en plekken), stap 11 en GAME_ANALYSE.md. De opzet van deze stap (stats via `getMultipliers`) maakt het later alleen data plus een kleine wijziging in de bedrading.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser: de hint start zodra goud 20 haalt (spotlight op de Shop-knop, dan op de koopknop, dan de afsluiting); kopen: goud 31 naar 11, niveau 1, volgende prijs 23; Max kocht 16 niveaus voor 4,14K (5000 naar 857, klopt met `packCost`); met Bigger Bar op 2 staan er 5 drankjes op de bar; met de winkel open verkleint het spel, ingrediënten en klanten blijven klikbaar en een klant serveren gaf goud 100 naar 108; sluiten herstelt de volle breedte. **Let op bij testen:** de dev-server van een andere sessie draaide in dezelfde map en bleef een tussenversie van `main.ts` serveren (Vite cachet `?t=`-URL's onbeperkt); een `touch` op de gewijzigde bestanden loste dat op. Console-fouten met oude `?t=`-tijdstempels zijn zulke restanten.
+- **Afwijkingen van het plan:** de plekken-upgrade en geleidelijke instroom zijn bewust niet gebouwd. Het winkelpaneel is een zijkolom in plaats van een pop-up (besluit van de eigenaar). Styling blijft placeholder (stap 21): de tutorial-pijl kan op een knop in het paneel liggen en de lege balken van een niet-16:9-venster zijn gewoon leeg. De indeling van de winkel op het scherm moet later nog nagekeken worden (IDEAS.md, punt 3).
+- **Nu te proberen:** `npm run dev`, wis Local Storage en speel de basisles uit. Zodra je 20 goud hebt, wijst de ketel de Shop-knop aan. Koop Swift Cauldron en kijk of het brouwen sneller gaat, probeer x10 en Max, en serveer terwijl de winkel open staat. Maak het venster smaller en hoger: spel en winkel schalen samen.
+- **Nog te doen / volgende stap:** stap 10, Personeel en idle/offline. Open punten voor de eigenaar: (1) wanneer ingrediëntenkosten komen (nu gratis); (2) wanneer de geleidelijke instroom en de plekken-upgrade gebouwd worden (stap 11 of eerder); (3) de huidige spawn-getallen zijn te snel voor het begin.
 
 ### Stap 8: Interactieve tutorial (basis) (2026-10-06, `step-08-tutorial`)
 - **Gedaan:** (code in `src/systems/tutorial/`, `src/data/tutorial/`, `src/ui/tutorial/`, `src/core/target-registry.ts`, `src/wiring/create-tutorial.ts`, `src/runtime/debug-commands.ts`; tests in `tests/systems/tutorial/`, `tests/wiring/` en meer)

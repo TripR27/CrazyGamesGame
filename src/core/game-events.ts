@@ -20,4 +20,9 @@ export interface GameEvents {
   'brew:started': { recipeId: string };
   'brew:done': { recipeId: string };
   'brew:notice': { notice: BrewNotice; messageKey: string };
+  /** The player can pay for an upgrade after not being able to; fires on each such moment. */
+  'upgrade:affordable': Record<string, never>;
+  'upgrade:bought': { id: string; count: number };
+  /** The shop panel was opened (the tutorial follows this). */
+  'shop:opened': Record<string, never>;
 }

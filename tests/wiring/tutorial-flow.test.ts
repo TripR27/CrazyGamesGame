@@ -28,7 +28,7 @@ describe('the first tutorial, played in the real game', () => {
     expect(game.shown()).toBe('basics_gold');
     game.tick(4_600);
     expect(game.shown()).toBeNull();
-    expect(game.world.tutorial.machine.isActive()).toBe(false);
+    expect(game.state.tutorial.completedSteps).toEqual(expect.arrayContaining(['basics_gold']));
     expect(game.state.tutorial.completedSteps).toHaveLength(5);
     expect(game.state.currencies.gold.gt(0)).toBe(true);
 

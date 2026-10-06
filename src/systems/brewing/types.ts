@@ -15,6 +15,8 @@ export interface BrewStation {
   ready: string[];
   /** How many finished drinks fit on the bar. */
   capacity: number;
+  /** Brew speed factor from upgrades: 2 brews twice as fast. */
+  speed: number;
 }
 
 /** What happened because of a player action or a tick; published on the bus by the caller. */

@@ -28,7 +28,7 @@ export function addIngredient(
   const recipe = matchRecipe(contents, knownRecipes);
   if (recipe !== undefined) {
     station.contents = [];
-    const totalMs = recipe.brewSeconds * 1000;
+    const totalMs = (recipe.brewSeconds * 1000) / station.speed;
     station.brewing = { recipeId: recipe.id, remainingMs: totalMs, totalMs };
     return [{ kind: 'started', recipeId: recipe.id }];
   }

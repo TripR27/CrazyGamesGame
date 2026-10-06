@@ -11,14 +11,15 @@ export interface TutorialUiSource {
   getGuideContext(): GuideContext;
 }
 
-const name = (domain: 'recipes' | 'ingredients', id: string | undefined): string =>
+const name = (domain: 'recipes' | 'ingredients' | 'upgrades', id: string | undefined): string =>
   id === undefined ? '' : t(textKey(domain, id, 'name'));
 
-/** Words the mascot can use in its lines: the drink and the ingredient the guide is talking about. */
+/** Words the mascot can use in its lines: the drink, ingredient and upgrade the guide is talking about. */
 function speech(stepId: string, ctx: GuideContext): string {
   return t(textKey('tutorial', stepId, 'text'), {
     drink: name('recipes', guideRecipe(ctx)?.id),
     ingredient: name('ingredients', nextIngredient(ctx)),
+    upgrade: name('upgrades', ctx.affordableUpgradeId ?? undefined),
   });
 }
 

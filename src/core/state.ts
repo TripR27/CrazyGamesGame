@@ -16,12 +16,16 @@ export interface TutorialProgress {
   skipped: boolean;
 }
 
+/** Purchased level per upgrade id. An open map: new upgrades need no change here. */
+export type UpgradeLevels = Record<string, number>;
+
 export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
   reputation: number;
   /** Recipe ids the player knows; customers only order these. */
   recipesDiscovered: string[];
+  upgrades: UpgradeLevels;
   tutorial: TutorialProgress;
 }
 
@@ -31,6 +35,7 @@ export function createInitialState(now: number): GameState {
     currencies: { gold: num(0) },
     reputation: 0,
     recipesDiscovered: [...STARTER_RECIPE_IDS],
+    upgrades: {},
     tutorial: { completedSteps: [], skipped: false },
   };
 }
