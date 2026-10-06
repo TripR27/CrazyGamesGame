@@ -40,7 +40,7 @@ export const INGREDIENT_SLOTS: readonly Point[] = Array.from({ length: SHELF_SLO
 }));
 
 /** Where finished drinks stand on the bar (centre x, y of the bar top). Room for the bar upgrades. */
-export const READY_SLOTS: readonly Point[] = [900, 975, 1050, 1125, 1200].map((x) => ({ x, y: 470 }));
+export const READY_SLOTS: readonly Point[] = [890, 955, 1020, 1085, 1150, 1215].map((x) => ({ x, y: 470 }));
 
 export const TABLES: readonly Rect[] = [
   { x: 260, y: 505, w: 120, h: 14 },

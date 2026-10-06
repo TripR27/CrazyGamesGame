@@ -3,7 +3,8 @@ import { formatNumber } from '@/core/format';
 import { recipes } from '@/data/recipes';
 import { textKey } from '@/data/text-key';
 import { t } from '@/i18n';
-import { CAULDRON, CUSTOMER_SLOTS } from '@/scene/layout';
+import { CAULDRON } from '@/scene/layout';
+import { SEAT_SLOTS } from '@/scene/layout-rooms';
 import type { SceneServices } from '@/scene/services';
 import { bonusLines, GOLD_COLOR } from './bonus-lines';
 import { createFloatingTexts } from './floating-text';
@@ -22,7 +23,7 @@ export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () =>
 
   const stops = [
     bus.on('customer:served', ({ seat, recipeId, gold, tip, extraReputation, liked, messageKey }) => {
-      const slot = CUSTOMER_SLOTS[seat];
+      const slot = SEAT_SLOTS[seat];
       const effect = recipes.find((r) => r.id === recipeId)?.effect;
       if (slot === undefined || effect === undefined) return;
       floats.show(slot.x, slot.y - GOLD_ABOVE_SLOT, `+${formatNumber(gold)}`, { color: GOLD_COLOR, size: 24 });
@@ -32,7 +33,7 @@ export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () =>
       });
     }),
     bus.on('customer:refused', ({ seat, recipeId, messageKey }) => {
-      const slot = CUSTOMER_SLOTS[seat];
+      const slot = SEAT_SLOTS[seat];
       if (slot !== undefined) floats.show(slot.x, slot.y - LINE_ABOVE_SLOT, line(messageKey, recipeId), { color: BAD_COLOR });
     }),
     bus.on('recipe:discovered', ({ recipeId }) => {

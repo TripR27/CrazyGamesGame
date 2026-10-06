@@ -8,7 +8,9 @@ import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
+import { ROOMS } from '@/data/rooms';
 import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients';
+import { firstBuildableRoom } from '@/systems/rooms';
 import { followOpenTab } from './follow-open-tab';
 import { createAlreadyHolds } from './tutorial-already-holds';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
@@ -60,6 +62,8 @@ export function createTutorial({ store, bus, floor, station, ingredients }: Tuto
     affordableStaffId: affordableStaff(),
     affordableIngredientId: firstBuyableIngredient(store.getState(), ingredients)?.id ?? null,
     newestIngredientId: store.getState().ingredientsBought.at(-1) ?? null,
+    affordableRoomId: firstBuildableRoom(store.getState(), ROOMS)?.id ?? null,
+    newestRoomId: store.getState().roomsBuilt.at(-1) ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

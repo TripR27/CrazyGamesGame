@@ -10,10 +10,15 @@ const isVip = (type: CustomerDef): boolean => type.vip === true;
  * Who walks in at this level: now and then a VIP (once one is open), otherwise a regular customer.
  * Without an open VIP no chance is rolled, so the random sequence stays as it was before VIPs.
  */
-export function pickCustomerType(rng: Rng, types: readonly CustomerDef[], level: number): CustomerDef | undefined {
+export function pickCustomerType(
+  rng: Rng,
+  types: readonly CustomerDef[],
+  level: number,
+  vipChance: number = VIP_SPAWN.chance,
+): CustomerDef | undefined {
   const open = types.filter((c) => c.minLevel <= level);
   const vips = open.filter(isVip);
-  if (vips.length > 0 && rng() < VIP_SPAWN.chance) return pickRandom(rng, vips);
+  if (vips.length > 0 && rng() < vipChance) return pickRandom(rng, vips);
   return pickRandom(rng, open.filter((c) => !isVip(c)));
 }
 

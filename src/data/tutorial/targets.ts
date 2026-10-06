@@ -2,6 +2,7 @@
 export const GUIDE_TARGETS = [
   'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
+  'guide-room-buy', 'guide-new-room',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */

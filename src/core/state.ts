@@ -27,6 +27,8 @@ export interface GameState {
   recipesDiscovered: string[];
   /** Ingredient ids bought in the shop (one-time purchases); they stay on the shelf. */
   ingredientsBought: string[];
+  /** Room ids built on the upper floor (one-time purchases). */
+  roomsBuilt: string[];
   upgrades: UpgradeLevels;
   tutorial: TutorialProgress;
 }
@@ -38,6 +40,7 @@ export function createInitialState(now: number): GameState {
     reputation: 0,
     recipesDiscovered: [...STARTER_RECIPE_IDS],
     ingredientsBought: [],
+    roomsBuilt: [],
     upgrades: {},
     tutorial: { completedSteps: [], skipped: false },
   };

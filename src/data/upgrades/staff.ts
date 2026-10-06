@@ -12,7 +12,7 @@ export const staffUpgrades: readonly UpgradeDef[] = [
     baseCost: 60,
     growth: 1.8,
     effect: { stat: 'autoBrew', mode: 'add', perLevel: 0.03 },
-    maxLevel: 5,
+    maxLevel: 7,
   },
   {
     id: 'waitress',
@@ -20,6 +20,6 @@ export const staffUpgrades: readonly UpgradeDef[] = [
     baseCost: 90,
     growth: 1.8,
     effect: { stat: 'autoServe', mode: 'add', perLevel: 0.04 },
-    maxLevel: 5,
+    maxLevel: 7,
   },
 ];

@@ -1,15 +1,13 @@
 import type { GameState } from '@/core/state';
 import type { Store } from '@/core/store';
 import { recipes, type RecipeDef } from '@/data/recipes';
-import { upgrades } from '@/data/upgrades';
 import { waitingCustomers } from '@/systems/customers';
-import { firstBuyableIngredient } from '@/systems/ingredients';
-import { quoteFor } from '@/systems/upgrades';
 import type { GameWorld } from '@/wiring/create-services';
 import { createIngredientShelf, type IngredientShelf } from '@/wiring/ingredient-shelf';
+import { shopOnce } from './shopping';
 
 export interface BotOptions {
-  /** Buy upgrades (the cheapest affordable one, one level at a time). */
+  /** Shop: ingredients, rooms (saving up for them) and the cheapest upgrade, one purchase at a time (sim/shopping.ts). */
   buys: boolean;
 }
 
@@ -48,28 +46,13 @@ function brewNext(world: GameWorld, state: GameState, shelf: IngredientShelf): b
   return true;
 }
 
-/** A new ingredient comes first: it opens up recipes to discover. */
-function buyIngredient(world: GameWorld, state: GameState, shelf: IngredientShelf): boolean {
-  const def = firstBuyableIngredient(state, shelf.catalog);
-  if (def !== undefined) world.scene.actions.buyIngredient(def.id);
-  return def !== undefined;
-}
-
-function buyCheapest(world: GameWorld, state: GameState): boolean {
-  const deals = upgrades.map((def) => ({ def, deal: quoteFor(state, def, 1) })).filter(({ deal }) => deal.affordable);
-  const cheapest = deals.sort((a, b) => a.deal.cost.cmp(b.deal.cost))[0];
-  if (cheapest === undefined) return false;
-  world.scene.actions.buyUpgrade(cheapest.def.id, 1);
-  return true;
-}
-
 export function createBot(world: GameWorld, store: Store<GameState>, options: BotOptions): Bot {
   const shelf = createIngredientShelf(store);
   return {
     act() {
       const state = store.getState();
       if (serveReady(world) || brewNext(world, state, shelf)) return;
-      if (options.buys && !buyIngredient(world, state, shelf)) buyCheapest(world, state);
+      if (options.buys) shopOnce(world, state, shelf);
     },
   };
 }

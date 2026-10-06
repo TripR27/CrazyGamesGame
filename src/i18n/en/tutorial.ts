@@ -24,5 +24,7 @@ export const tutorial: Messages = {
   'tutorial.staff_done.text': 'Hired! They are slower than you, but they never ask for a break. They even keep working when you close the tab.',
   'tutorial.vip_spot.text': 'A VIP! Royalty wants {royal}, the fanciest thing we make. Pays triple, waits for nobody.',
   'tutorial.vip_done.text': 'Ka-ching. Keep the crown happy and the crown keeps paying.',
+  'tutorial.room_buy.text': 'This shack has an upstairs? Build the {room} in the Shop tab. More room, more customers, more chaos.',
+  'tutorial.room_done.text': 'Look up! A brand new room. Customers will find it on their own. They always find the drinks.',
   'tutorial.upgrade_done.text': 'Ahh, shopping. Your gold went down and somehow you feel richer. Welcome to economics.',
 };

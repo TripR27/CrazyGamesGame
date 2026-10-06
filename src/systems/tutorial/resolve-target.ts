@@ -39,6 +39,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-upgrade': (ctx) => inShop(ctx, 'upgrade', ctx.affordableUpgradeId),
   'guide-ingredient-buy': (ctx) => inShop(ctx, 'ingredient-buy', ctx.affordableIngredientId),
   'guide-new-ingredient': (ctx) => (ctx.newestIngredientId === null ? null : `ingredient:${ctx.newestIngredientId}`),
+  'guide-room-buy': (ctx) => inShop(ctx, 'room-buy', ctx.affordableRoomId),
+  'guide-new-room': (ctx) => (ctx.newestRoomId === null ? null : `room:${ctx.newestRoomId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */

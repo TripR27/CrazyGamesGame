@@ -16,9 +16,11 @@ export const isWaiting = (customer: CustomerInstance): boolean => customer.drink
 /** The customers still waiting for their drink, oldest first. Drinking customers only hold a seat. */
 export const waitingCustomers = (floor: CustomerFloor): CustomerInstance[] => floor.customers.filter(isWaiting);
 
-export function freeSeats(floor: CustomerFloor): number[] {
+/** Seats nobody sits in; only among `open` when given (rooms that are not built have no usable seats). */
+export function freeSeats(floor: CustomerFloor, open?: readonly number[]): number[] {
   const taken = new Set(floor.customers.map((c) => c.seat));
-  return Array.from({ length: floor.capacity }, (_, seat) => seat).filter((s) => !taken.has(s));
+  const all = Array.from({ length: floor.capacity }, (_, seat) => seat);
+  return all.filter((s) => !taken.has(s) && (open === undefined || open.includes(s)));
 }
 
 /** Remove a customer from the floor. Returns the change to announce, or undefined if they were not there. */
