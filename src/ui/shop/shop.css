@@ -3,7 +3,7 @@
 .shop-button {
   position: absolute;
   top: 12px;
-  right: 16px;
+  right: calc(var(--side-w, 0px) + 16px);
   padding: 10px 22px;
   border: 3px solid #5e3a18;
   border-radius: 20px;
@@ -16,13 +16,14 @@
 }
 .shop-button:hover { background: #ffd865; }
 
-/* A column on the right side of the window. The game view shrinks to make room (see ui/side-layout.ts),
-   so serving keeps working while the shop is open. Its width is set from code. */
+/* A column just right of the game, as tall as the game. Game and panel are fitted into the window together
+   (see ui/side-layout.ts), so serving keeps working while the shop is open. Sizes are design pixels. */
 .shop-panel {
   position: absolute;
   top: 0;
-  right: 0;
-  bottom: 0;
+  left: 1280px;
+  width: 380px;
+  height: 720px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

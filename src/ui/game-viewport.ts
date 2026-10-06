@@ -1,12 +1,16 @@
-import type { SideLayout } from './side-layout';
+import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
+import type { Fit } from './fit-math';
 
 /**
- * Gives the canvas container the room a side panel leaves free, then tells the engine to fit again.
- * Returns a stop function.
+ * Puts the canvas container exactly where the game part of the frame is, then lets the engine fit again.
+ * The engine only re-reads the size of its container on a window resize, so `refit` has to ask for it.
  */
-export function bindGameViewport(container: HTMLElement, side: SideLayout, refit: () => void): () => void {
-  return side.subscribe(() => {
-    container.style.right = `${side.width()}px`;
-    refit();
+export function placeGame(container: HTMLElement, fit: Fit, refit: () => void): void {
+  Object.assign(container.style, {
+    left: `${fit.left}px`,
+    top: `${fit.top}px`,
+    width: `${GAME_WIDTH * fit.scale}px`,
+    height: `${GAME_HEIGHT * fit.scale}px`,
   });
+  refit();
 }

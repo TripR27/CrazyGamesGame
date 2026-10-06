@@ -1,27 +1,15 @@
 import { t } from '@/i18n';
-import { sidePanelWidth, type SideLayout } from '@/ui/side-layout';
+import { SHOP_PANEL_WIDTH, type SideLayout } from '@/ui/side-layout';
 
 /**
  * The Shop button opens and closes the side panel and tells the layout how much room it takes,
- * so the game view shrinks next to it. Returns a stop function.
+ * so the game view shrinks next to it.
  */
-export function bindPanelToggle(
-  button: HTMLElement,
-  panel: HTMLElement,
-  layout: SideLayout,
-  onOpen: () => void,
-): () => void {
-  const fit = (): void => {
-    const width = panel.hidden ? 0 : sidePanelWidth(window.innerWidth);
-    panel.style.width = `${width}px`;
-    layout.setWidth(width);
-  };
+export function bindPanelToggle(button: HTMLElement, panel: HTMLElement, layout: SideLayout, onOpen: () => void): void {
   button.addEventListener('click', () => {
     panel.hidden = !panel.hidden;
     button.textContent = t(panel.hidden ? 'shop.button' : 'shop.close');
-    fit();
+    layout.setWidth(panel.hidden ? 0 : SHOP_PANEL_WIDTH);
     if (!panel.hidden) onOpen();
   });
-  window.addEventListener('resize', fit);
-  return () => window.removeEventListener('resize', fit);
 }

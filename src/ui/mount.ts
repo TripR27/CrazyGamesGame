@@ -1,5 +1,6 @@
 import type { TargetRegistry } from '@/core/target-registry';
 import type { PlayerActions } from '@/systems/actions';
+import type { Fit } from './fit-math';
 import { fitToViewport } from './fit-root';
 import type { SideLayout } from './side-layout';
 import { mountHud, type HudSource } from './hud';
@@ -11,15 +12,16 @@ export interface UiServices {
   actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop'>;
   tutorial: TutorialUiSource;
   targets: TargetRegistry;
-  /** Where side panels go (outside the scaled game box) and how much room they take. */
-  side: HTMLElement;
+  /** How much room a side panel takes next to the game. */
   layout: SideLayout;
+  /** Told where the game part of the frame sits, so the canvas can follow. */
+  onFit: (fit: Fit) => void;
 }
 
 /** Builds the DOM overlay on top of the canvas. */
-export function mountUi(root: HTMLElement, { source, actions, tutorial, targets, side, layout }: UiServices): void {
-  fitToViewport(root, layout);
+export function mountUi(root: HTMLElement, { source, actions, tutorial, targets, layout, onFit }: UiServices): void {
+  fitToViewport(root, layout, onFit);
   mountHud(root, source, targets);
-  mountShop({ root, side, layout }, source, actions, targets);
+  mountShop({ root, layout }, source, actions, targets);
   mountTutorial(root, tutorial, targets);
 }

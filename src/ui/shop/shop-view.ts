@@ -18,16 +18,14 @@ export interface ShopSource {
 }
 
 export interface ShopHosts {
-  /** The scaled game box: the Shop button lives here, in the corner of the game view. */
+  /** The scaled overlay box: the Shop button sits in the corner of the game, the panel just to its right. */
   root: HTMLElement;
-  /** Outside the game box: the panel is a column next to the game view and shrinks the game view. */
-  side: HTMLElement;
   layout: SideLayout;
 }
 
 /** Shop button plus a side panel with one row per upgrade. Returns an unmount function. */
 export function mountShop(
-  { root, side, layout }: ShopHosts,
+  { root, layout }: ShopHosts,
   source: ShopSource,
   actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop'>,
   targets: TargetRegistry,
@@ -38,8 +36,7 @@ export function mountShop(
     amount = picked;
     render();
   });
-  root.append(button);
-  side.append(panel);
+  root.append(button, panel);
 
   const rows = upgrades.map((def) => {
     const row = createUpgradeRow(() => actions.buyUpgrade(def.id, amount));
@@ -52,14 +49,13 @@ export function mountShop(
     picker.select(amount);
     for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
   }
-  const stopToggle = bindPanelToggle(button, panel, layout, actions.openShop);
+  bindPanelToggle(button, panel, layout, actions.openShop);
   const unsubscribe = source.subscribe(render);
   render();
 
   return () => {
     unsubscribe();
     unregister();
-    stopToggle();
     button.remove();
     panel.remove();
   };
