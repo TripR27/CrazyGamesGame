@@ -3,7 +3,7 @@ import type { GameEvents } from '@/core/game-events';
 import type { Rng } from '@/core/rng';
 import type { RecipeDef } from '@/data/recipes';
 import { publishBrewEvent, type BrewStation } from '@/systems/brewing';
-import type { CustomerFloor } from '@/systems/customers';
+import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { serveAndPublish, type ServeDeps } from '@/systems/serving';
 import { startWantedBrew } from './auto-brew';
 import { readyCustomer } from './auto-serve';
@@ -32,14 +32,14 @@ export function startStaff(deps: StaffDeps): () => void {
     serveCharge.fill(deltaMs, rates.serve);
 
     if (serveCharge.ready()) {
-      const id = readyCustomer(deps.floor.customers, deps.station);
+      const id = readyCustomer(waitingCustomers(deps.floor), deps.station);
       if (id !== undefined) {
         serveAndPublish({ ...deps.serve, floor: deps.floor, station: deps.station, rng: deps.rng, bus: deps.bus }, id);
         serveCharge.spend();
       }
     }
     if (brewCharge.ready()) {
-      const events = startWantedBrew(deps.station, deps.floor.customers, deps.getKnownRecipes(), deps.rng);
+      const events = startWantedBrew(deps.station, waitingCustomers(deps.floor), deps.getKnownRecipes(), deps.rng);
       if (events.length > 0) {
         events.forEach((event) => publishBrewEvent(deps.bus, event));
         brewCharge.spend();

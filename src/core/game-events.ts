@@ -14,8 +14,22 @@ export interface GameEvents {
   /** A customer sat down; look the customer up on the floor by `id`. */
   'customer:arrived': { id: number };
   'customer:left': { id: number; reason: LeaveReason };
-  'customer:served': { id: number; seat: number; recipeId: string; gold: Num; messageKey: string };
+  /** `gold` is the price (strength included), `tip` comes on top (luck), `extraReputation` too (charm). */
+  'customer:served': {
+    id: number;
+    seat: number;
+    recipeId: string;
+    gold: Num;
+    tip: Num;
+    extraReputation: number;
+    liked: boolean;
+    messageKey: string;
+  };
   'customer:refused': { id: number; seat: number; recipeId: string; reason: RefuseReason; messageKey: string };
+  /** A customer sat down and ordered a drink whose effect they like (it counts double). */
+  'likes:ordered': { id: number };
+  /** A customer got a drink they like. */
+  'likes:served': { id: number };
   'ingredient:clicked': { id: string };
   'brew:started': { recipeId: string };
   'brew:done': { recipeId: string };

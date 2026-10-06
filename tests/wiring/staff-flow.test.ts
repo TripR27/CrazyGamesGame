@@ -4,7 +4,7 @@ import { createInitialState } from '@/core/state';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
 
-const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold'];
+const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
 const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done'];
 const SEATS = ['seats_buy', 'seats_done'];
 

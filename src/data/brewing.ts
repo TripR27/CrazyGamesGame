@@ -8,4 +8,6 @@ export const BREWING = {
 
 export const SERVING = {
   reputationPerServe: 1,
+  /** A served customer stays this long to drink before the seat frees up (speed drinks make it shorter). */
+  drinkMs: 5000,
 } as const;

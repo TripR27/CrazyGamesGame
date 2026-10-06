@@ -35,3 +35,10 @@ export function playBasics(game: ReturnType<typeof newGame>): void {
   game.tick(15_000);
   actions.clickCustomer(readyCustomerId(game.guide()) ?? -1);
 }
+
+// The preference lesson: wait for a customer who orders a drink they like (♥), brew it and serve them.
+export function playLikes(game: ReturnType<typeof newGame>): void {
+  for (let t = 0; t < 300_000 && game.shown() !== 'likes_spot'; t += 1_000) game.tick(1_000);
+  playBasics(game);
+  game.tick(6_100);
+}

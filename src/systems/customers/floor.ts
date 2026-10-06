@@ -10,6 +10,12 @@ export function findCustomer(floor: CustomerFloor, id: number): CustomerInstance
   return floor.customers.find((c) => c.id === id);
 }
 
+/** Still waiting for a drink (not drinking yet). */
+export const isWaiting = (customer: CustomerInstance): boolean => customer.drinkMsLeft === undefined;
+
+/** The customers still waiting for their drink, oldest first. Drinking customers only hold a seat. */
+export const waitingCustomers = (floor: CustomerFloor): CustomerInstance[] => floor.customers.filter(isWaiting);
+
 export function freeSeats(floor: CustomerFloor): number[] {
   const taken = new Set(floor.customers.map((c) => c.seat));
   return Array.from({ length: floor.capacity }, (_, seat) => seat).filter((s) => !taken.has(s));

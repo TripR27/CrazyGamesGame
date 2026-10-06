@@ -1,10 +1,9 @@
 import type { Num } from '@/core/numbers';
 import { OFFLINE } from '@/data/offline';
-import { SERVING } from '@/data/brewing';
 import type { CustomerDef } from '@/data/customers';
 import type { RecipeDef } from '@/data/recipes';
 import { meanSpawnIntervalMs } from '@/systems/customers';
-import { averagePayout } from './earnings';
+import { averageReward } from './earnings';
 import type { OfflineReport } from './types';
 
 const HOUR_MS = 3_600_000;
@@ -36,7 +35,7 @@ export function computeOffline(input: OfflineInput): OfflineReport {
   const customersPerSecond = 1000 / meanSpawnIntervalMs(input.reputation);
   const drinksPerSecond = Math.min(input.rates.brew, input.rates.serve, customersPerSecond);
   const served = hadStaff ? Math.floor((countedMs / 1000) * drinksPerSecond * OFFLINE.efficiency) : 0;
-  const payout = averagePayout(input.knownRecipes, input.customerTypes, input.reputation, input.sellMultiplier);
+  const reward = averageReward(input.knownRecipes, input.customerTypes, input.reputation, input.sellMultiplier);
 
   return {
     awayMs,
@@ -45,7 +44,7 @@ export function computeOffline(input: OfflineInput): OfflineReport {
     limitHours: input.limitHours,
     hadStaff,
     served,
-    gold: payout.mul(served).round(),
-    reputation: served * SERVING.reputationPerServe,
+    gold: reward.gold.mul(served).round(),
+    reputation: Math.floor(served * reward.reputation),
   };
 }

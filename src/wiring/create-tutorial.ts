@@ -6,7 +6,7 @@ import { recipes } from '@/data/recipes';
 import { TUTORIAL_STEPS, type TutorialEvent } from '@/data/tutorial';
 import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
-import type { CustomerFloor } from '@/systems/customers';
+import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
 
@@ -46,7 +46,8 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
   const alreadyHolds = (event: TutorialEvent): boolean =>
     (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null) ||
     (event === 'seats:affordable' && affordableSeats() !== null) ||
-    (event === 'staff:affordable' && affordableStaff() !== null);
+    (event === 'staff:affordable' && affordableStaff() !== null) ||
+    (event === 'likes:ordered' && waitingCustomers(floor).some((c) => c.liked));
   const machine = createTutorialMachine(TUTORIAL_STEPS, progress, alreadyHolds);
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
@@ -59,7 +60,7 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     contents: station.contents,
     brewingRecipeId: station.brewing?.recipeId ?? null,
     readyRecipeIds: station.ready,
-    customers: floor.customers,
+    customers: waitingCustomers(floor),
     affordableUpgradeId: affordable(),
     affordableSeatsId: affordableSeats(),
     affordableStaffId: affordableStaff(),

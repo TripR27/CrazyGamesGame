@@ -44,10 +44,11 @@ describe('a full round: brew, wait, serve', () => {
 
     actions.clickCustomer(1);
     expect(seen.served).toHaveBeenCalledWith(expect.objectContaining({ id: 1, recipeId: 'ab' }));
-    expect(seen.left).toHaveBeenCalledWith({ id: 1, reason: 'served' });
     expect(eco.getState().currencies.gold.eq(10)).toBe(true);
     expect(eco.getState().reputation).toBe(1);
-    expect(floor.customers).toEqual([]);
+    // The customer stays to drink; the customer system lets them leave later.
+    expect(seen.left).not.toHaveBeenCalled();
+    expect(floor.customers[0]?.drinkMsLeft).toBeGreaterThan(0);
   });
 
   it('tells the player when serving too early', () => {

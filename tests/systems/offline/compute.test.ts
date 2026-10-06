@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { num } from '@/core/numbers';
-import { averagePayout, computeOffline, type OfflineInput } from '@/systems/offline';
+import { averageReward, computeOffline, type OfflineInput } from '@/systems/offline';
 import { plain, recipes, rich } from '../fixtures';
 
 const HOUR = 3_600_000;
@@ -15,21 +15,36 @@ const input = (over: Partial<OfflineInput> = {}): OfflineInput => ({
   ...over,
 });
 
-describe('average payout', () => {
+describe('average reward', () => {
   it('averages every known recipe against every customer type that comes', () => {
-    expect(averagePayout(recipes, [plain], 0, num(1)).toNumber()).toBe(20); // (10 + 30) / 2
-    expect(averagePayout(recipes, [plain, rich], 0, num(1)).toNumber()).toBe(25); // (10 + 15 + 30 + 45) / 4
+    expect(averageReward(recipes, [plain], 0, num(1)).gold.toNumber()).toBe(20); // (10 + 30) / 2
+    expect(averageReward(recipes, [plain, rich], 0, num(1)).gold.toNumber()).toBe(25); // (10 + 15 + 30 + 45) / 4
   });
 
   it('leaves out customers whose reputation is not reached and counts the sell multiplier', () => {
     const vip = { ...rich, id: 'vip', minReputation: 50 };
-    expect(averagePayout(recipes, [plain, vip], 0, num(2)).toNumber()).toBe(40);
-    expect(averagePayout(recipes, [plain, vip], 50, num(1)).toNumber()).toBe(25);
+    expect(averageReward(recipes, [plain, vip], 0, num(2)).gold.toNumber()).toBe(40);
+    expect(averageReward(recipes, [plain, vip], 50, num(1)).gold.toNumber()).toBe(25);
   });
 
   it('is zero when nobody can order anything', () => {
-    expect(averagePayout([], [plain], 0, num(1)).toNumber()).toBe(0);
-    expect(averagePayout(recipes, [], 0, num(1)).toNumber()).toBe(0);
+    expect(averageReward([], [plain], 0, num(1)).gold.toNumber()).toBe(0);
+    expect(averageReward(recipes, [], 0, num(1)).gold.toNumber()).toBe(0);
+  });
+});
+
+describe('average reward with drink effects', () => {
+  const strong = { ...recipes[0]!, effect: 'strength' as const };
+  const charming = { ...recipes[1]!, effect: 'charm' as const };
+  const lucky = { ...recipes[0]!, effect: 'luck' as const };
+
+  it('counts strength, expected tips and charm, and liked drinks are ordered more often', () => {
+    expect(averageReward([strong], [plain], 0, num(1)).gold.toNumber()).toBe(13); // 10 x 1.25, rounded
+    expect(averageReward([lucky], [plain], 0, num(1)).gold.toNumber()).toBe(11.25); // 10 + 25% of a 5 tip
+    expect(averageReward([charming], [plain], 0, num(1)).reputation).toBe(2);
+    const fan = { ...plain, likes: ['charm' as const] };
+    // Charm liked: 3 reputation, ordered twice as often as the 1-reputation drink: (2 x 3 + 1) / 3.
+    expect(averageReward([recipes[0]!, charming], [fan], 0, num(1)).reputation).toBeCloseTo(7 / 3);
   });
 });
 

@@ -1,4 +1,5 @@
-import { pickRandom, type Rng } from '@/core/rng';
+import { pickRandom, pickWeighted, type Rng } from '@/core/rng';
+import { isLiked, orderWeight } from '@/systems/effects';
 import { freeSeats } from './floor';
 import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from './types';
 
@@ -17,15 +18,15 @@ export function trySpawn(
     rng,
     catalog.customerTypes.filter((c) => c.minReputation <= context.reputation),
   );
-  const recipe = pickRandom(
-    rng,
-    catalog.recipes.filter((r) => context.unlockedRecipeIds.includes(r.id)),
-  );
+  const known = catalog.recipes.filter((r) => context.unlockedRecipeIds.includes(r.id));
+  // A customer orders a drink they like more often than another.
+  const recipe = type === undefined ? undefined : pickWeighted(rng, known, (r) => orderWeight(type, r));
   const seat = pickRandom(rng, freeSeats(floor));
   if (type === undefined || recipe === undefined || seat === undefined) return undefined;
 
   const patienceMaxMs = type.patienceSeconds * 1000;
   const id = floor.nextId++;
-  floor.customers.push({ id, typeId: type.id, recipeId: recipe.id, seat, patienceMs: patienceMaxMs, patienceMaxMs });
-  return { kind: 'arrived', id };
+  const liked = isLiked(type, recipe);
+  floor.customers.push({ id, typeId: type.id, recipeId: recipe.id, seat, patienceMs: patienceMaxMs, patienceMaxMs, liked });
+  return { kind: 'arrived', id, liked };
 }

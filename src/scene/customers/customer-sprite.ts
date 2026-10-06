@@ -6,6 +6,7 @@ const BAR_Y = -70;
 const BUBBLE_HEIGHT = 28;
 const BUBBLE_Y = { low: -96, raised: -126 } as const;
 const BAR_COLORS = { good: 0x7be05a, warn: 0xf5c542, bad: 0xe2563b } as const;
+const MUG_COLOR = 0xe0a030;
 
 /** A pooled placeholder customer: body, head, a drink bubble and a patience bar. */
 export interface CustomerSprite {
@@ -18,6 +19,8 @@ export interface CustomerSprite {
   setPatience(fraction: number): void;
   /** Hide the bubble and bar, e.g. while the customer walks out. */
   setOrderVisible(visible: boolean): void;
+  /** Show a mug in the customer's hand while they drink. */
+  setDrinking(drinking: boolean): void;
 }
 
 function barColor(fraction: number): number {
@@ -36,7 +39,8 @@ export function createCustomerSprite(scene: Scene, onClick: (customerId: number)
   const barBack = scene.add.rectangle(0, BAR_Y, BAR_WIDTH, 6, 0x2a1a0c);
   const bar = scene.add.rectangle(-BAR_WIDTH / 2, BAR_Y, BAR_WIDTH, 6, BAR_COLORS.good).setOrigin(0, 0.5);
   const order = [bubble, text, barBack, bar];
-  const container = scene.add.container(0, 0, [hit, body, head, ...order]);
+  const mug = scene.add.rectangle(20, -26, 10, 14, MUG_COLOR).setStrokeStyle(2, 0x5e3a18).setVisible(false);
+  const container = scene.add.container(0, 0, [hit, body, head, mug, ...order]);
   container.setVisible(false);
   const sprite: CustomerSprite = {
     container,
@@ -53,6 +57,9 @@ export function createCustomerSprite(scene: Scene, onClick: (customerId: number)
     },
     setOrderVisible(visible) {
       for (const part of order) part.setVisible(visible);
+    },
+    setDrinking(drinking) {
+      mug.setVisible(drinking);
     },
   };
   hit.setInteractive({ useHandCursor: true });

@@ -4,12 +4,14 @@ import { textKey } from '@/data/text-key';
 import { t } from '@/i18n';
 import { CAULDRON, CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
+import { bonusLines, GOLD_COLOR } from './bonus-lines';
 import { createFloatingTexts } from './floating-text';
 
-const GOLD_COLOR = '#f5c542';
 const BAD_COLOR = '#ffc2b8';
 const LINE_ABOVE_SLOT = 125;
 const GOLD_ABOVE_SLOT = 98;
+const BONUS_ABOVE_SLOT = 72;
+const BONUS_LINE_PX = 20;
 
 /** Turns game events into floating "+gold" and funny lines near whoever they are about. */
 export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () => void {
@@ -18,11 +20,14 @@ export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () =>
     t(key, recipeId === undefined ? undefined : { drink: t(textKey('recipes', recipeId, 'name')) });
 
   const stops = [
-    bus.on('customer:served', ({ seat, recipeId, gold, messageKey }) => {
+    bus.on('customer:served', ({ seat, recipeId, gold, tip, extraReputation, messageKey }) => {
       const slot = CUSTOMER_SLOTS[seat];
       if (slot === undefined) return;
       floats.show(slot.x, slot.y - GOLD_ABOVE_SLOT, `+${formatNumber(gold)}`, { color: GOLD_COLOR, size: 24 });
       floats.show(slot.x, slot.y - LINE_ABOVE_SLOT, line(messageKey, recipeId));
+      bonusLines(tip, extraReputation).forEach((b, i) => {
+        floats.show(slot.x, slot.y - BONUS_ABOVE_SLOT + i * BONUS_LINE_PX, b.text, { color: b.color, size: 16 });
+      });
     }),
     bus.on('customer:refused', ({ seat, recipeId, messageKey }) => {
       const slot = CUSTOMER_SLOTS[seat];

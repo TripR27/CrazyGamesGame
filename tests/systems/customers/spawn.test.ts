@@ -9,7 +9,7 @@ describe('spawning customers', () => {
   it('brings the first customer after the first delay, not before', () => {
     const floor = newFloor();
     expect(run(floor, context(), FIRST_DELAY - 100)).toEqual([]);
-    expect(run(floor, context(), 100)).toEqual([{ kind: 'arrived', id: 1 }]);
+    expect(run(floor, context(), 100)).toEqual([{ kind: 'arrived', id: 1, liked: false }]);
   });
 
   it('gives the newcomer a free seat, the type patience and a known recipe', () => {
@@ -69,7 +69,7 @@ describe('spawning customers', () => {
     expect(floor.customers).toHaveLength(1);
     dismiss(floor, first?.id ?? -1, 'served');
     expect(run(floor, context(), SPAWNING.refillDelayMs - 200, undefined, patientCatalog)).toEqual([]);
-    expect(run(floor, context(), 300, undefined, patientCatalog)).toEqual([{ kind: 'arrived', id: 2 }]);
+    expect(run(floor, context(), 300, undefined, patientCatalog)).toEqual([{ kind: 'arrived', id: 2, liked: false }]);
   });
 
   it('seats at most as many customers as the player has seats', () => {

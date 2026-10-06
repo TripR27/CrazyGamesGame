@@ -23,3 +23,14 @@ export function randomIndex(rng: Rng, count: number): number {
 export function pickRandom<T>(rng: Rng, items: readonly T[]): T | undefined {
   return items.length === 0 ? undefined : items[randomIndex(rng, items.length)];
 }
+
+/** Pick an item with a chance in proportion to its weight. Equal weights give the same pick as `pickRandom`. */
+export function pickWeighted<T>(rng: Rng, items: readonly T[], weight: (item: T) => number): T | undefined {
+  const total = items.reduce((sum, item) => sum + weight(item), 0);
+  let roll = rng() * total;
+  for (const item of items) {
+    roll -= weight(item);
+    if (roll < 0) return item;
+  }
+  return items[items.length - 1];
+}
