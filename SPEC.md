@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 2 (Core). **Volgende stap:** 3 (Save-systeem).
+**Nu bezig:** niets. **Laatst afgerond:** stap 3 (Save-systeem). **Volgende stap:** 4 (i18n + data-schema).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -17,7 +17,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 |---|---|---|---|
 | 1 | Project opzetten | ✅ | `step-01-project-setup` |
 | 2 | Core (getallen, state, tick) | ✅ | `step-02-core` |
-| 3 | Save-systeem | ⬜ | |
+| 3 | Save-systeem | ✅ | `step-03-save-system` |
 | 4 | i18n + data-schema | ⬜ | |
 | 5 | Taverne-scene (placeholder) | ⬜ | |
 | 6 | Klanten | ⬜ | |
@@ -174,7 +174,9 @@ Bestandsnamen: `kebab-case.ts`. Eén verantwoordelijkheid per bestand; een besta
 
 - Sleutel `bt_save`, inhoud: `{ version, savedAt, state }` als JSON-string.
 - `migrate(save)` voert versie-stappen uit (`v1 → v2 → ...`), zodat updates nooit voortgang breken.
-- Autosave elke 30 s, bij belangrijke acties (aankoop, prestige) en bij `visibilitychange`/`beforeunload`.
+- Autosave elke 30 s, bij belangrijke acties (aankoop, prestige: via de event `saveRequested`) en bij `visibilitychange`/`beforeunload`. Elke autosave zet eerst `meta.lastSeenAt` (nodig voor offline-voortgang in stap 10).
+- Een onleesbare of te nieuwe save wordt **niet** weggegooid: de ruwe tekst gaat naar `bt_save_backup` en er start een nieuw spel (`status: recovered`).
+- Bij laden wordt de save samengevoegd met de defaults (`reconcile`): ontbrekende velden krijgen een default, onbekende velden vallen weg, velden van het verkeerde type vallen terug op de default. **Regel:** een leeg object in de default-state (`{}`) betekent een open lijst (bijv. upgrade-niveaus per id); de opgeslagen inhoud blijft dan volledig behouden.
 - Handmatige **export/import** als tekst (base64) in Settings, als vangnet.
 - Grootte bewaken: < 200 KB (SDK-limiet is 1 MB).
 - Alle opslag via een `StorageAdapter`-interface: `localStorageAdapter` (dev/Basic Launch) en `crazyGamesAdapter` (SDK data-module).
@@ -345,7 +347,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* `npm run check` en `npm run build` slagen, pagina laadt zonder fouten, bundlegrootte genoteerd.
 - [x] **Stap 2: Core.** Decimal-wrapper + getalformattering (K/M/B/T/aa…), `GameState`-type, store met subscribe, event-bus, vaste 100 ms-tick op `Date.now()`-delta, debug-helper. Tests.
   *Klaar wanneer:* tests voor formattering en tick slagen (incl. grote delta's).
-- [ ] **Stap 3: Save-systeem.** Serialize/deserialize (Decimal↔string), versie + migratie, `StorageAdapter` + `localStorageAdapter`, autosave, export/import-string. Tests incl. fixture.
+- [x] **Stap 3: Save-systeem.** Serialize/deserialize (Decimal↔string), versie + migratie, `StorageAdapter` + `localStorageAdapter`, autosave, export/import-string. Tests incl. fixture.
   *Klaar wanneer:* state overleeft herladen; oude fixture laadt; kapotte save valt netjes terug op nieuwe game.
 - [ ] **Stap 4: i18n + data-schema.** `t()` met `en`, typen voor ingredient/recipe/customer/upgrade, eerste 5 recepten + 6 ingrediënten + 3 klanttypes als data.
   *Klaar wanneer:* data valideert via een test (unieke ids, bestaande ingrediënt-verwijzingen, vertaalsleutels aanwezig).
@@ -394,6 +396,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 | Saves breken bij update | Versie + migraties + fixture-test |
 | 100-regelsregel leidt tot veel kleine bestanden | Bewust; duidelijke mappen en indexbestanden |
 | Balans te traag/snel | Simulator (stap 13), alle getallen in `data/` |
+| Twee tabs tegelijk overschrijven elkaars save (zelfde `localStorage`) | CrazyGames toont de game normaal in één iframe; de data-module van de SDK (stap 20) synchroniseert per account. Eventueel later: `storage`-event of een tab-lock als dit een probleem blijkt |
 | Art-kwaliteit met alleen SVG | Stijlkeuze: eenvoudige vlakke cartoon-vormen; thumbnail apart aandacht |
 | Tutorial irriteert of loopt vast | Altijd overslaanbaar, beloont echte acties i.p.v. klikken op "volgende", test op vastlopers |
 
@@ -411,6 +414,25 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 3: Save-systeem (2026-10-06, `step-03-save-system`)
+- **Gedaan:** (code in `src/save/`, `src/runtime/autosave-driver.ts`, tests in `tests/save/`)
+  - `storage.ts`: `StorageAdapter`-interface (zelfde vorm als localStorage en de CrazyGames data-module). `memory-adapter.ts` en `local-storage-adapter.ts` (valt terug op geheugen als localStorage geblokkeerd is).
+  - `codec.ts`: JSON-codering waarbij elke `Decimal` automatisch een getagde string wordt (`{"$num":"1.5e+500"}`). Nieuwe state-onderdelen met getallen hoeven dus geen eigen save-code.
+  - `reconcile.ts`, `migrate.ts`, `envelope.ts`, `errors.ts`, `base64.ts`: samenvoegen met defaults, versie-migraties (`CURRENT_SAVE_VERSION = 1`, nog geen migraties nodig), save-omslag `{version, savedAt, state}`, foutsoorten `corrupt` en `too-new`, en base64 voor export/import.
+  - `save-manager.ts`: `load()` (`new`, `loaded` of `recovered`), `save()`, `exportString()`, `importString()`. Opslaan faalt stil (met debug-log) als de opslag vol of geblokkeerd is.
+  - `autosave-driver.ts`: elke 30 s, bij verborgen tab, bij sluiten en bij de nieuwe event `saveRequested`. Zet `lastSeenAt` bij.
+  - `touchLastSeen` in `core/state.ts`, `main.ts` laadt nu de save en start de autosave.
+  - 29 nieuwe tests (56 totaal) inclusief een vastgezette oude save in `tests/fixtures/save-v1.json`.
+- **Waarom (keuzes):**
+  - Het getal-formaat gaat via één codec met tag-marker in plaats van per veld, zodat nieuwe state-secties (stap 4 tot 17) zonder extra werk opgeslagen worden (SOLID: O).
+  - `reconcile` in plaats van strenge validatie: een update met nieuwe velden breekt oude saves niet. Structurele wijzigingen gaan via migraties.
+  - Een kapotte of te nieuwe save wordt als backup bewaard in plaats van overschreven, zodat een speler zijn voortgang nooit stilletjes kwijtraakt.
+  - De manager krijgt storage, klok en default-state binnen (SOLID: D); de CrazyGames-adapter komt in stap 20 zonder dat de manager verandert.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt (56 tests, geen bestand boven 100 regels). In de browser gecontroleerd: nieuw spel schrijft een save bij sluiten; een bewerkte save (gold 1.5e500, reputatie 7, createdAt 111) laadt correct; een kapotte save geeft `recovered` met backup in `bt_save_backup`; het spel blijft renderen zonder fouten.
+- **Afwijkingen van het plan:** `runtime/autosave-driver.ts` en de event `saveRequested` toegevoegd (de timers en DOM-events horen niet in `save/`). Twee tabs tegelijk overschrijven elkaars save; als risico genoteerd in hoofdstuk 13.
+- **Nu te proberen:** `npm run dev`, open de browser-console en kijk bij Application, Local Storage naar `bt_save`. Pas daar `reputation` aan en herlaad (sluit eerst andere tabs van het spel, anders overschrijft die het).
+- **Nog te doen / volgende stap:** stap 4, i18n en data-schema (`t()` met Engels, types voor ingrediënt/recept/klant/upgrade, eerste 5 recepten, 6 ingrediënten en 3 klanttypes).
 
 ### Stap 2: Core (2026-10-06, `step-02-core`)
 - **Gedaan:** (alles in `src/core/`, tests in `tests/core/`)
