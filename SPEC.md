@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 10b (Offline-voortgang). **Volgende stap:** 11 (Reputatie, gates en drankeffecten).
+**Nu bezig:** niets. **Laatst afgerond:** stap 11a (Plekken en geleidelijke klanten). **Volgende stap:** 11b (Voorkeuren en drankeffecten).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -26,7 +26,9 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 9 | Economie en upgrades | ✅ | `step-09-economy-upgrades` |
 | 10a | Personeel (brouwer en serveerster) | ✅ | `step-10a-staff` |
 | 10b | Offline-voortgang | ✅ | `step-10b-offline` |
-| 11 | Reputatie, gates, drankeffecten | ⬜ | |
+| 11a | Plekken en geleidelijke klanten | ✅ | `step-11a-seats` |
+| 11b | Voorkeuren en drankeffecten | ⬜ | |
+| 11c | Reputatieniveaus, gates en VIP-klanten | ⬜ | |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
 | 13 | Balans-simulator | ⬜ | |
 | 14 | Kamers en visuele groei | ⬜ | |
@@ -211,12 +213,22 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - Multipliers worden samengevoegd in één functie `getMultipliers(state)` (`systems/economy/`) zodat bronnen (prestige, upgrades, achievements, events) op één plek optellen/vermenigvuldigen. Eerst telt 'add', dan 'multiply'. Basiswaarden per stat staan in `data/upgrades/base-stats.ts`; de bar en de ketel lezen hun waarden via `wiring/sync-station.ts`.
 - Alle balansgetallen staan in `data/`, nooit in `systems/`.
 
-### Klanteninstroom en plekken (besluit eigenaar, 2026-10-06; **nog niet gebouwd**)
+### Klanteninstroom en plekken (besluit eigenaar, 2026-10-06; gebouwd in stap 11a)
 
-- Klanten komen **geleidelijk**: aan het begin niet meteen veel en niet snel achter elkaar. De eerste klant mag snel komen (5 seconden tot plezier), maar de speler krijgt de tijd om te brouwen en te serveren. Het tempo groeit mee met reputatie en met het aantal plekken.
-- De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden **gekocht** met een upgrade ("plekken": een stat `seats`, basiswaarde 1, mode `add`, kosten stijgen; eventueel later). De 7 bestaande klantplekken (`CUSTOMER_SLOTS`) zijn dan de bovengrens tot kamers (stap 14) er plekken bij zetten.
-- Bouwwijze: nieuwe stat in `UpgradeStat` en `BASE_STATS`, een upgrade in `data/upgrades/`, en `maxCustomers = min(plekken, tutorialgrens)` in `wiring/create-services.ts`. Spawn-getallen staan in `data/customers/spawning.ts`. De huidige placeholders (eerste klant na 1,5 s, interval 8 s, 7 plekken) zijn te snel en te druk en worden hiermee vervangen.
-- Inplannen: bij stap 11 (klantgedrag) of eerder als de eigenaar dat wil; tuning in stap 13. Hoort er een tutorial-hint bij (eerste plekkenupgrade) en de tutorial (1 klant tegelijk) moet blijven kloppen met 1 plek.
+- Klanten komen **geleidelijk**: aan het begin niet meteen veel en niet snel achter elkaar. De eerste klant komt na 3 seconden (`SPAWNING.firstDelayMs`), daarna gemiddeld elke 12 seconden, korter met reputatie (2% van de basis per punt, nooit onder 3 s). Een vrijgekomen plek wordt niet meteen gevuld: de volgende klant heeft minstens `refillDelayMs` (2,5 s) nodig om binnen te lopen.
+- De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden gekocht met de upgrade **Extra Seat** (stat `seats`, basis 1, +1 per niveau, kosten 40 met groei 1,8, max 6 niveaus). De 7 klantplekken van de scene (`CUSTOMER_SLOTS`) zijn de bovengrens tot kamers (stap 14) er plekken bij zetten; een test bewaakt dat de upgrades die grens niet overschrijden.
+- `maxCustomers = min(plekken, tutorialgrens)` staat in `wiring/create-services.ts`; alle getallen staan in `data/customers/spawning.ts` en `data/upgrades/tier01.ts`, en zijn placeholders (stap 13).
+- De offline-berekening (stap 10b) gebruikt dezelfde gemiddelde klantinterval (`meanSpawnIntervalMs`), maar houdt nog geen rekening met het aantal plekken; bij het afstellen in stap 13 meenemen.
+
+### Receptenboek (wens eigenaar, 2026-10-06; hoort bij stap 12)
+
+- De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`, met een eigen knop naast Shop) met een grid van alle drankjes.
+- **Ontdekt recept:** naam, ingrediënten (met hun plaatje of kleur), brouwtijd, prijs, effect en zeldzaamheid. Zo hoeft de speler niets te onthouden en kan hij het recept zonder gokken opnieuw brouwen.
+- **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
+- Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
+- Later (open vraag): een vereenvoudigde versie al eerder bouwen, bijvoorbeeld direct na stap 11b, omdat de speler nu na de les alleen de plank en de bestellingen heeft om uit te leren.
+- Hoort bij de tutorial-hint "eerste ontdekking" (stap 12): bij de eerste keer openen wijst de ketel de knop aan.
+
 - **Balans-simulator** (`scripts/simulate.ts`, draait in Node dankzij de pure `systems/`): simuleert een speler-strategie en print wanneer mijlpalen worden gehaald. Doel: eerste prestige na ~1 tot 2 uur.
 
 ### Rendering
@@ -381,8 +393,11 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* tabblad 5 min weg of sluiten/openen levert correcte offline-opbrengst; tests voor `systems/offline`.
 
 ### Fase C: Diepte
-- [ ] **Stap 11: Reputatie, gates en drankeffecten.** Reputatieniveaus ontgrendelen klanten/kamers/recepten; klantvoorkeuren en effecten (kracht/snelheid/geluk/charme); VIP-klanten. Tutorial-hint: klantvoorkeur. **Ook:** geleidelijke klanteninstroom en de plekken-upgrade met start op 1 plek (zie hoofdstuk 4, Klanteninstroom en plekken), tenzij de eigenaar het eerder wil.
-- [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
+- [x] **Stap 11a: Plekken en geleidelijke klanten.** De speler begint met 1 plek en koopt er bij (upgrade Extra Seat); klanten komen rustig, met een korte wachttijd tussen vertrek en volgende aankomst. Tutorial-hint: eerste extra plek.
+  *Klaar wanneer:* een nieuw spel heeft één klant tegelijk, elke plek is één klant extra, de hint start bij genoeg goud, tests slagen.
+- [ ] **Stap 11b: Voorkeuren en drankeffecten.** Klantvoorkeuren (`likes`) en de vier effecten (kracht: meer betaald; snelheid: klant is sneller klaar en maakt de plek vrij; geluk: kans op fooi; charme: extra reputatie). Een effect werkt altijd; zit het in de voorkeur van de klant, dan is het dubbel zo sterk. Tutorial-hint: klantvoorkeur.
+- [ ] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
+- [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
 - [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
@@ -429,6 +444,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 11a: Plekken en geleidelijke klanten (2026-10-06, `step-11a-seats`)
+- **Gedaan:** (code in `src/data/upgrades/`, `src/data/customers/spawning.ts`, `src/systems/customers/update.ts`, `src/systems/upgrades/groups.ts`, `src/data/tutorial/seats.ts`, `src/wiring/`; tests in `tests/wiring/seats-flow.test.ts` en aangepaste bestaande tests)
+  - **Plekken als stat:** nieuwe stat `seats` (basis 1) en de upgrade **Extra Seat** (kosten 40, groei 1,8, +1 per niveau, max 6). `maxCustomers = min(plekken, tutorialgrens)`; het spel begint dus met één klant tegelijk en elke gekochte plek is één klant extra, tot de 7 plekken van de scene.
+  - **Geleidelijke instroom:** eerste klant na 3 s (was 1,5 s), basisinterval 12 s (was 8 s) en een nieuwe `refillDelayMs` van 2,5 s: terwijl de taverne vol is, zakt de timer niet onder die waarde, dus een vrijgekomen plek wordt niet meteen gevuld. Klanten komen zo niet in een stroom achter elkaar.
+  - **Tutorial-hint** (`seats_buy`, `seats_done`): start zodra de speler een plek kan betalen (event `seats:affordable`, via dezelfde `watchAffordable`), wijst eerst de Shop-knop en dan de upgrade (gids-alias `guide-seats`), en sluit af (event `seats:bought`). De hulpfuncties voor de gedeelde logica (`inShop`) en de groepen (`generalOnly`, `seatsOnly`, `staffOnly`) zijn herschikt, zodat elke hint zijn eigen groep upgrades heeft en de eerste-upgrade-hint de plekken en het personeel niet meer meetelt.
+  - Bestaande tests aangepast voor de nieuwe tijden en de ene plek (`withSeats()` in de testhulp); nieuwe tests voor plekken (start op één, elke plek één klant extra, grens van de scene), geleidelijke komst (eerste klant, wachttijd na vertrek, nooit meer dan de plekken) en de hint. 284 tests.
+- **Waarom (keuzes):** eigenaar wil rustig beginnen; de wachttijd als ondergrens op de timer (in plaats van de timer te verlengen) laat een snelle speler niet langer wachten dan nodig en een trage speler niet sneller bedienen. De volgorde van de lessen (basis, upgrade, plekken, personeel) volgt de prijzen (20, 40, 100 goud).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser: de hint start bij genoeg goud en wijst de Shop-knop aan, de winkel toont Extra Seat onder Tavern, kopen (goud 100 naar 60) maakt een tweede klant mogelijk en de hint sluit af. Eerder meldde de ingebouwde browser fouten die van tussenversies kwamen (zie de opmerking bij stap 9: een `touch` op de gewijzigde bestanden herstelt dat).
+- **Afwijkingen van het plan:** stap 11 is gesplitst in 11a, 11b en 11c (afgesproken met de eigenaar). De lessen lopen nog steeds één voor één: een les die zichtbaar blijft (de speler negeert hem) houdt de volgende hint tegen tot hij klaar is of de speler de tutorial overslaat. Dat blijft werken omdat een toestand die al geldt de volgende les meteen start, maar een zichtbare les die de speler negeert, kan de volgende uitstellen. Als dat in de praktijk irriteert, laat de machine lessen onafhankelijk starten.
+- **Nu te proberen:** wis Local Storage en begin een nieuw spel: de eerste klant komt na een paar seconden en er is steeds één klant. Haal 40 goud en koop Extra Seat; daarna kunnen er twee klanten zitten. Het offline-aandeel is nog niet gekoppeld aan het aantal plekken.
+- **Nog te doen / volgende stap:** stap 11b, Voorkeuren en drankeffecten (de effecten kracht, snelheid, geluk en charme; voorkeur verdubbelt het effect). Daarna 11c (reputatieniveaus en VIP) en stap 12 met het receptenboek.
 
 ### Stap 10b: Offline-voortgang (2026-10-06, `step-10b-offline`)
 - **Gedaan:** (code in `src/systems/offline/`, `src/data/offline.ts`, `src/wiring/create-offline.ts`, `src/ui/welcome/`, aanpassingen in `main.ts` en `systems/customers/spawn-timing.ts`; tests in `tests/systems/offline/`, `tests/ui/welcome-view-model.test.ts` en `tests/wiring/offline-flow.test.ts`)
