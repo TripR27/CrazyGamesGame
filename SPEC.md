@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 13 (Balans-simulator). **Volgende stap:** 14 (Kamers en visuele groei).
+**Nu bezig:** niets. **Laatst afgerond:** stap 13 (Balans-simulator). **Volgende stap:** 13b (Speelbaarheid, UX-ronde 1), daarna 13c (Ingrediënten in de winkel) en 14 (Kamers).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -31,6 +31,8 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 11c | Reputatieniveaus, gates en VIP-klanten | ✅ | `step-11c-reputation` |
 | 12 | Receptenontdekking + receptenboek | ✅ | `step-12-recipe-book` |
 | 13 | Balans-simulator | ✅ | `step-13-balance-simulator` |
+| 13b | Speelbaarheid (UX-ronde 1) | ⬜ | |
+| 13c | Ingrediënten in de winkel | ⬜ | |
 | 14 | Kamers en visuele groei | ⬜ | |
 | 15 | Helden | ⬜ | |
 | 16 | Expedities en kerkers | ⬜ | |
@@ -240,6 +242,17 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Offline** telt niveaus en VIP's mee: de gewone klanten van het niveau en de VIP's naar hun kans.
 - Alle getallen zijn placeholders (stap 13).
 
+### Speelbaarheid na de eerste speeltest (besluit eigenaar, 2026-10-06; stap 13b en 13c)
+
+De eigenaar speelde t/m stap 13 en vond het spel goed, met vier punten:
+
+1. **Effecten waren niet duidelijk.** De voorkeursles noemt kracht, snelheid, geluk en charme tegelijk; wat ze doen ontdekte de eigenaar pas via het receptenboek. **Besluit: effect-iconen** (stap 13b): elk effect krijgt een icoon (💪 kracht, ⚡ snelheid, 🍀 geluk, 💖 charme; emoji als placeholder tot stap 21) in de bestelbubbel, in het receptenboek en in de zwevende tekst na het serveren (bijv. "⚡ quick drinker"). Een voorkeur toont het icoon met een ♥. De voorkeursles noemt alleen het effect van het drankje dat de klant bestelt, met icoon, en de afsluitzin verwijst naar het boek voor de rest. Andere ideeën (uitleg per effect bij de eerste keer, klantkaartje, legenda) staan in IDEAS.md, punt 7.
+2. **Serveren vanuit het drankje.** **Besluit: eerst het drankje, dan de klant** (stap 13b): klik een drankje op de bar; het licht op en de klanten die het besteld hebben krijgen een markering. Klik dan een klant om het te geven (verkeerde klant = de bekende weigering, het drankje blijft geselecteerd). Opnieuw op het drankje klikken of op een lege plek heft de selectie op. Direct een klant klikken zonder selectie blijft werken zoals nu. De basisles wijst het drankje en daarna de klant aan.
+3. **Eén knop voor de panelen.** In plaats van de knoppen Recipes, Shop en Close: **één knop die het zijpaneel uitklapt en weer inklapt** (stap 13b), met bovenin het paneel **tabbladen** (Shop | Recipes; later ook Settings, Heroes). Het paneel opent op het laatst gebruikte tabblad. Technisch: `ui/side-panels.ts` wordt een paneel met tabbladen in plaats van losse panelen; de tutorial wijst de uitklapknop aan en daarna het juiste tabblad (doelen `panel-button` en `tab:<id>`).
+4. **Niveau 2 bracht te veel tegelijk** (alle drie de tier-2-ingrediënten op het schap, ook voor recepten van latere niveaus). **Besluit: ingrediënten koop je in de winkel** (stap 13c): een niveau maakt een ingrediënt koopbaar (eenmalige aankoop, groep "Ingredients" in de winkel). Pas na de aankoop staat het op het schap. Een recept is ontdekbaar als zijn niveau bereikt is **én** de speler alle ingrediënten heeft. Voorstel: niveau 2 Fire Pepper, niveau 3 Moon Grape, niveau 4 Troll Sweat (recepten per niveau daarop afstemmen). Ingrediënten blijven per gebruik gratis.
+
+Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de speler **ontdekt** heeft; een ontdekbaar recept bestelt niemand.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`, met een eigen knop naast Shop) met een grid van alle drankjes.
@@ -263,7 +276,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
-- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (nu de winkel, later o.a. receptenboek en instellingen) staan **rechts van het spel binnen dezelfde overlay**: `ui/side-layout.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
+- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `ui/side-layout.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
 
 ### Assets
@@ -429,6 +442,10 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [x] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
+- [ ] **Stap 13b: Speelbaarheid (UX-ronde 1).** Effect-iconen in bubbel, boek en zwevende tekst; voorkeursles noemt alleen het effect van dat drankje; serveren door eerst het drankje en dan de klant te kiezen (direct de klant klikken blijft werken); één uitklapknop met een zijpaneel met tabbladen (Shop | Recipes) in plaats van losse knoppen en Close. Tutorial-hints aanpassen (basisles: drankje, dan klant; upgrade-, plekken-, personeels- en boeklessen: uitklapknop, dan tabblad). Zie hoofdstuk 4, Speelbaarheid na de eerste speeltest.
+  *Klaar wanneer:* een nieuwe speler ziet aan de bubbel wat een drankje doet, kan een drankje selecteren en aan een klant geven, en opent winkel en boek met één knop en tabbladen; alle lessen werken met de nieuwe bediening; tests slagen.
+- [ ] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
+  *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
 - [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
 - [ ] **Stap 15: Helden.** Inhuren, klassen, levelen, uitrusting, held-paneel. Tutorial-hint: eerste held.
 - [ ] **Stap 16: Expedities en kerkers.** Held + kerker + meegenomen drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
