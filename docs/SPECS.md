@@ -143,7 +143,8 @@ platform/  audio/  i18n/   (diensten; mogen door ui/scene gebruikt worden,
 
 ```
 crazyGamesGame/
-  CLAUDE.md  SPECS.md  GAME_ANALYSE.md  ASSETS.md
+  CLAUDE.md               (blijft in de hoofdmap: Claude Code laadt hem automatisch)
+  docs/                   SPECS.md, GAME_ANALYSE.md, IDEAS.md, later ASSETS.md
   index.html  package.json  vite.config.ts  tsconfig.json  eslint.config.js
   scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/sim/)
   public/         assets (svg, spritesheets, audio)
@@ -339,7 +340,7 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Eerlijke kanttekening:** ik kan geen geschilderde/AI-afbeeldingen genereren. Wel kan ik **pixel-art-sprites schrijven als tekstrasters met een palet** (zie `scripts/pixel/` en `art/pixel/`; een script maakt er PNG's van, zonder dependencies) en **CC0/vrije assets opzoeken** (bijv. Kenney.nl, OpenGameArt; per asset de licentie checken). Downloaden doe ik alleen na jouw akkoord per bestand. Ingewikkelde sprites (zeldzame klanten, helden, gebouwen) kun je beter via een beeldtool of CC0-pakket laten maken; eenvoudige klanten, ingrediënten en meubels lukken in dit formaat.
 - Stap 1 t/m 20: **placeholders** (gekleurde vormen + emoji) zodat spelen niet op art wacht.
 - Stap 21: volledige styling-stap in pixel art, met animaties (zie stap 21 in hoofdstuk 12).
-- Elke gebruikte externe asset komt met bron en licentie in `ASSETS.md`.
+- Elke gebruikte externe asset komt met bron en licentie in `docs/ASSETS.md`.
 - Budget: alle assets samen < 5 MB. Muziek: korte loopbare mp3/ogg (jij levert), < 2 MB per track.
 
 ### i18n
@@ -516,7 +517,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
-- [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `ASSETS.md` bijwerken.
+- [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
 - [ ] **Stap 22: Performance, QA en indienklaar maken.** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
@@ -553,7 +554,7 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 ### Chore: ideeënronde (2026-10-06, `chore-ideas-review`)
-- **Gedaan:** alle punten uit IDEAS.md met de eigenaar doorgenomen (vragen in vier rondes), de besluiten vastgelegd in hoofdstuk 4 ("Besluiten uit de ideeënronde" en "Helden") en in het stappenplan (nieuwe stappen 14c, 14d en 16b; 15 en 16 aangescherpt). IDEAS.md opgeschoond: volledig uitgewerkte ideeën zijn eruit (afspraak eigenaar: wat in SPECS.md staat, gaat uit IDEAS.md); alleen open punten blijven. De hernoeming van SPEC.md naar SPECS.md (door de eigenaar) is vastgelegd en alle verwijzingen zijn bijgewerkt.
+- **Gedaan:** alle punten uit IDEAS.md met de eigenaar doorgenomen (vragen in vier rondes), de besluiten vastgelegd in hoofdstuk 4 ("Besluiten uit de ideeënronde" en "Helden") en in het stappenplan (nieuwe stappen 14c, 14d en 16b; 15 en 16 aangescherpt). IDEAS.md opgeschoond: volledig uitgewerkte ideeën zijn eruit (afspraak eigenaar: wat in SPECS.md staat, gaat uit IDEAS.md); alleen open punten blijven. De hernoeming van SPEC.md naar SPECS.md (door de eigenaar) is vastgelegd, en alle documentatie staat nu in `docs/` (wens eigenaar; CLAUDE.md blijft in de hoofdmap omdat Claude Code hem daar automatisch laadt). Alle verwijzingen zijn bijgewerkt.
 - **Waarom:** de eigenaar wilde eerst samen bepalen wat er van de ideeën in het plan komt, voordat er verder gebouwd wordt. Geen code.
 - **Nog te doen / volgende stap:** stap 14b, Decoraties.
 
