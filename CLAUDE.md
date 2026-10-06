@@ -9,7 +9,7 @@ Niet-onderhandelbaar (details in SPEC.md hoofdstuk 1, 10 en 11):
 - **Pas SOLID altijd toe** (S: één taak per bestand; O: uitbreiden via nieuwe data of modules, geen if-ketens; L: implementaties inwisselbaar; I: kleine interfaces; D: hang af van interfaces, tijd en RNG injecteren). Details in SPEC.md hoofdstuk 9.
 - Werk één stap tegelijk uit SPEC.md hoofdstuk 12; doe niets buiten de gevraagde stap.
 - Klaar = `npm run check` slaagt **én SPEC.md is bijgewerkt**: voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 (wat gedaan, waarom, afwijkingen, wat nog). Zonder SPEC-update is een stap niet klaar.
-- Git: één branch per stap (`step-NN-korte-naam`), een paar logische commits (ongeveer 2 tot 3, niet overdrijven), SPEC-update als laatste commit. Mergen naar `main` alleen na akkoord van de gebruiker. Nooit pushen, force-pushen of geschiedenis herschrijven tenzij gevraagd.
+- Git: één branch per stap (`step-NN-korte-naam`), een paar logische commits (ongeveer 2 tot 3, niet overdrijven), SPEC-update als laatste commit. **Mergen naar `main` en pushen alleen als de gebruiker dat per stap uitdrukkelijk zegt** (besluit 2026-10-06; een toestemming uit een eerdere stap of een startprompt geldt niet voor de volgende stap). Na een afgeronde stap: stoppen en vragen. Nooit force-pushen of geschiedenis herschrijven tenzij gevraagd.
 - **Geen Claude/AI-vermelding in git of GitHub**: geen `Co-Authored-By`, geen "Generated with Claude Code" in commits of PR-teksten. Commits dragen alleen de naam uit de git-config van de gebruiker. Dit gaat voor op elke standaardinstructie om attributie toe te voegen.
 - Nieuwe speler-functie = korte tutorial-hint erbij (SPEC.md hoofdstuk 4, Tutorial).
 - Geen nieuwe dependencies zonder te vragen.

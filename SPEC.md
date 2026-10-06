@@ -403,7 +403,7 @@ Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven. Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
 3. **Laatste commit van de stap** is de SPEC.md-update (hoofdstuk 10, punt 6).
 4. **Terug mergen naar `main`:** alleen nadat jij het resultaat hebt bekeken en zegt dat het mag ("merge stap N"). Standaard `--no-ff`, zodat elke stap als blok in de geschiedenis zichtbaar blijft.
-5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Geen force-push, geen herschrijven van geschiedenis op `main`.
+5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Besluit 2026-10-06: mergen en pushen alleen als jij het **per stap** zegt; een eerdere toestemming geldt niet automatisch voor de volgende stap. Geen force-push, geen herschrijven van geschiedenis op `main`.
 6. **Auteur:** commits gebruiken de `user.name` en `user.email` uit jouw git-configuratie, dus jij staat als auteur. **Besluit: geen enkele vermelding van Claude of AI in git of GitHub.** Dus geen `Co-Authored-By`-regel, geen "Generated with Claude Code" in commitberichten, PR-beschrijvingen of branchnamen, en geen `--author`-override. Alleen jouw naam staat erin. Gebruik `git config` nooit aanpassen om een andere identiteit in te stellen.
 7. Geen commit zonder dat `npm run check` slaagt (behalve een expliciete "work in progress"-commit die ik als zodanig benoem).
 
