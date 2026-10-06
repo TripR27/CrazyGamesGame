@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 11b (Voorkeuren en drankeffecten). **Volgende stap:** 11c (Reputatieniveaus, gates en VIP-klanten).
+**Nu bezig:** niets. **Laatst afgerond:** stap 11c (Reputatieniveaus, gates en VIP-klanten). **Volgende stap:** 12 (Receptenontdekking en receptenboek).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -28,7 +28,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 10b | Offline-voortgang | ✅ | `step-10b-offline` |
 | 11a | Plekken en geleidelijke klanten | ✅ | `step-11a-seats` |
 | 11b | Voorkeuren en drankeffecten | ✅ | `step-11b-effects` |
-| 11c | Reputatieniveaus, gates en VIP-klanten | ⬜ | |
+| 11c | Reputatieniveaus, gates en VIP-klanten | ✅ | `step-11c-reputation` |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
 | 13 | Balans-simulator | ⬜ | |
 | 14 | Kamers en visuele groei | ⬜ | |
@@ -204,7 +204,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, personeel. Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, personeel, VIP. Ze lopen één voor één.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
 
@@ -229,6 +229,16 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Bestellen:** een klant bestelt een drankje dat hij lekker vindt twee keer zo vaak als een ander bekend drankje (`LIKED_ORDER_WEIGHT`). Voorkeuren nu: ridder snelheid en geluk, elf charme, dwerg kracht.
 - Code: getallen in `data/effects.ts` en `data/brewing.ts`; één regel per effect in `systems/effects/bonus.ts` (een nieuw effect is één regel erbij); de fooi in `tip.ts`. Alle getallen zijn placeholders (stap 13).
 - Offline (stap 10b) telt kracht, de verwachte fooi en charme mee, en weegt de bestellingen zoals de klanten ze kiezen. De drinkfase en het aantal plekken tellen offline nog niet mee.
+
+### Reputatieniveaus en VIP-klanten (besluit eigenaar, 2026-10-06; gebouwd in stap 11c)
+
+- **6 niveaus** (`data/reputation/levels.ts`, namen in i18n `reputation.<id>.name`): Shabby Shack (0), Local Haunt (10), Cozy Inn (25), Popular Pub (50), Famous Tavern (100), Legendary Hall (200). Niveau 1 is het eerste. `levelFor`, `levelProgress` en `recipesTaughtUpTo` staan in `systems/reputation/level.ts`.
+- **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau kan recepten leren (`teaches`): niveau 3 Dragon's Hiccup, 4 Moonlight Merlot, 5 Troll's Toll. **Tot stap 12 betekent dat "je kent het recept"**; in stap 12 wordt het "het recept is te ontdekken" (de receptenontdekking bepaalt hoe). De ingrediënten van een nieuwe tier komen op het schap zodra een recept van die tier bekend is. Kamers (stap 14) krijgen ook een niveau-eis.
+- **Bewaker** (`systems/reputation/watch.ts`): leert bij een nieuw niveau de recepten en meldt `reputation:levelUp` (één keer per niveau, ook na een grote sprong, bijvoorbeeld offline). Een save die al voorbij een niveau is, krijgt de recepten stil bij het laden.
+- **HUD:** naast de reputatie de naam van het niveau en een balkje naar het volgende. Bij een nieuw niveau verschijnt 4,5 s een melding met wat erbij komt (nieuwe klant, nieuw recept) (`ui/level-up/`).
+- **VIP-klanten:** gewone klanttypes met `vip: true` en een eigen `reputationBonus` (nu King Grumblebeard: niveau 3, betaalt 3x, +3 reputatie, 30 s geduld). Zodra een VIP open is, is elke nieuwe klant met kans `VIP_SPAWN.chance` (10%) een VIP (`systems/customers/pick-type.ts`). Een VIP bestelt het **duurste bekende drankje**, heeft een kroon in de bubbel en een gouden kleur. Boos vertrekken kost niets. Een nieuwe VIP is alleen data.
+- **Offline** telt niveaus en VIP's mee: de gewone klanten van het niveau en de VIP's naar hun kans.
+- Alle getallen zijn placeholders (stap 13).
 
 ### Receptenboek (wens eigenaar, 2026-10-06; hoort bij stap 12)
 
@@ -272,7 +282,8 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 Ingredient { id, tier, rarity, source: 'shop' | 'dungeon:<id>' }
 Recipe     { id, tier, rarity, ingredients: id[2..3], brewSeconds, basePrice,
              effect: 'strength' | 'speed' | 'luck' | 'charm' }   // naam en hint: i18n-sleutels recipes.<id>.name/.hint
-Customer   { id, minReputation, patienceSeconds, spendMultiplier, likes: effect[] }
+Customer   { id, minLevel, patienceSeconds, spendMultiplier, likes: effect[], vip?, reputationBonus? }
+ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, unlockReputation, cost, slotsAdded, bonus }
 Hero       { id, class, baseStats, hireCost }
@@ -408,7 +419,8 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* een nieuw spel heeft één klant tegelijk, elke plek is één klant extra, de hint start bij genoeg goud, tests slagen.
 - [x] **Stap 11b: Voorkeuren en drankeffecten.** Klantvoorkeuren (`likes`) en de vier effecten (kracht: meer betaald; snelheid: klant is sneller klaar en maakt de plek vrij; geluk: kans op fooi; charme: extra reputatie). Een effect werkt altijd; zit het in de voorkeur van de klant, dan is het dubbel zo sterk. Tutorial-hint: klantvoorkeur.
   *Klaar wanneer:* elk effect is merkbaar bij serveren, een voorkeur verdubbelt het en is zichtbaar (♥), een bediende klant drinkt eerst en maakt dan de plek vrij, de hint start bij de eerste ♥-bestelling, tests slagen.
-- [ ] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
+- [x] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
+  *Klaar wanneer:* niveaus staan in de HUD met een melding bij elk nieuw niveau, klanten en recepten komen per niveau, VIP's verschijnen vanaf hun niveau en vragen het duurste drankje, de hint start bij de eerste VIP, tests slagen.
 - [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
@@ -456,6 +468,21 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 11c: Reputatieniveaus, gates en VIP-klanten (2026-10-06, `step-11c-reputation`)
+- **Gedaan:** (code in `src/data/reputation/`, `src/data/customers/`, `src/systems/reputation/`, `src/systems/customers/pick-type.ts`, `src/systems/offline/earnings.ts`, `src/ui/hud*.ts`, `src/ui/level-up/`, `src/ui/tutorial/speech.ts`, `src/data/tutorial/vip.ts`, `src/data/validate/reputation-table.ts`; tests in `tests/systems/reputation/`, `tests/systems/customers/vip.test.ts`, `tests/data/validate-reputation.test.ts`, `tests/ui/level-up-view-model.test.ts`, `tests/wiring/vip-flow.test.ts`)
+  - **Niveaus, gates en recepten:** zie hoofdstuk 4, Reputatieniveaus en VIP-klanten. Klanttypes hebben `minLevel` in plaats van `minReputation` (de niveaus zijn nu de poort; het datamodel in hoofdstuk 5 is aangepast).
+  - **VIP:** King Grumblebeard, met het duurste bekende drankje, 3x de prijs, +3 reputatie en een kroon in de bubbel. Zonder open VIP wordt er geen kans gegooid, dus bestaande seeds geven dezelfde klanten als voorheen.
+  - **HUD en melding:** niveaunaam met balkje, plus een melding bij elk nieuw niveau.
+  - **Tutorial-hint** (`vip_spot`, `vip_done`, na de personeelsles): start bij de eerste VIP (event `vip:arrived`, of meteen als er al een wacht), wijst hem aan (gids-alias `guide-vip`, tekstparameter `{royal}`), klaar zodra hij zijn drankje krijgt (`vip:served`). Geen aparte les voor niveaus (keuze van de eigenaar); de melding legt het zelf uit.
+  - **Validator:** niveaus moeten bij 0 beginnen en stijgen, en mogen alleen bestaande recepten leren; klanten moeten een bestaand niveau hebben en een reputatiebonus van minstens 0.
+  - Opgesplitst om onder de grenzen te blijven: `startCustomers` uit `createServices` (functie was 42 regels), de spraaktekst van de mascotte uit `tutorial-view.ts` (`speech.ts`).
+  - 24 nieuwe tests (331 totaal).
+- **Waarom (keuzes, afgesproken met de eigenaar):** 6 niveaus met de bestaande drempels van elf en dwerg; een niveau leert nu direct een recept, zodat de speler voor stap 12 al iets nieuws krijgt; VIP's mild (geen straf). VIP's als klanttypes met een vlag in plaats van een aparte lijst: geen nieuwe catalogus, en de offline-berekening en de validator gaan vanzelf mee.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser: de HUD toont "Local Haunt" met een bijna vol balkje bij 24 reputatie; één Slime Sap (charme) gaf 26 reputatie en de melding "Level up! Cozy Inn" met de dwerg, King Grumblebeard en Dragon's Hiccup; de tier-2-ingrediënten kwamen op het schap. Met 7 plekken kwam de koning in het goud met "👑 Dragon's Hiccup", en de VIP-les wees hem aan. Klanten bestelden daarna een mix van de drie drankjes met ♥ waar het hoort. Geen consolefouten.
+- **Afwijkingen van het plan:** het receptenboek en echte ontdekking blijven bij stap 12. Alle tier-2-ingrediënten komen tegelijk op het schap zodra het eerste tier-2-recept bekend is (Troll Sweat staat er dus al voordat Troll's Toll bekend is); dat past bij ontdekken in stap 12.
+- **Nu te proberen:** speel tot 10 en 25 reputatie: je ziet de meldingen en de nieuwe klanten. Vanaf Cozy Inn komt af en toe de koning; serveer hem Dragon's Hiccup (Fire Pepper en Wild Honey) voor 90 goud.
+- **Nog te doen / volgende stap:** stap 12, Receptenontdekking en receptenboek. Voor stap 13: drempels, VIP-kans en prijzen afstellen.
 
 ### Stap 11b: Voorkeuren en drankeffecten (2026-10-06, `step-11b-effects`)
 - **Gedaan:** (code in `src/data/effects.ts`, `src/systems/effects/`, `src/systems/customers/drinking.ts`, `src/systems/serving/`, `src/data/tutorial/likes.ts`, `src/scene/customers/`, `src/scene/effects/bonus-lines.ts`, `src/i18n/en/effects.ts`; tests in `tests/systems/effects/`, `tests/systems/customers/drinking.test.ts`, `tests/systems/serving/serve-effects.test.ts`, `tests/wiring/likes-flow.test.ts` en aangepaste bestaande tests)
