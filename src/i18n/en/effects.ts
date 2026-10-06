@@ -5,4 +5,8 @@ export const effects: Messages = {
   'effects.liked_order': '♥ {drink}',
   'effects.tip': '+{n} tip!',
   'effects.reputation': '+{n} reputation',
+  'effects.strength.name': 'Strength: pays more',
+  'effects.speed.name': 'Speed: drinks faster',
+  'effects.luck.name': 'Luck: may tip',
+  'effects.charm.name': 'Charm: more reputation',
 };

@@ -2,6 +2,7 @@ import type { EventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import type { Num } from '@/core/numbers';
 import type { Rng } from '@/core/rng';
+import type { RecipeDef } from '@/data/recipes';
 import type { UpgradeDef } from '@/data/upgrades';
 import { addIngredient, emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
 import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
@@ -18,6 +19,9 @@ export interface PlayerActions {
   /** The shop panel was opened. Announced so the tutorial can follow along. */
   openShop(): void;
   closeShop(): void;
+  /** The recipe book was opened or closed. Announced so the tutorial can follow along. */
+  openBook(): void;
+  closeBook(): void;
 }
 
 export interface PlayerActionDeps {
@@ -33,6 +37,8 @@ export interface PlayerActionDeps {
   getSellMultiplier(): Num;
   /** Read fresh on every click, so a newly discovered recipe works immediately. */
   getKnownRecipeIds(): readonly string[];
+  /** Recipes the player could discover now by brewing them (none when left out). */
+  getDiscoverable?(): readonly RecipeDef[];
 }
 
 export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
@@ -41,7 +47,8 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
     clickIngredient(ingredientId) {
       bus.emit('ingredient:clicked', { id: ingredientId });
       const known = catalog.recipes.filter((r) => deps.getKnownRecipeIds().includes(r.id));
-      for (const event of addIngredient(station, ingredientId, known, rng)) publishBrewEvent(bus, event);
+      const discoverable = deps.getDiscoverable?.() ?? [];
+      for (const event of addIngredient(station, ingredientId, known, rng, discoverable)) publishBrewEvent(bus, event);
     },
     clickCauldron() {
       emptyCauldron(station);
@@ -63,6 +70,12 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
     },
     closeShop() {
       bus.emit('shop:closed', {});
+    },
+    openBook() {
+      bus.emit('book:opened', {});
+    },
+    closeBook() {
+      bus.emit('book:closed', {});
     },
   };
 }

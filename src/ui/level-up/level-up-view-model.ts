@@ -17,14 +17,15 @@ export function toLevelUpView(
 ): LevelUpView {
   const reached = levels[level - 1];
   if (reached === undefined) return { title: '', lines: [] };
-  const name = (domain: 'customers' | 'recipes', id: string): string => t(textKey(domain, id, 'name'));
+  const name = (id: string): string => t(textKey('customers', id, 'name'));
   return {
     title: t('reputation.level_up', { level: t(textKey('reputation', reached.id, 'name')) }),
     lines: [
       ...customerTypes
         .filter((c) => c.minLevel === level)
-        .map((c) => t('reputation.new_customer', { name: name('customers', c.id) })),
-      ...(reached.teaches ?? []).map((id) => t('reputation.new_recipe', { name: name('recipes', id) })),
+        .map((c) => t('reputation.new_customer', { name: name(c.id) })),
+      // Recipe names stay secret: they still have to be discovered.
+      ...((reached.unlocks ?? []).length > 0 ? [t('reputation.new_recipes', { n: reached.unlocks?.length ?? 0 })] : []),
     ],
   };
 }

@@ -4,8 +4,8 @@ import type { GameEvents } from '@/core/game-events';
 import { createStore } from '@/core/store';
 import { watchReputationLevels, type LevelState } from '@/systems/reputation';
 
-function setup(reputation: number, recipesDiscovered: string[] = []) {
-  const store = createStore<LevelState>({ reputation, recipesDiscovered });
+function setup(reputation: number) {
+  const store = createStore<LevelState>({ reputation });
   const bus = createEventBus<GameEvents>();
   const levelUps = vi.fn();
   const saves = vi.fn();
@@ -13,38 +13,30 @@ function setup(reputation: number, recipesDiscovered: string[] = []) {
   bus.on('saveRequested', saves);
   watchReputationLevels(store, bus);
   const gain = (n: number): void => store.update((s) => void (s.reputation += n));
-  return { store, levelUps, saves, gain };
+  return { levelUps, saves, gain };
 }
 
 describe('watching reputation levels', () => {
-  it('announces a new level once, and teaches its recipes', () => {
-    const { store, levelUps, gain } = setup(20);
+  it('announces a new level once, exactly at the threshold', () => {
+    const { levelUps, saves, gain } = setup(20);
     gain(4);
     expect(levelUps).not.toHaveBeenCalled();
-    gain(1); // 25: level 3 teaches Dragon's Hiccup
+    gain(1); // 25: Cozy Inn
     expect(levelUps).toHaveBeenCalledWith({ level: 3 });
-    expect(store.getState().recipesDiscovered).toContain('dragons_hiccup');
+    expect(saves).toHaveBeenCalled();
     gain(10);
     expect(levelUps).toHaveBeenCalledTimes(1);
   });
 
-  it('announces every level on the way after a big jump, and asks for a save', () => {
-    const { store, levelUps, saves, gain } = setup(0);
+  it('announces every level on the way after a big jump', () => {
+    const { levelUps, gain } = setup(0);
     gain(120);
     expect(levelUps.mock.calls.map(([e]) => e.level)).toEqual([2, 3, 4, 5]);
-    expect(store.getState().recipesDiscovered).toEqual(['dragons_hiccup', 'moonlight_merlot', 'trolls_toll']);
-    expect(saves).toHaveBeenCalled();
   });
 
-  it('catches up quietly with a save that is already past a level, without a message', () => {
-    const { store, levelUps } = setup(60, ['slime_sap']);
-    expect(store.getState().recipesDiscovered).toEqual(['slime_sap', 'dragons_hiccup', 'moonlight_merlot']);
+  it('says nothing about a level the save had already reached', () => {
+    const { levelUps, gain } = setup(60);
+    gain(1);
     expect(levelUps).not.toHaveBeenCalled();
-  });
-
-  it('never teaches a recipe twice', () => {
-    const { store, gain } = setup(0, ['dragons_hiccup']);
-    gain(30);
-    expect(store.getState().recipesDiscovered.filter((id) => id === 'dragons_hiccup')).toHaveLength(1);
   });
 });

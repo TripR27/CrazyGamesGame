@@ -37,6 +37,8 @@ export interface GameEvents {
   /** The player reached a new reputation level (1 is the first); fired once for every level on the way. */
   'reputation:levelUp': { level: number };
   'ingredient:clicked': { id: string };
+  /** The player brewed a recipe for the first time ("Eureka!"); it is known from now on. */
+  'recipe:discovered': { recipeId: string };
   'brew:started': { recipeId: string };
   'brew:done': { recipeId: string };
   'brew:notice': { notice: BrewNotice; messageKey: string };
@@ -53,4 +55,7 @@ export interface GameEvents {
   /** The shop panel was opened or closed (the tutorial follows this). */
   'shop:opened': Record<string, never>;
   'shop:closed': Record<string, never>;
+  /** Same for the recipe book. */
+  'book:opened': Record<string, never>;
+  'book:closed': Record<string, never>;
 }

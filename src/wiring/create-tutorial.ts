@@ -8,6 +8,7 @@ import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
+import { createAlreadyHolds } from './tutorial-already-holds';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
 
 export interface TutorialDeps {
@@ -41,15 +42,7 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
   let shopOpen = false;
   bus.on('shop:opened', () => void (shopOpen = true));
   bus.on('shop:closed', () => void (shopOpen = false));
-  // A situation that already holds counts as the start of a lesson: a customer who sat down before the
-  // tutorial (re)started, or gold that was already enough for an upgrade (the event would not fire again).
-  const alreadyHolds = (event: TutorialEvent): boolean =>
-    (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null) ||
-    (event === 'seats:affordable' && affordableSeats() !== null) ||
-    (event === 'staff:affordable' && affordableStaff() !== null) ||
-    (event === 'likes:ordered' && waitingCustomers(floor).some((c) => c.liked)) ||
-    (event === 'vip:arrived' && waitingCustomers(floor).some((c) => c.vip));
-  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, alreadyHolds);
+  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds(store, floor));
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
   bus.on('tick', ({ deltaMs }) => machine.onTick(deltaMs));

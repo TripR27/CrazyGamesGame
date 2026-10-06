@@ -33,6 +33,9 @@ export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () =>
       const slot = CUSTOMER_SLOTS[seat];
       if (slot !== undefined) floats.show(slot.x, slot.y - LINE_ABOVE_SLOT, line(messageKey, recipeId), { color: BAD_COLOR });
     }),
+    bus.on('recipe:discovered', ({ recipeId }) => {
+      floats.show(CAULDRON.x + CAULDRON.w / 2, CAULDRON.y - 60, line('book.eureka', recipeId), { color: GOLD_COLOR, size: 26 });
+    }),
     bus.on('brew:notice', ({ messageKey }) => {
       floats.show(CAULDRON.x + CAULDRON.w / 2, CAULDRON.y - 60, line(messageKey), { color: BAD_COLOR });
     }),

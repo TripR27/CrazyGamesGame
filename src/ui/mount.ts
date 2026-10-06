@@ -7,13 +7,15 @@ import type { SideLayout } from './side-layout';
 import { mountHud, type HudSource } from './hud';
 import { mountLevelUpToast } from './level-up/level-up-toast';
 import type { LevelUpView } from './level-up/level-up-view-model';
+import { mountRecipeBook, type BookSource } from './recipe-book/book-view';
 import { mountShop, type ShopSource } from './shop/shop-view';
+import { createSidePanels } from './side-panels';
 import { mountWelcomeBack } from './welcome/welcome-back';
 import { mountTutorial, type TutorialUiSource } from './tutorial/tutorial-view';
 
 export interface UiServices {
-  source: HudSource & ShopSource;
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop' | 'closeShop'>;
+  source: HudSource & ShopSource & BookSource;
+  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop' | 'closeShop' | 'openBook' | 'closeBook'>;
   tutorial: TutorialUiSource;
   targets: TargetRegistry;
   /** How much room a side panel takes next to the game. */
@@ -31,7 +33,9 @@ export function mountUi(root: HTMLElement, services: UiServices): void {
   const { source, actions, tutorial, targets, layout, welcome, onFit, onLevelUp } = services;
   fitToViewport(root, layout, onFit);
   mountHud(root, source, targets);
-  mountShop({ root, layout }, source, actions, targets);
+  const panels = createSidePanels(layout);
+  mountShop({ root, panels }, source, actions, targets);
+  mountRecipeBook({ root, panels }, source, actions, targets);
   mountTutorial(root, tutorial, targets);
   mountLevelUpToast(root, onLevelUp);
   mountWelcomeBack(root, welcome);

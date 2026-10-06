@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { ReputationLevel } from '@/data/reputation/levels';
-import { levelFor, levelProgress, recipesTaughtUpTo } from '@/systems/reputation';
+import { levelFor, levelProgress, recipesUnlockedUpTo } from '@/systems/reputation';
 
 const LEVELS: readonly ReputationLevel[] = [
   { id: 'one', minReputation: 0 },
-  { id: 'two', minReputation: 10, teaches: ['a'] },
-  { id: 'three', minReputation: 30, teaches: ['b', 'c'] },
+  { id: 'two', minReputation: 10, unlocks: ['a'] },
+  { id: 'three', minReputation: 30, unlocks: ['b', 'c'] },
 ];
 
 describe('reputation levels', () => {
@@ -25,8 +25,8 @@ describe('reputation levels', () => {
   });
 
   it('list the recipes every level up to this one teaches', () => {
-    expect(recipesTaughtUpTo(1, LEVELS)).toEqual([]);
-    expect(recipesTaughtUpTo(3, LEVELS)).toEqual(['a', 'b', 'c']);
+    expect(recipesUnlockedUpTo(1, LEVELS)).toEqual([]);
+    expect(recipesUnlockedUpTo(3, LEVELS)).toEqual(['a', 'b', 'c']);
   });
 
   it('use the game levels by default: the elf level at 10, the dwarf level at 25', () => {

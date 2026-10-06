@@ -21,6 +21,8 @@ export interface BrewStation {
 
 /** What happened because of a player action or a tick; published on the bus by the caller. */
 export type BrewEvent =
+  /** The player brewed a recipe they did not know yet: it is theirs now. */
+  | { kind: 'discovered'; recipeId: string }
   | { kind: 'started'; recipeId: string }
   | { kind: 'done'; recipeId: string }
   | { kind: 'notice'; notice: BrewNotice; messageKey: string };

@@ -8,22 +8,22 @@ import type { Store } from '@/core/store';
 import { BREWING } from '@/data/brewing';
 import { customers } from '@/data/customers';
 import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
+import { recipes, type RecipeDef } from '@/data/recipes';
 import { upgrades } from '@/data/upgrades';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { createPlayerActions } from '@/systems/actions';
 import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
-import { createFloor, startCustomerSystem, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
+import { createFloor } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
+import { discoverableRecipes, recordDiscoveries } from '@/systems/recipes';
 import { watchReputationLevels } from '@/systems/reputation';
 import { createOffline, type OfflineServices } from './create-offline';
 import { createTutorial, type TutorialServices } from './create-tutorial';
+import { startCustomers } from './start-customers';
 import { startStaffWork } from './start-staff';
 import { syncStationStats } from './sync-station';
 import { watchShop } from './watch-shop';
-
-const TUTORIAL_MAX_CUSTOMERS = 1;
 
 export interface WiringDeps {
   store: Store<GameState>;
@@ -41,32 +41,6 @@ export interface GameWorld {
   targets: TargetRegistry;
 }
 
-interface CustomerWiring extends Pick<WiringDeps, 'store' | 'bus' | 'rng'> {
-  floor: CustomerFloor;
-  catalog: CustomerCatalog;
-}
-
-/** Runs the customers: as many as the player has seats, and while a lesson is on screen just one. */
-function startCustomers({ store, bus, rng, floor, catalog }: CustomerWiring, inLesson: () => boolean): void {
-  // The player starts with one seat and buys more: that many customers at most.
-  const seats = (): number => Math.floor(getMultipliers(store.getState()).seats.toNumber());
-  startCustomerSystem({
-    floor,
-    bus,
-    rng,
-    catalog,
-    getContext: () => ({
-      reputation: store.getState().reputation,
-      unlockedRecipeIds: store.getState().recipesDiscovered,
-      // While a lesson is on screen: one customer at a time, who does not lose patience, so it can always
-      // point at the right person and nobody leaves in the middle of a lesson. A lesson that has not
-      // started yet (waiting for its moment) does not hold the game back.
-      maxCustomers: Math.min(seats(), inLesson() ? TUTORIAL_MAX_CUSTOMERS : Infinity),
-      freezePatience: inLesson(),
-    }),
-  });
-}
-
 /**
  * The composition root for the game world: builds the runtime objects (customer floor, cauldron and bar),
  * starts the systems that run on the tick, and returns what the scenes need.
@@ -76,8 +50,10 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
   const floor = createFloor(CUSTOMER_SLOTS.length);
   const station = createStation(BREWING.storageCapacity);
   syncStationStats(store, station);
-  // Reaching a reputation level teaches its recipes; done first, so customers can order them at once.
+  // Announces each new reputation level (the HUD shows a message).
   watchReputationLevels(store, bus);
+  recordDiscoveries(store, bus);
+  const discoverable = (): readonly RecipeDef[] => discoverableRecipes(store.getState(), recipes);
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
   const tutorial = createTutorial({ store, bus, floor, station });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
@@ -90,9 +66,11 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
     upgradeStore: store,
     upgradeDefs: upgrades,
     getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
+    getDiscoverable: discoverable,
   });
+  // The shelf also offers what a discoverable recipe needs, otherwise it could never be found.
   const getShelf = (): readonly string[] =>
-    shelfIngredients(ingredients, recipes.filter((r) => knownIds().includes(r.id))).map((i) => i.id);
+    shelfIngredients(ingredients, [...recipes.filter((r) => knownIds().includes(r.id)), ...discoverable()]).map((i) => i.id);
   const targets = createTargetRegistry();
   const offline = createOffline({ store, bus, clock, catalog });
   return { scene: { bus, floor, station, actions, getShelf, targets }, tutorial, offline, targets };

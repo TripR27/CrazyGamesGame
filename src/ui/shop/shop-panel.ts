@@ -7,7 +7,7 @@ import { createAmountPicker } from './amount-picker';
 import type { UpgradeRow } from './upgrade-row';
 
 export function buildPanel(onPick: (amount: BuyAmount) => void) {
-  const panel = createEl('div', 'shop-panel');
+  const panel = createEl('div', 'side-panel shop-panel');
   panel.hidden = true;
   const list = createEl('div', 'shop-list');
   const picker = createAmountPicker(onPick);

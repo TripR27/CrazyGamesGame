@@ -1,4 +1,5 @@
 import { basicsLesson } from './basics';
+import { bookLesson } from './book';
 import { likesLesson } from './likes';
 import { seatsLesson } from './seats';
 import { staffLesson } from './staff';
@@ -14,6 +15,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...likesLesson,
   ...upgradeLesson,
   ...seatsLesson,
+  ...bookLesson,
   ...staffLesson,
   ...vipLesson,
 ];

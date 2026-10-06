@@ -24,7 +24,7 @@ export function levelProgress(reputation: number, levels: readonly ReputationLev
   return { level, current, next, fraction };
 }
 
-/** Every recipe the levels up to and including `level` teach, in level order. */
-export function recipesTaughtUpTo(level: number, levels: readonly ReputationLevel[] = REPUTATION_LEVELS): string[] {
-  return levels.slice(0, level).flatMap((l) => l.teaches ?? []);
+/** Every recipe the levels up to and including `level` unlock for discovery, in level order. */
+export function recipesUnlockedUpTo(level: number, levels: readonly ReputationLevel[] = REPUTATION_LEVELS): string[] {
+  return levels.slice(0, level).flatMap((l) => l.unlocks ?? []);
 }
