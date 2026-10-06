@@ -1,9 +1,16 @@
 import type { EventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
+import type { PlayerActions } from '@/systems/actions';
+import type { BrewStation } from '@/systems/brewing';
 import type { CustomerFloor } from '@/systems/customers';
 
-/** What the scenes may read: the event bus and the live customer floor. Handed in from main.ts. */
+/** What the scenes may read and call. Handed in from the composition root (src/wiring). */
 export interface SceneServices {
   bus: EventBus<GameEvents>;
   floor: CustomerFloor;
+  station: BrewStation;
+  /** The only way the scene changes the game: mouse clicks as actions. */
+  actions: PlayerActions;
+  /** Ingredient ids to show on the shelf; read again every frame so new ones appear. */
+  getShelf(): readonly string[];
 }

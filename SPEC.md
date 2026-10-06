@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 6 (Klanten). **Volgende stap:** 7 (Brouwen en serveren, de eerste speelbare versie).
+**Nu bezig:** niets. **Laatst afgerond:** stap 7 (Brouwen en serveren, eerste speelbare versie). **Volgende stap:** 8 (Interactieve tutorial).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -21,7 +21,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 4 | i18n + data-schema | ✅ | `step-04-i18n-data-schema` |
 | 5 | Taverne-scene (placeholder) | ✅ | `step-05-tavern-scene` |
 | 6 | Klanten | ✅ | `step-06-customers` |
-| 7 | Brouwen en serveren | ⬜ | |
+| 7 | Brouwen en serveren | ✅ | `step-07-brew-and-serve` |
 | 8 | Interactieve tutorial (basis) | ⬜ | |
 | 9 | Economie en upgrades | ⬜ | |
 | 10 | Personeel en idle/offline | ⬜ | |
@@ -148,6 +148,7 @@ crazyGamesGame/
                             heroes, expeditions, prestige, offline, achievements, tutorial
     scene/                  boot, tavern, sprites/ (klant, ketel, held), effects
     ui/                     hud, shop, recipe-book, heroes, prestige, settings, toast, tutorial/
+    wiring/                 composition root: bouwt de runtime-objecten, start de systemen, levert services aan de scenes
     runtime/                browser-koppelingen voor core (loop-driver: timers en tab-zichtbaarheid)
     platform/               crazygames (SDK-wrapper), mock, ads, gameplay-state
     audio/                  sfx, music, mute-logic
@@ -359,7 +360,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* scene schaalt correct in venster, HUD toont state-waarden.
 - [x] **Stap 6: Klanten.** `systems/customers` (spawn-ritme, geduld, bestelling kiezen op basis van ontgrendelde recepten) + sprites die binnenlopen, bestelling tonen, wegfeesten/vertrekken. Objectpool.
   *Klaar wanneer:* klanten komen en gaan; tests voor spawn en geduld.
-- [ ] **Stap 7: Brouwen en serveren (eerste speelbare versie).** Klik op ingrediënten → ketel → brouwbalk → serveren aan wachtende klant → goud + reputatie + zwevende "+goud". Absurde klantreacties (i18n).
+- [x] **Stap 7: Brouwen en serveren (eerste speelbare versie).** Klik op ingrediënten → ketel → brouwbalk → serveren aan wachtende klant → goud + reputatie + zwevende "+goud". Absurde klantreacties (i18n).
   *Klaar wanneer:* alle handelingen werken. **Mijlpaal: is dit leuk?** (De uitleg komt in stap 8.)
 - [ ] **Stap 8: Interactieve tutorial (framework + basis).** Zie hoofdstuk 4, Tutorial. Tutorial-statemachine (`systems/tutorial`), target-register, spotlight/pijl/spraakbel-UI, eerste tutorial: ingrediënt klikken → ketel → wachten → serveren → eerste goud. Overslaan-knop, opslaan van voortgang, opnieuw afspelen via debug-commando (Settings-knop komt in stap 18).
   *Klaar wanneer:* een nieuwe speler die niets weet, kan zonder tekstmuur of apart scherm de basis doen; tutorial overleeft herladen; vastlopen is onmogelijk (verkeerde volgorde of overslaan breekt niets); tests voor de statemachine.
@@ -417,6 +418,30 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 7: Brouwen en serveren (2026-10-06, `step-07-brew-and-serve`)
+- **Gedaan:** (code in `src/systems/brewing|serving|actions/`, `src/scene/brewing|effects/`, `src/wiring/`, `src/data/`; tests in `tests/systems/` en `tests/data/`)
+  - **De speelloop:** klik een ingrediënt van de plank; het gaat in de ketel (bolletjes boven de ketel). Past de combinatie precies op een **bekend** recept, dan start het brouwen meteen (brouwbalk). Een combinatie die nooit een bekend recept kan worden (fout paar, dubbel ingrediënt, ingrediënt zonder recept) **mislukt** direct: de ketel leegt en er verschijnt een grappige zin. Klik op de ketel om de inhoud weg te gooien (niet tijdens brouwen). Een klaar drankje komt op de bar (3 plekken). Klik op een wachtende klant: staat zijn drankje klaar, dan krijgt hij het en betaalt `basisprijs × spendMultiplier` (hele munten, minimaal 1) en geeft +1 reputatie. Verkeerd drankje of niets klaar: de klant weigert met een zin en schudt, en er verandert niets.
+  - **Systemen** (puur TS): `brewing/` (`match.ts`, `add-ingredient.ts`, `advance.ts`, `shelf.ts`, `station.ts`, `system.ts`), `serving/` (`serve.ts`, `payout.ts`), `actions/player-actions.ts` (`clickIngredient`, `clickCauldron`, `clickCustomer`: de enige weg waarlangs de scene het spel verandert) en `feedback.ts` (kiest een zin uit een pool met de rng).
+  - **Plank:** toont de winkelingrediënten tot de hoogste tier van de bekende recepten (nu dus de 3 van tier 1). Hogere tiers verschijnen zodra recepten bekend worden (stap 12).
+  - **Nieuwe bus-events:** `ingredient:clicked`, `brew:started`, `brew:done`, `brew:notice`, `customer:served`, `customer:refused` (de eerste vier zijn ook de haken voor de tutorial van stap 8).
+  - **Data:** `data/brewing.ts` (`BREWING`: max 3 ingrediënten, 3 plekken op de bar; `SERVING`: reputatie per bediening), `data/feedback.ts` (zinnenpools: served 4, wrong 4, nothing 4, fizzle 3, full 2, busy 2) en 19 zinnen in `i18n/en/feedback.ts` met `{drink}` (absurde toon).
+  - **Validator:** nieuwe tabel `feedback` (alle zinnen van elke pool moeten bestaan; tekstvelden per item) en een regel dat **geen recept een deel van een groter recept is** (anders start brouwen te vroeg).
+  - **Scene:** `brewing/shelf-view.ts`, `cauldron-view.ts`, `ready-view.ts`, `ingredient-look.ts`, `effects/floating-text.ts` (pool) en `feedback-layer.ts`, klikbare klanten in `customers/`, en `sprites/shelf.ts`. De losse mokken op de bar zijn vervangen door de drankjes van de ready view.
+  - **Bedrading:** `wiring/create-services.ts` bouwt floor, station, systemen en acties; `main.ts` blijft kort. `SceneServices` heeft nu ook `station`, `actions` en `getShelf`.
+  - 38 nieuwe tests (156 totaal): matchen, brouwregels (inclusief bezig, vol, mislukken), timer en bus, ketel legen, plank, uitbetaling, serveren (goed, fout, niets klaar, verdwenen klant), een volledige ronde via de bus, de validator en de layout van plank en bar.
+- **Waarom (keuzes):**
+  - **Auto-start bij een volledig recept** en **meteen mislukken** zodra een combinatie niets meer kan worden: weinig klikken en direct feedback ("5 seconden tot plezier"). De validatieregel over deelrecepten maakt dit veilig.
+  - **Klik op de klant = serveren** (het systeem zoekt zelf het juiste drankje op de bar): minste klikken en idle-vriendelijk. Een fout drankje wordt geweigerd in plaats van met korting geaccepteerd; dat is duidelijker.
+  - Ingrediënten zijn nu **gratis** en onbeperkt; de economie komt in stap 9. Mislukken kost dus niets behalve tijd.
+  - Ketel, inhoud en bar zijn runtime en worden niet opgeslagen (net als de klanten): bij laden begint de ketel leeg. Eenvoudig, en je verliest hooguit een paar drankjes.
+  - De systemen kiezen de zinnen (`messageKey` in het event) en de scene vertaalt ze; zo zijn ze testbaar met een vaste rng en blijft de tekst in i18n.
+  - `shelfIngredients` toont alleen nuttige ingrediënten, zodat een nieuwe speler niet op `Fire Pepper` klikt en alleen mislukkingen ziet.
+- **Gemeten / gecontroleerd:** `npm run check` en `npm run build` slagen, geen bestand boven 100 regels. Bundel 372 kB gzip JS. In de browser (schone tab, geen console-fouten): slijm + honing starten Slime Sap, de brouwbalk loopt, het drankje staat met naam op de bar, klik op de klant geeft goud 8 en reputatie 1 met "+8" en een absurde zin; fout drankje geeft "That is not Glowcap Stout. That is a cry for help." en laat alles staan; slijm + glowcap mislukt met een zin; een derde klik tijdens het brouwen geeft "One brew at a time. The cauldron is shy."
+- **Een echte bug door de tests gevonden en opgelost:** een dubbel ingrediënt (slijm + slijm) werd als `slime_sap` herkend. `matchRecipe` weigert nu dubbele ingrediënten.
+- **Afwijkingen van het plan:** geen. Een tutorial-hint ontbreekt bewust: de uitleg is stap 8 (zoals in het plan). De bubbel van klanten bij tafel 2 hangt deels over de ketel; dat is een placeholder-layoutkwestie voor stap 14 en 21.
+- **Nu te proberen:** `npm run dev`, open http://localhost:5173. Klik op **Swamp Slime** en **Wild Honey** (Slime Sap) of **Glowcap Mushroom** en **Wild Honey** (Glowcap Stout), wacht een paar seconden, en klik dan op de klant die dat drankje bestelde. Probeer ook een verkeerde combinatie, een verkeerd drankje en klikken terwijl de ketel bezig is. **Mijlpaal: is dit leuk?** Let op: gaat het te traag of te snel, en is het duidelijk wat je moet doen zonder uitleg?
+- **Nog te doen / volgende stap:** stap 8, Interactieve tutorial: statemachine in `systems/tutorial`, doelenregister voor DOM en Phaser, spotlight/pijl/spraakbel, en de eerste tutorial (ingrediënt klikken, ketel, wachten, serveren, eerste goud). De bus-events `ingredient:clicked`, `brew:done` en `customer:served` zijn daarvoor al klaar.
 
 ### Stap 6: Klanten (2026-10-06, `step-06-customers`)
 - **Gedaan:** (code in `src/systems/customers/`, `src/scene/customers/`, `src/core/`, `src/data/`; tests in `tests/systems/customers/` en `tests/core/`)

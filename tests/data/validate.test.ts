@@ -5,6 +5,7 @@ import type { RecipeDef } from '@/data/recipes';
 import type { UpgradeDef } from '@/data/upgrades';
 import {
   customerTable,
+  feedbackTable,
   ingredientTable,
   recipeTable,
   upgradeTable,
@@ -52,6 +53,17 @@ describe('validateContent', () => {
   it('reports two recipes with the same combination, whatever the order', () => {
     const out = problems(...base(), recipeTable([rec('r1'), rec('r2', { ingredients: ['b', 'a'] })]));
     expect(out).toEqual(['recipes: two recipes share the combination a+b']);
+  });
+
+  it('reports a recipe that is a part of a bigger recipe, since it could never be finished', () => {
+    const big = rec('big', { ingredients: ['a', 'b', 'c'] });
+    const out = problems(...base(), ingredientTable([ing('c')]), recipeTable([rec('small'), big]));
+    expect(out).toContain('recipes: recipe small is a part of recipe big');
+  });
+
+  it('reports missing feedback lines', () => {
+    const out = validateContent((k) => k === 'feedback.pool.1', [feedbackTable([{ id: 'served', lines: 2 }])]);
+    expect(out).toEqual(['missing translation key feedback.served.1', 'missing translation key feedback.served.2']);
   });
 
   it('reports invalid numbers and unknown effects or rarities', () => {
