@@ -22,3 +22,8 @@ export function createInitialState(now: number): GameState {
     reputation: 0,
   };
 }
+
+/** Remember when the player was last active; offline progress is computed from this. */
+export function touchLastSeen(state: GameState, now: number): void {
+  state.meta.lastSeenAt = now;
+}
