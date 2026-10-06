@@ -16,17 +16,17 @@
 }
 .shop-button:hover { background: #ffd865; }
 
-/* A column over the whole right side of the screen; the Shop button stays on top as the on/off switch. */
+/* A column on the right side of the window. The game view shrinks to make room (see ui/side-layout.ts),
+   so serving keeps working while the shop is open. Its width is set from code. */
 .shop-panel {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 380px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding: 72px 14px 14px;
+  padding: 14px;
   border-left: 4px solid #5e3a18;
   background: #fff7e0;
   color: #3b2410;

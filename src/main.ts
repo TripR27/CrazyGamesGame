@@ -12,7 +12,9 @@ import { createSaveManager } from '@/save/save-manager';
 import { startAutosave } from '@/runtime/autosave-driver';
 import { registerDebugCommands } from '@/runtime/debug-commands';
 import { startLoopDriver } from '@/runtime/loop-driver';
+import { bindGameViewport } from '@/ui/game-viewport';
 import { mountUi } from '@/ui/mount';
+import { createSideLayout } from '@/ui/side-layout';
 import { createServices } from '@/wiring/create-services';
 
 const clock = systemClock;
@@ -34,6 +36,19 @@ const world = createServices({ store, bus, rng: systemRng });
 startLoopDriver(ticker);
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
-createGame('game', world.scene);
+const layout = createSideLayout();
+const game = createGame('game', world.scene);
+bindGameViewport(document.getElementById('game') as HTMLElement, layout, () => {
+  // Phaser only re-reads the size of its container on a window resize, so ask for it explicitly.
+  game.scale.getParentBounds();
+  game.scale.refresh();
+});
 registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
-mountUi(document.getElementById('ui-root') as HTMLElement, { source: store, actions: world.scene.actions, tutorial: world.tutorial, targets: world.targets });
+mountUi(document.getElementById('ui-root') as HTMLElement, {
+  source: store,
+  actions: world.scene.actions,
+  tutorial: world.tutorial,
+  targets: world.targets,
+  side: document.getElementById('side-root') as HTMLElement,
+  layout,
+});
