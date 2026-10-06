@@ -23,6 +23,11 @@ export default tseslint.config(
     rules: { 'no-console': 'off' },
   },
   {
+    // describe() blocks are long by nature; file length is still guarded.
+    files: ['tests/**/*.ts'],
+    rules: { 'max-lines-per-function': 'off' },
+  },
+  {
     // Game logic must stay free of Phaser, DOM and presentation layers.
     files: ['src/core/**/*.ts', 'src/systems/**/*.ts', 'src/data/**/*.ts'],
     rules: {
