@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 13c (Ingrediënten in de winkel). **Volgende stap:** 14 (Kamers en visuele groei).
+**Nu bezig:** niets (stap 14a wacht op akkoord om te mergen). **Laatst afgerond:** stap 14a (Kamers). **Volgende stap:** 14b (Decoraties).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -33,7 +33,8 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 13 | Balans-simulator | ✅ | `step-13-balance-simulator` |
 | 13b | Speelbaarheid (UX-ronde 1) | ✅ | `step-13b-ux` |
 | 13c | Ingrediënten in de winkel | ✅ | `step-13c-ingredients` |
-| 14 | Kamers en visuele groei | ⬜ | |
+| 14a | Kamers (bovenverdieping) | ✅ | `step-14a-rooms` |
+| 14b | Decoraties (goud-sink) | ⬜ | |
 | 15 | Helden | ⬜ | |
 | 16 | Expedities en kerkers | ⬜ | |
 | 17 | Prestige | ⬜ | |
@@ -206,7 +207,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP. Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
@@ -221,7 +222,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 ### Klanteninstroom en plekken (besluit eigenaar, 2026-10-06; gebouwd in stap 11a)
 
 - Klanten komen **geleidelijk**: aan het begin niet meteen veel en niet snel achter elkaar. De eerste klant komt na 3 seconden (`SPAWNING.firstDelayMs`), daarna gemiddeld elke 12 seconden, korter met reputatie (2% van de basis per punt, nooit onder 3 s). Een vrijgekomen plek wordt niet meteen gevuld: de volgende klant heeft minstens `refillDelayMs` (2,5 s) nodig om binnen te lopen.
-- De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden gekocht met de upgrade **Extra Seat** (stat `seats`, basis 1, +1 per niveau, kosten 40 met groei 1,8, max 6 niveaus). De 7 klantplekken van de scene (`CUSTOMER_SLOTS`) zijn de bovengrens tot kamers (stap 14) er plekken bij zetten; een test bewaakt dat de upgrades die grens niet overschrijden.
+- De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden gekocht met de upgrade **Extra Seat** (stat `seats`, basis 1, +1 per niveau, kosten 40 met groei 1,8, max 6 niveaus). De 7 klantplekken beneden (`CUSTOMER_SLOTS`) zijn de bovengrens van Extra Seat; een test bewaakt dat. Kamers (stap 14a) zetten er plekken bóven bij (zie Kamers).
 - `maxCustomers = min(plekken, tutorialgrens)` staat in `wiring/create-services.ts`; alle getallen staan in `data/customers/spawning.ts` en `data/upgrades/tier01.ts`, en zijn placeholders (stap 13).
 - De offline-berekening (stap 10b) gebruikt dezelfde gemiddelde klantinterval (`meanSpawnIntervalMs`), maar houdt nog geen rekening met het aantal plekken; bij het afstellen in stap 13 meenemen.
 
@@ -237,7 +238,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 ### Reputatieniveaus en VIP-klanten (besluit eigenaar, 2026-10-06; gebouwd in stap 11c)
 
 - **6 niveaus** (`data/reputation/levels.ts`, namen in i18n `reputation.<id>.name`): Shabby Shack (0), Local Haunt (10), Cozy Inn (25), Popular Pub (50), Famous Tavern (100), Legendary Hall (200). Niveau 1 is het eerste. `levelFor`, `levelProgress` en `recipesTaughtUpTo` staan in `systems/reputation/level.ts`.
-- **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau maakt recepten ontdekbaar (`unlocks`, sinds stap 12; in 11c leerde het ze direct). Welke recepten bij welk niveau horen, staat in hoofdstuk 4, Receptenboek, en in het logboek van stap 12. Kamers (stap 14) krijgen ook een niveau-eis.
+- **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau maakt recepten ontdekbaar (`unlocks`, sinds stap 12; in 11c leerde het ze direct). Welke recepten bij welk niveau horen, staat in hoofdstuk 4, Receptenboek, en in het logboek van stap 12. Kamers (stap 14a) hebben ook een niveau-eis.
 - **Bewaker** (`systems/reputation/watch.ts`): leert bij een nieuw niveau de recepten en meldt `reputation:levelUp` (één keer per niveau, ook na een grote sprong, bijvoorbeeld offline). Een save die al voorbij een niveau is, krijgt de recepten stil bij het laden.
 - **HUD:** naast de reputatie de naam van het niveau en een balkje naar het volgende. Bij een nieuw niveau verschijnt 4,5 s een melding met wat erbij komt (nieuwe klant, nieuw recept) (`ui/level-up/`).
 - **VIP-klanten:** gewone klanttypes met `vip: true` en een eigen `reputationBonus` (nu King Grumblebeard: niveau 3, betaalt 3x, +3 reputatie, 30 s geduld). Zodra een VIP open is, is elke nieuwe klant met kans `VIP_SPAWN.chance` (10%) een VIP (`systems/customers/pick-type.ts`). Een VIP bestelt het **duurste bekende drankje**, heeft een kroon in de bubbel en een gouden kleur. Boos vertrekken kost niets. Een nieuwe VIP is alleen data.
@@ -268,6 +269,20 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 - **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `scene/effects/bonus-lines.ts`).
 - **Serveren:** `DrinkSelection` (`systems/serving/selection.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`systems/actions/serve-actions.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
 - **Paneel:** één knop "☰ Menu" / "✕" rechtsboven in het spel; bovenin het paneel tabbladen Shop | Recipes (`ui/side-panels.ts`, logica zonder DOM in `ui/side-panel-state.ts`). Het paneel opent op het laatst gebruikte tabblad, **alleen binnen de sessie** (na herladen weer Shop). De tutorial volgt welk tabblad open is via `wiring/follow-open-tab.ts`.
+
+### Kamers (besluit eigenaar, 2026-10-06; gebouwd in stap 14a)
+
+- **Bovenverdieping:** boven de taverne staan drie kamervakken naast elkaar (`scene/layout-rooms.ts`). Niet gebouwd: dichtgetimmerd met een bordje ("Unlocks at <niveau>" of "Build in the shop: <prijs>"); klikken opent het zijpaneel op Shop (event `shop:requested`). Gebouwd: ingericht met placeholder-meubels (`scene/rooms/room-furniture.ts`, één tekenfunctie per kamer), en klanten zitten er. Klanten lopen voorlopig in een rechte lijn naar boven (echte animaties in stap 21).
+- **De kamers** (`data/rooms/`, placeholder-prijzen afgesteld met de simulator):
+  - **Extension** (niveau 3, 1.500): +3 plekken boven.
+  - **Alchemy Lab** (niveau 4, 8.000): ketel 25% sneller, +1 drankje op de bar (de bar heeft nu 6 plekken in de scene).
+  - **VIP Lounge** (niveau 5, 30.000): VIP-kans ×2 (nieuwe stat `vipChance`, basis 10%), +2 plekken boven.
+- **Plekken:** stoelnummers zijn eerst de 7 beneden, dan per kamer (`systems/rooms/seats.ts`). Open zijn de gekochte plekken beneden (Extra Seat) plus alle plekken van gebouwde kamers; klanten kiezen alleen open plekken (`openSeats` in de klantcontext).
+- **Bonussen:** kamers gebruiken dezelfde effecten als upgrades en tellen mee in `getMultipliers` (één keer per gebouwde kamer). Offline telt de VIP-kans mee.
+- **Kopen:** groep "Rooms" in het Shop-tabblad; een gebouwde kamer verdwijnt eruit. Ingrediënten en kamers delen één module voor eenmalige aankopen (`systems/purchases/`) en één winkelonderdeel (`ui/shop/one-time-section.ts`).
+- **State:** `roomsBuilt` (lijst ids).
+- **Tutorial-hint** (les `room`, na de VIP-les): start zodra een kamer te bouwen én betaalbaar is; wijst Menu, Shop en de bouwknop aan, en daarna de nieuwe kamer.
+- **Decoraties** komen in stap 14b.
 
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
@@ -319,7 +334,7 @@ Recipe     { id, tier, rarity, ingredients: id[2..3], brewSeconds, basePrice,
 Customer   { id, minLevel, patienceSeconds, spendMultiplier, likes: effect[], vip?, reputationBonus? }
 ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
-Room       { id, unlockReputation, cost, slotsAdded, bonus }
+Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
 Hero       { id, class, baseStats, hireCost }
 Dungeon    { id, minHeroLevel, durationSeconds, drops: ingredient id weighted[] }
 ```
@@ -462,7 +477,8 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* een nieuwe speler ziet aan de bubbel wat een drankje doet, kan een drankje selecteren en aan een klant geven, en opent winkel en boek met één knop en tabbladen; alle lessen werken met de nieuwe bediening; tests slagen.
 - [x] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
-- [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
+- [x] **Stap 14a: Kamers.** Uitbreidingen (uitbouw met extra tafels, alchemielab, VIP-lounge) als kamervakken op een bovenverdieping in de scene, te bouwen in de winkel. Tutorial-hint: eerste kamer. Zie hoofdstuk 4, Kamers. (Stap 14 is op 2026-10-06 gesplitst in 14a en 14b, keuze eigenaar.)
+- [ ] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie.
 - [ ] **Stap 15: Helden.** Inhuren, klassen, levelen, uitrusting, held-paneel. Tutorial-hint: eerste held.
 - [ ] **Stap 16: Expedities en kerkers.** Held + kerker + meegenomen drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
 - [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
@@ -506,6 +522,19 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 14a: Kamers (2026-10-06, `step-14a-rooms`)
+- **Gedaan:** (code in `src/data/rooms/`, `src/systems/rooms/`, `src/systems/purchases/`, `src/systems/actions/room-actions.ts`, `src/scene/layout-rooms.ts`, `src/scene/rooms/`, `src/ui/shop/one-time-*.ts`, `src/ui/shop/room-view-model.ts`, `src/data/tutorial/room.ts`, `src/data/validate/room-table.ts`, `src/sim/shopping.ts`; tests in `tests/systems/rooms/`, `tests/scene/layout-rooms.test.ts`, `tests/ui/room-view-model.test.ts`, `tests/wiring/room-flow.test.ts`, `tests/data/validate-rooms.test.ts`)
+  - **Kamers op een bovenverdieping:** zie hoofdstuk 4, Kamers.
+  - **Opgeschoond:** ingrediënten gebruiken nu de gedeelde module voor eenmalige aankopen (geen dubbele logica voor kamers); `getMultipliers` telt bronnen (upgrades en kamers) op één manier op.
+  - **Simulator:** de bot spaart voor een kamer zodra die te koop is (hij koopt dan alleen upgrades onder 10% van de kamerprijs) en bouwt hem; de tijdlijn toont "built <kamer>" en de kolom seats telt de kamerplekken mee.
+  - **Personeel tot niveau 7** (was 5): met meer plekken en VIP's verdient actief spelen meer, waardoor idle zakte naar 22%. Met twee extra trainingsniveaus komt idle weer rond een derde, en er is na minuut 20 weer iets te kopen. Niveau 8 schoot door (43-56%).
+  - 16 tests erbij (407 totaal).
+- **Waarom (keuzes, afgesproken met de eigenaar via vragen):** 3 kamers (de MVP-omvang), op een bovenverdieping zonder camerabeweging, kopen in de winkel plus klikken in de scene, en de stap gesplitst (decoraties in 14b). Een gebouwde kamer verdwijnt uit de winkel, net als ingrediënten (wens eigenaar uit 13c). Kamerplekken zijn aparte stoelnummers na de 7 beneden, zodat Extra Seat en kamers elkaar niet in de weg zitten en klanten echt in de kamer gaan zitten.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. Simulator, 60 minuten: Extension op 8:40 / 9:03 / 9:06, Alchemy Lab op 13:12 / 13:29 / 14:03, VIP Lounge op 21:31 / 22:25 / 22:45 (seeds 1/2/3; doel: eerste kamer binnen 30 minuten); idle 28% / 33% / 35% (doel 30-40%; seed 1 net eronder); 16 aankopen in de eerste 5 minuten, eerste medewerker op 4:26, eerste ontdekking op 1:20 (ongewijzigd). In de browser: drie dichtgetimmerde kamers met bordjes; klikken op de Extension opende het paneel op Shop met de groep Rooms; na het bouwen een ingerichte kamer met drie klanten boven; met alle kamers gebouwd: lab met flesjes, lounge met tapijt, lijst en bank, klanten boven en beneden door elkaar. Geen consolefouten.
+- **Afwijkingen van het plan:** stap 14 is gesplitst in 14a en 14b (keuze eigenaar). Het personeel kan nu tot niveau 7 trainen (balans, zie boven). Klanten lopen nog dwars door de muur naar boven; dat lost de art-pass op (stap 21).
+- **Nu te proberen:** speel tot Cozy Inn en spaar 1.500 goud; de ketel wijst de Extension aan. Klik op een dichtgetimmerde kamer om de winkel te openen.
+- **Nog te doen / volgende stap:** stap 14b, Decoraties (na akkoord van de eigenaar om 14a te mergen).
 
 ### Stap 13c: Ingrediënten in de winkel (2026-10-06, `step-13c-ingredients`)
 - **Gedaan:** (code in `src/data/ingredients/`, `src/systems/ingredients/`, `src/systems/recipes/discovery.ts`, `src/systems/actions/ingredient-actions.ts`, `src/wiring/ingredient-shelf.ts`, `src/ui/shop/ingredient-*.ts`, `src/ui/recipe-book/`, `src/ui/level-up/`, `src/data/tutorial/ingredient.ts`, `src/data/validate/ingredient-table.ts`, `src/sim/`; tests in `tests/systems/ingredients/`, `tests/ui/ingredient-view-model.test.ts`, `tests/wiring/ingredient-flow.test.ts` en aangepaste bestaande tests)
