@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 13b (Speelbaarheid, UX-ronde 1). **Volgende stap:** 13c (Ingrediënten in de winkel), daarna 14 (Kamers).
+**Nu bezig:** niets (stap 13c wacht op akkoord om te mergen). **Laatst afgerond:** stap 13c (Ingrediënten in de winkel). **Volgende stap:** 14 (Kamers en visuele groei).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -32,7 +32,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 12 | Receptenontdekking + receptenboek | ✅ | `step-12-recipe-book` |
 | 13 | Balans-simulator | ✅ | `step-13-balance-simulator` |
 | 13b | Speelbaarheid (UX-ronde 1) | ✅ | `step-13b-ux` |
-| 13c | Ingrediënten in de winkel | ⬜ | |
+| 13c | Ingrediënten in de winkel | ✅ | `step-13c-ingredients` |
 | 14 | Kamers en visuele groei | ⬜ | |
 | 15 | Helden | ⬜ | |
 | 16 | Expedities en kerkers | ⬜ | |
@@ -206,7 +206,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, personeel, VIP. Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP. Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
@@ -255,6 +255,15 @@ De eigenaar speelde t/m stap 13 en vond het spel goed, met vier punten:
 
 Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de speler **ontdekt** heeft; een ontdekbaar recept bestelt niemand.
 
+**Gebouwd in stap 13c (punt 4):**
+- **Data:** een winkelingrediënt kan `buy: { level, cost }` hebben (`data/ingredients/`); zonder `buy` is het een basisingrediënt dat vanaf het begin op het schap staat. Nu: Fire Pepper op niveau 2 voor 40 goud, Moon Grape op 3 voor 150, Troll Sweat op 4 voor 600. De recepten per niveau pasten al bij dit voorstel (niveau 2: Bog Lantern, Dragon's Hiccup, Swamp Fire; 3: Moonlight Merlot, Honeyed Moon; 4: Troll's Toll, Gym Sock Mead, Spicy Spores); een test bewaakt dat een niveau geen recept opent waarvan een ingrediënt pas later te koop is.
+- **State:** `ingredientsBought` (lijst ids; oude saves krijgen via `reconcile` een lege lijst).
+- **Bezit** (`systems/ingredients/owned.ts`): basis, plus gekocht, plus alles wat een **bekend** recept gebruikt. Dat laatste houdt oude saves (die tier-2-recepten al kenden) brouwbaar zonder migratie. Het schap toont precies het bezit; de oude regel "tot de hoogste tier van bekende en ontdekbare recepten" (`systems/brewing/shelf.ts`) is weg.
+- **Ontdekken:** een recept is ontdekbaar met niveau én alle ingrediënten in bezit (`discoverableRecipes(state, recipes, owned)`).
+- **Winkel:** groep "Ingredients" bovenaan het Shop-tabblad, per ingrediënt "Unlocks at <niveau>", "Buy · <prijs>" of "On the shelf / Owned" (`ui/shop/ingredient-section.ts`). Actie `buyIngredient(id)`, event `ingredient:bought`; `ingredients:affordable` meldt wanneer er iets te kopen valt.
+- **Melding en boek:** de niveaumelding zegt "New in the shop: <ingrediënt>"; een ontdekbaar recept waarvoor nog een ingrediënt ontbreekt, zegt in het boek "Needs <ingrediënt> from the shop".
+- **Tutorial-hint** (les `ingredient`, na het boek, vóór personeel): start zodra een ingrediënt te koop én betaalbaar is (of meteen als dat al zo is), wijst Menu, tabblad Shop en de koopknop aan (alias `guide-ingredient-buy`), en daarna het nieuwe ingrediënt op het schap (`guide-new-ingredient`).
+
 **Gebouwd in stap 13b (punten 1 t/m 3; keuzes van de eigenaar via vragen):**
 - **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `scene/effects/bonus-lines.ts`).
 - **Serveren:** `DrinkSelection` (`systems/serving/selection.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`systems/actions/serve-actions.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
@@ -270,7 +279,7 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 - **Gebouwd in stap 12 (keuzes van Claude, de eigenaar liet de aanbevolen keuze over):**
   - **Ontdekken:** een niveau maakt recepten *ontdekbaar* (`unlocks` in `data/reputation/levels.ts`), niet bekend. Past de inhoud van de ketel precies op een ontdekbaar recept, dan komt er "Eureka! <drankje>!" en begint het meteen te brouwen; het recept is vanaf dan bekend (`systems/recipes/discovery.ts`, event `recipe:discovered`). Een combinatie die op geen bekend of ontdekbaar recept kan uitkomen, mislukt zoals voorheen. Klanten bestellen alleen bekende recepten.
   - **Niveau 1 maakt niets ontdekbaar:** in tier 1 is elke combinatie van twee ingrediënten een recept, en een nieuwe speler zou tijdens de basisles per ongeluk iets kunnen brouwen wat niemand besteld heeft. De eerste ontdekkingen komen op niveau 2.
-  - **Het schap** toont de ingrediënten tot de hoogste tier van de bekende én ontdekbare recepten (anders kan een recept nooit ontdekt worden).
+  - **Het schap** toonde de ingrediënten tot de hoogste tier van de bekende én ontdekbare recepten. *Sinds stap 13c:* het schap toont de basisingrediënten plus de gekochte (zie Speelbaarheid, "Gebouwd in stap 13c").
   - **Paneel en knop:** een zijpaneel met een eigen knop "Recipes" links van Shop. Er is steeds maar één paneel open (`ui/side-panels.ts`; opent de speler het ene, dan sluit het andere). Per recept een kaartje: **bekend** (naam, zeldzaamheid, ingrediënten met hun kleur van het schap, brouwtijd, prijs en effect), **ontdekbaar** (silhouet "???" met zeldzaamheid en hint) of **op slot** ("Unlocks at <niveau>"). Bovenaan X/N. De melding bij een nieuw niveau noemt het aantal nieuwe recepten, niet de namen.
   - **Poster op de muur:** nog niet gebouwd; dat hoort bij de art-pass (stap 21), omdat de poster pas leesbaar en mooi wordt met echte art. Het paneel is de basis waar de poster later naartoe linkt (IDEAS.md, punt 5).
   - **Tutorial-hint:** een les `book` (na de plekken-les, vóór personeel) die start bij het eerste nieuwe niveau (`reputation:levelUp`, of meteen als het niveau al bereikt is): de ketel wijst de knop aan en daarna de kop van het open boek.
@@ -304,7 +313,7 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 ## 5. Datamodel (schetsen)
 
 ```ts
-Ingredient { id, tier, rarity, source: 'shop' | 'dungeon:<id>' }
+Ingredient { id, tier, rarity, source: 'shop' | 'dungeon:<id>', buy?: { level, cost } }   // zonder buy: basisingrediënt
 Recipe     { id, tier, rarity, ingredients: id[2..3], brewSeconds, basePrice,
              effect: 'strength' | 'speed' | 'luck' | 'charm' }   // naam en hint: i18n-sleutels recipes.<id>.name/.hint
 Customer   { id, minLevel, patienceSeconds, spendMultiplier, likes: effect[], vip?, reputationBonus? }
@@ -451,7 +460,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
 - [x] **Stap 13b: Speelbaarheid (UX-ronde 1).** Effect-iconen in bubbel, boek en zwevende tekst; voorkeursles noemt alleen het effect van dat drankje; serveren door eerst het drankje en dan de klant te kiezen (direct de klant klikken blijft werken); één uitklapknop met een zijpaneel met tabbladen (Shop | Recipes) in plaats van losse knoppen en Close. Tutorial-hints aanpassen (basisles: drankje, dan klant; upgrade-, plekken-, personeels- en boeklessen: uitklapknop, dan tabblad). Zie hoofdstuk 4, Speelbaarheid na de eerste speeltest.
   *Klaar wanneer:* een nieuwe speler ziet aan de bubbel wat een drankje doet, kan een drankje selecteren en aan een klant geven, en opent winkel en boek met één knop en tabbladen; alle lessen werken met de nieuwe bediening; tests slagen.
-- [ ] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
+- [x] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
 - [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
 - [ ] **Stap 15: Helden.** Inhuren, klassen, levelen, uitrusting, held-paneel. Tutorial-hint: eerste held.
@@ -497,6 +506,19 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 13c: Ingrediënten in de winkel (2026-10-06, `step-13c-ingredients`)
+- **Gedaan:** (code in `src/data/ingredients/`, `src/systems/ingredients/`, `src/systems/recipes/discovery.ts`, `src/systems/actions/ingredient-actions.ts`, `src/wiring/ingredient-shelf.ts`, `src/ui/shop/ingredient-*.ts`, `src/ui/recipe-book/`, `src/ui/level-up/`, `src/data/tutorial/ingredient.ts`, `src/data/validate/ingredient-table.ts`, `src/sim/`; tests in `tests/systems/ingredients/`, `tests/ui/ingredient-view-model.test.ts`, `tests/wiring/ingredient-flow.test.ts` en aangepaste bestaande tests)
+  - **Ingrediënten koop je in de winkel:** zie hoofdstuk 4, Speelbaarheid na de eerste speeltest ("Gebouwd in stap 13c").
+  - **Validator:** een `buy` mag alleen bij een winkelingrediënt, op niveau 2 of hoger, met een positieve prijs. De ingrediënttabel staat nu in een eigen bestand (`tables.ts` werd te lang).
+  - **Simulator:** de bot koopt een betaalbaar ingrediënt vóór de goedkoopste upgrade (een speler wil nieuwe recepten proberen); de tijdlijn toont "bought <ingrediënt>" en telt het als aankoop.
+  - **Werkafspraak** (op verzoek van de eigenaar): mergen en pushen alleen als de eigenaar het per stap zegt; vastgelegd in `CLAUDE.md` en hoofdstuk 11.
+  - 11 tests erbij (390 totaal; de drie oude schaptests zijn vervangen door tests voor het bezit).
+- **Waarom (keuzes):** het voorstel uit hoofdstuk 4 is gevolgd (de eigenaar liet de details aan Claude). Bezit afleiden uit bekende recepten in plaats van een savemigratie: eenvoudiger, en een bekend recept bewijst dat de speler de ingrediënten had. Prijzen: Fire Pepper 40 (net na niveau 2 te betalen), Moon Grape 150, Troll Sweat 600 (met 400 werd het 14 s na niveau 4 gekocht, dus geen doel meer). De les staat na het boek, omdat niveau 2 eerst het boek opent en pas iets later genoeg goud voor de peper geeft.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. Simulator (seed 1): niveau 2 op 1:19, Fire Pepper gekocht op 2:13, Dragon's Hiccup ontdekt op 2:15; niveau 3 op 4:12, Moon Grape op 4:56; niveau 4 op 7:37, Troll Sweat op 8:17; alle 13 recepten rond minuut 23. Doelen: 16 aankopen in de eerste 5 minuten (doel ~10, was 15), eerste medewerker op 4:26, eerste ontdekking op 1:20, idle 32% (seeds 2 en 3: 33% en 34%) in de standaardrun van 60 minuten. In de browser: de niveaumelding "Level up! Local Haunt" noemt "New in the shop: Fire Pepper"; het boek zegt bij Dragon's Hiccup en Swamp Fire "Needs Fire Pepper from the shop"; de les wees Menu en daarna de koopknop aan; na het kopen stond Fire Pepper op het schap en in de winkel op "On the shelf / Owned"; Moon Grape en Troll Sweat staan op "Unlocks at Cozy Inn / Popular Pub". Geen consolefouten.
+- **Afwijkingen van het plan:** geen. Opgemerkt: in een run van 30 minuten (weglopen op minuut 20) schommelt het idle-aandeel per seed tussen 24% en 32%; dat venster van 10 minuten is te kort om op te sturen, de standaardmeting van 60 minuten blijft binnen het doel. In de winkel worden lange regels zoals "Unlocks at Cozy Inn" naast de naam krap; hoort bij de winkel-layout (IDEAS.md, punt 3).
+- **Nu te proberen:** speel tot 10 reputatie: lees de melding, open het boek (Needs Fire Pepper) en koop de peper zodra je 40 goud hebt; de ketel wijst het aan. Probeer daarna Fire Pepper met Wild Honey.
+- **Nog te doen / volgende stap:** stap 14, Kamers en visuele groei (na akkoord van de eigenaar om 13c te mergen).
 
 ### Stap 13b: Speelbaarheid, UX-ronde 1 (2026-10-06, `step-13b-ux`)
 - **Gedaan:** (code in `src/i18n/en/effects.ts`, `src/scene/effects/`, `src/scene/customers/`, `src/scene/brewing/ready-view.ts`, `src/systems/serving/selection.ts`, `src/systems/actions/serve-actions.ts`, `src/ui/side-panels.ts`, `src/ui/side-panel-state.ts`, `src/ui/shop/`, `src/ui/recipe-book/`, `src/data/tutorial/`, `src/systems/tutorial/`, `src/wiring/follow-open-tab.ts`, `src/wiring/tutorial-already-holds.ts`; tests in `tests/scene/effect-text.test.ts`, `tests/systems/actions/serve-actions.test.ts`, `tests/systems/tutorial/resolve-target.test.ts`, `tests/systems/tutorial/machine-only-shown.test.ts`, `tests/ui/side-panel-state.test.ts` en aangepaste wiring-tests)
