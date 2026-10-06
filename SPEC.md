@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 3 (Save-systeem). **Volgende stap:** 4 (i18n + data-schema).
+**Nu bezig:** niets. **Laatst afgerond:** stap 4 (i18n + data-schema). **Volgende stap:** 5 (Taverne-scene, placeholder).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -18,7 +18,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 1 | Project opzetten | ✅ | `step-01-project-setup` |
 | 2 | Core (getallen, state, tick) | ✅ | `step-02-core` |
 | 3 | Save-systeem | ✅ | `step-03-save-system` |
-| 4 | i18n + data-schema | ⬜ | |
+| 4 | i18n + data-schema | ✅ | `step-04-i18n-data-schema` |
 | 5 | Taverne-scene (placeholder) | ⬜ | |
 | 6 | Klanten | ⬜ | |
 | 7 | Brouwen en serveren | ⬜ | |
@@ -236,7 +236,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 ```ts
 Ingredient { id, tier, rarity, source: 'shop' | 'dungeon:<id>' }
 Recipe     { id, tier, rarity, ingredients: id[2..3], brewSeconds, basePrice,
-             effect: 'strength' | 'speed' | 'luck' | 'charm', discoveredHint }
+             effect: 'strength' | 'speed' | 'luck' | 'charm' }   // naam en hint: i18n-sleutels recipes.<id>.name/.hint
 Customer   { id, minReputation, patienceSeconds, spendMultiplier, likes: effect[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, unlockReputation, cost, slotsAdded, bonus }
@@ -349,7 +349,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* tests voor formattering en tick slagen (incl. grote delta's).
 - [x] **Stap 3: Save-systeem.** Serialize/deserialize (Decimal↔string), versie + migratie, `StorageAdapter` + `localStorageAdapter`, autosave, export/import-string. Tests incl. fixture.
   *Klaar wanneer:* state overleeft herladen; oude fixture laadt; kapotte save valt netjes terug op nieuwe game.
-- [ ] **Stap 4: i18n + data-schema.** `t()` met `en`, typen voor ingredient/recipe/customer/upgrade, eerste 5 recepten + 6 ingrediënten + 3 klanttypes als data.
+- [x] **Stap 4: i18n + data-schema.** `t()` met `en`, typen voor ingredient/recipe/customer/upgrade, eerste 5 recepten + 6 ingrediënten + 3 klanttypes als data.
   *Klaar wanneer:* data valideert via een test (unieke ids, bestaande ingrediënt-verwijzingen, vertaalsleutels aanwezig).
 
 ### Fase B: Eerste speelbare loop
@@ -414,6 +414,27 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 4: i18n + data-schema (2026-10-06, `step-04-i18n-data-schema`)
+- **Gedaan:** (code in `src/i18n/` en `src/data/`, tests in `tests/i18n/` en `tests/data/`)
+  - `i18n/translator.ts`: `createTranslator({ messages, fallback? })` met `t(key, params?)` en `has(key)`. `{naam}`-parameters worden ingevuld; een onbekende sleutel geeft de sleutel zelf terug (zichtbaar in de game, gelogd in dev). `i18n/index.ts` exporteert `t` en `hasKey` op basis van Engels.
+  - `i18n/en/`: één bestand per domein (`ingredients`, `recipes`, `customers`) plus `index.ts` dat ze samenvoegt.
+  - `data/text-key.ts`: `textKey(domein, id, veld)` = `domein.id.veld`. Dit is de conventie waarmee data en vertaling aan elkaar hangen. Gebruik in UI: `t(textKey('recipes', id, 'name'))`.
+  - `data/common.ts`: `Rarity` en `Effect` (met lijsten `RARITIES`, `EFFECTS`).
+  - Typen en data per map: `ingredients/` (`IngredientDef`, tier 1 en 2), `recipes/` (`RecipeDef`, tier 1 en 2), `customers/` (`CustomerDef`) en `upgrades/` (alleen typen `UpgradeDef`, `UpgradeEffect`, `UpgradeKind`, `UpgradeStat`; lijst is leeg tot stap 9).
+  - **Content:** 6 ingrediënten (Swamp Slime, Wild Honey, Glowcap Mushroom, Fire Pepper, Moon Grape, Troll Sweat), 5 recepten (Slime Sap, Glowcap Stout, Dragon's Hiccup, Moonlight Merlot, Troll's Toll met 3 ingrediënten; alle vier effecten komen voor) en 3 klanttypes (Sir Dents-a-Lot, Elf with Opinions, Thirsty Dwarf).
+  - `data/validate/`: `validateContent(hasKey, tables?)` geeft een lijst fouten terug (leeg = geldig). Controleert unieke en snake_case ids, bestaande ingrediënt-verwijzingen, 2 tot 3 verschillende ingrediënten per recept, geldige getallen/zeldzaamheid/effecten, dat geen twee recepten dezelfde combinatie hebben (ongeacht volgorde) en dat alle vertaalsleutels bestaan.
+  - 23 nieuwe tests (79 totaal): vertaler, de echte content, en de validator zelf met bewust kapotte data (zodat zeker is dat hij fouten vangt).
+- **Waarom (keuzes):**
+  - Data bevat **geen tekst**, alleen ids; de tekst staat onder een voorspelbare sleutel. Zo blijft `data/` vrij van i18n en komt een Nederlandse vertaling later zonder datawijzigingen.
+  - `t()` accepteert een gewone `string` als sleutel (niet een union van alle sleutels), omdat sleutels uit ids worden samengesteld. De test bewaakt dat ze bestaan.
+  - Elke tabel brengt zijn eigen regels mee via `defineTable` (SOLID: O): een nieuw domein (kamers, helden, kerkers) is één nieuwe tabel in `validate/tables.ts`, de validator zelf verandert niet. `hasKey` wordt ingespoten (SOLID: D).
+  - Content per tier in aparte bestanden (`tier01.ts`, `tier02.ts`), zoals in het plan; een nieuwe tier is een bestand plus één regel in de `index.ts`.
+  - Getallen in de data (prijzen, geduld, reputatiedrempels, brouwtijden) zijn **placeholders**; echte tuning volgt in stap 11 en 13.
+  - Upgrade-typen zijn bewust al aanwezig met validatie, zodat de data van stap 9 meteen gecontroleerd wordt. De precieze velden kunnen dan nog bijgesteld worden.
+- **Afwijkingen van het plan:** `discoveredHint` uit het datamodel (hoofdstuk 5) is geen veld in `RecipeDef`, maar een vertaalsleutel `recipes.<id>.hint`. De bestaande "Hello tavern" in `hello-scene.ts` is nog hardcoded; die scene verdwijnt in stap 5, dus niet aangepast.
+- **Nu te proberen:** `npm run test` (79 tests). Lees de teksten in `src/i18n/en/` en pas er één aan. Maak in `src/data/recipes/tier01.ts` een tikfout in een ingrediënt-id of verwijder een vertaling in `src/i18n/en/` en draai `npm run test`: de validatietest zegt precies wat er mis is. Er is niets zichtbaar in de browser; het spel toont nog "Hello tavern".
+- **Nog te doen / volgende stap:** stap 5, Taverne-scene (placeholder) met boot-scene, doorsnede met gekleurde vormen en een DOM-overlay `#ui-root` met lege HUD (goud en reputatie via `t()`).
 
 ### Stap 3: Save-systeem (2026-10-06, `step-03-save-system`)
 - **Gedaan:** (code in `src/save/`, `src/runtime/autosave-driver.ts`, tests in `tests/save/`)
