@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 10a (Personeel). **Volgende stap:** 10b (Offline-voortgang).
+**Nu bezig:** niets. **Laatst afgerond:** stap 10b (Offline-voortgang). **Volgende stap:** 11 (Reputatie, gates en drankeffecten).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -25,7 +25,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 8 | Interactieve tutorial (basis) | ✅ | `step-08-tutorial` |
 | 9 | Economie en upgrades | ✅ | `step-09-economy-upgrades` |
 | 10a | Personeel (brouwer en serveerster) | ✅ | `step-10a-staff` |
-| 10b | Offline-voortgang | ⬜ | |
+| 10b | Offline-voortgang | ✅ | `step-10b-offline` |
 | 11 | Reputatie, gates, drankeffecten | ⬜ | |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
 | 13 | Balans-simulator | ⬜ | |
@@ -170,7 +170,7 @@ Bestandsnamen: `kebab-case.ts`. Eén verantwoordelijkheid per bestand; een besta
 
 - Vaste simulatiestap van **100 ms**, losgekoppeld van framerate.
 - Tijd wordt altijd gemeten met `Date.now()`-verschil (accumulator), niet met "aantal ticks", omdat achtergrondtabs door de browser worden afgeknepen.
-- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `systems/offline` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar).
+- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `systems/offline` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `wiring/create-offline.ts`.
 - Expedities slaan een absolute `endsAt` op en worden bij laden direct afgehandeld.
 
 ### Save
@@ -377,7 +377,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* upgrades werken, kosten stijgen, tests slagen.
 - [x] **Stap 10a: Personeel.** Brouwer-assistent en serveerster automatiseren brouwen en serveren; inhuren met niveaus in de winkel (idle-inkomen mikt op ≈ 30 tot 40% van actief spelen, te meten in stap 13). Tutorial-hint: eerste medewerker inhuren. De barman volgt later (bijv. fooien of geduld).
   *Klaar wanneer:* ingehuurd personeel brouwt en serveert zonder dat de speler iets doet, hoger niveau werkt sneller, tests slagen.
-- [ ] **Stap 10b: Offline-voortgang.** `systems/offline` rekent met formules uit wat het personeel in de tijd weg verdiende (limiet 2 uur, uitbreidbaar), plus een "welkom terug"-venster. De ticker meldt grote gaten al via `onGap`.
+- [x] **Stap 10b: Offline-voortgang.** `systems/offline` rekent met formules uit wat het personeel in de tijd weg verdiende (limiet 2 uur, uitbreidbaar), plus een "welkom terug"-venster. De ticker meldt grote gaten al via `onGap`.
   *Klaar wanneer:* tabblad 5 min weg of sluiten/openen levert correcte offline-opbrengst; tests voor `systems/offline`.
 
 ### Fase C: Diepte
@@ -429,6 +429,21 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 10b: Offline-voortgang (2026-10-06, `step-10b-offline`)
+- **Gedaan:** (code in `src/systems/offline/`, `src/data/offline.ts`, `src/wiring/create-offline.ts`, `src/ui/welcome/`, aanpassingen in `main.ts` en `systems/customers/spawn-timing.ts`; tests in `tests/systems/offline/`, `tests/ui/welcome-view-model.test.ts` en `tests/wiring/offline-flow.test.ts`)
+  - **Formule, geen simulatie** (`compute.ts`): drankjes per seconde = het langzaamste van het brouwtempo, het serveertempo en de klantstroom; daarvan telt `OFFLINE.efficiency` (50%, placeholder) en alleen tot de offline-limiet. Aantal bediend = afgerond naar beneden (geen toeval, dus testbaar). Goud = aantal × de gemiddelde uitbetaling (`earnings.ts`: elk bekend recept tegen elk klanttype dat op deze reputatie komt, met de verkoopprijsfactor); reputatie loopt mee. Zonder een volledige bezetting (brouwer en serveerster) verdient niemand iets.
+  - **Klantstroom als grens:** `meanSpawnIntervalMs(reputation)` is uit `spawn-timing.ts` gehaald (zonder jitter), zodat de offline-berekening automatisch meegaat als de klantstroom later wordt aangepast (geleidelijke instroom, plekken).
+  - **Limiet uitbreidbaar:** nieuwe stat `offlineHours` in `UPGRADE_STATS` (basis 2 uur uit `data/offline.ts`). Er is nog geen upgrade voor; prestige of een upgrade kan hem later verhogen zonder code te wijzigen.
+  - **Twee ingangen, één functie** (`handleAway(awayMs)`): bij het laden de tijd sinds `meta.lastSeenAt` (alleen als er een save geladen is), en tijdens het spelen elk gat dat de ticker meldt (tab afgeknepen, computer in slaap). De uitkomst wordt direct uitbetaald, `lastSeenAt` gaat naar nu en er komt een save. Dat laatste voorkomt dat dezelfde tijd bij de volgende start nog eens meetelt.
+  - **Welkom-terug-venster** (`ui/welcome/`): alleen bij een afwezigheid vanaf een minuut (`OFFLINE.minWelcomeMs`); kortere gaten tellen stil mee. Het toont de tijd weg, bediende klanten en verdiend goud, een regel als de limiet bereikt is, en bij een lege bezetting de uitleg dat de speler een brouwer en een serveerster moet inhuren. De pure opmaak (`welcome-view-model.ts`) is getest. Reports gaan via een inbox (`inbox.ts`), omdat het rapport er al kan zijn voordat de UI is aangemaakt.
+  - **Tutorial-hint:** de afsluitende zin van de personeelshint noemt nu dat het personeel ook doorwerkt als de speler het tabblad sluit; het welkom-terug-venster legt zonder personeel uit wat te doen.
+  - 23 nieuwe tests (275 totaal): gemiddelde uitbetaling (reputatiegrenzen, vermenigvuldiger, niets te bestellen), de formule (langzaamste schakel, klantstroom, beide medewerkers nodig, limiet en hogere limiet, negatieve tijd, enorme getallen), uitbetalen en de inbox, het venster, en in het echte spel (uitbetalen met rapport, niets zonder personeel, 2-uurs limiet, stille korte gaten, geen dubbele telling).
+- **Waarom (keuzes, afgesproken met de eigenaar):** de offline-opbrengst is een deel van wat het personeel in die tijd verdient (50%, nog af te stellen in stap 13), en een rewarded ad die de opbrengst later verdubbelt hoort bij stap 20. Omdat de opbrengst meteen wordt uitgekeerd (geen "ophalen"-stap), kan een ad later gewoon hetzelfde bedrag nogmaals bijschrijven zonder dat er iets verloren gaat als de speler het venster wegklikt.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser met een save van 1 uur geleden en beide medewerkers ingehuurd: het venster toonde "away for 1h", 90 klanten en 900 goud (goud 50 naar 950, reputatie 90), sluiten werkt en de opgeslagen `lastSeenAt` stond op nu, dus een herlaad telt dezelfde tijd niet nog eens.
+- **Afwijkingen van het plan:** er is geen dubbele-beloning-knop (de SDK komt in stap 20); het venster heeft alleen "Great!". Het spel pauzeert niet terwijl het venster open staat (klanten kunnen intussen geduld verliezen); pauzeren hoort bij de platformlaag (stap 20). Het deel van de klanten en de bar dat tijdens een gat bestond, wordt niet nagebootst: de taverne blijft zoals ze was.
+- **Nu te proberen:** huur beide medewerkers in, sluit het tabblad en open het een paar minuten later: het venster laat zien wat ze verdienden. Zonder personeel zie je de uitleg. Wil je een lange afwezigheid testen, zet dan in Local Storage `bt_save` de velden `savedAt` en `state.meta.lastSeenAt` op een tijdstip uren geleden (sluit eerst andere tabs).
+- **Nog te doen / volgende stap:** stap 11, Reputatie, gates en drankeffecten (en eventueel de geleidelijke klanteninstroom en de plekken-upgrade uit hoofdstuk 4). Open punt voor de eigenaar: het offline-aandeel (50%) en de limiet van 2 uur zijn placeholders, in stap 13 te tunen met de simulator.
 
 ### Stap 10a: Personeel (2026-10-06, `step-10a-staff`)
 - **Gedaan:** (code in `src/systems/staff/`, `src/data/upgrades/staff.ts`, `src/data/tutorial/staff.ts`, `src/wiring/start-staff.ts`, `src/wiring/watch-shop.ts`, `src/systems/serving/publish.ts`; tests in `tests/systems/staff/` en `tests/wiring/staff-flow.test.ts`)
