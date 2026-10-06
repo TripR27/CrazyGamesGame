@@ -36,6 +36,7 @@ function onArrived(ctx: LayerContext, id: number): void {
   sprite.setLook(customer.typeId, order, customer.seat % 2 === 1);
   sprite.setPatience(1);
   sprite.setOrderVisible(true);
+  sprite.customerId = id;
   sprite.container.setPosition(DOOR_ENTRY.x, DOOR_ENTRY.y).setVisible(true);
   walkTo(ctx, sprite, slot.x, slot.y);
   ctx.active.set(id, sprite);
@@ -45,8 +46,16 @@ function onLeft(ctx: LayerContext, id: number): void {
   const sprite = ctx.active.get(id);
   if (sprite === undefined) return;
   ctx.active.delete(id);
+  sprite.customerId = null;
   sprite.setOrderVisible(false);
   walkTo(ctx, sprite, DOOR_ENTRY.x, DOOR_ENTRY.y, () => ctx.pool.release(sprite));
+}
+
+/** A quick sideways shake when the customer turns the drink down. */
+function onRefused(ctx: LayerContext, id: number): void {
+  const sprite = ctx.active.get(id);
+  if (sprite === undefined || ctx.scene.tweens.isTweening(sprite.container)) return;
+  ctx.scene.tweens.add({ targets: sprite.container, x: sprite.container.x + 8, duration: 60, yoyo: true, repeat: 3 });
 }
 
 function refreshPatience(ctx: LayerContext): void {
@@ -63,13 +72,14 @@ export function createCustomersLayer(scene: Scene, services: SceneServices): Cus
     services,
     active: new Map(),
     pool: createPool<CustomerSprite>({
-      create: () => createCustomerSprite(scene),
+      create: () => createCustomerSprite(scene, services.actions.clickCustomer),
       reset: (sprite) => sprite.container.setVisible(false),
     }),
   };
   const stops = [
     services.bus.on('customer:arrived', ({ id }) => onArrived(ctx, id)),
     services.bus.on('customer:left', ({ id }) => onLeft(ctx, id)),
+    services.bus.on('customer:refused', ({ id }) => onRefused(ctx, id)),
   ];
   return {
     update: () => refreshPatience(ctx),

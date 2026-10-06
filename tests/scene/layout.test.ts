@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
+import { BREWING } from '@/data/brewing';
 import {
   BAR,
   BUILDING,
@@ -8,6 +9,9 @@ import {
   DOOR,
   FLOOR_Y,
   HUD_HEIGHT,
+  INGREDIENT_SLOTS,
+  READY_SLOTS,
+  SHELF,
   TABLES,
   type Rect,
 } from '@/scene/layout';
@@ -53,5 +57,28 @@ describe('tavern layout', () => {
         expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(60);
       }),
     );
+  });
+
+  it('has room on the shelf for six ingredients, all resting on the shelf plank', () => {
+    expect(INGREDIENT_SLOTS).toHaveLength(6);
+    for (const slot of INGREDIENT_SLOTS) {
+      expect(slot.x - 22).toBeGreaterThanOrEqual(SHELF.x);
+      expect(slot.x + 22).toBeLessThanOrEqual(SHELF.x + SHELF.w);
+      expect(slot.y + 22).toBe(SHELF.y);
+    }
+  });
+
+  it('keeps the shelf clear of the cauldron and the bar', () => {
+    expect(overlaps(SHELF, CAULDRON)).toBe(false);
+    expect(overlaps(SHELF, BAR)).toBe(false);
+  });
+
+  it('has a spot on the bar for every drink the bar can hold', () => {
+    expect(READY_SLOTS.length).toBeGreaterThanOrEqual(BREWING.storageCapacity);
+    for (const slot of READY_SLOTS) {
+      expect(slot.x - 15).toBeGreaterThanOrEqual(BAR.x);
+      expect(slot.x + 15).toBeLessThanOrEqual(BAR.x + BAR.w);
+      expect(slot.y).toBe(BAR.y);
+    }
   });
 });

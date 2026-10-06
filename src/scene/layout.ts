@@ -29,6 +29,19 @@ export const DOOR_ENTRY: Point = { x: 115, y: FLOOR_Y + 20 };
 export const BAR: Rect = { x: 860, y: 470, w: 380, h: FLOOR_Y - 470 };
 export const CAULDRON: Rect = { x: 700, y: 440, w: 120, h: FLOOR_Y - 440 };
 
+/** Wall shelf with the ingredients; each slot is where an ingredient sits (centre). */
+export const SHELF: Rect = { x: 300, y: 300, w: 440, h: 10 };
+const SHELF_FIRST_X = 340;
+export const SHELF_GAP = 72;
+const SHELF_SLOTS = 6;
+export const INGREDIENT_SLOTS: readonly Point[] = Array.from({ length: SHELF_SLOTS }, (_, i) => ({
+  x: SHELF_FIRST_X + i * SHELF_GAP,
+  y: SHELF.y - 22,
+}));
+
+/** Where finished drinks stand on the bar (centre x, y of the bar top). */
+export const READY_SLOTS: readonly Point[] = [900, 1010, 1120].map((x) => ({ x, y: 470 }));
+
 export const TABLES: readonly Rect[] = [
   { x: 260, y: 505, w: 120, h: 14 },
   { x: 500, y: 505, w: 120, h: 14 },
