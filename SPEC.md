@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 5 (Taverne-scene, placeholder). **Volgende stap:** 6 (Klanten).
+**Nu bezig:** niets. **Laatst afgerond:** stap 6 (Klanten). **Volgende stap:** 7 (Brouwen en serveren, de eerste speelbare versie).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -20,7 +20,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 3 | Save-systeem | ✅ | `step-03-save-system` |
 | 4 | i18n + data-schema | ✅ | `step-04-i18n-data-schema` |
 | 5 | Taverne-scene (placeholder) | ✅ | `step-05-tavern-scene` |
-| 6 | Klanten | ⬜ | |
+| 6 | Klanten | ✅ | `step-06-customers` |
 | 7 | Brouwen en serveren | ⬜ | |
 | 8 | Interactieve tutorial (basis) | ⬜ | |
 | 9 | Economie en upgrades | ⬜ | |
@@ -161,6 +161,7 @@ Bestandsnamen: `kebab-case.ts`. Eén verantwoordelijkheid per bestand; een besta
 
 - **Eén** `GameState`-object, volledig JSON-serialiseerbaar (Decimal als string bij opslaan).
 - Wijzigingen alleen via acties in `systems/` (`(state, params) => void` of nieuwe state). Na wijziging roept de store `notify()` aan; UI abonneert zich.
+- **Niet in de state:** wie er op dit moment in de taverne zit (`CustomerFloor` in `systems/customers`) is runtime en wordt niet opgeslagen; de taverne begint bij elk laden leeg.
 - State bevat o.a.: `meta` (versie, laatst-gezien-tijd), `currencies`, `reputation`, `recipesDiscovered`, `ingredients`, `upgrades`, `staff`, `rooms`, `heroes`, `expeditions` (met absolute eindtijd), `prestige`, `achievements`, `settings`, `stats`.
 
 ### Tijd en tick
@@ -356,7 +357,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 ### Fase B: Eerste speelbare loop
 - [x] **Stap 5: Taverne-scene (placeholder).** Boot-scene + taverne-doorsnede met gekleurde vormen: bar, ketel, tafels, plek voor klanten. DOM-overlay `#ui-root` met lege HUD (goud, reputatie).
   *Klaar wanneer:* scene schaalt correct in venster, HUD toont state-waarden.
-- [ ] **Stap 6: Klanten.** `systems/customers` (spawn-ritme, geduld, bestelling kiezen op basis van ontgrendelde recepten) + sprites die binnenlopen, bestelling tonen, wegfeesten/vertrekken. Objectpool.
+- [x] **Stap 6: Klanten.** `systems/customers` (spawn-ritme, geduld, bestelling kiezen op basis van ontgrendelde recepten) + sprites die binnenlopen, bestelling tonen, wegfeesten/vertrekken. Objectpool.
   *Klaar wanneer:* klanten komen en gaan; tests voor spawn en geduld.
 - [ ] **Stap 7: Brouwen en serveren (eerste speelbare versie).** Klik op ingrediënten → ketel → brouwbalk → serveren aan wachtende klant → goud + reputatie + zwevende "+goud". Absurde klantreacties (i18n).
   *Klaar wanneer:* alle handelingen werken. **Mijlpaal: is dit leuk?** (De uitleg komt in stap 8.)
@@ -416,6 +417,27 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 6: Klanten (2026-10-06, `step-06-customers`)
+- **Gedaan:** (code in `src/systems/customers/`, `src/scene/customers/`, `src/core/`, `src/data/`; tests in `tests/systems/customers/` en `tests/core/`)
+  - **Systeem** (puur TS): `floor.ts` (`createFloor`, `findCustomer`, `freeSeats`, `dismiss`), `spawn-timing.ts`, `spawn.ts` (`trySpawn`), `patience.ts`, `update.ts` (`updateCustomers`, één stap) en `system.ts` (`startCustomerSystem` luistert op de `tick`-event en publiceert `customer:arrived` en `customer:left`; `publishChange` is er ook voor stap 7).
+  - **Spelregels:** de eerste klant komt na 1,5 s. Daarna is het interval 8 s min 2% van de basis per reputatiepunt, nooit onder 3 s, met 30% spreiding. Een klant kiest willekeurig een vrije plek, een klanttype waarvan `minReputation` gehaald is en een recept dat de speler kent. Geduld loopt af; bij nul vertrekt de klant (`impatient`). Is de taverne vol, dan wordt een vrijgekomen plek bij de volgende stap direct opnieuw gevuld.
+  - **Kern:** `core/rng.ts` (`Rng`, `createSeededRng`, `pickRandom`), `core/pool.ts` (generieke objectpool), twee nieuwe bus-events (`customer:arrived` en `customer:left` met `LeaveReason`).
+  - **Data/state:** `data/customers/spawning.ts` (alle spawn-getallen), `data/recipes/starters.ts` (`slime_sap` en `glowcap_stout`) en nieuw veld `recipesDiscovered` in `GameState` (oude saves krijgen de standaardwaarde via `reconcile`).
+  - **Scene:** `scene/services.ts` (`SceneServices`: bus en floor, ingespoten via `createGame`), `scene/customers/customers-layer.ts` (events naar sprites, pool, lopen met tweens), `customer-sprite.ts` (lijf, hoofd, bubbel met drankje via `t()`, geduldbalk), `customer-look.ts` (kleur per type). `main.ts` bedraadt alles.
+  - 27 nieuwe tests (118 totaal): eerste klant na de vertraging, alleen ontdekte recepten, reputatie-gates op klanttypes, plekken uniek en capaciteit, hervullen, spawn-interval, geduld en vertrek, `dismiss`, bus-koppeling (inclusief verse context per stap en stoppen) en rng/pool.
+- **Waarom (keuzes):**
+  - Het systeem kent geen posities, alleen stoelnummers (`seat`); de scene koppelt die aan `CUSTOMER_SLOTS`. Zo blijft `systems/` vrij van scene-code en kan stap 14 plekken toevoegen zonder het systeem te wijzigen.
+  - Willekeur en recepten/klanttypes worden ingespoten (SOLID: D), dus tests en de simulator van stap 13 zijn deterministisch.
+  - Bus-events dragen alleen een id (de scene zoekt de klant op in de floor), zodat `core/` geen typen uit `systems/` hoeft te importeren.
+  - De klanten in de taverne worden niet opgeslagen: een nieuwe sessie begint met een lege taverne. Dat is eenvoudig en voorkomt vreemde situaties na een offline gat.
+  - Bestellingen kiezen uniform uit de ontdekte recepten; voorkeuren per klanttype komen in stap 11.
+  - Bubbels van naastgelegen plekken (60 px uit elkaar) staan op twee hoogtes zodat ze niet over elkaar liggen.
+- **Gemeten / gecontroleerd:** `npm run check` en `npm run build` slagen, geen bestand boven 100 regels. Bundel 369 kB gzip JS. In de browser: geen console-fouten; de eerste klant verschijnt na ongeveer 1,5 s, loopt van de deur naar een plek met bubbel en geduldbalk, de taverne vult zich tot 7 klanten en klanten die uitgeput zijn lopen terug naar de deur waarna de plek opnieuw gevuld wordt. Een oude save zonder `recipesDiscovered` laadt gewoon.
+- **Afwijkingen van het plan:** geen. Een tutorial-hint hoort hier nog niet bij: er is nog niets voor de speler te doen (dat begint in stap 7).
+- **Let op voor stap 7 en 13:** er is nog geen manier om klanten te bedienen, dus de taverne loopt vol en klanten vertrekken na het geduld. Het aantal plekken, het geduld (60 s voor de ridder) en het spawn-tempo zijn placeholders; echte balans volgt in stap 13.
+- **Nu te proberen:** `npm run dev`, open http://localhost:5173 en kijk: na een seconde komt de eerste klant binnen. Verhoog `reputation` in Local Storage `bt_save` naar 10 of 25 (sluit andere tabs eerst) om de Elf with Opinions (groen) en de Thirsty Dwarf (bruin) naast de grijze ridder te zien.
+- **Nog te doen / volgende stap:** stap 7, Brouwen en serveren: klik op ingrediënten, ketel, brouwbalk, serveren aan een klant via `dismiss(..., 'served')` en `publishChange`, goud en reputatie, zwevende "+goud" en absurde klantreacties. Mijlpaal: is dit leuk?
 
 ### Chore: pixel-art-experiment (2026-10-06, `chore-pixel-art-experiment`)
 - **Gedaan:** `scripts/pixel/` met een PNG-encoder op alleen Node-bordmiddelen (`png.mjs`), een canvas met opschalen zonder vervaging (`canvas.mjs`), sprites als tekstrasters met palet (`sprite.mjs`, `sprites/cauldron.mjs`, `sprites/knight.mjs`), een achtergrond (`backdrop.mjs`) en `preview.mjs`. `npm run pixel:preview` schrijft naar `art/pixel/`: de taverne op 320×180 (4× opgeschaald) en de twee sprites op 12×.
