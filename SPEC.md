@@ -43,19 +43,20 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ## 1. Harde regels (altijd van toepassing)
 
-1. **Geen enkel bestand in `src/`, `tests/` of `scripts/` is langer dan 100 regels.** Geteld als ruwe regels (inclusief lege regels en comments). Zit je erboven: splitsen/refactoren *voordat* de stap als klaar geldt. Geen uitzonderingen, ook niet voor data (recepten worden per tier in aparte bestanden gezet). Uitgezonderd: config in de projectroot, lockfiles, en `.md`-bestanden.
-2. **Eén stap per keer.** Geen code buiten de scope van de gevraagde stap.
-3. **Een stap is pas klaar als `npm run check` slaagt** (typecheck + lint + regelgrens + tests) en de "Klaar wanneer"-punten van de stap kloppen.
-4. **Geen nieuwe dependencies zonder te vragen.** De toegestane lijst staat in hoofdstuk 3.
-5. **Game-logica kent geen Phaser en geen DOM** (zie lagen, hoofdstuk 4).
-6. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
-7. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
-8. **Na elke stap wordt SPEC.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
-9. **Git:** één branch per stap, meerdere commits, mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
+1. **Houd bestanden klein: richtlijn 100 regels per bestand** in `src/`, `tests/` en `scripts/` (geteld als ruwe regels). Het doel is niet de grens zelf, maar **SOLID werken**: kleine bestanden met één verantwoordelijkheid. Een paar regels erover (tot ~120) is toelaatbaar als splitsen het onnodig verknipt; daarboven is splitsen verplicht. Vermijd bewust te veel regels. Ook data wordt gesplitst (recepten per tier). Uitgezonderd: config in de projectroot, lockfiles en `.md`-bestanden.
+2. **SOLID is verplicht** (zie hoofdstuk 9): elke module heeft één reden om te veranderen, uitbreiden gaat via nieuwe data of nieuwe modules, en afhankelijkheden lopen via interfaces.
+3. **Eén stap per keer.** Geen code buiten de scope van de gevraagde stap.
+4. **Een stap is pas klaar als `npm run check` slaagt** (typecheck + lint + regelgrens + tests) en de "Klaar wanneer"-punten van de stap kloppen.
+5. **Geen nieuwe dependencies zonder te vragen.** De toegestane lijst staat in hoofdstuk 3.
+6. **Game-logica kent geen Phaser en geen DOM** (zie lagen, hoofdstuk 4).
+7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
+8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
+9. **Na elke stap wordt SPEC.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
+10. **Git:** één branch per stap, meerdere commits, mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
 
 ### Hoe dwing je dit af (voor jou)
 - **`CLAUDE.md`** in de projectroot (wordt in stap 1 gemaakt, en ik maak hem nu al aan) wordt automatisch bij elke sessie geladen en verwijst hiernaar. Dat is de betrouwbaarste manier.
-- **`npm run check`** laat de regelgrens (ESLint `max-lines: 100` + `scripts/check-lines.mjs`) technisch falen. Wat niet door de check komt, is niet klaar.
+- **`npm run check`** bewaakt de regelrichtlijn: ESLint waarschuwt vanaf 100 regels en `scripts/check-lines.mjs` waarschuwt vanaf 101 en **faalt vanaf 121 regels**. Wat niet door de check komt, is niet klaar.
 - Optioneel in stap 1: een hook in Claude Code-instellingen die na elke bestandswijziging de regelcheck draait (kan via de `update-config` skill; vraag erom).
 - Jij kunt altijd zeggen: "Doe stap N", en ik lees eerst dit bestand.
 
@@ -99,7 +100,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Build/dev | Vite | 8.x | `base: './'`, productiebuild naar `dist/` |
 | Grote getallen | `break_infinity.js` | 2.2.x | Opslaan als string in save |
 | Tests | Vitest | 5.x | Alleen voor `core/` en `systems/` (puur TS) |
-| Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Regel `max-lines: 100`, `max-lines-per-function: 40` |
+| Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Waarschuwing `max-lines: 100`, fout `max-lines-per-function: 40` |
 | UI | **Vanilla TypeScript + DOM** voor HUD/menu's, Phaser-canvas voor de taverne | n.v.t. | Geen React/Vue (bundlegrootte, eenvoud) |
 | Opslag | via `Storage`-adapter: SDK data-module of `localStorage` | n.v.t. | |
 | Audio | Phaser's eigen audio | n.v.t. | Geen Howler nodig |
@@ -282,6 +283,12 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 ## 9. Code-conventies
 
 - `strict` TypeScript, geen `any`, geen `// @ts-ignore`.
+- **SOLID (verplicht)**, vertaald naar dit project:
+  - **S (single responsibility):** één bestand, één taak. Een systeem berekent, een scene tekent, een UI-paneel toont. Raakt een wijziging twee soorten dingen, dan is het bestand te groot.
+  - **O (open/closed):** uitbreiden zonder bestaande code te wijzigen. Nieuwe recepten, klanten, upgrades, kerkers en kamers zijn nieuwe data of nieuwe kleine modules, geen `if`-ketens in bestaande systemen. Gedrag per type via een registry of tabel.
+  - **L (Liskov):** elke implementatie van een interface (bijv. `StorageAdapter`, `Platform`, upgrade-effecten) moet inwisselbaar zijn zonder verrassingen, zodat de mock en de echte SDK zich gelijk gedragen.
+  - **I (interface segregation):** kleine, gerichte interfaces. Een systeem dat alleen goud nodig heeft, krijgt geen hele `GameState`, maar het stuk dat het nodig heeft.
+  - **D (dependency inversion):** logica hangt af van interfaces, niet van concrete diensten (opslag, platform, tijd, willekeur). Tijd en RNG worden ingespoten, zodat tests en de simulator deterministisch zijn.
 - Functies kort (lint: max 40 regels), liever pure functies dan klassen. Klassen alleen waar Phaser het vraagt (Scenes).
 - Geen magische getallen in logica: naar `data/` of constanten.
 - Geen commentaar dat herhaalt wat de code doet; wel één regel *waarom* bij niet-voor-de-hand-liggende keuzes.
@@ -295,7 +302,7 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 1. De stap-beschrijving is volledig uitgevoerd, niets extra's.
 2. `npm run check` slaagt (typecheck, lint, regelgrens, tests).
 3. Visuele stappen: in de browser gecontroleerd, geen console-fouten.
-4. Geen bestand > 100 regels.
+4. Geen bestand > 120 regels, en bestanden boven 100 regels zijn bewust (en gemeld) of worden gesplitst. SOLID gecontroleerd.
 5. Heeft de stap een nieuwe speler-functie? Dan hoort daar een korte **tutorial-hint** bij (zie hoofdstuk 4, Tutorial).
 6. **SPEC.md is bijgewerkt (verplicht, laatste commit van de stap):**
    - Voortgangsoverzicht bovenaan: status van de stap, branch, wat de volgende stap is.
@@ -312,7 +319,7 @@ Een stap is **niet** klaar als punt 6 ontbreekt.
 
 - Begin elke codeer-sessie met het lezen van dit bestand en `CLAUDE.md`.
 - Vraag bij twijfel over een speelkeuze (balans, humor, volgorde); neem technische standaardkeuzes zelf en meld ze.
-- Maak een bestand nooit "tijdelijk" langer dan 100 regels.
+- Houd bestanden rond 100 regels; zie je een bestand groeien of meerdere verantwoordelijkheden krijgen, splits het direct.
 - Als een stap te groot blijkt: stop, stel een opsplitsing voor.
 
 ### Git-werkwijze (per stap)
@@ -404,11 +411,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nog te doen / volgende stap:** ...
 ```
 
+### Besluit na stap 1: regelrichtlijn en SOLID (2026-10-06, `chore-line-policy-and-solid`)
+- **Gedaan:** de harde grens van 100 regels is een richtlijn geworden: waarschuwing vanaf 101 regels (ESLint en `check-lines`), fout vanaf 121. SOLID is verplicht gesteld in hoofdstuk 1 en 9 en in `CLAUDE.md`.
+- **Waarom:** de 100 regels waren bedoeld om SOLID af te dwingen, niet als doel op zich. Een paar regels erover mag, te lange bestanden niet.
+- **Gecontroleerd:** bestand van 101 regels geeft een waarschuwing, 121 regels geeft een fout.
+
 ### Stap 1: Project opzetten (2026-10-06, `step-01-project-setup`)
 - **Gedaan:**
   - Vite 8 + TypeScript (strict) + Phaser 4.2.1 + Vitest 5 + ESLint 10 + `break_infinity.js` geïnstalleerd.
   - Scripts: `npm run dev | build | typecheck | lint | lines | test | check`.
-  - `scripts/check-lines.mjs` (faalt bij > 100 regels in `src/`, `tests/`, `scripts/`) plus ESLint-regels `max-lines: 100` en `max-lines-per-function: 40`.
+  - `scripts/check-lines.mjs` (faalde bij > 100 regels; sinds de beleidswijziging na stap 1: waarschuwing vanaf 101, fout vanaf 121) plus ESLint `max-lines-per-function: 40`.
   - ESLint-lagenregel: `src/core`, `src/systems`, `src/data` mogen geen `phaser`, `scene/`, `ui/`, `document`, `window` of `localStorage` gebruiken.
   - Pad-alias `@/` naar `src/`. Lege Phaser-scene (1280×720, `Scale.FIT`, gecentreerd) toont "Hello tavern". `index.html` heeft `#game` en `#ui-root`.
   - Eén test (16:9-ontwerpresolutie). `.gitignore` (o.a. `.env*`, `.claude/`) en `.gitattributes` (LF).
