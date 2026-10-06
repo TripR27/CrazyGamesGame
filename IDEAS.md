@@ -46,6 +46,26 @@
 
 ---
 
-## 3. Andere gedachten (leeg)
+## 3. Winkel-layout en schermindeling nakijken
+
+**Wens (eigenaar, 2026-10-06):** de layout van de shop en hoe alles op het scherm komt, moeten later nog aangepast of nagekeken worden. Wat er nu staat (stap 9) is een werkende placeholder.
+
+**Wat er nu is:** de winkel is een kolom (380 ontwerp-pixels) rechts van het spel. Spel en kolom passen samen als één kader in het venster; het spel wordt kleiner zodra de winkel opent, zodat je kunt blijven serveren. De kolom is even hoog als het spel en loopt niet door de lege balken van een venster dat niet 16:9 is. De Shop/Close-knop staat in de rechterbovenhoek van het spel. Zie `ui/side-layout.ts`, `ui/fit-root.ts` en `ui/shop/`.
+
+**Om na te kijken of aan te passen (nog niet gepland):**
+- Het spel springt van schaal als de winkel opent of sluit; misschien liever een zachte overgang, of de winkel als overlay op kleine vensters.
+- Hoe klein het spel wordt met de winkel open op een klein venster of laptop, en hoe leesbaar de tekst dan nog is.
+- De lege balken boven en onder bij een niet-16:9-venster: leeg laten, of de achtergrond doortrekken (past bij de art-pass).
+- Echte afmetingen van de CrazyGames-iframe en volledig scherm controleren, en later de mobiele/touch-indeling (liggend en staand).
+- De breedte van de kolom, de lettergroottes, de rij-indeling en wat er bij veel upgrades gebeurt (scrollen, groeperen per soort: ketel, taverne, personeel).
+- De tutorial-pijl kan op een knop in het paneel liggen; de plaatsing en de Skip-knop bij een open paneel nakijken.
+- Eén gedeelde regel voor alle zijpanelen (winkel, receptenboek, instellingen, helden): wat gebeurt er als twee tegelijk open willen?
+- Waar de Shop-knop staat ten opzichte van de HUD en de bar.
+
+**Plan:** niet bouwen buiten de stappen. Meenemen bij stap 14 (kamers en visuele groei, nieuwe panelen), bij de mobiele pass en in elk geval bij stap 21 (styling) en stap 22 (QA op Chromebook, Chrome en Edge). Wil de eigenaar het eerder, dan komt het als aparte stap in SPEC.md.
+
+---
+
+## 4. Andere gedachten (leeg)
 
 *(Hier komen nieuwe ideeën.)*

@@ -39,7 +39,7 @@ Voorlopige keuze: **Brewmaster's Tavern**. Vóór lancering checken of de naam a
 ## 3. Ontwerppijlers
 
 1. **5 seconden tot plezier.** Geen tutorial-muur. Eerste klik = eerste drankje = eerste goud.
-2. **Diepte komt later.** Nieuwe systemen worden pas ontgrendeld na een paar minuten, zodat de speler nooit overweldigd wordt.
+2. **Diepte komt later.** Nieuwe systemen worden pas ontgrendeld na een paar minuten, zodat de speler nooit overweldigd wordt. Dat geldt ook voor drukte: klanten komen **geleidelijk**, niet meteen veel en niet snel achter elkaar. De speler begint met één plek in de bar (maximaal één klant tegelijk) en koopt extra plekken.
 3. **Altijd iets te kopen.** Op elk moment is er een upgrade die bijna betaalbaar is.
 4. **Visuele beloning.** Elke progressie is zichtbaar in de scene: nieuwe meubels, nieuwe klanten, drukte.
 5. **Respect voor de speler.** Geen agressieve ads of pay-to-win. Ads alleen op natuurlijke momenten (zie hoofdstuk 9).
@@ -101,6 +101,7 @@ Voorbeeld-ladder:
 - **Geduld-balk:** te lang wachten = klant gaat weg (geen straf voor idle-modus, wel voor actief spel, anders irritant).
 - **VIP-klanten** (koningen, beroemde helden) verschijnen willekeurig, betalen veel, vragen een specifiek duur drankje.
 - Klantaantal en variatie schalen mee met reputatie.
+- **Geleidelijke instroom:** in het begin komen klanten rustig, één voor één. De speler begint met **één plek** (maximaal één klant tegelijk in de bar) en koopt **extra plekken** als upgrade; later komen er plekken bij via kamers. Zo groeit de drukte mee met wat de speler aankan.
 
 ### 5.3 Reputatie
 - Verdiend door tevreden klanten. Reputatie-niveaus ontgrendelen: nieuwe klanttypes, kamers, recepten, helden-slots.
@@ -117,6 +118,7 @@ Voorbeeld-ladder:
   5. Podium met minstrelen (passieve bonus op fooien)
   6. Casino-hoek (minigame, risico/beloning)
   7. Kasteel-verdiepingen
+- **Plekken in de bar** (upgrade, misschien later): betalen voor extra klantplekken, beginnend bij één.
 - Cosmetische **decoratie** als goud-sink: fakkels, tapijten, trofeeën (kleine bonussen + puur plezier).
 
 ### 5.5 Helden-gilde
