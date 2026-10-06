@@ -1,3 +1,4 @@
+import { systemClock, type Clock } from '@/core/clock';
 import type { EventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import type { Rng } from '@/core/rng';
@@ -15,6 +16,7 @@ import { createPlayerActions } from '@/systems/actions';
 import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
 import { createFloor, startCustomerSystem } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
+import { createOffline, type OfflineServices } from './create-offline';
 import { createTutorial, type TutorialServices } from './create-tutorial';
 import { startStaffWork } from './start-staff';
 import { syncStationStats } from './sync-station';
@@ -26,11 +28,14 @@ export interface WiringDeps {
   store: Store<GameState>;
   bus: EventBus<GameEvents>;
   rng: Rng;
+  /** Used to mark when offline time has been counted. Defaults to the system clock. */
+  clock?: Clock;
 }
 
 export interface GameWorld {
   scene: SceneServices;
   tutorial: TutorialServices;
+  offline: OfflineServices;
   /** Shared by the scene and the DOM overlay, so the tutorial can point at both. */
   targets: TargetRegistry;
 }
@@ -39,13 +44,12 @@ export interface GameWorld {
  * The composition root for the game world: builds the runtime objects (customer floor, cauldron and bar),
  * starts the systems that run on the tick, and returns what the scenes need.
  */
-export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
+export function createServices({ store, bus, rng, clock = systemClock }: WiringDeps): GameWorld {
   const catalog = { customerTypes: customers, recipes };
   const floor = createFloor(CUSTOMER_SLOTS.length);
   const station = createStation(BREWING.storageCapacity);
   syncStationStats(store, station);
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
-
   const tutorial = createTutorial({ store, bus, floor, station });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomerSystem({
@@ -64,10 +68,8 @@ export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
     }),
   });
   startBrewSystem(station, bus);
-
   watchShop(store, bus);
   startStaffWork({ store, bus, floor, station, rng, catalog });
-
   const actions = createPlayerActions({
     bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds,
     upgradeStore: store,
@@ -77,5 +79,6 @@ export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
   const getShelf = (): readonly string[] =>
     shelfIngredients(ingredients, recipes.filter((r) => knownIds().includes(r.id))).map((i) => i.id);
   const targets = createTargetRegistry();
-  return { scene: { bus, floor, station, actions, getShelf, targets }, tutorial, targets };
+  const offline = createOffline({ store, bus, clock, catalog });
+  return { scene: { bus, floor, station, actions, getShelf, targets }, tutorial, offline, targets };
 }

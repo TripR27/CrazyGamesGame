@@ -1,9 +1,11 @@
 import { BREWING } from '@/data/brewing';
+import { OFFLINE } from '@/data/offline';
 import type { UpgradeStat } from './types';
 
 /**
  * What each stat is worth before any upgrade: brew speed and sell price are factors, storage is a count,
- * and the staff stats are actions per second (0 until someone is hired).
+ * the staff stats are actions per second (0 until someone is hired) and offlineHours is how long staff
+ * keep working while the player is away.
  */
 export const BASE_STATS: Readonly<Record<UpgradeStat, number>> = {
   brewSpeed: 1,
@@ -11,4 +13,5 @@ export const BASE_STATS: Readonly<Record<UpgradeStat, number>> = {
   storage: BREWING.storageCapacity,
   autoBrew: 0,
   autoServe: 0,
+  offlineHours: OFFLINE.limitHours,
 };

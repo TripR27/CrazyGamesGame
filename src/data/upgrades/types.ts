@@ -4,7 +4,7 @@ export type UpgradeId = string;
 export type UpgradeKind = 'cauldron' | 'tavern' | 'staff';
 
 /** The stats an upgrade can change; `getMultipliers` reads these. Add a stat here and in `BASE_STATS`. */
-export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe'] as const;
+export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe', 'offlineHours'] as const;
 export type UpgradeStat = (typeof UPGRADE_STATS)[number];
 
 export interface UpgradeEffect {

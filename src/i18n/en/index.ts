@@ -7,6 +7,7 @@ import { recipes } from './recipes';
 import { shop } from './shop';
 import { tutorial } from './tutorial';
 import { upgrades } from './upgrades';
+import { welcome } from './welcome';
 
 /** One file per domain; adding a domain means adding a spread here. */
-export const en: Messages = { ...hud, ...ingredients, ...recipes, ...customers, ...feedback, ...tutorial, ...shop, ...upgrades };
+export const en: Messages = { ...hud, ...ingredients, ...recipes, ...customers, ...feedback, ...tutorial, ...shop, ...upgrades, ...welcome };
