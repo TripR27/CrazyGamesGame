@@ -1,7 +1,8 @@
 import type { Scene } from 'phaser';
 import { createPool, type Pool } from '@/core/pool';
 import { recipes } from '@/data/recipes';
-import { CUSTOMER_SLOTS, DOOR_ENTRY } from '@/scene/layout';
+import { DOOR_ENTRY } from '@/scene/layout';
+import { SEAT_SLOTS } from '@/scene/layout-rooms';
 import type { SceneServices } from '@/scene/services';
 import { findCustomer, isWaiting } from '@/systems/customers';
 import { shakeNo, showDrinking } from './customer-reactions';
@@ -32,7 +33,7 @@ function walkTo(ctx: LayerContext, sprite: CustomerSprite, x: number, y: number,
 
 function onArrived(ctx: LayerContext, id: number): void {
   const customer = findCustomer(ctx.services.floor, id);
-  const slot = customer === undefined ? undefined : CUSTOMER_SLOTS[customer.seat];
+  const slot = customer === undefined ? undefined : SEAT_SLOTS[customer.seat];
   const recipe = recipes.find((r) => r.id === customer?.recipeId);
   if (customer === undefined || slot === undefined || recipe === undefined) return;
   const sprite = ctx.pool.acquire();

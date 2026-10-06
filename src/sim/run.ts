@@ -4,6 +4,7 @@ import type { Num } from '@/core/numbers';
 import { createSeededRng } from '@/core/rng';
 import { createInitialState, type GameState } from '@/core/state';
 import { createStore } from '@/core/store';
+import { ROOMS } from '@/data/rooms';
 import { getMultipliers } from '@/systems/economy';
 import { levelFor } from '@/systems/reputation';
 import { createServices } from '@/wiring/create-services';
@@ -48,7 +49,8 @@ function snapshot(minute: number, state: GameState): Snapshot {
     reputation: Math.floor(state.reputation),
     level: levelFor(state.reputation),
     recipes: state.recipesDiscovered.length,
-    seats: stats.seats.toNumber(),
+    // Seats downstairs plus the seats of the built rooms.
+    seats: stats.seats.toNumber() + ROOMS.filter((r) => state.roomsBuilt.includes(r.id)).reduce((sum, r) => sum + r.seats, 0),
     staff: `${stats.autoBrew.toNumber().toFixed(2)}/${stats.autoServe.toNumber().toFixed(2)}`,
   };
 }

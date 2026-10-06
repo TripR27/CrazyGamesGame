@@ -4,6 +4,7 @@ import type { TargetRegistry } from '@/core/target-registry';
 import type { PlayerActions } from '@/systems/actions';
 import type { BrewStation } from '@/systems/brewing';
 import type { CustomerFloor } from '@/systems/customers';
+import type { OneTimeOffer } from '@/systems/purchases';
 import type { DrinkSelection } from '@/systems/serving';
 
 /** What the scenes may read and call. Handed in from the composition root (src/wiring). */
@@ -17,6 +18,8 @@ export interface SceneServices {
   actions: PlayerActions;
   /** Ingredient ids to show on the shelf; read again every frame so new ones appear. */
   getShelf(): readonly string[];
+  /** How a room stands (locked, for sale with its price, or built); read every frame. Undefined for an unknown room. */
+  getRoomOffer(roomId: string): OneTimeOffer | undefined;
   /** Scene objects the tutorial can point at register themselves here. */
   targets: TargetRegistry;
 }

@@ -8,6 +8,7 @@ import { panel } from './panel';
 import { ingredients } from './ingredients';
 import { recipes } from './recipes';
 import { reputation } from './reputation';
+import { rooms } from './rooms';
 import { shop } from './shop';
 import { tutorial } from './tutorial';
 import { upgrades } from './upgrades';
@@ -28,4 +29,5 @@ export const en: Messages = {
   ...welcome,
   ...book,
   ...panel,
+  ...rooms,
 };

@@ -33,6 +33,10 @@ export interface CustomerContext {
   unlockedRecipeIds: readonly string[];
   /** Most customers allowed in the tavern at once (the tutorial lowers this to one). */
   maxCustomers: number;
+  /** Seat numbers customers may use (bought seats downstairs, built rooms); left out means every seat. */
+  openSeats?: readonly number[];
+  /** Chance that a new customer is a VIP, once one is open; left out means the base chance. */
+  vipChance?: number;
   /** Patience stops running down (the tutorial freezes it so nobody leaves in the middle of a lesson). */
   freezePatience: boolean;
 }

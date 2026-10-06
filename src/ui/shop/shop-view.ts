@@ -1,21 +1,18 @@
 import type { Listener } from '@/core/store';
 import type { TargetRegistry } from '@/core/target-registry';
-import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
 import { upgrades } from '@/data/upgrades';
 import { t } from '@/i18n';
 import type { PlayerActions } from '@/systems/actions';
-import type { IngredientShopState } from '@/systems/ingredients';
 import type { BuyAmount, UpgradeState } from '@/systems/upgrades';
 import { createEl } from '@/ui/dom';
 import type { SidePanels } from '@/ui/side-panels';
-import { mountIngredientSection } from './ingredient-section';
+import { mountOneTimeGroups, type OneTimeState } from './one-time-groups';
 import { buildPanel, registerTargets } from './shop-panel';
 import { toRowView } from './shop-view-model';
 import { createUpgradeRow } from './upgrade-row';
 import './shop.css';
 
-type ShopState = UpgradeState & IngredientShopState;
+type ShopState = UpgradeState & OneTimeState;
 
 export interface ShopSource {
   getState(): ShopState;
@@ -28,11 +25,11 @@ export interface ShopHosts {
   panels: SidePanels;
 }
 
-/** The Shop tab of the side panel: the ingredients for sale, then one row per upgrade. Returns an unmount function. */
+/** The Shop tab of the side panel: ingredients and rooms for sale, then one row per upgrade. Returns an unmount function. */
 export function mountShop(
   { root, panels }: ShopHosts,
   source: ShopSource,
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'buyIngredient' | 'openShop' | 'closeShop'>,
+  actions: Pick<PlayerActions, 'buyUpgrade' | 'buyIngredient' | 'buildRoom' | 'openShop' | 'closeShop'>,
   targets: TargetRegistry,
 ): () => void {
   let amount: BuyAmount = 1;
@@ -41,8 +38,7 @@ export function mountShop(
     render();
   });
 
-  const catalog = { ingredients, recipes };
-  const renderIngredients = mountIngredientSection({ list, root, panel, catalog, onBuy: actions.buyIngredient, targets });
+  const renderOneTime = mountOneTimeGroups({ list, root, panel, actions, targets });
   let kind = '';
   const rows = upgrades.map((def) => {
     const row = createUpgradeRow(() => actions.buyUpgrade(def.id, amount));
@@ -56,7 +52,7 @@ export function mountShop(
 
   function render(): void {
     picker.select(amount);
-    renderIngredients(source.getState());
+    renderOneTime(source.getState());
     for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
   }
   panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: actions.openShop, onClose: actions.closeShop });

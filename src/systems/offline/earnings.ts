@@ -44,13 +44,14 @@ function customerReward(recipes: readonly RecipeDef[], type: CustomerDef, sellMu
 
 /**
  * What one served drink brings on average at this reputation: the regular customers of the level (evenly,
- * like the spawner picks them), and VIPs by their chance once one is open. Zero when nobody could order.
+ * like the spawner picks them), and VIPs by their chance (`vipChance`) once one is open. Zero when nobody could order.
  */
 export function averageReward(
   recipes: readonly RecipeDef[],
   customerTypes: readonly CustomerDef[],
   reputation: number,
   sellMultiplier: Num,
+  vipChance: number = VIP_SPAWN.chance,
 ): Reward {
   if (recipes.length === 0) return NOTHING;
   const open = customerTypes.filter((c) => c.minLevel <= levelFor(reputation));
@@ -58,5 +59,5 @@ export function averageReward(
     average(open.filter((c) => (c.vip === true) === vip).map((c) => customerReward(recipes, c, sellMultiplier)));
   const regular = byType(false);
   if (!open.some((c) => c.vip === true)) return regular;
-  return average([regular, byType(true)], [1 - VIP_SPAWN.chance, VIP_SPAWN.chance]);
+  return average([regular, byType(true)], [1 - vipChance, vipChance]);
 }

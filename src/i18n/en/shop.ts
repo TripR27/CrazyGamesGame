@@ -9,6 +9,8 @@ export const shop: Messages = {
   'shop.ingredient_owned': 'On the shelf',
   'shop.buy_once': 'Buy · {cost}',
   'shop.owned': 'Owned',
+  'shop.kind_rooms': 'Rooms',
+  'shop.build_once': 'Build · {cost}',
   'shop.kind_cauldron': 'Cauldron',
   'shop.kind_tavern': 'Tavern',
   'shop.kind_staff': 'Staff',

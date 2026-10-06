@@ -21,7 +21,7 @@ export function updateCustomers(
 ): CustomerChange[] {
   // Drinking goes on during a lesson too, otherwise a served customer would hold the only seat.
   const changes = [...advanceDrinking(floor, deltaMs), ...(context.freezePatience ? [] : advancePatience(floor, deltaMs))];
-  const full = floor.customers.length >= context.maxCustomers || freeSeats(floor).length === 0;
+  const full = floor.customers.length >= context.maxCustomers || freeSeats(floor, context.openSeats).length === 0;
   floor.spawnInMs = Math.max(full ? SPAWNING.refillDelayMs : 0, floor.spawnInMs - deltaMs);
   if (floor.spawnInMs > 0) return changes;
 

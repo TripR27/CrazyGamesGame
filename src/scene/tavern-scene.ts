@@ -3,6 +3,7 @@ import { createCauldronView, type CauldronView } from '@/scene/brewing/cauldron-
 import { createReadyView, type ReadyView } from '@/scene/brewing/ready-view';
 import { createShelfView, type ShelfView } from '@/scene/brewing/shelf-view';
 import { createCustomersLayer, type CustomersLayer } from '@/scene/customers/customers-layer';
+import { createRoomsView, type RoomsView } from '@/scene/rooms/rooms-view';
 import { createFeedbackLayer } from '@/scene/effects/feedback-layer';
 import type { SceneServices } from '@/scene/services';
 import { drawBar } from '@/scene/sprites/bar';
@@ -19,6 +20,7 @@ interface Views {
   shelf: ShelfView;
   cauldron: CauldronView;
   ready: ReadyView;
+  rooms: RoomsView;
 }
 
 /** Placeholder cross-section of the tavern: static shapes on one Graphics object, plus the live parts. */
@@ -38,7 +40,10 @@ export class TavernScene extends Scene {
     drawBar(g);
     drawCauldron(g);
     drawCustomerSlots(g);
+    // The rooms come first, so customers upstairs are drawn in front of them.
+    const rooms = createRoomsView(this, services);
     this.views = {
+      rooms,
       shelf: createShelfView(this, services.getShelf, services.actions.clickIngredient, services.targets),
       cauldron: createCauldronView(this, services.station, services.actions.clickCauldron, services.targets),
       ready: createReadyView(this, {
@@ -65,6 +70,7 @@ export class TavernScene extends Scene {
     this.views.shelf.update();
     this.views.cauldron.update();
     this.views.ready.update();
+    this.views.rooms.update();
     this.views.customers.update();
   }
 }

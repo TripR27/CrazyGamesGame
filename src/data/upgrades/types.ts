@@ -3,8 +3,8 @@ export type UpgradeId = string;
 /** Shop grouping. Add a kind here when a new upgrade category appears. */
 export type UpgradeKind = 'cauldron' | 'tavern' | 'staff';
 
-/** The stats an upgrade can change; `getMultipliers` reads these. Add a stat here and in `BASE_STATS`. */
-export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe', 'offlineHours', 'seats'] as const;
+/** The stats an upgrade or a room can change; `getMultipliers` reads these. Add a stat here and in `BASE_STATS`. */
+export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe', 'offlineHours', 'seats', 'vipChance'] as const;
 export type UpgradeStat = (typeof UPGRADE_STATS)[number];
 
 export interface UpgradeEffect {

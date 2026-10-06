@@ -19,6 +19,8 @@ export interface OfflineInput {
   knownRecipes: readonly RecipeDef[];
   customerTypes: readonly CustomerDef[];
   sellMultiplier: Num;
+  /** Chance that a customer is a VIP once one is open (rooms can raise it); left out means the base chance. */
+  vipChance?: number;
 }
 
 /**
@@ -35,7 +37,7 @@ export function computeOffline(input: OfflineInput): OfflineReport {
   const customersPerSecond = 1000 / meanSpawnIntervalMs(input.reputation);
   const drinksPerSecond = Math.min(input.rates.brew, input.rates.serve, customersPerSecond);
   const served = hadStaff ? Math.floor((countedMs / 1000) * drinksPerSecond * OFFLINE.efficiency) : 0;
-  const reward = averageReward(input.knownRecipes, input.customerTypes, input.reputation, input.sellMultiplier);
+  const reward = averageReward(input.knownRecipes, input.customerTypes, input.reputation, input.sellMultiplier, input.vipChance);
 
   return {
     awayMs,

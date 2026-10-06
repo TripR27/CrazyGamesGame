@@ -16,10 +16,10 @@ export function trySpawn(
   rng: Rng,
 ): CustomerChange | undefined {
   if (floor.customers.length >= context.maxCustomers) return undefined;
-  const type = pickCustomerType(rng, catalog.customerTypes, levelFor(context.reputation));
+  const type = pickCustomerType(rng, catalog.customerTypes, levelFor(context.reputation), context.vipChance);
   const known = catalog.recipes.filter((r) => context.unlockedRecipeIds.includes(r.id));
   const recipe = type === undefined ? undefined : pickOrder(rng, type, known);
-  const seat = pickRandom(rng, freeSeats(floor));
+  const seat = pickRandom(rng, freeSeats(floor, context.openSeats));
   if (type === undefined || recipe === undefined || seat === undefined) return undefined;
 
   const patienceMaxMs = type.patienceSeconds * 1000;

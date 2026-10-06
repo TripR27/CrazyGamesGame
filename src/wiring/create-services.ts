@@ -8,12 +8,14 @@ import type { Store } from '@/core/store';
 import { BREWING } from '@/data/brewing';
 import { customers } from '@/data/customers';
 import { recipes } from '@/data/recipes';
+import { ROOMS } from '@/data/rooms';
 import { upgrades } from '@/data/upgrades';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { createPlayerActions } from '@/systems/actions';
 import { createStation, startBrewSystem } from '@/systems/brewing';
 import { createFloor } from '@/systems/customers';
+import { roomOffer, totalSeats } from '@/systems/rooms';
 import { getMultipliers } from '@/systems/economy';
 import { recordDiscoveries } from '@/systems/recipes';
 import { watchReputationLevels } from '@/systems/reputation';
@@ -48,7 +50,9 @@ export interface GameWorld {
  */
 export function createServices({ store, bus, rng, clock = systemClock }: WiringDeps): GameWorld {
   const catalog = { customerTypes: customers, recipes };
-  const floor = createFloor(CUSTOMER_SLOTS.length);
+  // Seat numbers: downstairs first, then the rooms upstairs (built or not; customers only use the open ones).
+  const seatPlan = { ground: CUSTOMER_SLOTS.length, rooms: ROOMS };
+  const floor = createFloor(totalSeats(seatPlan));
   const station = createStation(BREWING.storageCapacity);
   syncStationStats(store, station);
   // Announces each new reputation level (the HUD shows a message).
@@ -58,7 +62,7 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
   const tutorial = createTutorial({ store, bus, floor, station, ingredients: shelf.catalog });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
-  startCustomers({ store, bus, rng, floor, catalog }, inLesson);
+  startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);
   startBrewSystem(station, bus);
   watchShop(store, bus, shelf.catalog);
   startStaffWork({ store, bus, floor, station, rng, catalog });
@@ -70,8 +74,14 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
     getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
     getDiscoverable: shelf.getDiscoverable,
     ingredients: { store, catalog: shelf.catalog },
+    rooms: { store, defs: ROOMS },
   });
   const targets = createTargetRegistry();
   const offline = createOffline({ store, bus, clock, catalog });
-  return { scene: { bus, floor, station, selection, actions, getShelf: shelf.getShelf, targets }, tutorial, offline, targets };
+  const getRoomOffer = (roomId: string) => {
+    const room = ROOMS.find((r) => r.id === roomId);
+    return room === undefined ? undefined : roomOffer(store.getState(), room);
+  };
+  const scene = { bus, floor, station, selection, actions, getShelf: shelf.getShelf, getRoomOffer, targets };
+  return { scene, tutorial, offline, targets };
 }

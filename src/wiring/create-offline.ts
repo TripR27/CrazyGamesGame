@@ -39,6 +39,7 @@ export function createOffline({ store, bus, clock, catalog }: OfflineDeps): Offl
         knownRecipes: recipes.filter((r) => state.recipesDiscovered.includes(r.id)),
         customerTypes: catalog.customerTypes,
         sellMultiplier: stats.sellPrice,
+        vipChance: stats.vipChance.toNumber(),
       });
       applyOffline(store, report);
       // The time is accounted for now; without this the same gap would count again at the next save.

@@ -18,6 +18,9 @@ export interface GuideContext {
   /** The first ingredient the player can buy in the shop right now, and the one bought last, if any. */
   affordableIngredientId: string | null;
   newestIngredientId: string | null;
+  /** The first room the player can build right now, and the one built last, if any. */
+  affordableRoomId: string | null;
+  newestRoomId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes'), or null while the panel is folded away. */
   openTab: string | null;
 }

@@ -24,6 +24,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     staff: upgradeName(ctx.affordableStaffId),
     liked: name('recipes', likedCustomer(ctx)?.recipeId),
     royal: name('recipes', vipCustomer(ctx)?.recipeId),
+    room: ctx.affordableRoomId === null ? '' : t(textKey('rooms', ctx.affordableRoomId, 'name')),
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
     ...likedEffect(ctx),
   });

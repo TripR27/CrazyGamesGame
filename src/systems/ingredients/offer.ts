@@ -1,7 +1,7 @@
-import { num, type Num } from '@/core/numbers';
+import type { Num } from '@/core/numbers';
 import type { IngredientDef } from '@/data/ingredients';
 import type { RecipeDef } from '@/data/recipes';
-import { levelFor } from '@/systems/reputation';
+import { oneTimeOffer, type OneTimeOffer } from '@/systems/purchases';
 import { ownedIngredients, type IngredientState } from './owned';
 
 /** The part of the state the ingredient shop reads and changes. */
@@ -16,14 +16,7 @@ export interface IngredientShopStore {
   update(mutator: (state: IngredientShopState) => void): void;
 }
 
-/** How an ingredient stands in the shop: not yet (level too low), for sale, or already on the shelf. */
-export type OfferStatus = 'locked' | 'forSale' | 'owned';
-
-export interface IngredientOffer {
-  status: OfferStatus;
-  cost: Num;
-  affordable: boolean;
-}
+export type IngredientOffer = OneTimeOffer;
 
 /** The catalogue the shop works with; passed in so tests and the simulator can use their own. */
 export interface IngredientCatalog {
@@ -32,12 +25,8 @@ export interface IngredientCatalog {
 }
 
 export function ingredientOffer(state: IngredientShopState, def: IngredientDef, catalog: IngredientCatalog): IngredientOffer {
-  const cost = num(def.buy?.cost ?? 0);
-  if (ownedIngredients(state, catalog.ingredients, catalog.recipes).some((i) => i.id === def.id)) {
-    return { status: 'owned', cost, affordable: false };
-  }
-  const open = def.buy !== undefined && levelFor(state.reputation) >= def.buy.level;
-  return { status: open ? 'forSale' : 'locked', cost, affordable: open && state.currencies.gold.gte(cost) };
+  const owned = ownedIngredients(state, catalog.ingredients, catalog.recipes).some((i) => i.id === def.id);
+  return oneTimeOffer(def.buy, owned, state);
 }
 
 /** The ingredients sold in the shop (all of them, whatever their status), in content order. */

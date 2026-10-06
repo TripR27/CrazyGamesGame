@@ -19,6 +19,8 @@ export interface SideTab {
 
 export interface SidePanels {
   add(tab: SideTab): void;
+  /** Unfold the panel on this tab (for example when the scene asks for the shop). */
+  show(tabId: string): void;
 }
 
 interface Entry {
@@ -76,5 +78,6 @@ export function createSidePanels(root: HTMLElement, layout: SideLayout, targets:
       targets.register(`tab:${tab.id}`, () => (panel.hidden ? null : domBounds(button, root)));
       render();
     },
+    show: (tabId) => apply(state.select(tabId)),
   };
 }

@@ -55,6 +55,11 @@ export interface GameEvents {
   /** An ingredient in the shop can be bought (after not being able to); and one was bought (one time each). */
   'ingredients:affordable': Record<string, never>;
   'ingredient:bought': { id: string };
+  /** Same for the rooms on the upper floor; `room:built` once per room. */
+  'rooms:affordable': Record<string, never>;
+  'room:built': { id: string };
+  /** Something in the scene (a boarded-up room) asks the side panel to open on the Shop tab. */
+  'shop:requested': Record<string, never>;
   /** A staff upgrade was bought (a hire or a training level). */
   'staff:hired': { id: string };
   /** The shop panel was opened or closed (the tutorial follows this). */

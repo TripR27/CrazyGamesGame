@@ -51,6 +51,7 @@ mountUi(document.getElementById('ui-root') as HTMLElement, {
   layout,
   welcome: world.offline.inbox,
   onLevelUp: (show) => bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, customers))),
+  onShopRequest: (open) => bus.on('shop:requested', open),
   onFit: (fit) =>
     placeGame(document.getElementById('game') as HTMLElement, fit, () => {
       game.scale.getParentBounds();
