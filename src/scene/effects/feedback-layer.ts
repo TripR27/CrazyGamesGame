@@ -1,5 +1,6 @@
 import type { Scene } from 'phaser';
 import { formatNumber } from '@/core/format';
+import { recipes } from '@/data/recipes';
 import { textKey } from '@/data/text-key';
 import { t } from '@/i18n';
 import { CAULDRON, CUSTOMER_SLOTS } from '@/scene/layout';
@@ -20,12 +21,13 @@ export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () =>
     t(key, recipeId === undefined ? undefined : { drink: t(textKey('recipes', recipeId, 'name')) });
 
   const stops = [
-    bus.on('customer:served', ({ seat, recipeId, gold, tip, extraReputation, messageKey }) => {
+    bus.on('customer:served', ({ seat, recipeId, gold, tip, extraReputation, liked, messageKey }) => {
       const slot = CUSTOMER_SLOTS[seat];
-      if (slot === undefined) return;
+      const effect = recipes.find((r) => r.id === recipeId)?.effect;
+      if (slot === undefined || effect === undefined) return;
       floats.show(slot.x, slot.y - GOLD_ABOVE_SLOT, `+${formatNumber(gold)}`, { color: GOLD_COLOR, size: 24 });
       floats.show(slot.x, slot.y - LINE_ABOVE_SLOT, line(messageKey, recipeId));
-      bonusLines(tip, extraReputation).forEach((b, i) => {
+      bonusLines(effect, { tip, extraReputation, liked }).forEach((b, i) => {
         floats.show(slot.x, slot.y - BONUS_ABOVE_SLOT + i * BONUS_LINE_PX, b.text, { color: b.color, size: 16 });
       });
     }),

@@ -18,6 +18,7 @@ import { createFloor } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
 import { discoverableRecipes, recordDiscoveries } from '@/systems/recipes';
 import { watchReputationLevels } from '@/systems/reputation';
+import { createDrinkSelection } from '@/systems/serving';
 import { createOffline, type OfflineServices } from './create-offline';
 import { createTutorial, type TutorialServices } from './create-tutorial';
 import { startCustomers } from './start-customers';
@@ -61,8 +62,9 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
   startBrewSystem(station, bus);
   watchShop(store, bus);
   startStaffWork({ store, bus, floor, station, rng, catalog });
+  const selection = createDrinkSelection(station);
   const actions = createPlayerActions({
-    bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds,
+    bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds, selection,
     upgradeStore: store,
     upgradeDefs: upgrades,
     getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
@@ -73,5 +75,5 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
     shelfIngredients(ingredients, [...recipes.filter((r) => knownIds().includes(r.id)), ...discoverable()]).map((i) => i.id);
   const targets = createTargetRegistry();
   const offline = createOffline({ store, bus, clock, catalog });
-  return { scene: { bus, floor, station, actions, getShelf, targets }, tutorial, offline, targets };
+  return { scene: { bus, floor, station, selection, actions, getShelf, targets }, tutorial, offline, targets };
 }

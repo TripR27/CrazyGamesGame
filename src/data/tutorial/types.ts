@@ -24,4 +24,9 @@ export interface TutorialStep {
   completeOn: Trigger;
   /** The step relies on things that are not saved (cauldron, bar); after a reload the lesson restarts. */
   needsLiveState?: boolean;
+  /**
+   * The completing event is only a way to get somewhere (opening a panel tab), not a real action: it counts only
+   * while this step is on screen and never finishes it ahead of time. Already there when the step shows: done at once.
+   */
+  onlyWhenShown?: boolean;
 }

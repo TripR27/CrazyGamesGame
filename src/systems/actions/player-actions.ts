@@ -6,14 +6,14 @@ import type { RecipeDef } from '@/data/recipes';
 import type { UpgradeDef } from '@/data/upgrades';
 import { addIngredient, emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
 import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
-import { serveAndPublish, type EconomyStore } from '@/systems/serving';
+import { createDrinkSelection, type DrinkSelection, type EconomyStore } from '@/systems/serving';
 import { buyUpgrade, type BuyAmount, type UpgradeStore } from '@/systems/upgrades';
+import { createServeActions, type ServeActions } from './serve-actions';
 
 /** Everything the player can do with the mouse. The scene calls these and never touches game rules. */
-export interface PlayerActions {
+export interface PlayerActions extends ServeActions {
   clickIngredient(ingredientId: string): void;
   clickCauldron(): void;
-  clickCustomer(customerId: number): void;
   /** Buy levels of an upgrade; does nothing when it cannot be afforded. */
   buyUpgrade(upgradeId: string, amount: BuyAmount): void;
   /** The shop panel was opened. Announced so the tutorial can follow along. */
@@ -39,11 +39,16 @@ export interface PlayerActionDeps {
   getKnownRecipeIds(): readonly string[];
   /** Recipes the player could discover now by brewing them (none when left out). */
   getDiscoverable?(): readonly RecipeDef[];
+  /** The drink picked from the bar; shared with the scene, which shows it. A fresh one when left out. */
+  selection?: DrinkSelection;
 }
 
 export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
   const { bus, station, floor, economy, catalog, rng } = deps;
+  const selection = deps.selection ?? createDrinkSelection(station);
+  const getSellMultiplier = deps.getSellMultiplier;
   return {
+    ...createServeActions({ bus, floor, station, economy, catalog, rng, getSellMultiplier, selection }),
     clickIngredient(ingredientId) {
       bus.emit('ingredient:clicked', { id: ingredientId });
       const known = catalog.recipes.filter((r) => deps.getKnownRecipeIds().includes(r.id));
@@ -52,9 +57,6 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
     },
     clickCauldron() {
       emptyCauldron(station);
-    },
-    clickCustomer(customerId) {
-      serveAndPublish({ bus, floor, station, economy, catalog, rng, getSellMultiplier: deps.getSellMultiplier }, customerId);
     },
     buyUpgrade(upgradeId, amount) {
       const def = deps.upgradeDefs.find((u) => u.id === upgradeId);

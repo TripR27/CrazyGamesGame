@@ -15,11 +15,16 @@ interface Session {
 const current = (s: Session): TutorialStep | null => firstOpenStep(s.steps, s.store.get());
 const notify = (s: Session): void => s.listeners.forEach((l) => l());
 
-/** A step shows at once if it has no start event, or if what that event announces is already true. */
+/**
+ * A step shows at once if it has no start event, or if what that event announces is already true. A step that
+ * only waits for the player to get somewhere is done at once when they are already there.
+ */
 function begin(s: Session): void {
   s.elapsedMs = 0;
-  const start = current(s)?.startWhen;
-  s.started = start === undefined || s.alreadyHolds(start.event);
+  const open = current(s);
+  s.started = open?.startWhen === undefined || s.alreadyHolds(open.startWhen.event);
+  const done = open?.completeOn;
+  if (s.started && open?.onlyWhenShown === true && done?.kind === 'event' && s.alreadyHolds(done.event)) completeThrough(s, open);
 }
 
 /** Finish this step and every earlier one: doing a later step's action first never leaves the tutorial stuck. */
@@ -38,9 +43,10 @@ function handleEvent(s: Session, event: TutorialEvent): void {
   const open = current(s);
   if (open === null) return;
   const done = s.store.get().completedSteps;
+  const counts = (step: TutorialStep): boolean => step.onlyWhenShown !== true || (step === open && s.started);
   const later = [...s.steps]
     .reverse()
-    .find((step) => !done.includes(step.id) && step.completeOn.kind === 'event' && step.completeOn.event === event);
+    .find((step) => !done.includes(step.id) && step.completeOn.kind === 'event' && step.completeOn.event === event && counts(step));
   if (later !== undefined) return completeThrough(s, later);
   if (!s.started && open.startWhen?.event === event) {
     s.started = true;

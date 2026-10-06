@@ -8,6 +8,8 @@ export const likesLesson: readonly TutorialStep[] = [
     startWhen: { kind: 'event', event: 'likes:ordered' },
     target: 'guide-liked',
     completeOn: { kind: 'event', event: 'likes:served' },
+    // A liked drink served during the basics must not skip this lesson: it shows at the next liked order.
+    onlyWhenShown: true,
   },
   {
     id: 'likes_done',

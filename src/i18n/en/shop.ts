@@ -1,9 +1,8 @@
 import type { Messages } from '@/i18n/translator';
 
 export const shop: Messages = {
-  'shop.button': 'Shop',
+  'shop.tab': 'Shop',
   'shop.title': 'Upgrades',
-  'shop.close': 'Close',
   'shop.kind_cauldron': 'Cauldron',
   'shop.kind_tavern': 'Tavern',
   'shop.kind_staff': 'Staff',

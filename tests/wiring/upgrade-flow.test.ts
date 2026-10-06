@@ -8,7 +8,7 @@ import { newGame, playBasics, playLikes } from './helpers';
 /** A game in which the basics lesson is done and the player has `gold`. */
 function afterBasics(gold: number) {
   const state = createInitialState(0);
-  state.tutorial.completedSteps = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
+  state.tutorial.completedSteps = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
   state.currencies.gold = num(gold);
   state.upgrades = { extra_seat: 6 }; // seats are not what these tests are about
   return newGame(state);

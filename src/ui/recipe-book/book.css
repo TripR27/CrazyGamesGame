@@ -1,6 +1,3 @@
-/* The Recipes button sits left of the Shop button. */
-.book-button { right: calc(var(--side-w, 0px) + 130px); }
-
 .book-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
 .book-title { margin: 0; font-size: 20px; }
 .book-progress { font-size: 14px; font-weight: bold; opacity: 0.8; }

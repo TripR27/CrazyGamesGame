@@ -4,7 +4,7 @@ import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
 
 const EARLIER = [
-  'basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
+  'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
   'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done',
 ];
 
@@ -48,11 +48,21 @@ describe('the recipe book hint, played in the real game', () => {
     expect(game.shown()).toBeNull();
     game.store.update((s) => void (s.reputation = 10));
     expect(game.shown()).toBe('book_open');
-    expect(resolveTarget('book-button', game.guide())).toBe('book-button');
+    expect(resolveTarget('guide-book', game.guide())).toBe('panel-button');
+    game.world.scene.actions.openShop(); // the panel unfolds on the shop tab first
+    expect(resolveTarget('guide-book', game.guide())).toBe('tab:recipes');
+    game.world.scene.actions.closeShop();
     game.world.scene.actions.openBook();
     expect(game.shown()).toBe('book_read');
     game.tick(7_100);
     expect(game.shown()).toBeNull();
+  });
+
+  it('is not skipped, and does not skip earlier lessons, when the player opens the Recipes tab early', () => {
+    const game = withReputation(0, ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold']);
+    game.world.scene.actions.openBook();
+    game.world.scene.actions.openShop();
+    expect(game.state.tutorial.completedSteps).toHaveLength(6);
   });
 
   it('starts at once after a reload when the level is already reached', () => {

@@ -4,7 +4,7 @@ import { resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics } from './helpers';
 
 const EARLIER = [
-  'basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
+  'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
   'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'staff_hire', 'staff_done',
 ];
 

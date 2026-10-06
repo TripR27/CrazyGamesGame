@@ -6,7 +6,7 @@ import { CUSTOMER_SLOTS } from '@/scene/layout';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
 
-const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done'];
+const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done'];
 
 const LATER_LESSONS = ['seats_buy', 'seats_done', 'staff_hire', 'staff_done'];
 
@@ -80,7 +80,7 @@ describe('the seat hint, played in the real game', () => {
     const game = afterLessons(0, false);
     game.store.update((s) => void (s.currencies.gold = num(40)));
     expect(game.shown()).toBe('seats_buy');
-    expect(resolveTarget('guide-seats', game.guide())).toBe('shop-button');
+    expect(resolveTarget('guide-seats', game.guide())).toBe('panel-button');
     game.world.scene.actions.openShop();
     expect(resolveTarget('guide-seats', game.guide())).toBe('upgrade:extra_seat');
     game.world.scene.actions.buyUpgrade('extra_seat', 1);

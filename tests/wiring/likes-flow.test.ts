@@ -4,7 +4,7 @@ import { SERVING } from '@/data/brewing';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics } from './helpers';
 
-const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold'];
+const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold'];
 
 /** The basics lesson is done; `known` are the recipes the player knows. */
 function afterBasics(known?: string[]) {
@@ -27,6 +27,15 @@ describe('the preference hint, played in the real game', () => {
     game.tick(6_100);
     expect(game.shown()).toBeNull();
     expect(game.state.tutorial.completedSteps).toEqual(expect.arrayContaining(['likes_spot', 'likes_done']));
+  });
+
+  it('is not skipped when the very first customer of the basics already gets a drink they like', () => {
+    const state = createInitialState(0);
+    state.recipesDiscovered = ['glowcap_stout']; // a speed drink: the knight likes it
+    const game = newGame(state);
+    game.tick(3_500);
+    playBasics(game);
+    expect(game.state.tutorial.completedSteps).not.toContain('likes_spot');
   });
 
   it('stays hidden while nobody orders a drink they like', () => {

@@ -15,7 +15,8 @@ export interface GuideContext {
   affordableSeatsId: string | null;
   /** The first staff upgrade (hire or training) the player can pay for right now, if any. */
   affordableStaffId: string | null;
-  shopOpen: boolean;
+  /** The side-panel tab on screen ('shop', 'recipes'), or null while the panel is folded away. */
+  openTab: string | null;
 }
 
 /**
@@ -50,4 +51,10 @@ export function vipCustomer(ctx: GuideContext): { id: number; recipeId: string }
 /** The oldest waiting customer whose drink is ready on the bar. */
 export function readyCustomerId(ctx: GuideContext): number | undefined {
   return ctx.customers.find((c) => ctx.readyRecipeIds.includes(c.recipeId))?.id;
+}
+
+/** The bar slot of the drink the oldest customer with a ready drink is waiting for (the first such drink on the bar). */
+export function readyDrinkSlot(ctx: GuideContext): number | undefined {
+  const id = ctx.customers.find((c) => ctx.readyRecipeIds.includes(c.recipeId))?.recipeId;
+  return id === undefined ? undefined : ctx.readyRecipeIds.indexOf(id);
 }

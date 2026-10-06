@@ -37,6 +37,8 @@ export interface GameEvents {
   /** The player reached a new reputation level (1 is the first); fired once for every level on the way. */
   'reputation:levelUp': { level: number };
   'ingredient:clicked': { id: string };
+  /** The player picked a finished drink up from the bar, to hand it to a customer next. */
+  'drink:picked': { recipeId: string };
   /** The player brewed a recipe for the first time ("Eureka!"); it is known from now on. */
   'recipe:discovered': { recipeId: string };
   'brew:started': { recipeId: string };

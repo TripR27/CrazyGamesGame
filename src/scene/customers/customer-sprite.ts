@@ -7,6 +7,7 @@ const BUBBLE_HEIGHT = 28;
 const BUBBLE_Y = { low: -96, raised: -126 } as const;
 const BAR_COLORS = { good: 0x7be05a, warn: 0xf5c542, bad: 0xe2563b } as const;
 const MUG_COLOR = 0xe0a030;
+const EDGE = { normal: 0x5e3a18, marked: 0x3fbf3f } as const;
 
 /** A pooled placeholder customer: body, head, a drink bubble and a patience bar. */
 export interface CustomerSprite {
@@ -21,6 +22,8 @@ export interface CustomerSprite {
   setOrderVisible(visible: boolean): void;
   /** Show a mug in the customer's hand while they drink. */
   setDrinking(drinking: boolean): void;
+  /** A green bubble and a small arrow: this customer ordered the drink the player picked up. */
+  setMarked(marked: boolean): void;
 }
 
 function barColor(fraction: number): number {
@@ -28,28 +31,54 @@ function barColor(fraction: number): number {
   return fraction > 0.25 ? BAR_COLORS.warn : BAR_COLORS.bad;
 }
 
+function createPatienceBar(scene: Scene) {
+  const barBack = scene.add.rectangle(0, BAR_Y, BAR_WIDTH, 6, 0x2a1a0c);
+  const bar = scene.add.rectangle(-BAR_WIDTH / 2, BAR_Y, BAR_WIDTH, 6, BAR_COLORS.good).setOrigin(0, 0.5);
+  return { barBack, bar };
+}
+
+/** The bubble with the order text, and the green arrow that marks a customer for the picked-up drink. */
+function createBubble(scene: Scene) {
+  const bubble = scene.add.rectangle(0, BUBBLE_Y.low, 100, BUBBLE_HEIGHT, 0xfff7e0).setStrokeStyle(2, EDGE.normal);
+  const text = scene.add
+    .text(0, BUBBLE_Y.low, '', { fontFamily: 'sans-serif', fontSize: '14px', color: '#3b2410' })
+    .setOrigin(0.5);
+  const mark = scene.add
+    .text(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, '▼', { fontFamily: 'sans-serif', fontSize: '18px', color: '#3fbf3f' })
+    .setOrigin(0.5, 1)
+    .setVisible(false);
+  return {
+    parts: [bubble, text],
+    mark,
+    show(orderText: string, y: number): void {
+      text.setText(orderText).setY(y);
+      mark.setY(y - BUBBLE_HEIGHT / 2);
+      bubble.setSize(Math.max(70, text.width + 20), BUBBLE_HEIGHT).setY(y);
+    },
+    setMarked(marked: boolean): void {
+      if (mark.visible === marked) return;
+      mark.setVisible(marked);
+      bubble.setStrokeStyle(marked ? 4 : 2, marked ? EDGE.marked : EDGE.normal);
+    },
+  };
+}
+
 export function createCustomerSprite(scene: Scene, onClick: (customerId: number) => void): CustomerSprite {
   const hit = scene.add.rectangle(0, -55, 80, 130, 0xffffff, 0.001);
   const body = scene.add.rectangle(0, -20, 30, 38, 0xffffff);
   const head = scene.add.circle(0, -48, 13, SKIN_COLOR);
-  const bubble = scene.add.rectangle(0, BUBBLE_Y.low, 100, BUBBLE_HEIGHT, 0xfff7e0).setStrokeStyle(2, 0x5e3a18);
-  const text = scene.add
-    .text(0, BUBBLE_Y.low, '', { fontFamily: 'sans-serif', fontSize: '14px', color: '#3b2410' })
-    .setOrigin(0.5);
-  const barBack = scene.add.rectangle(0, BAR_Y, BAR_WIDTH, 6, 0x2a1a0c);
-  const bar = scene.add.rectangle(-BAR_WIDTH / 2, BAR_Y, BAR_WIDTH, 6, BAR_COLORS.good).setOrigin(0, 0.5);
-  const order = [bubble, text, barBack, bar];
+  const bubble = createBubble(scene);
+  const { barBack, bar } = createPatienceBar(scene);
+  const order = [...bubble.parts, barBack, bar];
   const mug = scene.add.rectangle(20, -26, 10, 14, MUG_COLOR).setStrokeStyle(2, 0x5e3a18).setVisible(false);
-  const container = scene.add.container(0, 0, [hit, body, head, mug, ...order]);
+  const container = scene.add.container(0, 0, [hit, body, head, mug, ...order, bubble.mark]);
   container.setVisible(false);
   const sprite: CustomerSprite = {
     container,
     customerId: null,
     setLook(typeId, orderText, raised) {
-      const y = raised ? BUBBLE_Y.raised : BUBBLE_Y.low;
       body.setFillStyle(bodyColorFor(typeId));
-      text.setText(orderText).setY(y);
-      bubble.setSize(Math.max(70, text.width + 20), BUBBLE_HEIGHT).setY(y);
+      bubble.show(orderText, raised ? BUBBLE_Y.raised : BUBBLE_Y.low);
     },
     setPatience(fraction) {
       const clamped = Math.min(1, Math.max(0, fraction));
@@ -57,13 +86,14 @@ export function createCustomerSprite(scene: Scene, onClick: (customerId: number)
     },
     setOrderVisible(visible) {
       for (const part of order) part.setVisible(visible);
+      if (!visible) bubble.setMarked(false);
     },
     setDrinking(drinking) {
       mug.setVisible(drinking);
     },
+    setMarked: bubble.setMarked,
   };
-  hit.setInteractive({ useHandCursor: true });
-  hit.on('pointerdown', () => {
+  hit.setInteractive({ useHandCursor: true }).on('pointerdown', () => {
     if (sprite.customerId !== null) onClick(sprite.customerId);
   });
   return sprite;

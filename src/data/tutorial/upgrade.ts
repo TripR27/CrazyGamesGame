@@ -1,13 +1,14 @@
 import type { TutorialStep } from './types';
 
-/** The hint for the first upgrade: starts when the player can pay for one, then open shop, buy, done. */
+/** The hint for the first upgrade: starts when the player can pay for one, then unfold the panel on the shop tab, buy, done. */
 export const upgradeLesson: readonly TutorialStep[] = [
   {
     id: 'upgrade_open',
     lesson: 'upgrade',
     startWhen: { kind: 'event', event: 'upgrade:affordable' },
-    target: 'shop-button',
+    target: 'guide-shop',
     completeOn: { kind: 'event', event: 'shop:opened' },
+    onlyWhenShown: true,
   },
   {
     id: 'upgrade_buy',

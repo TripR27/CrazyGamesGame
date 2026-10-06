@@ -1,6 +1,6 @@
 import type { TutorialStep } from './types';
 
-/** The first lesson: ingredient, cauldron, wait, serve, first gold. */
+/** The first lesson: ingredient, cauldron, wait, pick the drink up, hand it over, first gold. */
 export const basicsLesson: readonly TutorialStep[] = [
   {
     id: 'basics_add',
@@ -20,6 +20,13 @@ export const basicsLesson: readonly TutorialStep[] = [
     lesson: 'basics',
     target: 'cauldron',
     completeOn: { kind: 'event', event: 'brew:done' },
+    needsLiveState: true,
+  },
+  {
+    id: 'basics_pick',
+    lesson: 'basics',
+    target: 'guide-drink',
+    completeOn: { kind: 'event', event: 'drink:picked' },
     needsLiveState: true,
   },
   {

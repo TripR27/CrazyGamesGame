@@ -4,6 +4,7 @@ import type { GameState } from '@/core/state';
 import type { RecipeDef } from '@/data/recipes';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
+import { effectName } from '@/scene/effects/effect-text';
 import { t } from '@/i18n';
 import { levelFor } from '@/systems/reputation';
 
@@ -40,7 +41,7 @@ function knownEntry(r: RecipeDef): BookEntry {
     details: [
       t('book.brew_time', { s: r.brewSeconds }),
       t('book.price', { n: formatNumber(num(r.basePrice)) }),
-      t(`effects.${r.effect}.name`),
+      effectName(r.effect),
     ],
     rarity: r.rarity,
   };
