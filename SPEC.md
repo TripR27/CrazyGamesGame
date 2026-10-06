@@ -9,14 +9,14 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 1 (project opzetten). **Volgende stap:** 2 (Core).
+**Nu bezig:** niets. **Laatst afgerond:** stap 2 (Core). **Volgende stap:** 3 (Save-systeem).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 | # | Stap | Status | Branch |
 |---|---|---|---|
 | 1 | Project opzetten | ✅ | `step-01-project-setup` |
-| 2 | Core (getallen, state, tick) | ⬜ | |
+| 2 | Core (getallen, state, tick) | ✅ | `step-02-core` |
 | 3 | Save-systeem | ⬜ | |
 | 4 | i18n + data-schema | ⬜ | |
 | 5 | Taverne-scene (placeholder) | ⬜ | |
@@ -52,7 +52,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
 8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
 9. **Na elke stap wordt SPEC.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
-10. **Git:** één branch per stap, meerdere commits, mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
+10. **Git:** één branch per stap, een paar logische commits (ongeveer 2 tot 3), mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
 
 ### Hoe dwing je dit af (voor jou)
 - **`CLAUDE.md`** in de projectroot (wordt in stap 1 gemaakt, en ik maak hem nu al aan) wordt automatisch bij elke sessie geladen en verwijst hiernaar. Dat is de betrouwbaarste manier.
@@ -148,6 +148,7 @@ crazyGamesGame/
                             heroes, expeditions, prestige, offline, achievements, tutorial
     scene/                  boot, tavern, sprites/ (klant, ketel, held), effects
     ui/                     hud, shop, recipe-book, heroes, prestige, settings, toast, tutorial/
+    runtime/                browser-koppelingen voor core (loop-driver: timers en tab-zichtbaarheid)
     platform/               crazygames (SDK-wrapper), mock, ads, gameplay-state
     audio/                  sfx, music, mute-logic
     i18n/                   index.ts (t()), en/*.ts, nl/*.ts (later)
@@ -326,7 +327,7 @@ Een stap is **niet** klaar als punt 6 ontbreekt.
 Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 
 1. **Branch per stap:** `step-NN-korte-naam` (bijv. `step-07-brew-and-serve`), aangemaakt vanaf een bijgewerkte `main`.
-2. **Meerdere commits per stap**, klein en logisch (bijv. "add recipe types", "add customer spawn system", "add tests"). Berichten in het Engels, korte imperatieve zin.
+2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven. Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
 3. **Laatste commit van de stap** is de SPEC.md-update (hoofdstuk 10, punt 6).
 4. **Terug mergen naar `main`:** alleen nadat jij het resultaat hebt bekeken en zegt dat het mag ("merge stap N"). Standaard `--no-ff`, zodat elke stap als blok in de geschiedenis zichtbaar blijft.
 5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Geen force-push, geen herschrijven van geschiedenis op `main`.
@@ -342,7 +343,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 ### Fase A: Fundament
 - [x] **Stap 1: Project opzetten.** Vite + TypeScript (strict) + Phaser + Vitest + ESLint. `npm run dev|build|check|test`. `scripts/check-lines.mjs`, ESLint `max-lines`, lagen-regels via `no-restricted-imports`. `.gitignore`. Lege Phaser-scene (1280×720, FIT) toont "Hello tavern". Productiebuild bundlegrootte rapporteren.
   *Klaar wanneer:* `npm run check` en `npm run build` slagen, pagina laadt zonder fouten, bundlegrootte genoteerd.
-- [ ] **Stap 2: Core.** Decimal-wrapper + getalformattering (K/M/B/T/aa…), `GameState`-type, store met subscribe, event-bus, vaste 100 ms-tick op `Date.now()`-delta, debug-helper. Tests.
+- [x] **Stap 2: Core.** Decimal-wrapper + getalformattering (K/M/B/T/aa…), `GameState`-type, store met subscribe, event-bus, vaste 100 ms-tick op `Date.now()`-delta, debug-helper. Tests.
   *Klaar wanneer:* tests voor formattering en tick slagen (incl. grote delta's).
 - [ ] **Stap 3: Save-systeem.** Serialize/deserialize (Decimal↔string), versie + migratie, `StorageAdapter` + `localStorageAdapter`, autosave, export/import-string. Tests incl. fixture.
   *Klaar wanneer:* state overleeft herladen; oude fixture laadt; kapotte save valt netjes terug op nieuwe game.
@@ -410,6 +411,30 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 2: Core (2026-10-06, `step-02-core`)
+- **Gedaan:** (alles in `src/core/`, tests in `tests/core/`)
+  - `numbers.ts`: dunne wrapper om `break_infinity.js` (`Num`, `num()`, `ZERO`, `ONE`, `serializeNum`, `parseNum`).
+  - `format.ts` en `suffixes.ts`: getalnotatie 999, 1.5K, 2.5B, 1Qa, daarna aa tot zz, en daarboven wetenschappelijk (bijv. `1.00e3000`). Rondt netjes door naar het volgende achtervoegsel (999.999 wordt 1K).
+  - `state.ts`: `GameState` met `meta`, `currencies.gold`, `reputation`, plus `createInitialState(now)`.
+  - `store.ts`: `createStore` met `getState`, `update(mutator)` en `subscribe`.
+  - `events.ts` en `game-events.ts`: getypeerde event-bus; de eerste gebeurtenis is `tick`.
+  - `clock.ts`: `Clock`-interface met `systemClock`.
+  - `ticker.ts`: vaste stap van 100 ms op basis van tijdsverschil. Bij een gat van meer dan 5 s roept de ticker `onGap` aan en simuleert geen stappen.
+  - `debug.ts`: logging alleen in dev; verdwijnt uit de productiebuild.
+  - `src/runtime/loop-driver.ts`: koppelt de ticker aan een timer en aan `visibilitychange`. `main.ts` bedraadt alles.
+  - 27 tests (formattering, getallen, events, store en state, ticker).
+- **Waarom (keuzes):**
+  - Tijd komt via een `Clock`-interface binnen (SOLID: D), zodat tests en de simulator deterministisch zijn.
+  - De ticker simuleert **geen** stappen bij lange gaten. Dat is het afgesproken offline-ontwerp: grote gaten gaan in stap 10 naar `systems/offline` met formules.
+  - Store muteert de state in-place en meldt dat daarna. Dat is eenvoudig en snel genoeg; geen kopieën nodig.
+  - De loop-driver staat in `src/runtime/` (nieuwe map) omdat `core/` geen DOM mag gebruiken.
+  - Testbestanden zijn uitgezonderd van de ESLint-regel `max-lines-per-function` (describe-blokken zijn lang); de bestandslengte blijft wel bewaakt.
+  - `tsconfig` kreeg `vite/client`-types voor `import.meta.env` in `debug.ts`.
+- **Gemeten / gecontroleerd:** `npm run check` en `npm run build` slagen, geen bestand boven 100 regels. In de browser: geen fouten, `[bt] state` wordt gelogd. De string `[bt]` staat niet in de productiebundel. Bundel: 363 kB gzip (was 358 kB).
+- **Afwijkingen van het plan:** `runtime/`-map toegevoegd; `meta.version` is bewust weggelaten uit de state omdat de save-versie in stap 3 in de save-wrapper komt.
+- **Nu te proberen:** `npm run test` (27 tests). `npm run dev` en open de console; je ziet de beginstate gelogd.
+- **Nog te doen / volgende stap:** stap 3, Save-systeem (serialize/deserialize, versie en migratie, `StorageAdapter`, autosave, export/import).
 
 ### Besluit na stap 1: regelrichtlijn en SOLID (2026-10-06, `chore-line-policy-and-solid`)
 - **Gedaan:** de harde grens van 100 regels is een richtlijn geworden: waarschuwing vanaf 101 regels (ESLint en `check-lines`), fout vanaf 121. SOLID is verplicht gesteld in hoofdstuk 1 en 9 en in `CLAUDE.md`.
