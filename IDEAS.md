@@ -83,6 +83,58 @@
 
 ---
 
-## 5. Andere gedachten (leeg)
+## 5. Receptenboek als poster op de muur
+
+**Wens (eigenaar, 2026-10-06):** de recepten hangen als **poster op de muur** van de taverne, zodat de speler altijd kan zien hoe je iets maakt, in plaats van (of naast) een knop in de hoek.
+
+**Wat al in het plan staat:** het receptenboek als zijpaneel met een grid van drankjes, ingrediënten per recept en X/N voortgang (SPEC.md hoofdstuk 4, Receptenboek, en stap 12).
+
+**Ideeën om uit te werken (nog niet gepland):**
+- Een poster in de scene (op de muur, bij de plank) die klikbaar is en het zijpaneel opent. Past bij "een zichtbare wereld": de poster kan groeien met het aantal ontdekte recepten (meer regels, kleurtjes, doorgestreepte of ingevulde vakjes).
+- Hij kan ook al het **ingrediëntenpaneel** zijn: kleine plaatjes van de ingrediënten per recept direct op de poster, zonder het paneel te openen, voor de meest recente of de gevraagde drankjes.
+- De tutorial wijst de poster aan bij de eerste ontdekking (doelenregister: `recipe-poster`).
+- Open vragen: poster en paneel allebei, of alleen de poster? Hoe leesbaar is hij op 1280x720 en op een Chromebook, en hoe past hij in de pixel-art-stijl (stap 21)?
+
+**Plan:** niet bouwen buiten de stappen. Beslissen bij het begin van stap 12.
+
+---
+
+## 6. Helden: nog te bespreken
+
+**Wens (eigenaar, 2026-10-06):** er komt nog een gesprek over de **helden** (stap 15 en 16 in SPEC.md), voordat die stappen worden uitgewerkt.
+
+**Wat er al ligt:** helden worden ingehuurd, hebben een klasse (krijger, boogschutter, magiër, schurk), level en uitrusting, en gaan met meegenomen drankjes op expeditie naar kerkers voor ingrediënten en XP, ook offline, zonder dat ze kunnen sterven (GAME_ANALYSE.md hoofdstuk 5.5, SPEC.md stap 15 en 16).
+
+**Onderwerpen voor dat gesprek:**
+- Hoe zichtbaar zijn helden in de taverne (zitten ze aan de bar, staan ze in een gildekamer, zie je ze vertrekken)?
+- Hoe sterk is de koppeling met de brouwloop: welke drankjes kies je, en hoe bepaalt de kwaliteit het succes?
+- Hoeveel keuze en hoeveel idle: handmatig uitrusten of automatisch, en wat gebeurt er offline?
+- Past een held visueel in de gekozen stijl (pixel art of 3D, zie punt 7)?
+
+**Plan:** eerst praten, dan SPEC.md aanpassen. Niet bouwen.
+
+---
+
+## 7. 3D-look of echte 3D?
+
+**Wens (eigenaar, 2026-10-06):** misschien een **3D-game-look**, of daadwerkelijk 3D als dat mogelijk is.
+
+**Wat er nu is besloten:** de eindstijl is pixel art op 320x180, 4x opgeschaald, als aparte styling-stap 21 (SPEC.md hoofdstuk 4, Rendering). Alles tot dan zijn placeholders. De engine is Phaser 4, een **2D-engine**.
+
+**Wat kan (ruwe inschatting, nog niet uitgeprobeerd):**
+- **Een 3D-look met 2D-middelen** (past binnen de huidige stack, geen nieuwe dependency): lagen met parallax, zachte schaduwen, lichtbronnen met normal maps (Phaser kent 2D-verlichting in WebGL), diepte-sortering en een lichte "isometrische" doorsnede. Wie het mooi vindt, kan dit ook als **HD-2D** doen: pixel-art-sprites met 3D-achtige belichting.
+- **Voorgerenderde 3D**: modellen in een 3D-programma (bijv. Blender) renderen naar sprites of spritesheets. Het spel blijft 2D en snel, de art ziet er 3D uit. Vraagt een tool en werk aan de art-kant, geen codeverandering.
+- **Echte 3D** met een bibliotheek als Three.js of Babylon.js: een nieuwe dependency (eerst vragen), een grotere bundel, 3D-modellen en textures (assetbudget < 5 MB), en een aparte render-laag naast of in plaats van Phaser. De DOM-overlay en de rest blijven werken. Risico's: prestaties op een Chromebook met 4 GB, laadtijd en geheugen, en meer werk voor elke visuele stap (kamers, klanten, helden).
+
+**Afwegingen:**
+- Het speelt zich af in een doorsnede met vaste camera; echte 3D voegt daar weinig bij ten opzichte van voorgerenderde sprites of een 2D-look met diepte.
+- CrazyGames-eisen (bundel < 8 MB doel, 60 FPS op laptop, Chromebook) pleiten voor 2D of voorgerenderd.
+- Dit raakt de stijlbeslissing van stap 21, dus beslissen **voor** de art-pass, het liefst met een kleine proef (zoals het pixel-art-experiment) in een eigen chore-branch.
+
+**Plan:** niet bouwen in de MVP. Eerst een kleine visuele proef als de eigenaar dat wil, dan beslissen en SPEC.md (Rendering en stap 21) aanpassen.
+
+---
+
+## 8. Andere gedachten (leeg)
 
 *(Hier komen nieuwe ideeën.)*

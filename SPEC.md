@@ -227,6 +227,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
 - Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
 - Later (open vraag): een vereenvoudigde versie al eerder bouwen, bijvoorbeeld direct na stap 11b, omdat de speler nu na de les alleen de plank en de bestellingen heeft om uit te leren.
+- **Idee van de eigenaar (2026-10-06): de recepten als poster op de muur** van de taverne, in plaats van of naast een knop. Klik op de poster opent het receptenboek-paneel. Zie IDEAS.md, punt 5. Beslissen bij het begin van stap 12.
 - Hoort bij de tutorial-hint "eerste ontdekking" (stap 12): bij de eerste keer openen wijst de ketel de knop aan.
 
 - **Balans-simulator** (`scripts/simulate.ts`, draait in Node dankzij de pure `systems/`): simuleert een speler-strategie en print wanneer mijlpalen worden gehaald. Doel: eerste prestige na ~1 tot 2 uur.
