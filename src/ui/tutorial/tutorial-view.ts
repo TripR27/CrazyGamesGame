@@ -1,7 +1,7 @@
 import type { Bounds, TargetRegistry } from '@/core/target-registry';
 import { textKey } from '@/data/text-key';
 import { t } from '@/i18n';
-import { guideRecipe, nextIngredient, resolveTarget, type GuideContext, type TutorialMachine } from '@/systems/tutorial';
+import { guideRecipe, likedCustomer, nextIngredient, resolveTarget, type GuideContext, type TutorialMachine } from '@/systems/tutorial';
 import { createEl } from '@/ui/dom';
 import { arrowPlacement, spotlightBounds } from './placement';
 import './tutorial.css';
@@ -14,13 +14,14 @@ export interface TutorialUiSource {
 const name = (domain: 'recipes' | 'ingredients' | 'upgrades', id: string | undefined): string =>
   id === undefined ? '' : t(textKey(domain, id, 'name'));
 
-/** Words the mascot can use in its lines: the drink, ingredient and upgrade the guide is talking about. */
+/** Words the mascot can use in its lines: the drink, ingredient and upgrade the guide is talking about, and the liked drink. */
 function speech(stepId: string, ctx: GuideContext): string {
   return t(textKey('tutorial', stepId, 'text'), {
     drink: name('recipes', guideRecipe(ctx)?.id),
     ingredient: name('ingredients', nextIngredient(ctx)),
     upgrade: name('upgrades', ctx.affordableUpgradeId ?? undefined),
     staff: name('upgrades', ctx.affordableStaffId ?? undefined),
+    liked: name('recipes', likedCustomer(ctx)?.recipeId),
   });
 }
 

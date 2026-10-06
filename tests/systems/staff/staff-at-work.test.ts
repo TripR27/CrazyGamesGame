@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createEventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import { startBrewSystem } from '@/systems/brewing';
+import { waitingCustomers } from '@/systems/customers';
 import { startStaff } from '@/systems/staff';
 import { ab, catalog, cde, economy, floorWith, rng, station } from '../fixtures';
 
@@ -36,7 +37,7 @@ describe('staff at work', () => {
     const { run, served, eco, floor } = crew({ brew: 0.2, serve: 0.2 }, [['plain', 'ab']]);
     run(30_000);
     expect(served).toHaveBeenCalledTimes(1);
-    expect(floor.customers).toEqual([]);
+    expect(waitingCustomers(floor)).toEqual([]);
     expect(eco.getState().currencies.gold.toNumber()).toBe(10);
     expect(eco.getState().reputation).toBe(1);
   });

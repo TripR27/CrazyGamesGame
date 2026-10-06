@@ -12,6 +12,10 @@ export interface CustomerInstance {
   seat: number;
   patienceMs: number;
   patienceMaxMs: number;
+  /** The customer likes the effect of the drink they ordered (it counts double). */
+  liked: boolean;
+  /** Set once served: time left to finish the drink. Undefined while still waiting for it. */
+  drinkMsLeft?: number;
 }
 
 export interface CustomerFloor {
@@ -38,5 +42,5 @@ export interface CustomerCatalog {
 }
 
 export type CustomerChange =
-  | { kind: 'arrived'; id: number }
+  | { kind: 'arrived'; id: number; liked: boolean }
   | { kind: 'left'; id: number; reason: LeaveReason };

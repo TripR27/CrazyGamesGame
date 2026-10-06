@@ -1,11 +1,11 @@
 import type { Scene } from 'phaser';
 import { createPool, type Pool } from '@/core/pool';
-import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
 import { CUSTOMER_SLOTS, DOOR_ENTRY } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { findCustomer } from '@/systems/customers';
+import { shakeNo, showDrinking } from './customer-reactions';
 import { createCustomerSprite, type CustomerSprite } from './customer-sprite';
+import { orderLabel } from './order-label';
 
 const WALK_MS = 900;
 
@@ -34,8 +34,7 @@ function onArrived(ctx: LayerContext, id: number): void {
   const slot = customer === undefined ? undefined : CUSTOMER_SLOTS[customer.seat];
   if (customer === undefined || slot === undefined) return;
   const sprite = ctx.pool.acquire();
-  const order = t(textKey('recipes', customer.recipeId, 'name'));
-  sprite.setLook(customer.typeId, order, customer.seat % 2 === 1);
+  sprite.setLook(customer.typeId, orderLabel(customer), customer.seat % 2 === 1);
   sprite.setPatience(1);
   sprite.setOrderVisible(true);
   sprite.customerId = id;
@@ -54,14 +53,8 @@ function onLeft(ctx: LayerContext, id: number): void {
   ctx.unregister.delete(id);
   sprite.customerId = null;
   sprite.setOrderVisible(false);
+  sprite.setDrinking(false);
   walkTo(ctx, sprite, DOOR_ENTRY.x, DOOR_ENTRY.y, () => ctx.pool.release(sprite));
-}
-
-/** A quick sideways shake when the customer turns the drink down. */
-function onRefused(ctx: LayerContext, id: number): void {
-  const sprite = ctx.active.get(id);
-  if (sprite === undefined || ctx.scene.tweens.isTweening(sprite.container)) return;
-  ctx.scene.tweens.add({ targets: sprite.container, x: sprite.container.x + 8, duration: 60, yoyo: true, repeat: 3 });
 }
 
 function refreshPatience(ctx: LayerContext): void {
@@ -83,10 +76,15 @@ export function createCustomersLayer(scene: Scene, services: SceneServices): Cus
       reset: (sprite) => sprite.container.setVisible(false),
     }),
   };
+  const withSprite = (id: number, react: (sprite: CustomerSprite) => void): void => {
+    const sprite = ctx.active.get(id);
+    if (sprite !== undefined) react(sprite);
+  };
   const stops = [
     services.bus.on('customer:arrived', ({ id }) => onArrived(ctx, id)),
     services.bus.on('customer:left', ({ id }) => onLeft(ctx, id)),
-    services.bus.on('customer:refused', ({ id }) => onRefused(ctx, id)),
+    services.bus.on('customer:refused', ({ id }) => withSprite(id, (sprite) => shakeNo(scene, sprite))),
+    services.bus.on('customer:served', ({ id }) => withSprite(id, showDrinking)),
   ];
   return {
     update: () => refreshPatience(ctx),

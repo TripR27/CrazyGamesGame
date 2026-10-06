@@ -24,14 +24,21 @@ describe('payout', () => {
 });
 
 describe('serving a customer', () => {
-  it('hands over the drink, pays gold, adds reputation and sends the customer off happy', () => {
+  it('hands over the drink, pays gold, adds reputation and lets the customer stay to drink it', () => {
     const { d, s, eco } = deps(['ab'], ['rich', 'ab']);
     const outcome = serveCustomer(d, 1);
-    expect(outcome).toMatchObject({ kind: 'served', change: { kind: 'left', id: 1, reason: 'served' } });
+    expect(outcome).toMatchObject({ kind: 'served', event: { id: 1, liked: false, extraReputation: 0 } });
     expect(eco.getState().currencies.gold.eq(15)).toBe(true);
     expect(eco.getState().reputation).toBe(1);
     expect(s.ready).toEqual([]);
-    expect(d.floor.customers).toEqual([]);
+    expect(d.floor.customers[0]?.drinkMsLeft).toBeGreaterThan(0);
+  });
+
+  it('ignores a click on a customer who is already drinking', () => {
+    const { d, s } = deps(['ab', 'ab'], ['plain', 'ab']);
+    serveCustomer(d, 1);
+    expect(serveCustomer(d, 1)).toEqual({ kind: 'ignored' });
+    expect(s.ready).toEqual(['ab']);
   });
 
   it('reports the seat, the drink, the gold and a line from the served pool', () => {

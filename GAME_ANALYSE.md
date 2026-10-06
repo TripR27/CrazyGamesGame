@@ -97,7 +97,7 @@ Voorbeeld-ladder:
 
 ### 5.2 Klanten
 - Types: Ridder, Elf, Tovenaar, Dwerg, Ork, Schurk, Draak-in-mensvorm (zeldzaam), enz.
-- Elk type heeft een **voorkeur** (bijv. dwergen houden van sterk, elfen van fruitig). Het juiste drankje = bonus. Dit geeft keuzes zonder complexiteit.
+- Elk type heeft een **voorkeur** voor één of meer effecten (bijv. dwergen houden van kracht, elfen van charme). Een drankje met dat effect = het effect telt dubbel, met een ♥ bij de bestelling; klanten bestellen hun voorkeur ook vaker. Dit geeft keuzes zonder complexiteit.
 - **Geduld-balk:** te lang wachten = klant gaat weg (geen straf voor idle-modus, wel voor actief spel, anders irritant).
 - **VIP-klanten** (koningen, beroemde helden) verschijnen willekeurig, betalen veel, vragen een specifiek duur drankje.
 - Klantaantal en variatie schalen mee met reputatie.

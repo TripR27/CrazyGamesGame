@@ -9,8 +9,9 @@ import { createFloor, type CustomerCatalog, type CustomerFloor } from '@/systems
 import type { EconomyState } from '@/systems/serving';
 import type { UpgradeState } from '@/systems/upgrades';
 
+// Speed only changes how long a customer drinks, so prices in these tests stay plain.
 const recipe = (id: string, ingredients: RecipeDef['ingredients'], brewSeconds: number, basePrice: number): RecipeDef => ({
-  id, tier: 1, rarity: 'common', ingredients, brewSeconds, basePrice, effect: 'luck',
+  id, tier: 1, rarity: 'common', ingredients, brewSeconds, basePrice, effect: 'speed',
 });
 
 /** Two small recipes: ab (2 ingredients, 2 s, 10 gold) and cde (3 ingredients, 3 s, 30 gold). */
@@ -43,7 +44,7 @@ export const noUpgrades = { upgradeDefs, getSellMultiplier: () => ONE };
 export function floorWith(...orders: Array<[string, string]>): CustomerFloor {
   const floor = createFloor(7);
   orders.forEach(([typeId, recipeId], seat) => {
-    floor.customers.push({ id: floor.nextId++, typeId, recipeId, seat, patienceMs: 60_000, patienceMaxMs: 60_000 });
+    floor.customers.push({ id: floor.nextId++, typeId, recipeId, seat, patienceMs: 60_000, patienceMaxMs: 60_000, liked: false });
   });
   return floor;
 }

@@ -14,8 +14,12 @@ export interface CustomerSystemDeps {
 }
 
 export function publishChange(bus: EventBus<GameEvents>, change: CustomerChange): void {
-  if (change.kind === 'arrived') bus.emit('customer:arrived', { id: change.id });
-  else bus.emit('customer:left', { id: change.id, reason: change.reason });
+  if (change.kind === 'left') {
+    bus.emit('customer:left', { id: change.id, reason: change.reason });
+    return;
+  }
+  bus.emit('customer:arrived', { id: change.id });
+  if (change.liked) bus.emit('likes:ordered', { id: change.id });
 }
 
 /** Runs the customer simulation on every game tick. Returns a stop function. */

@@ -6,7 +6,7 @@ import { CUSTOMER_SLOTS } from '@/scene/layout';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
 
-const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'upgrade_open', 'upgrade_buy', 'upgrade_done'];
+const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done'];
 
 const LATER_LESSONS = ['seats_buy', 'seats_done', 'staff_hire', 'staff_done'];
 

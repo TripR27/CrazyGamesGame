@@ -3,12 +3,12 @@ import { num } from '@/core/numbers';
 import { createInitialState } from '@/core/state';
 import { BREWING } from '@/data/brewing';
 import { resolveTarget } from '@/systems/tutorial';
-import { newGame, playBasics } from './helpers';
+import { newGame, playBasics, playLikes } from './helpers';
 
 /** A game in which the basics lesson is done and the player has `gold`. */
 function afterBasics(gold: number) {
   const state = createInitialState(0);
-  state.tutorial.completedSteps = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold'];
+  state.tutorial.completedSteps = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
   state.currencies.gold = num(gold);
   state.upgrades = { extra_seat: 6 }; // seats are not what these tests are about
   return newGame(state);
@@ -27,9 +27,8 @@ describe('the upgrade hint, played in the real game', () => {
     game.tick(3_500);
     playBasics(game);
     game.tick(4_600);
-    expect(game.shown()).toBeNull();
-
     game.store.update((s) => void (s.currencies.gold = num(0)));
+    playLikes(game); // one more drink, still less than the 20 gold an upgrade costs
     expect(game.shown()).toBeNull();
     game.store.update((s) => void (s.currencies.gold = num(20)));
     expect(game.shown()).toBe('upgrade_open');

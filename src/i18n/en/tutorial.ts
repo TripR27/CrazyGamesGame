@@ -7,6 +7,8 @@ export const tutorial: Messages = {
   'tutorial.basics_wait.text': 'Brewing! Do not stare at me. It makes me nervous.',
   'tutorial.basics_serve.text': 'Done! Click the customer who ordered it. Hand it to the wrong one and I will judge you.',
   'tutorial.basics_gold.text': 'Gold! Shiny. Keep the drinks coming and I will keep bubbling.',
+  'tutorial.likes_spot.text': 'See the ♥ on that order? This one loves what {liked} does, so its effect counts double. Serve it!',
+  'tutorial.likes_done.text': 'Strength pays more, speed frees the seat, luck brings tips, charm adds reputation. A ♥ makes it double.',
   'tutorial.upgrade_open.text': 'Psst. You have gold burning a hole in your pocket. Open the shop.',
   'tutorial.upgrade_buy.text': 'Buy {upgrade}. Gold only counts when it is spent. That is the whole joke.',
   'tutorial.seats_buy.text': 'One customer at a time? Buy an Extra Seat in the shop. More chairs, more thirst.',
