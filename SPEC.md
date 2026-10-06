@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 9 (Economie en upgrades). **Volgende stap:** 10 (Personeel en idle/offline).
+**Nu bezig:** niets. **Laatst afgerond:** stap 10a (Personeel). **Volgende stap:** 10b (Offline-voortgang).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -24,7 +24,8 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 7 | Brouwen en serveren | ✅ | `step-07-brew-and-serve` |
 | 8 | Interactieve tutorial (basis) | ✅ | `step-08-tutorial` |
 | 9 | Economie en upgrades | ✅ | `step-09-economy-upgrades` |
-| 10 | Personeel en idle/offline | ⬜ | |
+| 10a | Personeel (brouwer en serveerster) | ✅ | `step-10a-staff` |
+| 10b | Offline-voortgang | ⬜ | |
 | 11 | Reputatie, gates, drankeffecten | ⬜ | |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
 | 13 | Balans-simulator | ⬜ | |
@@ -374,7 +375,9 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* een nieuwe speler die niets weet, kan zonder tekstmuur of apart scherm de basis doen; tutorial overleeft herladen; vastlopen is onmogelijk (verkeerde volgorde of overslaan breekt niets); tests voor de statemachine.
 - [x] **Stap 9: Economie en upgrades.** Kostenformule, `getMultipliers`, winkelpaneel (DOM) met koop x1/x10/max, eerste upgrades (ketel-snelheid, prijs, opslag). Tutorial-hint: eerste upgrade kopen.
   *Klaar wanneer:* upgrades werken, kosten stijgen, tests slagen.
-- [ ] **Stap 10: Personeel en idle.** Barman/serveerster/brouwer-assistent automatiseren stappen; idle-inkomen ≈ 30 tot 40% van actief spelen; offline-voortgang met limiet en "welkom terug"-venster. Tutorial-hint: eerste medewerker inhuren.
+- [x] **Stap 10a: Personeel.** Brouwer-assistent en serveerster automatiseren brouwen en serveren; inhuren met niveaus in de winkel (idle-inkomen mikt op ≈ 30 tot 40% van actief spelen, te meten in stap 13). Tutorial-hint: eerste medewerker inhuren. De barman volgt later (bijv. fooien of geduld).
+  *Klaar wanneer:* ingehuurd personeel brouwt en serveert zonder dat de speler iets doet, hoger niveau werkt sneller, tests slagen.
+- [ ] **Stap 10b: Offline-voortgang.** `systems/offline` rekent met formules uit wat het personeel in de tijd weg verdiende (limiet 2 uur, uitbreidbaar), plus een "welkom terug"-venster. De ticker meldt grote gaten al via `onGap`.
   *Klaar wanneer:* tabblad 5 min weg of sluiten/openen levert correcte offline-opbrengst; tests voor `systems/offline`.
 
 ### Fase C: Diepte
@@ -426,6 +429,22 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 10a: Personeel (2026-10-06, `step-10a-staff`)
+- **Gedaan:** (code in `src/systems/staff/`, `src/data/upgrades/staff.ts`, `src/data/tutorial/staff.ts`, `src/wiring/start-staff.ts`, `src/wiring/watch-shop.ts`, `src/systems/serving/publish.ts`; tests in `tests/systems/staff/` en `tests/wiring/staff-flow.test.ts`)
+  - **Twee medewerkers als upgrades van soort `staff`:** **Brouwer-assistent** (kosten 100, groei 1,5, max 10) en **Serveerster** (kosten 150, groei 1,5, max 10). Niveau 1 is het inhuren, elk volgend niveau is training. Hergebruikt de hele upgrade-machinerie (kosten, x1/x10/max, opslaan). Twee nieuwe stats in `UPGRADE_STATS`: `autoBrew` en `autoServe`, in acties per seconde (basis 0, +0,05 en +0,08 per niveau). `getMultipliers` loopt nu over de lijst van stats, dus een nieuwe stat is data plus één regel.
+  - **Brouwer-assistent** (`auto-brew.ts`): start het drankje van de oudste wachtende klant dat nog niet op de bar staat, alleen met een vrije ketel, ruimte op de bar en een lege ketel (nooit tijdens handmatig brouwen van de speler). Brouwt nooit een drankje waar niemand om vraagt.
+  - **Serveerster** (`auto-serve.ts`): serveert de oudste klant wiens drankje klaarstaat, via dezelfde regels als een klik: `serveAndPublish` is uit `player-actions.ts` gehaald (één plek voor serveren, gedeeld door speler en serveerster).
+  - **Tempo** (`charge.ts`, `system.ts`): elke medewerker bouwt lading op met de tijd; een actie kost een volle lading en de lading is begrensd op één actie, zodat een medewerker zonder werk geen stoot opspaart. Het personeel loopt op de bus-`tick`; de snelheden komen uit `getMultipliers` (`wiring/start-staff.ts`) en een net ingehuurde medewerker begint direct.
+  - **Winkel:** de lijst heeft nu kopjes per soort (Cauldron, Tavern, Staff, via `shop.kind_*`).
+  - **Tutorial-hint** (`data/tutorial/staff.ts`, 2 stappen): start zodra de speler zijn eerste medewerker kan betalen (nieuw event `staff:affordable`, via dezelfde `watchAffordable` met een eigen eventnaam), wijst de Shop-knop aan als de winkel dicht is en daarna de inhuur-knop (nieuw gids-alias `guide-staff`, de tutorial weet of de winkel open is via `shop:opened` en `shop:closed`), en sluit af. Nieuw event `staff:hired` bij het kopen van een staff-upgrade. De hint voor de eerste winkelupgrade telt staff niet meer mee (`staffOnly` en `withoutStaff`).
+  - **Zichtbaarheid:** personeel handelt zonder animatie of sprites; je ziet alleen dat drankjes ontstaan en klanten bediend worden. Sprites en animaties van personeel horen bij stap 21.
+  - 17 nieuwe tests (252 totaal): lading, brouwer (wensen, bezette ketel, volle bar, half gevulde ketel), serveerster, personeel aan het werk (niets zonder medewerkers, verdient zelf, trager bij lager tempo) en in het echte spel (verdient zonder spelerhandeling, sneller na training, de hint start op het juiste moment en wijst eerst de knop en dan de inhuur-knop aan).
+- **Waarom (keuzes, afgesproken met de eigenaar):** stap 10 is gesplitst in 10a (personeel) en 10b (offline); brouwer en serveerster nu, de barman later; inhuren met niveaus op een vaste tik. Staff als upgrades hergebruikt kosten, winkel en opslag zonder nieuw datamodel (SOLID: O).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser: de hint start bij 100 goud en wijst de Shop-knop aan, de winkel toont de drie kopjes en de twee medewerkers, beide inhuren werkt; daarna steeg het goud van 158 naar 170 en de reputatie van 1 naar 2 in 30 seconden zonder één klik.
+- **Afwijkingen van het plan:** het plan noemde ook de barman; die is bewust uitgesteld. Het idle-aandeel (30 tot 40% van actief spelen) is nog niet gemeten; de getallen zijn een schatting op basis van de klantstroom en worden in stap 13 met de simulator afgesteld. De klantenstroom (zie hoofdstuk 4, Klanteninstroom en plekken) bepaalt hoeveel het personeel kan verdienen.
+- **Nu te proberen:** wis Local Storage, speel de lessen uit en haal 100 goud. De ketel wijst de Shop aan; huur de brouwer-assistent en de serveerster in en laat het tabblad open: klanten worden vanzelf bediend. Train ze met extra niveaus en kijk of het sneller gaat.
+- **Nog te doen / volgende stap:** stap 10b, Offline-voortgang: `systems/offline` rekent met formules uit wat het personeel verdiende terwijl het spel dicht was (limiet 2 uur, uitbreidbaar) en toont een "welkom terug"-venster. Open punten voor de eigenaar: hoe de offline-opbrengst wordt berekend (aandeel van de actieve snelheid, afhankelijk van het personeel), en of een rewarded ad later de opbrengst verdubbelt (stap 20).
 
 ### Stap 9: Economie en upgrades (2026-10-06, `step-09-economy-upgrades`)
 - **Gedaan:** (code in `src/systems/economy|upgrades/`, `src/data/upgrades/`, `src/ui/shop/`, `src/ui/side-layout.ts`, `src/wiring/sync-station.ts`; tests in `tests/systems/upgrades|economy/`, `tests/ui/` en `tests/wiring/upgrade-flow.test.ts`)
