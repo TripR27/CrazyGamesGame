@@ -1,0 +1,38 @@
+import type { LeaveReason } from '@/core/game-events';
+import type { CustomerDef } from '@/data/customers';
+import type { RecipeDef } from '@/data/recipes';
+
+/** A customer currently in the tavern. Not saved: the floor starts empty on every launch. */
+export interface CustomerInstance {
+  id: number;
+  typeId: string;
+  /** The drink this customer ordered. */
+  recipeId: string;
+  /** Seat number, 0 to capacity - 1. The scene maps it to a spot; the system never knows positions. */
+  seat: number;
+  patienceMs: number;
+  patienceMaxMs: number;
+}
+
+export interface CustomerFloor {
+  capacity: number;
+  customers: CustomerInstance[];
+  nextId: number;
+  spawnInMs: number;
+}
+
+/** What the system needs to know about the player (interface segregation: not the whole state). */
+export interface CustomerContext {
+  reputation: number;
+  unlockedRecipeIds: readonly string[];
+}
+
+/** The content tables, passed in so tests and the simulator can use their own. */
+export interface CustomerCatalog {
+  customerTypes: readonly CustomerDef[];
+  recipes: readonly RecipeDef[];
+}
+
+export type CustomerChange =
+  | { kind: 'arrived'; id: number }
+  | { kind: 'left'; id: number; reason: LeaveReason };

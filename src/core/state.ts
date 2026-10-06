@@ -1,4 +1,5 @@
 import { num, type Num } from '@/core/numbers';
+import { STARTER_RECIPE_IDS } from '@/data/recipes/starters';
 
 export interface MetaState {
   createdAt: number;
@@ -13,6 +14,8 @@ export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
   reputation: number;
+  /** Recipe ids the player knows; customers only order these. */
+  recipesDiscovered: string[];
 }
 
 export function createInitialState(now: number): GameState {
@@ -20,6 +23,7 @@ export function createInitialState(now: number): GameState {
     meta: { createdAt: now, lastSeenAt: now },
     currencies: { gold: num(0) },
     reputation: 0,
+    recipesDiscovered: [...STARTER_RECIPE_IDS],
   };
 }
 
