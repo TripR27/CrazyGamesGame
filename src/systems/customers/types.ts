@@ -14,6 +14,8 @@ export interface CustomerInstance {
   patienceMaxMs: number;
   /** The customer likes the effect of the drink they ordered (it counts double). */
   liked: boolean;
+  /** A VIP: pays a lot and orders the most expensive known drink. */
+  vip: boolean;
   /** Set once served: time left to finish the drink. Undefined while still waiting for it. */
   drinkMsLeft?: number;
 }
@@ -42,5 +44,5 @@ export interface CustomerCatalog {
 }
 
 export type CustomerChange =
-  | { kind: 'arrived'; id: number; liked: boolean }
+  | { kind: 'arrived'; id: number; liked: boolean; vip: boolean }
   | { kind: 'left'; id: number; reason: LeaveReason };

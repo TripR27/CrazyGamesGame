@@ -3,6 +3,7 @@ import type { FeedbackPool } from '@/data/feedback';
 import type { CustomerDef } from '@/data/customers';
 import type { IngredientDef } from '@/data/ingredients';
 import type { RecipeDef } from '@/data/recipes';
+import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import type { UpgradeDef } from '@/data/upgrades';
 import { duplicates, isTier, oneOf, positive } from './rules';
 import { defineTable, type ContentTable } from './table';
@@ -64,7 +65,8 @@ export const customerTable = (items: readonly CustomerDef[]): ContentTable =>
     items,
     textFields: ['name', 'tagline'],
     check: (c) => [
-      ...(c.minReputation >= 0 ? [] : ['minReputation must be >= 0']),
+      ...(isTier(c.minLevel) && c.minLevel <= REPUTATION_LEVELS.length ? [] : [`minLevel must be a level from 1 to ${REPUTATION_LEVELS.length}`]),
+      ...((c.reputationBonus ?? 0) >= 0 ? [] : ['reputationBonus must be >= 0']),
       ...positive(c.patienceSeconds, 'patienceSeconds'),
       ...positive(c.spendMultiplier, 'spendMultiplier'),
       ...c.likes.flatMap((effect) => oneOf(effect, EFFECTS, 'liked effect')),

@@ -6,6 +6,7 @@ import { systemRng } from '@/core/rng';
 import { createInitialState, type GameState } from '@/core/state';
 import { createStore } from '@/core/store';
 import { createTicker } from '@/core/ticker';
+import { customers } from '@/data/customers';
 import { createGame } from '@/game';
 import { createLocalStorageAdapter } from '@/save/local-storage-adapter';
 import { createSaveManager } from '@/save/save-manager';
@@ -14,6 +15,7 @@ import { registerDebugCommands } from '@/runtime/debug-commands';
 import { startLoopDriver } from '@/runtime/loop-driver';
 import { placeGame } from '@/ui/game-viewport';
 import { mountUi } from '@/ui/mount';
+import { toLevelUpView } from '@/ui/level-up/level-up-view-model';
 import { createSideLayout } from '@/ui/side-layout';
 import { createServices } from '@/wiring/create-services';
 
@@ -48,6 +50,7 @@ mountUi(document.getElementById('ui-root') as HTMLElement, {
   targets: world.targets,
   layout,
   welcome: world.offline.inbox,
+  onLevelUp: (show) => bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, customers))),
   onFit: (fit) =>
     placeGame(document.getElementById('game') as HTMLElement, fit, () => {
       game.scale.getParentBounds();

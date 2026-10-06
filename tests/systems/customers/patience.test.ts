@@ -26,7 +26,7 @@ describe('customer patience', () => {
   it('only removes the customers who ran out, not the others', () => {
     const floor = newFloor();
     run(floor, context(), 60_000, undefined, {
-      customerTypes: [{ id: 'x', minReputation: 0, patienceSeconds: 1000, spendMultiplier: 1, likes: [] }],
+      customerTypes: [{ id: 'x', minLevel: 1, patienceSeconds: 1000, spendMultiplier: 1, likes: [] }],
       recipes: [],
     });
     expect(floor.customers).toEqual([]); // no recipes in this catalog, so nobody came

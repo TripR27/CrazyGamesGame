@@ -5,6 +5,7 @@ import { feedback } from './feedback';
 import { hud } from './hud';
 import { ingredients } from './ingredients';
 import { recipes } from './recipes';
+import { reputation } from './reputation';
 import { shop } from './shop';
 import { tutorial } from './tutorial';
 import { upgrades } from './upgrades';
@@ -15,6 +16,7 @@ export const en: Messages = {
   ...hud,
   ...ingredients,
   ...recipes,
+  ...reputation,
   ...customers,
   ...effects,
   ...feedback,

@@ -20,6 +20,7 @@ export function publishChange(bus: EventBus<GameEvents>, change: CustomerChange)
   }
   bus.emit('customer:arrived', { id: change.id });
   if (change.liked) bus.emit('likes:ordered', { id: change.id });
+  if (change.vip) bus.emit('vip:arrived', { id: change.id });
 }
 
 /** Runs the customer simulation on every game tick. Returns a stop function. */

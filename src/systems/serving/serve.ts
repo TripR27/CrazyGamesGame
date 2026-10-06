@@ -42,11 +42,13 @@ export function serveCustomer(deps: ServeDeps, customerId: number): ServeOutcome
   const bonus = drinkBonus(recipe, type);
   const gold = computePayout(recipe, type, deps.getSellMultiplier?.() ?? ONE);
   const tip = rollTip(gold, bonus, rng);
+  // Charm and a VIP's own bonus both come on top of the normal reputation.
+  const extraReputation = bonus.extraReputation + (type.reputationBonus ?? 0);
   startDrinking(customer, SERVING.drinkMs * bonus.drinkTimeFactor);
   economy.update((state) => {
     state.currencies.gold = state.currencies.gold.add(gold).add(tip);
-    state.reputation += SERVING.reputationPerServe + bonus.extraReputation;
+    state.reputation += SERVING.reputationPerServe + extraReputation;
   });
-  const event = { ...base, gold, tip, extraReputation: bonus.extraReputation, liked: customer.liked };
+  const event = { ...base, gold, tip, extraReputation, liked: customer.liked, vip: customer.vip };
   return { kind: 'served', event: { ...event, messageKey: feedbackKey('served', rng) } };
 }

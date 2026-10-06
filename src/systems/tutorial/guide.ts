@@ -8,7 +8,7 @@ export interface GuideContext {
   brewingRecipeId: string | null;
   readyRecipeIds: readonly string[];
   /** Waiting customers, oldest first. `liked`: they like the effect of what they ordered. */
-  customers: readonly { id: number; recipeId: string; liked: boolean }[];
+  customers: readonly { id: number; recipeId: string; liked: boolean; vip: boolean }[];
   /** The first upgrade the player can pay for right now, if any. */
   affordableUpgradeId: string | null;
   /** The first seat upgrade the player can pay for right now, if any. */
@@ -40,6 +40,11 @@ export function nextIngredient(ctx: GuideContext): string | undefined {
 /** The oldest waiting customer who ordered a drink they like. */
 export function likedCustomer(ctx: GuideContext): { id: number; recipeId: string } | undefined {
   return ctx.customers.find((c) => c.liked);
+}
+
+/** The oldest waiting VIP. */
+export function vipCustomer(ctx: GuideContext): { id: number; recipeId: string } | undefined {
+  return ctx.customers.find((c) => c.vip);
 }
 
 /** The oldest waiting customer whose drink is ready on the bar. */

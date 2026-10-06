@@ -7,6 +7,7 @@ export type { ContentTable } from './table';
 export { defineTable } from './table';
 export { CONTENT_TABLES };
 export { customerTable, feedbackTable, ingredientTable, recipeTable, upgradeTable } from './tables';
+export { reputationTable } from './reputation-table';
 export { tutorialTable } from './tutorial-table';
 
 function checkTable(table: ContentTable, ctx: CheckContext, hasKey: (key: string) => boolean): string[] {
