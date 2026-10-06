@@ -11,6 +11,8 @@ export interface GuideContext {
   customers: readonly { id: number; recipeId: string }[];
   /** The first upgrade the player can pay for right now, if any. */
   affordableUpgradeId: string | null;
+  /** The first seat upgrade the player can pay for right now, if any. */
+  affordableSeatsId: string | null;
   /** The first staff upgrade (hire or training) the player can pay for right now, if any. */
   affordableStaffId: string | null;
   shopOpen: boolean;

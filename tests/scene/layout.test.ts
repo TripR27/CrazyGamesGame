@@ -83,4 +83,9 @@ describe('tavern layout', () => {
       expect(slot.y).toBe(BAR.y);
     }
   });
+
+  it('has a place for every customer the seat upgrades can allow', () => {
+    const maxed = Object.fromEntries(upgrades.map((u) => [u.id, u.maxLevel ?? Infinity]));
+    expect(getMultipliers({ upgrades: maxed }).seats.toNumber()).toBeLessThanOrEqual(CUSTOMER_SLOTS.length);
+  });
 });

@@ -6,12 +6,14 @@ import { newGame } from './helpers';
 
 const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold'];
 const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done'];
+const SEATS = ['seats_buy', 'seats_done'];
 
 /** A game with the earlier lessons done and `gold` in the till. */
-function afterLessons(gold: number, done: string[] = [...BASICS, ...UPGRADE]) {
+function afterLessons(gold: number, done: string[] = [...BASICS, ...UPGRADE, ...SEATS]) {
   const state = createInitialState(0);
   state.tutorial.completedSteps = done;
   state.currencies.gold = num(gold);
+  state.upgrades = { extra_seat: 6 }; // several customers, so the staff have work
   return newGame(state);
 }
 

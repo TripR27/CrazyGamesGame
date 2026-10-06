@@ -3,7 +3,7 @@ import { createEventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
 import { createSeededRng } from '@/core/rng';
 import { dismiss, publishChange, startCustomerSystem } from '@/systems/customers';
-import { catalog, context, newFloor } from './helpers';
+import { catalog, context, FIRST_DELAY, newFloor } from './helpers';
 
 function setup(getContext = () => context()) {
   const bus = createEventBus<GameEvents>();
@@ -22,7 +22,7 @@ function setup(getContext = () => context()) {
 describe('customer system on the event bus', () => {
   it('announces arrivals when the game ticks', () => {
     const { arrived, floor, tick } = setup();
-    tick(1_400);
+    tick(FIRST_DELAY - 100);
     expect(arrived).not.toHaveBeenCalled();
     tick(100);
     expect(arrived).toHaveBeenCalledWith({ id: 1 });
@@ -31,7 +31,7 @@ describe('customer system on the event bus', () => {
 
   it('announces impatient departures', () => {
     const { left, tick } = setup();
-    tick(1_500);
+    tick(FIRST_DELAY);
     tick(20_000);
     expect(left).toHaveBeenCalledWith({ id: 1, reason: 'impatient' });
   });
@@ -55,7 +55,7 @@ describe('customer system on the event bus', () => {
 
   it('publishes a dismissal as a left event (used when serving in step 7)', () => {
     const { bus, floor, left, tick } = setup();
-    tick(1_500);
+    tick(FIRST_DELAY);
     const change = dismiss(floor, 1, 'served');
     if (change) publishChange(bus, change);
     expect(left).toHaveBeenCalledWith({ id: 1, reason: 'served' });

@@ -6,6 +6,8 @@ export const upgrades: Messages = {
   'upgrades.swift_cauldron.description': 'The cauldron brews {amount} faster per level. It denies being in a hurry.',
   'upgrades.better_prices.name': 'Better Prices',
   'upgrades.better_prices.description': 'Drinks sell for {amount} more per level. Nobody checks the menu anyway.',
+  'upgrades.extra_seat.name': 'Extra Seat',
+  'upgrades.extra_seat.description': '{amount} customer can sit in the tavern per level. More seats, more thirst.',
   'upgrades.bigger_bar.name': 'Bigger Bar',
   'upgrades.brewer_assistant.name': "Brewer's Assistant",
   'upgrades.brewer_assistant.description': 'Starts the drink a waiting customer wants. Each level adds {amount} brews per second. Works for exposure.',

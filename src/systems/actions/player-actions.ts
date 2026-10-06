@@ -55,6 +55,7 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
       if (def === undefined || count === 0) return;
       bus.emit('upgrade:bought', { id: def.id, count });
       if (def.kind === 'staff') bus.emit('staff:hired', { id: def.id });
+      if (def.effect.stat === 'seats') bus.emit('seats:bought', { id: def.id });
       bus.emit('saveRequested', {});
     },
     openShop() {

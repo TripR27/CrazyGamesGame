@@ -9,7 +9,7 @@ export function firstAffordable(state: UpgradeState, defs: readonly UpgradeDef[]
 }
 
 /** Which event announces the moment: one for the shop upgrades, one for staff. */
-export type AffordableEvent = 'upgrade:affordable' | 'staff:affordable';
+export type AffordableEvent = 'upgrade:affordable' | 'staff:affordable' | 'seats:affordable';
 
 export interface AffordableSource {
   getState(): UpgradeState;

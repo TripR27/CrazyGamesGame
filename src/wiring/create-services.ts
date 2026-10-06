@@ -52,6 +52,8 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
   const tutorial = createTutorial({ store, bus, floor, station });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
+  // The player starts with one seat and buys more: that many customers at most.
+  const seats = (): number => Math.floor(getMultipliers(store.getState()).seats.toNumber());
   startCustomerSystem({
     floor,
     bus,
@@ -63,7 +65,7 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
       // While a lesson is on screen: one customer at a time, who does not lose patience, so it can always
       // point at the right person and nobody leaves in the middle of a lesson. A lesson that has not
       // started yet (waiting for its moment) does not hold the game back.
-      maxCustomers: inLesson() ? TUTORIAL_MAX_CUSTOMERS : Infinity,
+      maxCustomers: Math.min(seats(), inLesson() ? TUTORIAL_MAX_CUSTOMERS : Infinity),
       freezePatience: inLesson(),
     }),
   });

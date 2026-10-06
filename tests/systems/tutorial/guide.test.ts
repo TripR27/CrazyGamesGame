@@ -9,6 +9,7 @@ const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   readyRecipeIds: [],
   customers: [],
   affordableUpgradeId: null,
+  affordableSeatsId: null,
   affordableStaffId: null,
   shopOpen: false,
   ...over,
