@@ -314,7 +314,7 @@ Zie ook de vragen in de chat. Beantwoord ze en dan werk ik dit document bij.
 |---|---|---|
 | Scope te groot (100+ recepten, helden, kamers, prestige) | Game wordt nooit af | Strikte MVP, data-gedreven content, fasering |
 | Economie niet in balans (te snel/traag) | Spelers haken af | Spreadsheet-eerst, playtesten, tuning-knoppen in debug-modus |
-| Weinig kunstmiddelen/kwaliteit | Thumbnail en eerste indruk zwak | Stijlkeuze die met weinig assets werkt (flat cartoon), eerste investeren in thumbnail en klant-sprites |
+| Weinig kunstmiddelen/kwaliteit | Thumbnail en eerste indruk zwak | Stijlkeuze die met weinig assets werkt (besloten: pixel art, zie SPEC stap 21), eerste investeren in thumbnail en klant-sprites |
 | Laadtijd/bestandsgrootte | Spelers vertrekken, CrazyGames-afwijzing | Gecomprimeerde assets, atlassen, lazy loading |
 | Lage retentie | CrazyGames promoot niet | Sterke eerste 5 minuten, dagelijkse beloningen, duidelijke volgende doelen |
 | Idle-bugs (offline-berekening, grote getallen) | Voortgang kapot | Testen van simulatiekern, save-versies, back-ups |
