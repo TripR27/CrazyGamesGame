@@ -81,7 +81,8 @@ Held inhuren -> uitrusten -> met drankjes op pad sturen
 
 ### 5.1 Drankjes en recepten
 - **100+ recepten** op termijn, gelanceerd met een kleinere set (zie fasering, hoofdstuk 10).
-- Een recept = 2 of 3 ingrediënten + een brouwtijd + een verkoopprijs + een **effect** op de klant.
+- Een recept = 2 of 3 ingrediënten + een brouwtijd + een verkoopprijs + een **effect** op de klant. Elk effect heeft een icoon (in de bestelbubbel, het boek en de zwevende tekst), zodat de speler ziet wat een drankje doet.
+- **Ingrediënten:** de basisingrediënten staan vanaf het begin op het schap; nieuwe ingrediënten worden per reputatieniveau koopbaar in de winkel (eenmalig). Zeldzame ingrediënten komen later uit kerkers.
 - **Effecten** (boosts): Kracht (klant betaalt meer), Snelheid (klant is sneller klaar met drinken, dus wisselt sneller), Geluk (kans op bonus/fooi), Charme (meer reputatie). Held-drankjes geven buffs op avontuur.
 - **Ontdekmechaniek:** speler combineert ingrediënten in de ketel. Een onbekende combinatie kan een nieuw recept opleveren (stukjes "Eureka"-moment). Hints in het receptenboek (silhouetten van onontdekte drankjes) houden mensen zoekend.
 - **Receptenboek (collectie):** grid met alle drankjes, voortgang X/100. Dit is een sterke retentiehaak voor completionisten. Het boek is ook het **naslagwerk**: bij elk ontdekt drankje staat hoe je het maakt (ingrediënten, brouwtijd, prijs, effect), zodat de speler niets hoeft te onthouden. Onontdekte drankjes zijn een silhouet met een hint.

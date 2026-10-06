@@ -115,6 +115,18 @@
 
 ---
 
-## 7. Andere gedachten (leeg)
+## 7. Meer uitleg over effecten (na de eerste speeltest)
+
+**Wens (eigenaar, 2026-10-06):** de effecten (kracht, snelheid, geluk, charme) moeten duidelijker zijn; nu snap je ze pas als je het receptenboek opent. Gekozen voor stap 13b: **effect-iconen** (SPEC.md hoofdstuk 4, Speelbaarheid na de eerste speeltest). Niet gekozen, maar bruikbaar als de iconen niet genoeg blijken:
+
+- **Uitleg per effect bij de eerste keer:** de ketel legt een effect pas uit als het voor het eerst gebeurt (eerste fooi, eerste snelle drinker, eerste extra reputatie), in plaats van alle vier tegelijk.
+- **Klantkaartje:** met de muis boven een klant zie je naam, grapje en voorkeur met iconen.
+- **Legenda in het receptenboek:** bovenaan een korte uitleg van de vier effecten met hun icoon.
+
+**Plan:** eerst stap 13b bouwen en spelen; daarna beslissen of een van deze erbij moet.
+
+---
+
+## 8. Andere gedachten (leeg)
 
 *(Hier komen nieuwe ideeën.)*
