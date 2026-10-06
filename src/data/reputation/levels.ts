@@ -20,8 +20,8 @@ export interface ReputationLevel {
 export const REPUTATION_LEVELS: readonly ReputationLevel[] = [
   { id: 'shabby_shack', minReputation: 0 },
   { id: 'local_haunt', minReputation: 10, unlocks: ['bog_lantern', 'dragons_hiccup', 'swamp_fire'] },
-  { id: 'cozy_inn', minReputation: 25, unlocks: ['moonlight_merlot', 'honeyed_moon'] },
-  { id: 'popular_pub', minReputation: 50, unlocks: ['trolls_toll', 'gym_sock_mead', 'spicy_spores'] },
-  { id: 'famous_tavern', minReputation: 100, unlocks: ['troll_torch', 'dusk_sangria'] },
-  { id: 'legendary_hall', minReputation: 200, unlocks: ['berserker_brew'] },
+  { id: 'cozy_inn', minReputation: 40, unlocks: ['moonlight_merlot', 'honeyed_moon'] },
+  { id: 'popular_pub', minReputation: 120, unlocks: ['trolls_toll', 'gym_sock_mead', 'spicy_spores'] },
+  { id: 'famous_tavern', minReputation: 300, unlocks: ['troll_torch', 'dusk_sangria'] },
+  { id: 'legendary_hall', minReputation: 650, unlocks: ['berserker_brew'] },
 ];

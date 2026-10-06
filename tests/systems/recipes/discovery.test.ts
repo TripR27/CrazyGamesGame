@@ -42,7 +42,7 @@ describe('which recipes can be discovered', () => {
 
   it('opens up the recipes of each level reached, except the ones already known', () => {
     expect(ids({ reputation: 10, recipesDiscovered: ['dragons_hiccup'] })).toEqual(['bog_lantern', 'swamp_fire']);
-    expect(ids({ reputation: 25, recipesDiscovered: [] })).toHaveLength(5);
+    expect(ids({ reputation: 40, recipesDiscovered: [] })).toHaveLength(5);
   });
 });
 

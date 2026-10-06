@@ -18,7 +18,7 @@ function withReputation(reputation: number) {
 
 describe('reputation levels in the real game', () => {
   it('only make recipes discoverable: customers keep ordering what the player knows', () => {
-    const game = withReputation(25);
+    const game = withReputation(40);
     game.tick(120_000);
     expect(game.state.recipesDiscovered).toEqual(['slime_sap', 'glowcap_stout']);
     expect(game.world.scene.floor.customers.every((c) => game.state.recipesDiscovered.includes(c.recipeId))).toBe(true);
@@ -36,7 +36,7 @@ describe('reputation levels in the real game', () => {
 
 describe('the VIP hint, played in the real game', () => {
   it('points at the first VIP, who wants the priciest known drink, and finishes once they are served', () => {
-    const game = withReputation(25);
+    const game = withReputation(40);
     for (let t = 0; t < 1_200_000 && game.shown() === null; t += 1_000) game.tick(1_000);
     expect(game.shown()).toBe('vip_spot');
     const vip = game.world.scene.floor.customers.find((c) => c.vip);

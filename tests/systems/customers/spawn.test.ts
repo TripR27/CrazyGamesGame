@@ -50,7 +50,7 @@ describe('spawning customers', () => {
     expect(new Set(low.customers.map((c) => c.typeId))).toEqual(new Set(['plain']));
 
     const high = newFloor(100);
-    run(high, context({ reputation: 60 }), 600_000, createSeededRng(3), patientCatalog);
+    run(high, context({ reputation: 120 }), 600_000, createSeededRng(3), patientCatalog);
     expect(new Set(high.customers.map((c) => c.typeId))).toEqual(new Set(['plain', 'fancy', 'royal']));
   });
 
