@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 12 (Receptenontdekking en receptenboek). **Volgende stap:** 13 (Balans-simulator).
+**Nu bezig:** niets. **Laatst afgerond:** stap 13 (Balans-simulator). **Volgende stap:** 14 (Kamers en visuele groei).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -30,7 +30,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 11b | Voorkeuren en drankeffecten | ✅ | `step-11b-effects` |
 | 11c | Reputatieniveaus, gates en VIP-klanten | ✅ | `step-11c-reputation` |
 | 12 | Receptenontdekking + receptenboek | ✅ | `step-12-recipe-book` |
-| 13 | Balans-simulator | ⬜ | |
+| 13 | Balans-simulator | ✅ | `step-13-balance-simulator` |
 | 14 | Kamers en visuele groei | ⬜ | |
 | 15 | Helden | ⬜ | |
 | 16 | Expedities en kerkers | ⬜ | |
@@ -139,7 +139,7 @@ platform/  audio/  i18n/   (diensten; mogen door ui/scene gebruikt worden,
 crazyGamesGame/
   CLAUDE.md  SPEC.md  GAME_ANALYSE.md  ASSETS.md
   index.html  package.json  vite.config.ts  tsconfig.json  eslint.config.js
-  scripts/        check-lines.mjs, simulate.ts (balans-simulator)
+  scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/sim/)
   public/         assets (svg, spritesheets, audio)
   src/
     main.ts                 opstart (kort!)
@@ -255,7 +255,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - **Poster op de muur:** nog niet gebouwd; dat hoort bij de art-pass (stap 21), omdat de poster pas leesbaar en mooi wordt met echte art. Het paneel is de basis waar de poster later naartoe linkt (IDEAS.md, punt 5).
   - **Tutorial-hint:** een les `book` (na de plekken-les, vóór personeel) die start bij het eerste nieuwe niveau (`reputation:levelUp`, of meteen als het niveau al bereikt is): de ketel wijst de knop aan en daarna de kop van het open boek.
 
-- **Balans-simulator** (`scripts/simulate.ts`, draait in Node dankzij de pure `systems/`): simuleert een speler-strategie en print wanneer mijlpalen worden gehaald. Doel: eerste prestige na ~1 tot 2 uur.
+- **Balans-simulator** (gebouwd in stap 13): `npm run simulate [-- minuten [seed]]` (standaard 60 minuten, seed 1). `scripts/simulate.mjs` laat de bestaande Vite de TypeScript-code laden (`ssrLoadModule`, geen nieuwe dependency); de logica staat in `src/sim/`: een speler-bot (`bot.ts`: serveert klaarstaande drankjes, probeert eerst nieuwe recepten, brouwt dan bestellingen, koopt de goedkoopste betaalbare upgrade; één klik per 0,7 s), een tijdlijn uit de spelgebeurtenissen (`timeline.ts`), de runner (`run.ts`: het echte spel via `createServices`, vaste seed, gesimuleerde klok, tutorial overgeslagen) en het rapport (`report.ts`). Het rapport toont de eerste keer van elke mijlpaal, een tabel per minuut en de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6. **Idle versus actief:** dezelfde run (zelfde seed) waarin de speler de laatste 10 minuten niets doet; doel 30-40%. Doel later: eerste prestige na ~1 tot 2 uur (prestige komt in stap 17).
 
 ### Rendering
 
@@ -427,7 +427,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
   *Klaar wanneer:* niveaus staan in de HUD met een melding bij elk nieuw niveau, klanten en recepten komen per niveau, VIP's verschijnen vanaf hun niveau en vragen het duurste drankje, de hint start bij de eerste VIP, tests slagen.
 - [x] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
-- [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
+- [x] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
 - [ ] **Stap 14: Kamers en visuele groei.** Uitbreidingen (extra tafels, alchemielab, VIP-lounge), kamer-slots in de scene, decoraties als goud-sink. Tutorial-hint: eerste kamer.
 - [ ] **Stap 15: Helden.** Inhuren, klassen, levelen, uitrusting, held-paneel. Tutorial-hint: eerste held.
@@ -473,6 +473,22 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 13: Balans-simulator (2026-10-06, `step-13-balance-simulator`)
+- **Gedaan:** (code in `src/sim/`, `scripts/simulate.mjs`, `src/systems/staff/stale-cauldron.ts`, getallen in `src/data/`; tests in `tests/sim/` en `tests/systems/staff/stale-cauldron.test.ts`)
+  - **Simulator:** zie hoofdstuk 4, Balans-simulator. Twee runs van een uur duren samen ongeveer 7 seconden.
+  - **Eerste afstelling** (seed 1, 60 minuten, gecontroleerd met seeds 2 en 3):
+    - *Better Prices* had geen maximum en werd elk niveau 15% beter bij maar 25% duurder: na minuut 10 explodeerde het goud (25 miljoen op minuut 60). Prijsgroei 1,25 naar 1,7: nu ongeveer 100K op minuut 60.
+    - *Personeel* was volledig getraind sneller dan de klantenstroom, waardoor idle 94% van actief verdiende en de speler later niets toevoegde. Nu: brouwer +0,03/s per niveau en serveerster +0,04/s, maximaal 5 niveaus, prijsgroei 1,8, en goedkoper inhuren (60 en 90, was 100 en 150). Idle verdient nu 32-34% van actief (doel 30-40%).
+    - *Niveaus* gingen te snel (Legendary Hall op 11 minuten): drempels 0 / 10 / 40 / 120 / 300 / 650 (was 0 / 10 / 25 / 50 / 100 / 200). Alle 13 recepten nu rond 23-24 minuten (doel ~15 recepten in 30 minuten).
+    - Uitkomst tegen de doelen: 15 aankopen in de eerste 5 minuten (doel ~10), eerste medewerker op 4:16 (doel binnen 5 minuten), eerste ontdekking op 1:20 (doel binnen 5 minuten).
+  - **Fout gevonden door de simulator en opgelost:** liet de speler één ingrediënt in de ketel liggen en liep hij weg, dan bleef de brouwer eeuwig wachten (hij raakt het werk van de speler niet aan), terwijl er 7 klanten zaten. Nu ruimt een ingehuurde brouwer een ketel op die 15 s onveranderd is (`BREWING.staleCauldronMs`); een speler midden in een combinatie merkt daar niets van.
+  - 9 nieuwe tests (353 totaal).
+- **Waarom (keuzes):** de eigenaar was weg en liet de aanbevolen keuze over. De runner gebruikt dezelfde bedrading als het spel in de browser, zodat de simulator altijd meeloopt met nieuwe regels. De idle-meting vergelijkt hetzelfde spel met en zonder speler; een eerste versie (stoppen direct na het inhuren) mat oneerlijk laag personeel en gaf 2%.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. In de browser laadt het spel zonder nieuwe fouten.
+- **Afwijkingen van het plan:** het script heet `scripts/simulate.mjs` met de logica in `src/sim/` (in plaats van `scripts/simulate.ts`), zodat de logica getypt, gelint en getest wordt. Na minuut 25 is er niets meer te kopen behalve Better Prices; kamers (stap 14) en prestige (stap 17) moeten daar de doelen vullen. De offline-berekening houdt nog geen rekening met plekken en drinktijd; met de nieuwe personeelsgetallen is het personeel vrijwel altijd de bottleneck, dus het verschil is klein.
+- **Nu te proberen:** `npm run simulate`, of `npm run simulate -- 30 7` voor 30 minuten met seed 7. Speel zelf de eerste 10 minuten en vergelijk met de tijdlijn.
+- **Nog te doen / volgende stap:** stap 14, Kamers en visuele groei. Bij elke nieuwe stap de simulator opnieuw draaien.
 
 ### Stap 12: Receptenontdekking en receptenboek (2026-10-06, `step-12-recipe-book`)
 - **Gedaan:** (code in `src/systems/recipes/`, `src/systems/brewing/add-ingredient.ts`, `src/data/recipes/`, `src/data/reputation/levels.ts`, `src/ui/recipe-book/`, `src/ui/side-panels.ts`, `src/data/tutorial/book.ts`, `src/wiring/tutorial-already-holds.ts`, `src/wiring/start-customers.ts`; tests in `tests/systems/recipes/`, `tests/ui/book-view-model.test.ts`, `tests/wiring/discovery-flow.test.ts` en aangepaste bestaande tests)
