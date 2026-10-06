@@ -66,6 +66,23 @@
 
 ---
 
-## 4. Andere gedachten (leeg)
+## 4. Offline-opbrengst eerst kopen en upgraden
+
+**Wens (eigenaar, 2026-10-06):** offline verdienen moet **niet automatisch** gebeuren. De speler moet het eerst **kopen** (ontgrendelen) en kan het daarna **upgraden**, zodat het voelt als een aankoop met een doel en niet als een gratis extraatje.
+
+**Wat er nu is (stap 10b):** zodra een brouwer en een serveerster zijn ingehuurd, verdient het personeel offline automatisch 50% van zijn tempo, tot 2 uur (`data/offline.ts`, `systems/offline/`). Er is nog geen aankoop voor.
+
+**Ideeën om uit te werken (nog niet gepland):**
+- Een eerste aankoop in de winkel ("Nachtwacht" of "Sluitingstijd", werknaam) die offline verdienen aanzet. Zonder die aankoop telt de tijd weg niet mee en toont het welkom-terug-venster een uitnodiging om het te kopen.
+- Upgrades daarna: een hoger offline-aandeel (nu 50%) en een langere limiet (nu 2 uur, de stat `offlineHours` bestaat al). Past ook in de prestige-boom ("Brouwerij-erfenis").
+- Een rewarded ad die de offline-opbrengst verdubbelt (stap 20) kan hierop aansluiten.
+- Technisch klein: een stat (bijv. `offlineShare`, basis 0) en een upgrade in `data/upgrades/`; `computeOffline` gebruikt dan die stat in plaats van de vaste `OFFLINE.efficiency`. Het welkom-terug-venster krijgt een regel voor "nog niet gekocht". De tutorial-hint voor de eerste medewerker moet dan ook uitleggen dat offline verdienen apart gekocht wordt.
+- Open vragen voor later: wat kost het, wanneer wordt het aangeboden (na de eerste medewerkers?), en moet de eerste afwezigheid wel eens laten zien wat de speler mist (een voorbeeldbedrag)?
+
+**Plan:** niet bouwen buiten de stappen. Een logisch moment is bij stap 13 (balans, getallen afstellen) of stap 17 (prestige-boom). Wil de eigenaar het eerder, dan komt het als aparte stap in SPEC.md.
+
+---
+
+## 5. Andere gedachten (leeg)
 
 *(Hier komen nieuwe ideeën.)*
