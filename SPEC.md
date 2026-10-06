@@ -9,13 +9,13 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (nog geen code). **Volgende stap:** 1.
+**Nu bezig:** niets. **Laatst afgerond:** stap 1 (project opzetten). **Volgende stap:** 2 (Core).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 | # | Stap | Status | Branch |
 |---|---|---|---|
-| 1 | Project opzetten | ⬜ | |
+| 1 | Project opzetten | ✅ | `step-01-project-setup` |
 | 2 | Core (getallen, state, tick) | ⬜ | |
 | 3 | Save-systeem | ⬜ | |
 | 4 | i18n + data-schema | ⬜ | |
@@ -94,7 +94,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 
 | Onderdeel | Keuze | Versie (npm, 2026-10-06) | Opmerking |
 |---|---|---|---|
-| Taal | TypeScript, `strict: true`, geen `any` | 7.0.x | |
+| Taal | TypeScript, `strict: true`, geen `any` | **6.0.3** (niet 7.x) | `typescript-eslint` ondersteunt alleen TypeScript < 6.1. Pas upgraden als dat verandert. |
 | Engine | **Phaser 4** | 4.2.x (stabiel sinds april 2026) | Fallback: Phaser 3.90. Check bundlegrootte in stap 1. |
 | Build/dev | Vite | 8.x | `base: './'`, productiebuild naar `dist/` |
 | Grote getallen | `break_infinity.js` | 2.2.x | Opslaan als string in save |
@@ -333,7 +333,7 @@ Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus volgorde aanhouden. De status per stap staat in het Voortgangsoverzicht bovenaan; hieronder staat wat elke stap inhoudt.
 
 ### Fase A: Fundament
-- [ ] **Stap 1: Project opzetten.** Vite + TypeScript (strict) + Phaser + Vitest + ESLint. `npm run dev|build|check|test`. `scripts/check-lines.mjs`, ESLint `max-lines`, lagen-regels via `no-restricted-imports`. `.gitignore`. Lege Phaser-scene (1280×720, FIT) toont "Hello tavern". Productiebuild bundlegrootte rapporteren.
+- [x] **Stap 1: Project opzetten.** Vite + TypeScript (strict) + Phaser + Vitest + ESLint. `npm run dev|build|check|test`. `scripts/check-lines.mjs`, ESLint `max-lines`, lagen-regels via `no-restricted-imports`. `.gitignore`. Lege Phaser-scene (1280×720, FIT) toont "Hello tavern". Productiebuild bundlegrootte rapporteren.
   *Klaar wanneer:* `npm run check` en `npm run build` slagen, pagina laadt zonder fouten, bundlegrootte genoteerd.
 - [ ] **Stap 2: Core.** Decimal-wrapper + getalformattering (K/M/B/T/aa…), `GameState`-type, store met subscribe, event-bus, vaste 100 ms-tick op `Date.now()`-delta, debug-helper. Tests.
   *Klaar wanneer:* tests voor formattering en tick slagen (incl. grote delta's).
@@ -404,4 +404,24 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nog te doen / volgende stap:** ...
 ```
 
-*(Nog geen stappen uitgevoerd.)*
+### Stap 1: Project opzetten (2026-10-06, `step-01-project-setup`)
+- **Gedaan:**
+  - Vite 8 + TypeScript (strict) + Phaser 4.2.1 + Vitest 5 + ESLint 10 + `break_infinity.js` geïnstalleerd.
+  - Scripts: `npm run dev | build | typecheck | lint | lines | test | check`.
+  - `scripts/check-lines.mjs` (faalt bij > 100 regels in `src/`, `tests/`, `scripts/`) plus ESLint-regels `max-lines: 100` en `max-lines-per-function: 40`.
+  - ESLint-lagenregel: `src/core`, `src/systems`, `src/data` mogen geen `phaser`, `scene/`, `ui/`, `document`, `window` of `localStorage` gebruiken.
+  - Pad-alias `@/` naar `src/`. Lege Phaser-scene (1280×720, `Scale.FIT`, gecentreerd) toont "Hello tavern". `index.html` heeft `#game` en `#ui-root`.
+  - Eén test (16:9-ontwerpresolutie). `.gitignore` (o.a. `.env*`, `.claude/`) en `.gitattributes` (LF).
+- **Waarom (keuzes):**
+  - **TypeScript 6.0.3 in plaats van 7.x**: `typescript-eslint` accepteert alleen TypeScript < 6.1, en de lint-regels zijn essentieel voor de 100-regelsgrens en de lagen.
+  - Vitest-config staat in `vite.config.ts` (via `vitest/config`), zodat er één configbestand is.
+  - `.claude/` staat helemaal in `.gitignore`, zodat er niets van Claude Code in de repository komt.
+  - Attributie in commits en PR's is uitgezet in `.claude/settings.local.json` (lokaal, niet in git).
+- **Gemeten / gecontroleerd:**
+  - `npm run check` en `npm run build` slagen.
+  - Regelgrens en lagenregel zijn bewust overtreden en geven beide een fout.
+  - In de browser: geen consolefouten, canvas 1280×720 geschaald naar 16:9 (1024×576 in een 1024×768 venster).
+  - **Bundelgrootte:** `dist/` is 1,4 MB totaal; JS 1,38 MB (358 kB gzip). Budget uit hoofdstuk 8 (< 8 MB initieel, JS gzip < 1,5 MB) is ruim gehaald. Phaser is vrijwel de hele bundel.
+- **Afwijkingen van het plan:** TypeScript 6.0.3 (zie boven); `.gitattributes` toegevoegd (niet gepland, voorkomt CRLF-meldingen op Windows).
+- **Nu te proberen:** `npm install` en daarna `npm run dev`, open http://localhost:5173. Je ziet "Hello tavern" gecentreerd en schaalbaar. `npm run check` draait alle controles.
+- **Nog te doen / volgende stap:** stap 2, Core (Decimal-wrapper en getalformattering, `GameState`, store, event-bus, vaste 100 ms-tick, tests).
