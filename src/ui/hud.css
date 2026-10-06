@@ -1,0 +1,41 @@
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  display: flex;
+  gap: 12px;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+
+.hud-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(27, 18, 9, 0.8);
+  color: #fff2cc;
+  font-size: 22px;
+}
+
+.hud-label {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.hud-value {
+  min-width: 2ch;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-item--gold .hud-value {
+  color: #f5c542;
+}
+
+.hud-item--reputation .hud-value {
+  color: #ff9bd0;
+}

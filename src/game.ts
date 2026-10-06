@@ -1,6 +1,7 @@
 import { AUTO, Game, Scale } from 'phaser';
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { HelloScene } from '@/scene/hello-scene';
+import { BootScene } from '@/scene/boot-scene';
+import { TavernScene } from '@/scene/tavern-scene';
 
 export function createGame(parent: string): Game {
   return new Game({
@@ -10,6 +11,6 @@ export function createGame(parent: string): Game {
     height: GAME_HEIGHT,
     backgroundColor: BACKGROUND_COLOR,
     scale: { mode: Scale.FIT, autoCenter: Scale.CENTER_BOTH },
-    scene: [HelloScene],
+    scene: [BootScene, TavernScene],
   });
 }
