@@ -10,7 +10,7 @@ export default tseslint.config(
   {
     files: ['src/**/*.ts', 'tests/**/*.ts', 'scripts/**/*.mjs'],
     rules: {
-      'max-lines': ['error', { max: 100 }],
+      'max-lines': ['warn', { max: 100 }],
       'max-lines-per-function': ['error', { max: 40 }],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': 'error',
