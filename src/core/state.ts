@@ -25,6 +25,8 @@ export interface GameState {
   reputation: number;
   /** Recipe ids the player knows; customers only order these. */
   recipesDiscovered: string[];
+  /** Ingredient ids bought in the shop (one-time purchases); they stay on the shelf. */
+  ingredientsBought: string[];
   upgrades: UpgradeLevels;
   tutorial: TutorialProgress;
 }
@@ -35,6 +37,7 @@ export function createInitialState(now: number): GameState {
     currencies: { gold: num(0) },
     reputation: 0,
     recipesDiscovered: [...STARTER_RECIPE_IDS],
+    ingredientsBought: [],
     upgrades: {},
     tutorial: { completedSteps: [], skipped: false },
   };

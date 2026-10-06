@@ -52,6 +52,9 @@ export interface GameEvents {
   /** Same again for the first extra seat. */
   'seats:affordable': Record<string, never>;
   'seats:bought': { id: string };
+  /** An ingredient in the shop can be bought (after not being able to); and one was bought (one time each). */
+  'ingredients:affordable': Record<string, never>;
+  'ingredient:bought': { id: string };
   /** A staff upgrade was bought (a hire or a training level). */
   'staff:hired': { id: string };
   /** The shop panel was opened or closed (the tutorial follows this). */

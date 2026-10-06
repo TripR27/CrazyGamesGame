@@ -10,5 +10,6 @@ export const reputation: Messages = {
   'reputation.legendary_hall.name': 'Legendary Hall',
   'reputation.level_up': 'Level up! {level}',
   'reputation.new_customer': 'New customer: {name}',
+  'reputation.new_ingredient': 'New in the shop: {name}',
   'reputation.new_recipes': 'New recipes to discover: {n}. Check the recipe book!',
 };

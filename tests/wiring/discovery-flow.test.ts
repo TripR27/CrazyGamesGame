@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { num } from '@/core/numbers';
 import { createInitialState } from '@/core/state';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
@@ -28,9 +29,21 @@ describe('discovering recipes in the real game', () => {
     expect(game.world.scene.station.brewing?.recipeId).toBe('bog_lantern');
   });
 
-  it('puts the ingredients of discoverable recipes on the shelf', () => {
-    expect(withReputation(0).world.scene.getShelf()).toHaveLength(3);
-    expect(withReputation(10).world.scene.getShelf()).toEqual(expect.arrayContaining(['fire_pepper']));
+  it('puts a new ingredient on the shelf only once it is bought, and then its recipes can be discovered', () => {
+    const game = withReputation(10, [...EARLIER, 'book_open', 'book_read']);
+    const { actions } = game.world.scene;
+    expect(game.world.scene.getShelf()).toEqual(['swamp_slime', 'wild_honey', 'glowcap']);
+    actions.clickIngredient('wild_honey');
+    actions.clickIngredient('fire_pepper'); // not on the shelf yet: Dragon's Hiccup cannot be discovered
+    expect(game.state.recipesDiscovered).not.toContain('dragons_hiccup');
+    actions.clickCauldron();
+    game.store.update((s) => void (s.currencies.gold = num(100)));
+    actions.buyIngredient('fire_pepper');
+    expect(game.world.scene.getShelf()).toContain('fire_pepper');
+    expect(game.state.currencies.gold.toNumber()).toBe(60);
+    actions.clickIngredient('fire_pepper');
+    actions.clickIngredient('wild_honey');
+    expect(game.state.recipesDiscovered).toContain('dragons_hiccup');
   });
 
   it('lets the same combination fizzle at the first level', () => {

@@ -1,7 +1,6 @@
 export { addIngredient } from './add-ingredient';
 export { advanceBrewing, brewProgress } from './advance';
 export { canGrow, matchRecipe } from './match';
-export { shelfIngredients } from './shelf';
 export { createStation, emptyCauldron } from './station';
 export { publishBrewEvent, startBrewSystem } from './system';
 export type { ActiveBrew, BrewEvent, BrewStation } from './types';

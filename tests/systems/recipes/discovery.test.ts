@@ -34,7 +34,8 @@ describe('discovering a recipe in the cauldron', () => {
 });
 
 describe('which recipes can be discovered', () => {
-  const ids = (state: DiscoveryState): string[] => discoverableRecipes(state, recipes).map((r) => r.id);
+  const all = ['swamp_slime', 'wild_honey', 'glowcap', 'fire_pepper', 'moon_grape', 'troll_sweat'];
+  const ids = (state: DiscoveryState, owned = all): string[] => discoverableRecipes(state, recipes, owned).map((r) => r.id);
 
   it('nothing at the first level, so a new player cannot brew something by accident', () => {
     expect(ids({ reputation: 0, recipesDiscovered: ['slime_sap', 'glowcap_stout'] })).toEqual([]);
@@ -43,6 +44,12 @@ describe('which recipes can be discovered', () => {
   it('opens up the recipes of each level reached, except the ones already known', () => {
     expect(ids({ reputation: 10, recipesDiscovered: ['dragons_hiccup'] })).toEqual(['bog_lantern', 'swamp_fire']);
     expect(ids({ reputation: 40, recipesDiscovered: [] })).toHaveLength(5);
+  });
+
+  it('needs every ingredient of the recipe on the shelf too', () => {
+    const basic = ['swamp_slime', 'wild_honey', 'glowcap'];
+    expect(ids({ reputation: 10, recipesDiscovered: [] }, basic)).toEqual(['bog_lantern']);
+    expect(ids({ reputation: 10, recipesDiscovered: [] }, [...basic, 'fire_pepper'])).toEqual(['bog_lantern', 'dragons_hiccup', 'swamp_fire']);
   });
 });
 

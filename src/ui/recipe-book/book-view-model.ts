@@ -1,15 +1,17 @@
 import { formatNumber } from '@/core/format';
 import { num } from '@/core/numbers';
 import type { GameState } from '@/core/state';
+import { ingredients as allIngredients, type IngredientDef } from '@/data/ingredients';
 import type { RecipeDef } from '@/data/recipes';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
 import { effectName } from '@/scene/effects/effect-text';
 import { t } from '@/i18n';
+import { ownedIngredients } from '@/systems/ingredients';
 import { levelFor } from '@/systems/reputation';
 
 /** What the book needs from the state (interface segregation). */
-export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation'>;
+export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation' | 'ingredientsBought'>;
 
 /** A known recipe shows how to make it; a discoverable one a silhouette with a hint; a locked one its level. */
 export type BookEntry =
@@ -21,7 +23,8 @@ export type BookEntry =
       details: string[];
       rarity: string;
     }
-  | { kind: 'hidden'; id: string; hint: string; rarity: string }
+  /** `needs`: the shop ingredients still to buy before it can be discovered, or undefined when none are missing. */
+  | { kind: 'hidden'; id: string; hint: string; rarity: string; needs?: string }
   | { kind: 'locked'; id: string; unlock: string };
 
 export interface BookView {
@@ -47,18 +50,29 @@ function knownEntry(r: RecipeDef): BookEntry {
   };
 }
 
+/** "Needs Fire Pepper from the shop" for a recipe whose ingredients are not all on the shelf yet. */
+function needsLine(r: RecipeDef, owned: readonly string[]): string | undefined {
+  const missing = r.ingredients.filter((id) => !owned.includes(id)).map((id) => text('ingredients', id, 'name'));
+  return missing.length === 0 ? undefined : t('book.needs', { ingredients: missing.join(', ') });
+}
+
 /** Every recipe as the book shows it, in content order, with the X/N progress on top. */
 export function toBookView(
   state: BookState,
   recipes: readonly RecipeDef[],
   levels: readonly ReputationLevel[] = REPUTATION_LEVELS,
+  ingredients: readonly IngredientDef[] = allIngredients,
 ): BookView {
   const level = levelFor(state.reputation, levels);
+  const owned = ownedIngredients(state, ingredients, recipes).map((i) => i.id);
   const unlockIndex = (id: string): number => levels.findIndex((l) => (l.unlocks ?? []).includes(id));
   const entries = recipes.map((r): BookEntry => {
     if (state.recipesDiscovered.includes(r.id)) return knownEntry(r);
     const at = unlockIndex(r.id);
-    if (at !== -1 && at < level) return { kind: 'hidden', id: r.id, hint: text('recipes', r.id, 'hint'), rarity: r.rarity };
+    if (at !== -1 && at < level) {
+      const needs = needsLine(r, owned);
+      return { kind: 'hidden', id: r.id, hint: text('recipes', r.id, 'hint'), rarity: r.rarity, ...(needs === undefined ? {} : { needs }) };
+    }
     const name = at === -1 ? t('book.unknown') : text('reputation', levels[at]?.id ?? '', 'name');
     return { kind: 'locked', id: r.id, unlock: t('book.locked', { level: name }) };
   });

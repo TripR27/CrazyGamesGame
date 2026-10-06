@@ -9,6 +9,7 @@ export const book: Messages = {
   'book.price': '{n} gold',
   'book.locked': 'Unlocks at {level}',
   'book.unknown': 'a later level',
+  'book.needs': 'Needs {ingredients} from the shop',
   'book.hidden_name': '???',
   'book.eureka': 'Eureka! {drink}!',
   'book.rarity_common': 'Common',

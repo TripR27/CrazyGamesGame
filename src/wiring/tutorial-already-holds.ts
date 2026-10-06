@@ -5,6 +5,7 @@ import { upgrades, type UpgradeDef } from '@/data/upgrades';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { levelFor } from '@/systems/reputation';
 import type { AlreadyHolds } from '@/systems/tutorial';
+import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
 
 /** What the checks may look at: the saved state, the customers, and the side-panel tab on screen. */
@@ -12,6 +13,7 @@ interface World {
   store: Store<GameState>;
   floor: CustomerFloor;
   openTab(): string | null;
+  ingredients: IngredientCatalog;
 }
 
 type Check = (world: World) => boolean;
@@ -30,6 +32,7 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'upgrade:affordable': canBuy(generalOnly),
   'seats:affordable': canBuy(seatsOnly),
   'staff:affordable': canBuy(staffOnly),
+  'ingredients:affordable': ({ store, ingredients }) => firstBuyableIngredient(store.getState(), ingredients) !== undefined,
   'likes:ordered': ({ floor }) => waitingCustomers(floor).some((c) => c.liked),
   'vip:arrived': ({ floor }) => waitingCustomers(floor).some((c) => c.vip),
   'reputation:levelUp': ({ store }) => levelFor(store.getState().reputation) > 1,

@@ -8,6 +8,7 @@ import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
+import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients';
 import { followOpenTab } from './follow-open-tab';
 import { createAlreadyHolds } from './tutorial-already-holds';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
@@ -17,6 +18,7 @@ export interface TutorialDeps {
   bus: EventBus<GameEvents>;
   floor: CustomerFloor;
   station: BrewStation;
+  ingredients: IngredientCatalog;
 }
 
 export interface TutorialServices {
@@ -31,7 +33,7 @@ function listenedEvents(): TutorialEvent[] {
 }
 
 /** Connects the tutorial machine to the saved state and the game bus. */
-export function createTutorial({ store, bus, floor, station }: TutorialDeps): TutorialServices {
+export function createTutorial({ store, bus, floor, station, ingredients }: TutorialDeps): TutorialServices {
   const progress: ProgressStore = {
     get: () => store.getState().tutorial,
     update: (mutator) => store.update((state) => mutator(state.tutorial)),
@@ -40,7 +42,7 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
   const affordableSeats = (): string | null => firstAffordable(store.getState(), seatsOnly(upgrades))?.id ?? null;
   const affordableStaff = (): string | null => firstAffordable(store.getState(), staffOnly(upgrades))?.id ?? null;
   const openTab = followOpenTab(bus);
-  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds({ store, floor, openTab }));
+  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds({ store, floor, openTab, ingredients }));
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
   bus.on('tick', ({ deltaMs }) => machine.onTick(deltaMs));
@@ -56,6 +58,8 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     affordableUpgradeId: affordable(),
     affordableSeatsId: affordableSeats(),
     affordableStaffId: affordableStaff(),
+    affordableIngredientId: firstBuyableIngredient(store.getState(), ingredients)?.id ?? null,
+    newestIngredientId: store.getState().ingredientsBought.at(-1) ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

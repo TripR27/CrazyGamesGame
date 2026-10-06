@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { customers } from '@/data/customers';
 import { ingredients } from '@/data/ingredients';
 import { recipes } from '@/data/recipes';
+import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { STARTER_RECIPE_IDS } from '@/data/recipes/starters';
 import { validateContent } from '@/data/validate';
 import { EFFECTS } from '@/data/common';
@@ -38,6 +39,21 @@ describe('game content', () => {
   it('covers every drink effect with at least one recipe', () => {
     const covered = new Set(recipes.map((r) => r.effect));
     expect([...covered].sort()).toEqual([...EFFECTS].sort());
+  });
+
+  it('only unlocks recipes whose shop ingredients can be bought by that level', () => {
+    const available = (id: string, level: number): boolean => {
+      const def = ingredients.find((i) => i.id === id);
+      return def !== undefined && def.source === 'shop' && (def.buy?.level ?? 1) <= level;
+    };
+    const tooEarly = REPUTATION_LEVELS.flatMap((l, i) =>
+      (l.unlocks ?? []).filter((id) => !(recipes.find((r) => r.id === id)?.ingredients ?? []).every((ing) => available(ing, i + 1))),
+    );
+    expect(tooEarly).toEqual([]);
+  });
+
+  it('sells one new ingredient per level from level 2 on', () => {
+    expect(ingredients.filter((i) => i.buy !== undefined).map((i) => i.buy?.level)).toEqual([2, 3, 4]);
   });
 
   it('uses every ingredient in at least one recipe', () => {

@@ -14,6 +14,8 @@ const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   affordableUpgradeId: null,
   affordableSeatsId: null,
   affordableStaffId: null,
+  affordableIngredientId: null,
+  newestIngredientId: null,
   openTab: null,
   ...over,
 });
