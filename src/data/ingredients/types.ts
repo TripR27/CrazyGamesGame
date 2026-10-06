@@ -1,0 +1,13 @@
+import type { Rarity } from '@/data/common';
+
+export type IngredientId = string;
+
+/** Where an ingredient comes from: bought in the shop, or dropped by a dungeon (step 16). */
+export type IngredientSource = 'shop' | `dungeon:${string}`;
+
+export interface IngredientDef {
+  id: IngredientId;
+  tier: number;
+  rarity: Rarity;
+  source: IngredientSource;
+}
