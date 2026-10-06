@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 11a (Plekken en geleidelijke klanten). **Volgende stap:** 11b (Voorkeuren en drankeffecten).
+**Nu bezig:** niets. **Laatst afgerond:** stap 11b (Voorkeuren en drankeffecten). **Volgende stap:** 11c (Reputatieniveaus, gates en VIP-klanten).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -27,7 +27,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 10a | Personeel (brouwer en serveerster) | ✅ | `step-10a-staff` |
 | 10b | Offline-voortgang | ✅ | `step-10b-offline` |
 | 11a | Plekken en geleidelijke klanten | ✅ | `step-11a-seats` |
-| 11b | Voorkeuren en drankeffecten | ⬜ | |
+| 11b | Voorkeuren en drankeffecten | ✅ | `step-11b-effects` |
 | 11c | Reputatieniveaus, gates en VIP-klanten | ⬜ | |
 | 12 | Receptenontdekking + receptenboek | ⬜ | |
 | 13 | Balans-simulator | ⬜ | |
@@ -204,6 +204,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, personeel. Ze lopen één voor één.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
 
@@ -219,6 +220,15 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden gekocht met de upgrade **Extra Seat** (stat `seats`, basis 1, +1 per niveau, kosten 40 met groei 1,8, max 6 niveaus). De 7 klantplekken van de scene (`CUSTOMER_SLOTS`) zijn de bovengrens tot kamers (stap 14) er plekken bij zetten; een test bewaakt dat de upgrades die grens niet overschrijden.
 - `maxCustomers = min(plekken, tutorialgrens)` staat in `wiring/create-services.ts`; alle getallen staan in `data/customers/spawning.ts` en `data/upgrades/tier01.ts`, en zijn placeholders (stap 13).
 - De offline-berekening (stap 10b) gebruikt dezelfde gemiddelde klantinterval (`meanSpawnIntervalMs`), maar houdt nog geen rekening met het aantal plekken; bij het afstellen in stap 13 meenemen.
+
+### Drankeffecten en voorkeuren (besluit eigenaar, 2026-10-06; gebouwd in stap 11b)
+
+- Elk drankje heeft één effect, en dat effect **werkt altijd**. Zit het effect in de voorkeur (`likes`) van de klant, dan telt het **dubbel** (`EFFECT_POWER.likedFactor`). De bestelling krijgt dan een ♥ in de bubbel.
+- **Kracht:** de klant betaalt 25% meer (voorkeur 50%), verwerkt in `computePayout`. **Snelheid:** de klant drinkt 40% korter (voorkeur 80%), dus de plek komt sneller vrij. **Geluk:** 25% kans op een fooi van de helft van de prijs (voorkeur 50% kans). **Charme:** +1 reputatie bovenop de gewone reputatie per bediening (voorkeur +2).
+- **Drinkfase:** een bediende klant vertrekt niet meteen, maar blijft `SERVING.drinkMs` (5 s) zitten met een kroes. Hij wacht niet meer (geen geduld, geen bubbel, klikken doet niets) maar houdt zijn plek bezet. Het drinken loopt ook door tijdens een les, anders zou de enige plek bezet blijven.
+- **Bestellen:** een klant bestelt een drankje dat hij lekker vindt twee keer zo vaak als een ander bekend drankje (`LIKED_ORDER_WEIGHT`). Voorkeuren nu: ridder snelheid en geluk, elf charme, dwerg kracht.
+- Code: getallen in `data/effects.ts` en `data/brewing.ts`; één regel per effect in `systems/effects/bonus.ts` (een nieuw effect is één regel erbij); de fooi in `tip.ts`. Alle getallen zijn placeholders (stap 13).
+- Offline (stap 10b) telt kracht, de verwachte fooi en charme mee, en weegt de bestellingen zoals de klanten ze kiezen. De drinkfase en het aantal plekken tellen offline nog niet mee.
 
 ### Receptenboek (wens eigenaar, 2026-10-06; hoort bij stap 12)
 
@@ -396,7 +406,8 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 ### Fase C: Diepte
 - [x] **Stap 11a: Plekken en geleidelijke klanten.** De speler begint met 1 plek en koopt er bij (upgrade Extra Seat); klanten komen rustig, met een korte wachttijd tussen vertrek en volgende aankomst. Tutorial-hint: eerste extra plek.
   *Klaar wanneer:* een nieuw spel heeft één klant tegelijk, elke plek is één klant extra, de hint start bij genoeg goud, tests slagen.
-- [ ] **Stap 11b: Voorkeuren en drankeffecten.** Klantvoorkeuren (`likes`) en de vier effecten (kracht: meer betaald; snelheid: klant is sneller klaar en maakt de plek vrij; geluk: kans op fooi; charme: extra reputatie). Een effect werkt altijd; zit het in de voorkeur van de klant, dan is het dubbel zo sterk. Tutorial-hint: klantvoorkeur.
+- [x] **Stap 11b: Voorkeuren en drankeffecten.** Klantvoorkeuren (`likes`) en de vier effecten (kracht: meer betaald; snelheid: klant is sneller klaar en maakt de plek vrij; geluk: kans op fooi; charme: extra reputatie). Een effect werkt altijd; zit het in de voorkeur van de klant, dan is het dubbel zo sterk. Tutorial-hint: klantvoorkeur.
+  *Klaar wanneer:* elk effect is merkbaar bij serveren, een voorkeur verdubbelt het en is zichtbaar (♥), een bediende klant drinkt eerst en maakt dan de plek vrij, de hint start bij de eerste ♥-bestelling, tests slagen.
 - [ ] **Stap 11c: Reputatieniveaus, gates en VIP-klanten.** Reputatieniveaus ontgrendelen klanten, recepten en kamers; VIP-klanten die veel betalen en een specifiek duur drankje vragen. Tutorial-hint: eerste VIP.
 - [ ] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [ ] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
@@ -445,6 +456,22 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 11b: Voorkeuren en drankeffecten (2026-10-06, `step-11b-effects`)
+- **Gedaan:** (code in `src/data/effects.ts`, `src/systems/effects/`, `src/systems/customers/drinking.ts`, `src/systems/serving/`, `src/data/tutorial/likes.ts`, `src/scene/customers/`, `src/scene/effects/bonus-lines.ts`, `src/i18n/en/effects.ts`; tests in `tests/systems/effects/`, `tests/systems/customers/drinking.test.ts`, `tests/systems/serving/serve-effects.test.ts`, `tests/wiring/likes-flow.test.ts` en aangepaste bestaande tests)
+  - **Vier effecten** die altijd werken, dubbel bij voorkeur (zie hoofdstuk 4, Drankeffecten en voorkeuren): kracht +25% prijs, snelheid 40% korter drinken, geluk 25% kans op een fooi van 50% van de prijs, charme +1 reputatie. `drinkBonus(recipe, customerType)` geeft per drankje een neutrale bonus met daarop de regel van het effect; `serveCustomer` past hem toe en de fooi wordt met de ingespoten RNG gegooid (alleen als er een kans is).
+  - **Drinkfase:** een bediende klant blijft 5 s met een kroes zitten en vertrekt dan (`customer:left` met reden `served` komt nu van het klantensysteem, niet meer van het serveren). Wachtende klanten (`waitingCustomers`) zijn de enigen met geduld, en de enigen die personeel, gids en klikken zien.
+  - **Voorkeur zichtbaar:** de bubbel toont "♥ drankje" als de klant het effect lekker vindt (`liked` wordt bij aankomst bepaald). Na het serveren zweven "+N tip!" en "+N reputation" onder het goud.
+  - **Bestellen met voorkeur:** `pickWeighted` in `core/rng.ts`; een gewenst drankje komt twee keer zo vaak. Met gelijke gewichten kiest hij hetzelfde als `pickRandom`, dus bestaande seeds geven dezelfde uitkomst.
+  - **Ridder** houdt nu ook van geluk (snelheid en geluk); elf charme, dwerg kracht.
+  - **Offline:** `averagePayout` is `averageReward` geworden (goud en reputatie per drankje, met kracht, verwachte fooi en charme, gewogen zoals klanten bestellen).
+  - **Tutorial-hint** (`data/tutorial/likes.ts`, les `likes`, direct na de basisles): start bij de eerste ♥-bestelling (nieuw event `likes:ordered`, of meteen als zo'n klant al wacht), wijst die klant aan (gids-alias `guide-liked`, tekstparameter `{liked}`), is klaar zodra een klant zijn favoriete drankje krijgt (`likes:served`) en sluit af met één zin over de vier effecten.
+  - 23 nieuwe tests (307 totaal): effecten neutraal en met voorkeur, fooi, gewogen keuze, drinkfase (vertrek, geen geduld, loopt door in een les), bestellingen met voorkeur, serveren per effect, het offline-gemiddelde, de gids en de les in het echte spel.
+- **Waarom (keuzes, afgesproken met de eigenaar):** snelheid had zonder drinkfase niets om te verkorten; met de drinkfase zie je het effect en blijft de plek een echte grens. Gematigde getallen als placeholders. De les staat direct na de basis, zodat de speler de ♥ snapt voordat hij gaat winkelen. Effecten als tabel (één regel per effect) houden het open voor nieuwe effecten (SOLID: O).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels (`customers-layer.ts` is opgesplitst met `customer-reactions.ts`). In de browser met een save na de basisles: Slime Sap gaf +8 goud en "+1 reputation" (reputatie +2), de klant bleef met een kroes zitten en vertrok daarna; de eerste "♥ Glowcap Stout" startte de les met de spotlight op die klant; serveren gaf +12, de afsluitzin bij het goud, en de klant was binnen 2 s weg. Daarna startte de upgrade-les meteen. Geen consolefouten.
+- **Afwijkingen van het plan:** geen. De drinkfase is nieuw ten opzichte van stap 11a: een vrijgekomen plek komt nu pas na het drinken plus de wachttijd (`refillDelayMs`) weer vrij. Bij één plek merk je dat nauwelijks, omdat de klantentimer intussen gewoon doorloopt.
+- **Nu te proberen:** wis Local Storage en speel de basisles. Wacht op een ridder met "♥ Glowcap Stout": de ketel legt de voorkeur uit. Let op de zwevende "+1 reputation" bij Slime Sap en hoe snel de ridder na zijn Glowcap vertrekt. Fooien zie je pas met een gelukdrankje (Troll's Toll, nog niet ontdekbaar tot stap 12).
+- **Nog te doen / volgende stap:** stap 11c, Reputatieniveaus, gates en VIP-klanten. Voor stap 13: de effectgetallen, `drinkMs` en de bestelweging afstellen, en de drinkfase en de plekken meenemen in de offline-berekening. Open punt: er is nog geen drankje met geluk onder de startrecepten, dus fooien verschijnen pas na ontdekking (stap 12).
 
 ### Stap 11a: Plekken en geleidelijke klanten (2026-10-06, `step-11a-seats`)
 - **Gedaan:** (code in `src/data/upgrades/`, `src/data/customers/spawning.ts`, `src/systems/customers/update.ts`, `src/systems/upgrades/groups.ts`, `src/data/tutorial/seats.ts`, `src/wiring/`; tests in `tests/wiring/seats-flow.test.ts` en aangepaste bestaande tests)
