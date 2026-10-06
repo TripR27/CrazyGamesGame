@@ -1,11 +1,13 @@
 import { createSeededRng } from '@/core/rng';
-import { num } from '@/core/numbers';
+import { num, ONE } from '@/core/numbers';
 import { createStore } from '@/core/store';
 import type { CustomerDef } from '@/data/customers';
 import type { RecipeDef } from '@/data/recipes';
+import type { UpgradeDef } from '@/data/upgrades';
 import { createStation } from '@/systems/brewing';
 import { createFloor, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
 import type { EconomyState } from '@/systems/serving';
+import type { UpgradeState } from '@/systems/upgrades';
 
 const recipe = (id: string, ingredients: RecipeDef['ingredients'], brewSeconds: number, basePrice: number): RecipeDef => ({
   id, tier: 1, rarity: 'common', ingredients, brewSeconds, basePrice, effect: 'luck',
@@ -23,9 +25,19 @@ export const catalog: CustomerCatalog = { customerTypes: [plain, rich], recipes 
 export const rng = () => createSeededRng(1);
 export const station = (capacity = 3) => createStation(capacity);
 
-export function economy() {
-  return createStore<EconomyState>({ currencies: { gold: num(0) }, reputation: 0 });
+/** Price upgrade: costs 10, 20, 40 and sells 50% more per level, up to level 3. */
+export const priceUp: UpgradeDef = {
+  id: 'price_up', kind: 'tavern', baseCost: 10, growth: 2,
+  effect: { stat: 'sellPrice', mode: 'multiply', perLevel: 0.5 }, maxLevel: 3,
+};
+export const upgradeDefs: readonly UpgradeDef[] = [priceUp];
+
+export function economy(gold = 0) {
+  return createStore<EconomyState & UpgradeState>({ currencies: { gold: num(gold) }, reputation: 0, upgrades: {} });
 }
+
+/** Everything `createPlayerActions` needs besides the game objects: no upgrades bought, price factor 1. */
+export const noUpgrades = { upgradeDefs, getSellMultiplier: () => ONE };
 
 /** A floor with customers already seated: one `[typeId, recipeId]` pair per seat. */
 export function floorWith(...orders: Array<[string, string]>): CustomerFloor {

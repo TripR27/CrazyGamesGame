@@ -1,3 +1,4 @@
+import { ONE, type Num } from '@/core/numbers';
 import type { Rng } from '@/core/rng';
 import { SERVING } from '@/data/brewing';
 import { dismiss, findCustomer, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
@@ -12,6 +13,8 @@ export interface ServeDeps {
   economy: EconomyStore;
   catalog: CustomerCatalog;
   rng: Rng;
+  /** Sell-price multiplier from upgrades; read at the moment of serving. */
+  getSellMultiplier?(): Num;
 }
 
 /**
@@ -36,7 +39,7 @@ export function serveCustomer(deps: ServeDeps, customerId: number): ServeOutcome
   const change = dismiss(floor, customer.id, 'served');
   if (change === undefined) return { kind: 'ignored' };
   station.ready.splice(index, 1);
-  const gold = computePayout(recipe, type);
+  const gold = computePayout(recipe, type, deps.getSellMultiplier?.() ?? ONE);
   economy.update((state) => {
     state.currencies.gold = state.currencies.gold.add(gold);
     state.reputation += SERVING.reputationPerServe;

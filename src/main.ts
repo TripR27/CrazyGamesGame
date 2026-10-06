@@ -36,4 +36,4 @@ startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
 createGame('game', world.scene);
 registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
-mountUi(document.getElementById('ui-root') as HTMLElement, { source: store, tutorial: world.tutorial, targets: world.targets });
+mountUi(document.getElementById('ui-root') as HTMLElement, { source: store, actions: world.scene.actions, tutorial: world.tutorial, targets: world.targets });

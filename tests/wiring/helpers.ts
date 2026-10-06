@@ -9,7 +9,8 @@ import { createServices } from '@/wiring/create-services';
 
 export function newGame(state: GameState = createInitialState(0)) {
   const bus = createEventBus<GameEvents>();
-  const world = createServices({ store: createStore(state), bus, rng: createSeededRng(4) });
+  const store = createStore(state);
+  const world = createServices({ store, bus, rng: createSeededRng(4) });
   const saves = vi.fn();
   bus.on('saveRequested', saves);
   const tick = (ms: number): void => {
@@ -17,7 +18,7 @@ export function newGame(state: GameState = createInitialState(0)) {
   };
   const shown = (): string | null => world.tutorial.machine.visibleStep()?.id ?? null;
   const guide = () => world.tutorial.getGuideContext();
-  return { world, tick, shown, guide, saves, state };
+  return { world, tick, shown, guide, saves, state, store };
 }
 
 // Plays the lesson the way the mascot asks: add what it points at, wait, serve who it points at.

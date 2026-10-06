@@ -9,6 +9,8 @@ export interface GuideContext {
   readyRecipeIds: readonly string[];
   /** Waiting customers, oldest first. */
   customers: readonly { id: number; recipeId: string }[];
+  /** The first upgrade the player can pay for right now, if any. */
+  affordableUpgradeId: string | null;
 }
 
 /**

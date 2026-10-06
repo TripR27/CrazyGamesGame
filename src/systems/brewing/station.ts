@@ -1,7 +1,7 @@
 import type { BrewStation } from './types';
 
-export function createStation(capacity: number): BrewStation {
-  return { contents: [], brewing: null, ready: [], capacity };
+export function createStation(capacity: number, speed = 1): BrewStation {
+  return { contents: [], brewing: null, ready: [], capacity, speed };
 }
 
 /** Throw away what is in the cauldron (not while brewing). Returns true when something was removed. */

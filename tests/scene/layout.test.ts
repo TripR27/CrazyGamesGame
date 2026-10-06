@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { BREWING } from '@/data/brewing';
+import { upgrades } from '@/data/upgrades';
+import { getMultipliers } from '@/systems/economy';
 import {
   BAR,
   BUILDING,
@@ -73,8 +74,9 @@ describe('tavern layout', () => {
     expect(overlaps(SHELF, BAR)).toBe(false);
   });
 
-  it('has a spot on the bar for every drink the bar can hold', () => {
-    expect(READY_SLOTS.length).toBeGreaterThanOrEqual(BREWING.storageCapacity);
+  it('has a spot on the bar for every drink the bar can hold, even with every storage upgrade bought', () => {
+    const maxed = Object.fromEntries(upgrades.map((u) => [u.id, u.maxLevel ?? Infinity]));
+    expect(READY_SLOTS.length).toBeGreaterThanOrEqual(getMultipliers({ upgrades: maxed }).storage.toNumber());
     for (const slot of READY_SLOTS) {
       expect(slot.x - 15).toBeGreaterThanOrEqual(BAR.x);
       expect(slot.x + 15).toBeLessThanOrEqual(BAR.x + BAR.w);

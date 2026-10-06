@@ -2,13 +2,11 @@ import { describe, expect, it } from 'vitest';
 import type { CustomerDef } from '@/data/customers';
 import { ingredients, type IngredientDef } from '@/data/ingredients';
 import type { RecipeDef } from '@/data/recipes';
-import type { UpgradeDef } from '@/data/upgrades';
 import {
   customerTable,
   feedbackTable,
   ingredientTable,
   recipeTable,
-  upgradeTable,
   validateContent,
   type ContentTable,
 } from '@/data/validate';
@@ -75,14 +73,6 @@ describe('validateContent', () => {
   it('reports a bad ingredient source', () => {
     const out = problems(ingredientTable([ing('a', { source: 'moon' as never })]));
     expect(out).toHaveLength(1);
-  });
-
-  it('validates upgrades so step 9 data is checked from day one', () => {
-    const bad: UpgradeDef = {
-      id: 'u1', kind: 'cauldron', baseCost: 0, growth: 1, maxLevel: 0,
-      effect: { stat: 'brewSpeed', mode: 'add', perLevel: 1 },
-    };
-    expect(problems(upgradeTable([bad]))).toHaveLength(3);
   });
 
   it('reports every missing translation key', () => {

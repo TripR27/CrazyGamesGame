@@ -8,12 +8,16 @@ import { BREWING } from '@/data/brewing';
 import { customers } from '@/data/customers';
 import { ingredients } from '@/data/ingredients';
 import { recipes } from '@/data/recipes';
+import { upgrades } from '@/data/upgrades';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { createPlayerActions } from '@/systems/actions';
 import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
 import { createFloor, startCustomerSystem } from '@/systems/customers';
+import { getMultipliers } from '@/systems/economy';
+import { watchAffordable } from '@/systems/upgrades';
 import { createTutorial, type TutorialServices } from './create-tutorial';
+import { syncStationStats } from './sync-station';
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
 
@@ -38,9 +42,11 @@ export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
   const catalog = { customerTypes: customers, recipes };
   const floor = createFloor(CUSTOMER_SLOTS.length);
   const station = createStation(BREWING.storageCapacity);
+  syncStationStats(store, station);
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
 
   const tutorial = createTutorial({ store, bus, floor, station });
+  const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomerSystem({
     floor,
     bus,
@@ -49,15 +55,23 @@ export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
     getContext: () => ({
       reputation: store.getState().reputation,
       unlockedRecipeIds: knownIds(),
-      // While the tutorial runs: one customer at a time, who does not lose patience, so it can always
-      // point at the right person and nobody leaves in the middle of a lesson.
-      maxCustomers: tutorial.machine.isActive() ? TUTORIAL_MAX_CUSTOMERS : Infinity,
-      freezePatience: tutorial.machine.isActive(),
+      // While a lesson is on screen: one customer at a time, who does not lose patience, so it can always
+      // point at the right person and nobody leaves in the middle of a lesson. A lesson that has not
+      // started yet (waiting for its moment) does not hold the game back.
+      maxCustomers: inLesson() ? TUTORIAL_MAX_CUSTOMERS : Infinity,
+      freezePatience: inLesson(),
     }),
   });
   startBrewSystem(station, bus);
 
-  const actions = createPlayerActions({ bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds });
+  watchAffordable(store, bus, upgrades);
+
+  const actions = createPlayerActions({
+    bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds,
+    upgradeStore: store,
+    upgradeDefs: upgrades,
+    getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
+  });
   const getShelf = (): readonly string[] =>
     shelfIngredients(ingredients, recipes.filter((r) => knownIds().includes(r.id))).map((i) => i.id);
   const targets = createTargetRegistry();
