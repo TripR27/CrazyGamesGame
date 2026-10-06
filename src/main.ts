@@ -10,6 +10,7 @@ import { createLocalStorageAdapter } from '@/save/local-storage-adapter';
 import { createSaveManager } from '@/save/save-manager';
 import { startAutosave } from '@/runtime/autosave-driver';
 import { startLoopDriver } from '@/runtime/loop-driver';
+import { mountUi } from '@/ui/mount';
 
 const clock = systemClock;
 const manager = createSaveManager<GameState>({
@@ -30,3 +31,4 @@ startLoopDriver(ticker);
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
 createGame('game');
+mountUi(document.getElementById('ui-root') as HTMLElement, store);

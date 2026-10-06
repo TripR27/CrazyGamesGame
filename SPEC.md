@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 4 (i18n + data-schema). **Volgende stap:** 5 (Taverne-scene, placeholder).
+**Nu bezig:** niets. **Laatst afgerond:** stap 5 (Taverne-scene, placeholder). **Volgende stap:** 6 (Klanten).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -19,7 +19,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 2 | Core (getallen, state, tick) | ✅ | `step-02-core` |
 | 3 | Save-systeem | ✅ | `step-03-save-system` |
 | 4 | i18n + data-schema | ✅ | `step-04-i18n-data-schema` |
-| 5 | Taverne-scene (placeholder) | ⬜ | |
+| 5 | Taverne-scene (placeholder) | ✅ | `step-05-tavern-scene` |
 | 6 | Klanten | ⬜ | |
 | 7 | Brouwen en serveren | ⬜ | |
 | 8 | Interactieve tutorial (basis) | ⬜ | |
@@ -353,7 +353,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* data valideert via een test (unieke ids, bestaande ingrediënt-verwijzingen, vertaalsleutels aanwezig).
 
 ### Fase B: Eerste speelbare loop
-- [ ] **Stap 5: Taverne-scene (placeholder).** Boot-scene + taverne-doorsnede met gekleurde vormen: bar, ketel, tafels, plek voor klanten. DOM-overlay `#ui-root` met lege HUD (goud, reputatie).
+- [x] **Stap 5: Taverne-scene (placeholder).** Boot-scene + taverne-doorsnede met gekleurde vormen: bar, ketel, tafels, plek voor klanten. DOM-overlay `#ui-root` met lege HUD (goud, reputatie).
   *Klaar wanneer:* scene schaalt correct in venster, HUD toont state-waarden.
 - [ ] **Stap 6: Klanten.** `systems/customers` (spawn-ritme, geduld, bestelling kiezen op basis van ontgrendelde recepten) + sprites die binnenlopen, bestelling tonen, wegfeesten/vertrekken. Objectpool.
   *Klaar wanneer:* klanten komen en gaan; tests voor spawn en geduld.
@@ -414,6 +414,25 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 5: Taverne-scene (placeholder) (2026-10-06, `step-05-tavern-scene`)
+- **Gedaan:** (code in `src/scene/` en `src/ui/`, tests in `tests/scene/` en `tests/ui/`)
+  - `scene/boot-scene.ts` start `scene/tavern-scene.ts`; `game.ts` kent nu die twee scenes. `hello-scene.ts` is verwijderd.
+  - De taverne is één doorsnede in gekleurde vormen op **één** `Graphics`-object: achtergrond, vloer en deur (`sprites/room-shell.ts`), bar met mokken (`bar.ts`), ketel boven vuur (`cauldron.ts`), 2 tafels (`tables.ts`) en 7 plekken voor klanten als zwakke ovalen (`customer-slots.ts`). Kleuren in `palette.ts`.
+  - `scene/layout.ts`: alle posities als pure data zonder Phaser (gebouw, deur, bar, ketel, tafels, `CUSTOMER_SLOTS` met id en soort `table`/`stool`, `DOOR_ENTRY`). Stap 6 gebruikt deze slots voor de klanten.
+  - `ui/`: `hud.ts` toont goud en reputatie (labels via `t()`, sleutels `hud.gold` en `hud.reputation`) en houdt zich bij met `store.subscribe`; `hud-view.ts` is de pure opmaak (`formatNumber`); `hud.css`; `dom.ts`; `mount.ts` bouwt de overlay op vanuit `main.ts`.
+  - `ui/fit-math.ts` en `ui/fit-root.ts`: `#ui-root` is nu een 1280×720-vak dat met dezelfde FIT-regel als het canvas geschaald en gecentreerd wordt (bij elke `resize`). HUD-elementen staan dus in ontwerp-pixels en blijven op dezelfde plek in de scene.
+  - 12 nieuwe tests (91 totaal): layout (alles binnen het gebouw, niets overlapt, klantplekken uniek en minstens 60 px uit elkaar), schaalberekening en HUD-waarden.
+- **Waarom (keuzes):**
+  - Posities als data in `layout.ts` (SOLID: O en D): stap 6 en 14 voegen plekken en kamers toe zonder tekenlogica te wijzigen, en de layout is zonder Phaser te testen.
+  - Eén `Graphics`-object voor de statische taverne: weinig objecten, snel op een Chromebook. Wat later animeert of klikbaar wordt (ketel in stap 7) wordt dan een eigen object.
+  - Geen tekstlabels in de scene (alleen vormen), zodat er geen speltekst buiten i18n valt.
+  - De overlay schaalt met CSS-`transform` in plaats van elke maat om te rekenen; zo blijft een HUD in ontwerp-pixels te schrijven.
+  - Placeholder-tekening bewust simpel; de art-pass is stap 21.
+- **Gemeten / gecontroleerd:** `npm run check` en `npm run build` slagen, geen bestand boven 100 regels. Bundel 367 kB gzip JS, dist 1,4 MB. In de browser: geen console-fouten; HUD toont uit een bewerkte save goud `150fy` (1.5e500) en reputatie 7; canvas en overlay vallen samen in een hoog venster (487×274 op dezelfde plek) en in een breed venster (x=127 en 127,8, breedte 1244). Een verschil van ongeveer 1 px komt door afronding van Phaser.
+- **Afwijkingen van het plan:** geen. De HUD heeft nog geen tutorial-hint nodig (er is nog niets te doen voor de speler).
+- **Nu te proberen:** `npm run dev`, open http://localhost:5173 en maak het venster groter en kleiner: de taverne en de HUD schalen mee. Pas in Local Storage `bt_save` het `reputation`-veld aan (sluit andere tabs, anders overschrijft de autosave het) en herlaad.
+- **Nog te doen / volgende stap:** stap 6, Klanten: `systems/customers` (spawn-ritme, geduld, bestelling kiezen) en sprites die via `DOOR_ENTRY` naar een `CUSTOMER_SLOTS`-plek lopen, met objectpool.
 
 ### Stap 4: i18n + data-schema (2026-10-06, `step-04-i18n-data-schema`)
 - **Gedaan:** (code in `src/i18n/` en `src/data/`, tests in `tests/i18n/` en `tests/data/`)
