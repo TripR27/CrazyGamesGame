@@ -8,7 +8,11 @@ import type { RowView } from './shop-view-model';
 
 const levelName = (level: number): string => t(textKey('reputation', REPUTATION_LEVELS[level - 1]?.id ?? '', 'name'));
 
-/** One ingredient in the shop: locked until its level, then for sale once, then on the shelf for good. */
+/** A bought ingredient leaves the shop: it is on the shelf for good, so listing it would only clutter the shop. */
+export const isListed = (def: IngredientDef, state: IngredientShopState, catalog: IngredientCatalog): boolean =>
+  ingredientOffer(state, def, catalog).status !== 'owned';
+
+/** One ingredient in the shop: locked until its level, then for sale once (see `isListed` for what happens after). */
 export function toIngredientRowView(def: IngredientDef, state: IngredientShopState, catalog: IngredientCatalog): RowView {
   const offer = ingredientOffer(state, def, catalog);
   const owned = offer.status === 'owned';

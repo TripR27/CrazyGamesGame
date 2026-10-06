@@ -4,7 +4,7 @@ import { ingredients } from '@/data/ingredients';
 import { recipes } from '@/data/recipes';
 import type { IngredientShopState } from '@/systems/ingredients';
 import { toBookView } from '@/ui/recipe-book/book-view-model';
-import { toIngredientRowView } from '@/ui/shop/ingredient-view-model';
+import { isListed, toIngredientRowView } from '@/ui/shop/ingredient-view-model';
 
 const catalog = { ingredients, recipes };
 const grape = ingredients.find((i) => i.id === 'moon_grape') ?? ingredients[0];
@@ -19,9 +19,13 @@ describe('an ingredient in the shop', () => {
       name: 'Moon Grape', level: 'Unlocks at Cozy Inn', buyLabel: 'Buy · 150', canBuy: false, maxed: false,
     });
     expect(toIngredientRowView(grape, state(40, 150), catalog)).toMatchObject({ level: '', canBuy: true });
-    expect(toIngredientRowView(grape, state(40, 0, ['moon_grape']), catalog)).toMatchObject({
-      level: 'On the shelf', buyLabel: 'Owned', canBuy: false, maxed: true,
-    });
+  });
+
+  it('leaves the shop once it is bought, but is listed while locked or for sale', () => {
+    if (grape === undefined) throw new Error('no ingredients');
+    expect(isListed(grape, state(0, 0), catalog)).toBe(true);
+    expect(isListed(grape, state(40, 0), catalog)).toBe(true);
+    expect(isListed(grape, state(40, 0, ['moon_grape']), catalog)).toBe(false);
   });
 });
 

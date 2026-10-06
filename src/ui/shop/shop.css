@@ -23,6 +23,7 @@
   background: #fffdf3;
 }
 .shop-row--maxed { opacity: 0.6; }
+.shop-row[hidden], .shop-kind[hidden] { display: none; }
 .shop-row-info { flex: 1; min-width: 0; }
 .shop-row-head { display: flex; justify-content: space-between; gap: 8px; font-weight: bold; font-size: 16px; }
 .shop-row-level { font-size: 13px; font-weight: normal; opacity: 0.75; }
