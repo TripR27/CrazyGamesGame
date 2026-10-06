@@ -1,0 +1,33 @@
+/** "Sir Dents-a-Lot": a knight whose helmet has seen better days. */
+export const knight = {
+  palette: {
+    k: 0x1a1a22, a: 0xb8c0cc, A: 0x7a8494, s: 0xf2c9a0, m: 0x6b3a14,
+    r: 0xd23a3a, b: 0x5e3a18,
+  },
+  rows: [
+    '......rr........',
+    '.....rrrr.......',
+    '...kkkkkkkkkk...',
+    '..kaaaaaaaaaak..',
+    '..kaaaaAAaaaak..',
+    '..kaaaaaaaaaak..',
+    '..kAssssssssAk..',
+    '..kAskssssksAk..',
+    '..kAssssssssAk..',
+    '...kAssssssAk...',
+    '...kAsmmmmsAk...',
+    '....kkkkkkkk....',
+    '..kaaaaaaaaaak..',
+    '.kAAarrrrrraAAk.',
+    '.kAAarrrrrraAAk.',
+    '.kAAarrrrrraAAk.',
+    '.kAAarrrrrraAAk.',
+    '.kbbbbbbbbbbbbk.',
+    '....kAAkkAAk....',
+    '....kAAkkAAk....',
+    '....kAAkkAAk....',
+    '...kbbbkkbbbk...',
+    '..kbbbbkkbbbbk..',
+    '..kkkkkkkkkkkk..',
+  ],
+};
