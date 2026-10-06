@@ -7,4 +7,5 @@ export type {
   CustomerFloor,
   CustomerInstance,
 } from './types';
+export { meanSpawnIntervalMs } from './spawn-timing';
 export { updateCustomers } from './update';

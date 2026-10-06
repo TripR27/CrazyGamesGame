@@ -26,13 +26,15 @@ const manager = createSaveManager<GameState>({
 const { state, status } = manager.load();
 const store = createStore(state);
 const bus = createEventBus<GameEvents>();
+const world = createServices({ store, bus, rng: systemRng, clock });
+// Time the tab was throttled or the computer slept is counted with the offline formulas, not simulated.
 const ticker = createTicker({
   clock,
   onStep: (deltaMs) => bus.emit('tick', { deltaMs }),
-  onGap: (gapMs) => debug('time gap, offline logic comes in step 10', gapMs),
+  onGap: (gapMs) => world.offline.handleAway(gapMs),
 });
-
-const world = createServices({ store, bus, rng: systemRng });
+// The time since the last save (the game was closed) goes through the same formulas.
+if (status === 'loaded') world.offline.handleAway(clock.now() - state.meta.lastSeenAt);
 startLoopDriver(ticker);
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
@@ -45,6 +47,7 @@ mountUi(document.getElementById('ui-root') as HTMLElement, {
   tutorial: world.tutorial,
   targets: world.targets,
   layout,
+  welcome: world.offline.inbox,
   onFit: (fit) =>
     placeGame(document.getElementById('game') as HTMLElement, fit, () => {
       game.scale.getParentBounds();
