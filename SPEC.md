@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 7 (Brouwen en serveren, eerste speelbare versie). **Volgende stap:** 8 (Interactieve tutorial).
+**Nu bezig:** niets. **Laatst afgerond:** stap 8 (Interactieve tutorial). **Volgende stap:** 9 (Economie en upgrades).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -22,7 +22,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 5 | Taverne-scene (placeholder) | ✅ | `step-05-tavern-scene` |
 | 6 | Klanten | ✅ | `step-06-customers` |
 | 7 | Brouwen en serveren | ✅ | `step-07-brew-and-serve` |
-| 8 | Interactieve tutorial (basis) | ⬜ | |
+| 8 | Interactieve tutorial (basis) | ✅ | `step-08-tutorial` |
 | 9 | Economie en upgrades | ⬜ | |
 | 10 | Personeel en idle/offline | ⬜ | |
 | 11 | Reputatie, gates, drankeffecten | ⬜ | |
@@ -43,7 +43,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ## 1. Harde regels (altijd van toepassing)
 
-1. **Houd bestanden klein: richtlijn 100 regels per bestand** in `src/`, `tests/` en `scripts/` (geteld als ruwe regels). Het doel is niet de grens zelf, maar **SOLID werken**: kleine bestanden met één verantwoordelijkheid. Een paar regels erover (tot ~120) is toelaatbaar als splitsen het onnodig verknipt; daarboven is splitsen verplicht. Vermijd bewust te veel regels. Ook data wordt gesplitst (recepten per tier). Uitgezonderd: config in de projectroot, lockfiles en `.md`-bestanden.
+1. **Houd bestanden klein: richtlijn 100 regels per bestand** in `src/`, `tests/` en `scripts/` (geteld als ruwe regels). Het doel is niet de grens zelf, maar **SOLID werken**: kleine bestanden met één verantwoordelijkheid. Een paar regels erover (tot ~120) is toelaatbaar als splitsen het onnodig verknipt; daarboven is splitsen verplicht. Vermijd bewust te veel regels. Ook data wordt gesplitst (recepten per tier). Uitgezonderd: config in de projectroot, lockfiles, `.md`-bestanden en stylesheets (`.css`): de grens geldt voor programmeerwerk.
 2. **SOLID is verplicht** (zie hoofdstuk 9): elke module heeft één reden om te veranderen, uitbreiden gaat via nieuwe data of nieuwe modules, en afhankelijkheden lopen via interfaces.
 3. **Eén stap per keer.** Geen code buiten de scope van de gevraagde stap.
 4. **Een stap is pas klaar als `npm run check` slaagt** (typecheck + lint + regelgrens + tests) en de "Klaar wanneer"-punten van de stap kloppen.
@@ -187,16 +187,17 @@ Bestandsnamen: `kebab-case.ts`. Eén verantwoordelijkheid per bestand; een besta
 
 Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, zonder tekstmuur en zonder apart scherm (past bij "land direct in gameplay" van CrazyGames).
 
-- **Statemachine in `systems/tutorial`** (puur TS, getest met Vitest). Stappen zijn data in `data/tutorial/`: `{ id, startWhen, target, textKey, completeOn }`.
+- **Statemachine in `systems/tutorial`** (puur TS, getest met Vitest). Stappen zijn data in `data/tutorial/`: `{ id, lesson, startWhen?, target, completeOn, needsLiveState? }`. De tekst is de i18n-sleutel `tutorial.<id>.text` (geen `textKey`-veld; dezelfde conventie als andere content).
   - `startWhen`/`completeOn` luisteren naar **echte spel-events** uit de event-bus (bijv. `ingredient:clicked`, `brew:done`, `customer:served`, `upgrade:bought`) of naar een state-conditie (bijv. "genoeg goud voor eerste upgrade").
   - De speler klikt dus nooit op "volgende"; de tutorial gaat verder wanneer de speler de actie echt uitvoert.
-- **Registry van doelen (`target`):** DOM-elementen en Phaser-objecten melden zich aan met een id (bijv. `ingredient-slime`, `cauldron`, `shop-button`). De tutorial-UI vraagt hun schermpositie op (rekening houdend met canvas-schaling).
+- **Registry van doelen (`target`):** `core/target-registry.ts`. DOM-elementen en Phaser-objecten melden zich aan met een id en een functie die hun huidige positie in ontwerp-pixels geeft (`ingredient:<id>`, `customer:<id>`, `cauldron`, `hud-gold`, later `shop-button`). Bewegende doelen worden gevolgd. Een stap kan ook een **gids-alias** als doel hebben (`guide-ingredient`, `guide-customer`) die `systems/tutorial/guide.ts` tijdens het spelen omzet naar het juiste doel, zodat de tutorial altijd het drankje van een echt wachtende klant uitlegt.
+- **Tijdens een les:** maximaal **één klant** in de taverne en het **geduld staat stil** (de balk blijft vol), zodat niemand midden in de les vertrekt. Daarna loopt alles normaal.
 - **UI in `ui/tutorial`:** gedimde overlay met een "spotlight"-gat om het doel, een pulserende pijl en een korte spraakbel van een mascotte. Maximaal 1 à 2 korte zinnen per stap, in humoristische toon (i18n-sleutels).
 - **Mascotte (werktitel):** een chagrijnige pratende ketel. Placeholder tot stap 21.
 - **Nooit blokkerend of vervelend:**
   - Altijd een zichtbare "Skip"-knop.
   - De rest van de game blijft bedienbaar; een verkeerde klik breekt niets.
-  - Doet de speler de actie van een latere stap al, dan wordt die stap automatisch afgevinkt.
+  - Doet de speler de actie van een latere stap al, dan wordt die stap (en elke eerdere) automatisch afgevinkt.
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
@@ -362,7 +363,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* klanten komen en gaan; tests voor spawn en geduld.
 - [x] **Stap 7: Brouwen en serveren (eerste speelbare versie).** Klik op ingrediënten → ketel → brouwbalk → serveren aan wachtende klant → goud + reputatie + zwevende "+goud". Absurde klantreacties (i18n).
   *Klaar wanneer:* alle handelingen werken. **Mijlpaal: is dit leuk?** (De uitleg komt in stap 8.)
-- [ ] **Stap 8: Interactieve tutorial (framework + basis).** Zie hoofdstuk 4, Tutorial. Tutorial-statemachine (`systems/tutorial`), target-register, spotlight/pijl/spraakbel-UI, eerste tutorial: ingrediënt klikken → ketel → wachten → serveren → eerste goud. Overslaan-knop, opslaan van voortgang, opnieuw afspelen via debug-commando (Settings-knop komt in stap 18).
+- [x] **Stap 8: Interactieve tutorial (framework + basis).** Zie hoofdstuk 4, Tutorial. Tutorial-statemachine (`systems/tutorial`), target-register, spotlight/pijl/spraakbel-UI, eerste tutorial: ingrediënt klikken → ketel → wachten → serveren → eerste goud. Overslaan-knop, opslaan van voortgang, opnieuw afspelen via debug-commando (Settings-knop komt in stap 18).
   *Klaar wanneer:* een nieuwe speler die niets weet, kan zonder tekstmuur of apart scherm de basis doen; tutorial overleeft herladen; vastlopen is onmogelijk (verkeerde volgorde of overslaan breekt niets); tests voor de statemachine.
 - [ ] **Stap 9: Economie en upgrades.** Kostenformule, `getMultipliers`, winkelpaneel (DOM) met koop x1/x10/max, eerste upgrades (ketel-snelheid, prijs, opslag). Tutorial-hint: eerste upgrade kopen.
   *Klaar wanneer:* upgrades werken, kosten stijgen, tests slagen.
@@ -418,6 +419,29 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 8: Interactieve tutorial (basis) (2026-10-06, `step-08-tutorial`)
+- **Gedaan:** (code in `src/systems/tutorial/`, `src/data/tutorial/`, `src/ui/tutorial/`, `src/core/target-registry.ts`, `src/wiring/create-tutorial.ts`, `src/runtime/debug-commands.ts`; tests in `tests/systems/tutorial/`, `tests/wiring/` en meer)
+  - **Statemachine** (`machine.ts`, `progress.ts`): stappen starten en eindigen op echte spel-events (`customer:arrived`, `ingredient:clicked`, `brew:started`, `brew:done`, `customer:served`) of na een tijd (`after`). De speler klikt nooit op "volgende". Een actie van een latere stap vinkt ook alle eerdere af. Overslaan en opnieuw afspelen zijn altijd mogelijk. Voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en elke wijziging vraagt om een save.
+  - **Gids** (`guide.ts`, `resolve-target.ts`): wijst het ingrediënt aan dat nog mist voor het drankje van de oudste wachtende klant (of past bij wat al in de ketel zit), en later de klant wiens drankje klaar staat. Daardoor kan niets vastlopen na een mislukte combinatie of als een klant een ander drankje wil. De tekst gebruikt `{drink}` en `{ingredient}`.
+  - **Data** (`data/tutorial/`): de basisles in 5 stappen (`basics_add`, `basics_finish`, `basics_wait`, `basics_serve`, `basics_gold`) met grappige teksten van een chagrijnige pratende ketel in `i18n/en/tutorial.ts`; de validator controleert doelen, timers, vertaalsleutels en dat een les uit aaneengesloten stappen bestaat.
+  - **Doelenregister:** plank (`ingredient:<id>`), ketel, klanten (`customer:<id>`, volgt het lopen) en de goud-HUD (`hud-gold`) melden zich aan.
+  - **UI** (`ui/tutorial/`): gedimde overlay met spotlight, pulserende pijl, spraakbel met een mascotte (CSS-placeholder) en een **Skip-knop**. De overlay laat alle klikken door; het spel blijft gewoon bedienbaar.
+  - **Tijdens de les:** maximaal één klant in de taverne en bevroren geduld (`CustomerContext.maxCustomers` en `freezePatience`). Daarna normaal.
+  - **Opnieuw afspelen:** in een dev-build via `bt.replayTutorial()` in de console (de Settings-knop komt in stap 18).
+  - Stylesheets (`.css`) tellen niet meer mee voor de regelgrens (`check-lines.mjs`, hoofdstuk 1 en `CLAUDE.md` aangepast).
+  - 40 nieuwe tests (196 totaal): machine (volgen, vooruitlopen, timers, overslaan, herstarten, hervatten), gids en doelen, doelenregister, plaatsing van pijl en spotlight, validator, en een hele les in het echte spel (één klant, bevroren geduld, afronden, mislukken, overslaan, herladen, opnieuw afspelen met een zittende klant).
+- **Waarom (keuzes):**
+  - **Gids op spelsituatie in plaats van vaste ingrediënten:** een vaste "klik slijm, dan honing" loopt vast zodra een klant glowcap wil of de combinatie mislukt.
+  - **Één klant en bevroren geduld tijdens de les** (op verzoek van de eigenaar): de speler wordt niet overspoeld en de klant vertrekt niet midden in de uitleg.
+  - **Hervatten na herladen:** de ketel en de bar worden niet opgeslagen, dus een les die op zo'n stap stond (`needsLiveState`) begint opnieuw bij zijn eerste stap. Overige stappen hervatten gewoon.
+  - **`alreadyHolds`:** een startvoorwaarde die al geldt (klant zit al) telt als gestart. Zonder dit bleef de tutorial na opnieuw afspelen verborgen en kwam er door de limiet van één klant geen nieuwe klant meer.
+  - Doelen en overlay werken in ontwerp-pixels, zoals de rest van de UI; de overlay schaalt mee met het canvas.
+- **Gemeten / gecontroleerd:** `npm run check` en `npm run build` slagen, geen bestand boven 100 regels. Bundel 374 kB gzip JS. In de browser (schone tab, geen console-fouten): spotlight en pijl op het juiste ingrediënt voor het bestelde drankje, tekst volgt de situatie (Glowcap Stout), de ketel krijgt de pijl tijdens het brouwen, daarna de klant, dan de goud-HUD; de les sluit na ruim 4 seconden; het geduld van de enige klant bleef meer dan 70 s vol; Skip verbergt alles en wordt opgeslagen; opnieuw afspelen met een zittende klant start meteen.
+- **Een echte bug gevonden en opgelost tijdens het testen in de browser:** opnieuw afspelen met een klant die al zat liet de tutorial verborgen en blokkeerde nieuwe klanten (zie `alreadyHolds`).
+- **Afwijkingen van het plan:** de mascotte is een CSS-tekening (geen aparte asset). Het opnieuw afspelen is alleen een dev-commando tot stap 18. De overlay heeft nog geen touch-aanpassingen (komt bij de mobiele pass).
+- **Nu te proberen:** wis Local Storage (of `localStorage.clear()` in de console) en herlaad `npm run dev`: een nieuwe speler krijgt de les. Klik dwars door de les heen, kies een verkeerd ingrediënt, druk op **Skip tutorial**, en probeer `bt.replayTutorial()` in de console.
+- **Nog te doen / volgende stap:** stap 9, Economie en upgrades: kostenformule, `getMultipliers`, een winkelpaneel (DOM) met koop x1/x10/max, de eerste upgrades (ketelsnelheid, prijs, opslag) en een tutorial-hint voor de eerste upgrade (als nieuwe les in `data/tutorial/`). Hier komt ook de plek waar meerdere drankjes tegelijk en ingrediëntenkosten bij horen.
 
 ### Stap 7: Brouwen en serveren (2026-10-06, `step-07-brew-and-serve`)
 - **Gedaan:** (code in `src/systems/brewing|serving|actions/`, `src/scene/brewing|effects/`, `src/wiring/`, `src/data/`; tests in `tests/systems/` en `tests/data/`)

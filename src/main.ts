@@ -10,6 +10,7 @@ import { createGame } from '@/game';
 import { createLocalStorageAdapter } from '@/save/local-storage-adapter';
 import { createSaveManager } from '@/save/save-manager';
 import { startAutosave } from '@/runtime/autosave-driver';
+import { registerDebugCommands } from '@/runtime/debug-commands';
 import { startLoopDriver } from '@/runtime/loop-driver';
 import { mountUi } from '@/ui/mount';
 import { createServices } from '@/wiring/create-services';
@@ -29,9 +30,10 @@ const ticker = createTicker({
   onGap: (gapMs) => debug('time gap, offline logic comes in step 10', gapMs),
 });
 
-const services = createServices({ store, bus, rng: systemRng });
+const world = createServices({ store, bus, rng: systemRng });
 startLoopDriver(ticker);
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
-createGame('game', services);
-mountUi(document.getElementById('ui-root') as HTMLElement, store);
+createGame('game', world.scene);
+registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
+mountUi(document.getElementById('ui-root') as HTMLElement, { source: store, tutorial: world.tutorial, targets: world.targets });

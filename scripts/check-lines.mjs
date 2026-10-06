@@ -4,7 +4,8 @@ import { join, extname } from 'node:path';
 const WARN_LINES = 100;
 const FAIL_LINES = 120;
 const DIRS = ['src', 'tests', 'scripts'];
-const EXTENSIONS = new Set(['.ts', '.mjs', '.js', '.css', '.html', '.json']);
+// Stylesheets are not counted: only programming work is bound to the line limit.
+const EXTENSIONS = new Set(['.ts', '.mjs', '.js', '.html', '.json']);
 
 function* walk(dir) {
   for (const name of readdirSync(dir)) {

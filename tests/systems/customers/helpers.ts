@@ -32,6 +32,8 @@ export const patientCatalog: CustomerCatalog = {
 export const context = (over: Partial<CustomerContext> = {}): CustomerContext => ({
   reputation: 0,
   unlockedRecipeIds: ['r1', 'r2'],
+  maxCustomers: Infinity,
+  freezePatience: false,
   ...over,
 });
 

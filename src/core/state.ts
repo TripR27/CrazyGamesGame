@@ -10,12 +10,19 @@ export interface CurrencyState {
   gold: Num;
 }
 
+/** Tutorial progress: finished step ids and whether the player skipped the tutorial. */
+export interface TutorialProgress {
+  completedSteps: string[];
+  skipped: boolean;
+}
+
 export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
   reputation: number;
   /** Recipe ids the player knows; customers only order these. */
   recipesDiscovered: string[];
+  tutorial: TutorialProgress;
 }
 
 export function createInitialState(now: number): GameState {
@@ -24,6 +31,7 @@ export function createInitialState(now: number): GameState {
     currencies: { gold: num(0) },
     reputation: 0,
     recipesDiscovered: [...STARTER_RECIPE_IDS],
+    tutorial: { completedSteps: [], skipped: false },
   };
 }
 

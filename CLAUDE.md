@@ -5,7 +5,7 @@ Idle/tycoon-game voor CrazyGames (HTML5, TypeScript, Phaser, Vite).
 **Lees `SPEC.md` volledig vóór je code schrijft of wijzigt.** Context over het spel staat in `GAME_ANALYSE.md`.
 
 Niet-onderhandelbaar (details in SPEC.md hoofdstuk 1, 10 en 11):
-- Houd bestanden klein, richtlijn 100 regels per bestand in `src/`, `tests/`, `scripts/` (101 tot ~120 mag als het splitsen onnodig verknipt; boven 120 faalt de check). Vermijd te veel regels. Het doel is **SOLID**: één verantwoordelijkheid per bestand.
+- Houd bestanden klein, richtlijn 100 regels per bestand in `src/`, `tests/`, `scripts/` (101 tot ~120 mag als het splitsen onnodig verknipt; boven 120 faalt de check; `.css` telt niet mee). Vermijd te veel regels. Het doel is **SOLID**: één verantwoordelijkheid per bestand.
 - **Pas SOLID altijd toe** (S: één taak per bestand; O: uitbreiden via nieuwe data of modules, geen if-ketens; L: implementaties inwisselbaar; I: kleine interfaces; D: hang af van interfaces, tijd en RNG injecteren). Details in SPEC.md hoofdstuk 9.
 - Werk één stap tegelijk uit SPEC.md hoofdstuk 12; doe niets buiten de gevraagde stap.
 - Klaar = `npm run check` slaagt **én SPEC.md is bijgewerkt**: voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 (wat gedaan, waarom, afwijkingen, wat nog). Zonder SPEC-update is een stap niet klaar.

@@ -1,6 +1,8 @@
 import type { Listener } from '@/core/store';
+import type { TargetRegistry } from '@/core/target-registry';
 import { t } from '@/i18n';
 import { createEl } from './dom';
+import { domBounds } from './dom-bounds';
 import { toHudView, type HudState } from './hud-view';
 import './hud.css';
 
@@ -16,8 +18,8 @@ function createItem(modifier: string, labelKey: string): { item: HTMLElement; va
   return { item, value };
 }
 
-/** Empty HUD for now: gold and reputation, kept in sync with the store. Returns an unmount function. */
-export function mountHud(root: HTMLElement, source: HudSource): () => void {
+/** HUD: gold and reputation, kept in sync with the store. Returns an unmount function. */
+export function mountHud(root: HTMLElement, source: HudSource, targets: TargetRegistry): () => void {
   const hud = createEl('div', 'hud');
   const gold = createItem('gold', 'hud.gold');
   const reputation = createItem('reputation', 'hud.reputation');
@@ -31,9 +33,11 @@ export function mountHud(root: HTMLElement, source: HudSource): () => void {
   };
   render(source.getState());
   const unsubscribe = source.subscribe(render);
+  const unregister = targets.register('hud-gold', () => domBounds(gold.item, root));
 
   return () => {
     unsubscribe();
+    unregister();
     hud.remove();
   };
 }

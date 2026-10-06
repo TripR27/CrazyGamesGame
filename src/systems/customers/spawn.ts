@@ -12,6 +12,7 @@ export function trySpawn(
   catalog: CustomerCatalog,
   rng: Rng,
 ): CustomerChange | undefined {
+  if (floor.customers.length >= context.maxCustomers) return undefined;
   const type = pickRandom(
     rng,
     catalog.customerTypes.filter((c) => c.minReputation <= context.reputation),

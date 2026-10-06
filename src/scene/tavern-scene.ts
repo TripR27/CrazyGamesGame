@@ -39,8 +39,8 @@ export class TavernScene extends Scene {
     drawCauldron(g);
     drawCustomerSlots(g);
     this.views = {
-      shelf: createShelfView(this, services.getShelf, services.actions.clickIngredient),
-      cauldron: createCauldronView(this, services.station, services.actions.clickCauldron),
+      shelf: createShelfView(this, services.getShelf, services.actions.clickIngredient, services.targets),
+      cauldron: createCauldronView(this, services.station, services.actions.clickCauldron, services.targets),
       ready: createReadyView(this, services.station),
       customers: createCustomersLayer(this, services),
     };

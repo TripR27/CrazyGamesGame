@@ -1,18 +1,13 @@
 import { textKey } from '@/data/text-key';
 import { duplicates, isValidId } from './rules';
 import type { CheckContext, ContentTable } from './table';
-import { CONTENT_TABLES } from './tables';
+import { CONTENT_TABLES } from './content-tables';
 
 export type { ContentTable } from './table';
 export { defineTable } from './table';
-export {
-  CONTENT_TABLES,
-  customerTable,
-  feedbackTable,
-  ingredientTable,
-  recipeTable,
-  upgradeTable,
-} from './tables';
+export { CONTENT_TABLES };
+export { customerTable, feedbackTable, ingredientTable, recipeTable, upgradeTable } from './tables';
+export { tutorialTable } from './tutorial-table';
 
 function checkTable(table: ContentTable, ctx: CheckContext, hasKey: (key: string) => boolean): string[] {
   const ids = table.entries.map((e) => e.id);

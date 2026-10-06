@@ -1,4 +1,5 @@
 import type { GameObjects, Scene } from 'phaser';
+import type { TargetRegistry } from '@/core/target-registry';
 import { CAULDRON } from '@/scene/layout';
 import { brewProgress, type BrewStation } from '@/systems/brewing';
 import { ingredientColor } from './ingredient-look';
@@ -15,7 +16,13 @@ export interface CauldronView {
 }
 
 /** Click target on the cauldron, the ingredients inside and the brew progress bar. */
-export function createCauldronView(scene: Scene, station: BrewStation, onClick: () => void): CauldronView {
+export function createCauldronView(
+  scene: Scene,
+  station: BrewStation,
+  onClick: () => void,
+  targets: TargetRegistry,
+): CauldronView {
+  targets.register('cauldron', () => CAULDRON);
   scene.add
     .zone(CENTER_X, CAULDRON.y + CAULDRON.h / 2, CAULDRON.w, CAULDRON.h)
     .setInteractive({ useHandCursor: true })
