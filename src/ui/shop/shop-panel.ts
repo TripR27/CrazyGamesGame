@@ -7,8 +7,7 @@ import { createAmountPicker } from './amount-picker';
 import type { UpgradeRow } from './upgrade-row';
 
 export function buildPanel(onPick: (amount: BuyAmount) => void) {
-  const panel = createEl('div', 'side-panel shop-panel');
-  panel.hidden = true;
+  const panel = createEl('div', 'shop-panel');
   const list = createEl('div', 'shop-list');
   const picker = createAmountPicker(onPick);
   const head = createEl('div', 'shop-head');
@@ -20,18 +19,14 @@ export function buildPanel(onPick: (amount: BuyAmount) => void) {
 export interface TargetParts {
   /** The element whose bounds are measured against `root` (the panel sits outside the scaled game box). */
   root: HTMLElement;
-  button: HTMLElement;
   panel: HTMLElement;
   rows: Array<{ def: { id: string }; row: UpgradeRow }>;
 }
 
-/** The shop button and each buy button (while the panel is open) are things the tutorial can point at. */
-export function registerTargets(targets: TargetRegistry, { root, button, panel, rows }: TargetParts): () => void {
-  const removers = [
-    targets.register('shop-button', () => domBounds(button, root)),
-    ...rows.map(({ def, row }) =>
-      targets.register(`upgrade:${def.id}`, () => (panel.hidden ? null : domBounds(row.buy, root))),
-    ),
-  ];
+/** Each buy button (while the shop tab is on screen) is something the tutorial can point at. */
+export function registerTargets(targets: TargetRegistry, { root, panel, rows }: TargetParts): () => void {
+  const removers = rows.map(({ def, row }) =>
+    targets.register(`upgrade:${def.id}`, () => (panel.hidden ? null : domBounds(row.buy, root))),
+  );
   return () => removers.forEach((remove) => remove());
 }

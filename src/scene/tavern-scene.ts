@@ -41,10 +41,19 @@ export class TavernScene extends Scene {
     this.views = {
       shelf: createShelfView(this, services.getShelf, services.actions.clickIngredient, services.targets),
       cauldron: createCauldronView(this, services.station, services.actions.clickCauldron, services.targets),
-      ready: createReadyView(this, services.station),
+      ready: createReadyView(this, {
+        station: services.station,
+        selected: services.selection.selected,
+        onClick: services.actions.clickReadyDrink,
+        targets: services.targets,
+      }),
       customers: createCustomersLayer(this, services),
     };
     const stopFeedback = createFeedbackLayer(this, services);
+    // A click on an empty spot puts a picked-up drink back.
+    this.input.on('pointerdown', (_pointer: unknown, over: readonly unknown[]) => {
+      if (over.length === 0) services.actions.cancelSelection();
+    });
     this.events.once('shutdown', () => {
       stopFeedback();
       this.views?.customers.destroy();

@@ -4,8 +4,12 @@ import { serveCustomer, type ServeDeps } from './serve';
 import type { ServeOutcome } from './types';
 
 /** Serves a customer and announces what happened. The player (a click) and the waitress both use this. */
-export function serveAndPublish(deps: ServeDeps & { bus: EventBus<GameEvents> }, customerId: number): ServeOutcome {
-  const outcome = serveCustomer(deps, customerId);
+export function serveAndPublish(
+  deps: ServeDeps & { bus: EventBus<GameEvents> },
+  customerId: number,
+  offered?: string,
+): ServeOutcome {
+  const outcome = serveCustomer(deps, customerId, offered);
   if (outcome.kind === 'served') {
     deps.bus.emit('customer:served', outcome.event);
     if (outcome.event.liked) deps.bus.emit('likes:served', { id: customerId });

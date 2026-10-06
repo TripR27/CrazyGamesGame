@@ -13,7 +13,7 @@ describe('the recipe book', () => {
       id: 'slime_sap',
       name: 'Slime Sap',
       ingredients: [{ id: 'swamp_slime', name: 'Swamp Slime' }, { id: 'wild_honey', name: 'Wild Honey' }],
-      details: ['4s brew', '8 gold', 'Charm: more reputation'],
+      details: ['4s brew', '8 gold', '💖 Charm: more reputation'],
       rarity: 'common',
     });
   });

@@ -4,6 +4,7 @@ import { customers } from './customers';
 import { effects } from './effects';
 import { feedback } from './feedback';
 import { hud } from './hud';
+import { panel } from './panel';
 import { ingredients } from './ingredients';
 import { recipes } from './recipes';
 import { reputation } from './reputation';
@@ -26,4 +27,5 @@ export const en: Messages = {
   ...upgrades,
   ...welcome,
   ...book,
+  ...panel,
 };

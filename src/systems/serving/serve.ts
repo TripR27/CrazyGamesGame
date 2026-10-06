@@ -20,10 +20,10 @@ export interface ServeDeps {
 
 /**
  * The player clicks a customer: if their drink is ready on the bar they get it, pay, and stay to drink it;
- * otherwise they complain. Wrong drinks are refused and stay on the bar. The drink's effect always works,
- * and counts double when the customer likes it.
+ * otherwise they complain. `offered` is the drink the player picked from the bar first: a different one is
+ * refused and stays on the bar. The drink's effect always works, and counts double when the customer likes it.
  */
-export function serveCustomer(deps: ServeDeps, customerId: number): ServeOutcome {
+export function serveCustomer(deps: ServeDeps, customerId: number, offered?: string): ServeOutcome {
   const { floor, station, economy, catalog, rng } = deps;
   const customer = findCustomer(floor, customerId);
   const recipe = catalog.recipes.find((r) => r.id === customer?.recipeId);
@@ -31,7 +31,7 @@ export function serveCustomer(deps: ServeDeps, customerId: number): ServeOutcome
   if (customer === undefined || !isWaiting(customer) || recipe === undefined || type === undefined) return { kind: 'ignored' };
 
   const base = { id: customer.id, seat: customer.seat, recipeId: recipe.id };
-  const index = station.ready.indexOf(recipe.id);
+  const index = offered === undefined || offered === recipe.id ? station.ready.indexOf(recipe.id) : -1;
   if (index === -1) {
     const reason = station.ready.length === 0 ? 'nothing-ready' : 'wrong-drink';
     const messageKey = feedbackKey(reason === 'nothing-ready' ? 'nothing' : 'wrong', rng);

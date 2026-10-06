@@ -33,7 +33,7 @@ export function mountUi(root: HTMLElement, services: UiServices): void {
   const { source, actions, tutorial, targets, layout, welcome, onFit, onLevelUp } = services;
   fitToViewport(root, layout, onFit);
   mountHud(root, source, targets);
-  const panels = createSidePanels(layout);
+  const panels = createSidePanels(root, layout, targets);
   mountShop({ root, panels }, source, actions, targets);
   mountRecipeBook({ root, panels }, source, actions, targets);
   mountTutorial(root, tutorial, targets);

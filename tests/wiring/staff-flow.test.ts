@@ -4,7 +4,7 @@ import { createInitialState } from '@/core/state';
 import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
 
-const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
+const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
 const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done'];
 const SEATS = ['seats_buy', 'seats_done', 'book_open', 'book_read'];
 
@@ -61,12 +61,12 @@ describe('the staff hint, played in the real game', () => {
     const game = afterLessons(0);
     game.store.update((s) => void (s.currencies.gold = num(100)));
     expect(game.shown()).toBe('staff_hire');
-    expect(resolveTarget('guide-staff', game.guide())).toBe('shop-button');
+    expect(resolveTarget('guide-staff', game.guide())).toBe('panel-button');
 
     game.world.scene.actions.openShop();
     expect(resolveTarget('guide-staff', game.guide())).toBe('upgrade:brewer_assistant');
     game.world.scene.actions.closeShop();
-    expect(resolveTarget('guide-staff', game.guide())).toBe('shop-button');
+    expect(resolveTarget('guide-staff', game.guide())).toBe('panel-button');
 
     game.world.scene.actions.openShop();
     game.world.scene.actions.buyUpgrade('brewer_assistant', 1);

@@ -1,4 +1,5 @@
-.tut { position: absolute; inset: 0; font-family: sans-serif; pointer-events: none; }
+/* Above the side panel and its button (z-index 1 and 2), so the spotlight can point into the panel. */
+.tut { position: absolute; inset: 0; font-family: sans-serif; pointer-events: none; z-index: 3; }
 .tut[hidden], .tut-spot[hidden], .tut-arrow[hidden] { display: none; }
 
 .tut-spot {

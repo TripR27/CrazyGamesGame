@@ -1,8 +1,9 @@
 import type { Scene } from 'phaser';
 import { createPool, type Pool } from '@/core/pool';
+import { recipes } from '@/data/recipes';
 import { CUSTOMER_SLOTS, DOOR_ENTRY } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
-import { findCustomer } from '@/systems/customers';
+import { findCustomer, isWaiting } from '@/systems/customers';
 import { shakeNo, showDrinking } from './customer-reactions';
 import { createCustomerSprite, type CustomerSprite } from './customer-sprite';
 import { orderLabel } from './order-label';
@@ -10,7 +11,7 @@ import { orderLabel } from './order-label';
 const WALK_MS = 900;
 
 export interface CustomersLayer {
-  /** Call every frame: keeps the patience bars in line with the simulation. */
+  /** Call every frame: keeps the patience bars and the marks for a picked drink in line with the game. */
   update(): void;
   destroy(): void;
 }
@@ -32,9 +33,10 @@ function walkTo(ctx: LayerContext, sprite: CustomerSprite, x: number, y: number,
 function onArrived(ctx: LayerContext, id: number): void {
   const customer = findCustomer(ctx.services.floor, id);
   const slot = customer === undefined ? undefined : CUSTOMER_SLOTS[customer.seat];
-  if (customer === undefined || slot === undefined) return;
+  const recipe = recipes.find((r) => r.id === customer?.recipeId);
+  if (customer === undefined || slot === undefined || recipe === undefined) return;
   const sprite = ctx.pool.acquire();
-  sprite.setLook(customer.typeId, orderLabel(customer), customer.seat % 2 === 1);
+  sprite.setLook(customer.typeId, orderLabel(customer, recipe.effect), customer.seat % 2 === 1);
   sprite.setPatience(1);
   sprite.setOrderVisible(true);
   sprite.customerId = id;
@@ -57,10 +59,13 @@ function onLeft(ctx: LayerContext, id: number): void {
   walkTo(ctx, sprite, DOOR_ENTRY.x, DOOR_ENTRY.y, () => ctx.pool.release(sprite));
 }
 
-function refreshPatience(ctx: LayerContext): void {
+function refresh(ctx: LayerContext): void {
+  const picked = ctx.services.selection.selected();
   for (const [id, sprite] of ctx.active) {
     const customer = findCustomer(ctx.services.floor, id);
-    if (customer !== undefined) sprite.setPatience(customer.patienceMs / customer.patienceMaxMs);
+    if (customer === undefined) continue;
+    sprite.setPatience(customer.patienceMs / customer.patienceMaxMs);
+    sprite.setMarked(picked !== null && isWaiting(customer) && customer.recipeId === picked);
   }
 }
 
@@ -87,7 +92,7 @@ export function createCustomersLayer(scene: Scene, services: SceneServices): Cus
     services.bus.on('customer:served', ({ id }) => withSprite(id, showDrinking)),
   ];
   return {
-    update: () => refreshPatience(ctx),
+    update: () => refresh(ctx),
     destroy: () => stops.forEach((stop) => stop()),
   };
 }

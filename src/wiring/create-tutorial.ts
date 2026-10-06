@@ -8,6 +8,7 @@ import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
+import { followOpenTab } from './follow-open-tab';
 import { createAlreadyHolds } from './tutorial-already-holds';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
 
@@ -38,11 +39,8 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
   const affordable = (): string | null => firstAffordable(store.getState(), generalOnly(upgrades))?.id ?? null;
   const affordableSeats = (): string | null => firstAffordable(store.getState(), seatsOnly(upgrades))?.id ?? null;
   const affordableStaff = (): string | null => firstAffordable(store.getState(), staffOnly(upgrades))?.id ?? null;
-  // The tutorial has to know whether the shop is open to point at the button or at the hire.
-  let shopOpen = false;
-  bus.on('shop:opened', () => void (shopOpen = true));
-  bus.on('shop:closed', () => void (shopOpen = false));
-  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds(store, floor));
+  const openTab = followOpenTab(bus);
+  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds({ store, floor, openTab }));
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
   bus.on('tick', ({ deltaMs }) => machine.onTick(deltaMs));
@@ -58,7 +56,7 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     affordableUpgradeId: affordable(),
     affordableSeatsId: affordableSeats(),
     affordableStaffId: affordableStaff(),
-    shopOpen,
+    openTab: openTab(),
   });
   return { machine, getGuideContext };
 }

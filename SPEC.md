@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 13 (Balans-simulator). **Volgende stap:** 13b (Speelbaarheid, UX-ronde 1), daarna 13c (Ingrediënten in de winkel) en 14 (Kamers).
+**Nu bezig:** niets. **Laatst afgerond:** stap 13b (Speelbaarheid, UX-ronde 1). **Volgende stap:** 13c (Ingrediënten in de winkel), daarna 14 (Kamers).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -31,7 +31,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 11c | Reputatieniveaus, gates en VIP-klanten | ✅ | `step-11c-reputation` |
 | 12 | Receptenontdekking + receptenboek | ✅ | `step-12-recipe-book` |
 | 13 | Balans-simulator | ✅ | `step-13-balance-simulator` |
-| 13b | Speelbaarheid (UX-ronde 1) | ⬜ | |
+| 13b | Speelbaarheid (UX-ronde 1) | ✅ | `step-13b-ux` |
 | 13c | Ingrediënten in de winkel | ⬜ | |
 | 14 | Kamers en visuele groei | ⬜ | |
 | 15 | Helden | ⬜ | |
@@ -207,6 +207,8 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
 - **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, personeel, VIP. Ze lopen één voor één.
+- **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
+- **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
 
@@ -253,9 +255,14 @@ De eigenaar speelde t/m stap 13 en vond het spel goed, met vier punten:
 
 Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de speler **ontdekt** heeft; een ontdekbaar recept bestelt niemand.
 
+**Gebouwd in stap 13b (punten 1 t/m 3; keuzes van de eigenaar via vragen):**
+- **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `scene/effects/bonus-lines.ts`).
+- **Serveren:** `DrinkSelection` (`systems/serving/selection.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`systems/actions/serve-actions.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
+- **Paneel:** één knop "☰ Menu" / "✕" rechtsboven in het spel; bovenin het paneel tabbladen Shop | Recipes (`ui/side-panels.ts`, logica zonder DOM in `ui/side-panel-state.ts`). Het paneel opent op het laatst gebruikte tabblad, **alleen binnen de sessie** (na herladen weer Shop). De tutorial volgt welk tabblad open is via `wiring/follow-open-tab.ts`.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
-- De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`, met een eigen knop naast Shop) met een grid van alle drankjes.
+- De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
 - **Ontdekt recept:** naam, ingrediënten (met hun plaatje of kleur), brouwtijd, prijs, effect en zeldzaamheid. Zo hoeft de speler niets te onthouden en kan hij het recept zonder gokken opnieuw brouwen.
 - **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
 - Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
@@ -442,7 +449,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 12: Receptenontdekking en receptenboek.** Combineren in ketel → nieuw recept ("Eureka!"), silhouetten van onontdekte recepten, receptenboek-paneel met X/N voortgang. Het receptenboek laat per ontdekt drankje zien **hoe je het maakt** (ingrediënten, brouwtijd, prijs, effect); zie hoofdstuk 4, Receptenboek. Content uitbreiden naar ~15 recepten. Tutorial-hint: eerste ontdekking.
 - [x] **Stap 13: Balans-simulator.** `scripts/simulate.ts` simuleert een speler; rapporteert mijlpaaltijden. Eerste tuning van getallen in `data/`.
   *Klaar wanneer:* simulator draait via `npm run simulate` en toont een duidelijke tijdlijn.
-- [ ] **Stap 13b: Speelbaarheid (UX-ronde 1).** Effect-iconen in bubbel, boek en zwevende tekst; voorkeursles noemt alleen het effect van dat drankje; serveren door eerst het drankje en dan de klant te kiezen (direct de klant klikken blijft werken); één uitklapknop met een zijpaneel met tabbladen (Shop | Recipes) in plaats van losse knoppen en Close. Tutorial-hints aanpassen (basisles: drankje, dan klant; upgrade-, plekken-, personeels- en boeklessen: uitklapknop, dan tabblad). Zie hoofdstuk 4, Speelbaarheid na de eerste speeltest.
+- [x] **Stap 13b: Speelbaarheid (UX-ronde 1).** Effect-iconen in bubbel, boek en zwevende tekst; voorkeursles noemt alleen het effect van dat drankje; serveren door eerst het drankje en dan de klant te kiezen (direct de klant klikken blijft werken); één uitklapknop met een zijpaneel met tabbladen (Shop | Recipes) in plaats van losse knoppen en Close. Tutorial-hints aanpassen (basisles: drankje, dan klant; upgrade-, plekken-, personeels- en boeklessen: uitklapknop, dan tabblad). Zie hoofdstuk 4, Speelbaarheid na de eerste speeltest.
   *Klaar wanneer:* een nieuwe speler ziet aan de bubbel wat een drankje doet, kan een drankje selecteren en aan een klant geven, en opent winkel en boek met één knop en tabbladen; alle lessen werken met de nieuwe bediening; tests slagen.
 - [ ] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
@@ -490,6 +497,20 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 13b: Speelbaarheid, UX-ronde 1 (2026-10-06, `step-13b-ux`)
+- **Gedaan:** (code in `src/i18n/en/effects.ts`, `src/scene/effects/`, `src/scene/customers/`, `src/scene/brewing/ready-view.ts`, `src/systems/serving/selection.ts`, `src/systems/actions/serve-actions.ts`, `src/ui/side-panels.ts`, `src/ui/side-panel-state.ts`, `src/ui/shop/`, `src/ui/recipe-book/`, `src/data/tutorial/`, `src/systems/tutorial/`, `src/wiring/follow-open-tab.ts`, `src/wiring/tutorial-already-holds.ts`; tests in `tests/scene/effect-text.test.ts`, `tests/systems/actions/serve-actions.test.ts`, `tests/systems/tutorial/resolve-target.test.ts`, `tests/systems/tutorial/machine-only-shown.test.ts`, `tests/ui/side-panel-state.test.ts` en aangepaste wiring-tests)
+  - **Effect-iconen, serveren vanuit het drankje en één paneel met tabbladen:** zie hoofdstuk 4, Speelbaarheid na de eerste speeltest ("Gebouwd in stap 13b").
+  - **Voorkeursles:** noemt alleen het effect van het bestelde drankje, met icoon en wat het doet ("Glowcap Stout is a ⚡ speed drink: they drink faster and free the seat sooner"); de afsluitzin verwijst naar het boek.
+  - **Lessen met de nieuwe bediening:** basisles: drankje (`basics_pick`), dan klant; upgrade-, plekken-, personeels- en boekles: uitklapknop, dan tabblad, dan de knop in het paneel.
+  - **Tutorial-fouten opgelost:** (1) het tabblad Recipes of Shop vroeg openen vinkte via "een latere actie al gedaan" hele lessen af (upgrade en plekken), of toonde de koopzin zonder naam ("Buy ."). Nu tellen navigatiestappen alleen als ze in beeld zijn (`onlyWhenShown`, zie hoofdstuk 4, Tutorial). (2) Kreeg de allereerste klant in de basisles een drankje dat hij lekker vond, dan werd de voorkeursles overgeslagen; nu verschijnt die bij de volgende ♥-bestelling. (3) De tutorial-overlay lag onder het zijpaneel, waardoor de spotlight in het paneel onzichtbaar was; de overlay heeft nu z-index 3.
+  - **Tekst (op verzoek van de eigenaar):** de koopzin "Buy {upgrade}. Gold only counts when it is spent. That is the whole joke." was raar en kwam uit het niets (door fout 1). Nieuw: "Buy {upgrade}. Upgrades make your tavern faster and richer. Gold is for spending, not for hugging." Zonder betaalbare upgrade zegt hij "an upgrade" in plaats van niets.
+  - 26 nieuwe tests (379 totaal).
+- **Waarom (keuzes):** de eigenaar koos via vragen steeds de aanbevolen optie: knop "☰ Menu" / "✕", laatst gebruikte tabblad alleen binnen de sessie, altijd een effectregel na het serveren, groene bubbel met ▼ als markering. De selectie onthoudt een soort drankje en geen plek op de bar, omdat de plekken verschuiven als de serveerster een drankje wegneemt. De iconen staan in i18n omdat het spelerstekst is (emoji als placeholder tot stap 21).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 100 regels. `npm run simulate` geeft dezelfde uitkomst als na stap 13 (geen balanswijziging). In de browser (nieuw spel en testsaves): bubbel "♥⚡ Glowcap Stout"; de basisles wijst het drankje op de bar aan en daarna de klant; "+12" en "⚡ Quick drinker! ♥x2" na het serveren; met twee klanten licht het opgepakte drankje op en krijgen de juiste klanten een groene bubbel met ▼; de verkeerde klant weigert en het drankje blijft opgepakt. Vroeg het tabblad Recipes openen laat de basisles staan. Upgrade-les: pijl op Menu, dan op het tabblad Shop (vanaf Recipes) en dan op de koopknop. Boekles: pijl op Menu, dan Recipes, dan de kop van het boek. Geen consolefouten.
+- **Afwijkingen van het plan:** de drie tutorial-fouten hierboven zijn mee opgelost, omdat "alle lessen werken met de nieuwe bediening" anders niet klopte (met één knop opent een nieuwe speler het paneel veel sneller). Verder geen.
+- **Nu te proberen:** wis Local Storage en speel de basisles: pak het drankje van de bar en geef het aan de klant. Open het menu, wissel tussen Shop en Recipes en sluit het weer; open het opnieuw: het staat op het laatste tabblad. Met meer plekken: pak een drankje op en kijk welke klanten groen worden; geef het aan de verkeerde klant.
+- **Nog te doen / volgende stap:** stap 13c, Ingrediënten in de winkel (daarna `npm run simulate` en opnieuw afstellen). Na het spelen beslissen of een van de extra uitlegideeën uit IDEAS.md, punt 7, nodig is.
 
 ### Stap 13: Balans-simulator (2026-10-06, `step-13-balance-simulator`)
 - **Gedaan:** (code in `src/sim/`, `scripts/simulate.mjs`, `src/systems/staff/stale-cauldron.ts`, getallen in `src/data/`; tests in `tests/sim/` en `tests/systems/staff/stale-cauldron.test.ts`)

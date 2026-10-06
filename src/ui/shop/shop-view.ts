@@ -17,12 +17,12 @@ export interface ShopSource {
 }
 
 export interface ShopHosts {
-  /** The scaled overlay box: the Shop button sits in the corner of the game, the panel just to its right. */
+  /** The scaled overlay box, to measure tutorial targets against. */
   root: HTMLElement;
   panels: SidePanels;
 }
 
-/** Shop button plus a side panel with one row per upgrade. Returns an unmount function. */
+/** The Shop tab of the side panel: one row per upgrade. Returns an unmount function. */
 export function mountShop(
   { root, panels }: ShopHosts,
   source: ShopSource,
@@ -30,12 +30,10 @@ export function mountShop(
   targets: TargetRegistry,
 ): () => void {
   let amount: BuyAmount = 1;
-  const button = createEl('button', 'side-button shop-button', t('shop.button'));
   const { panel, list, picker } = buildPanel((picked) => {
     amount = picked;
     render();
   });
-  root.append(button, panel);
 
   let kind = '';
   const rows = upgrades.map((def) => {
@@ -46,20 +44,19 @@ export function mountShop(
     list.append(row.el);
     return { def, row };
   });
-  const unregister = registerTargets(targets, { root, button, panel, rows });
+  const unregister = registerTargets(targets, { root, panel, rows });
 
   function render(): void {
     picker.select(amount);
     for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
   }
-  panels.add({ button, panel, labels: { open: 'shop.button', close: 'shop.close' }, onOpen: actions.openShop, onClose: actions.closeShop });
+  panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: actions.openShop, onClose: actions.closeShop });
   const unsubscribe = source.subscribe(render);
   render();
 
   return () => {
     unsubscribe();
     unregister();
-    button.remove();
     panel.remove();
   };
 }

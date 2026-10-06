@@ -2,8 +2,7 @@ import type { Messages } from '@/i18n/translator';
 
 /** The recipe book panel, and the "Eureka!" line when a recipe is discovered. */
 export const book: Messages = {
-  'book.button': 'Recipes',
-  'book.close': 'Close',
+  'book.tab': 'Recipes',
   'book.title': 'Recipe Book',
   'book.progress': '{found}/{total} discovered',
   'book.brew_time': '{s}s brew',

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { nextIngredient, readyDrinkSlot, resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics, withSeats } from './helpers';
 
 describe('the first tutorial, played in the real game', () => {
@@ -20,6 +21,32 @@ describe('the first tutorial, played in the real game', () => {
     expect(first?.patienceMs).toBe(first?.patienceMaxMs);
   });
 
+  it('points at the finished drink on the bar first, then at the customer who ordered it', () => {
+    const game = newGame();
+    game.tick(3_500);
+    const { actions } = game.world.scene;
+    for (let i = 0; i < 2; i++) actions.clickIngredient(nextIngredient(game.guide()) ?? '');
+    game.tick(15_000);
+    expect(game.shown()).toBe('basics_pick');
+    expect(resolveTarget('guide-drink', game.guide())).toBe('drink:0');
+    actions.clickReadyDrink(readyDrinkSlot(game.guide()) ?? -1);
+    expect(game.shown()).toBe('basics_serve');
+    const [customer] = game.world.scene.floor.customers;
+    expect(resolveTarget('guide-customer', game.guide())).toBe(`customer:${customer?.id}`);
+    actions.clickCustomer(customer?.id ?? -1);
+    expect(game.shown()).toBe('basics_gold');
+  });
+
+  it('also goes on when the player clicks the customer without picking the drink up', () => {
+    const game = newGame();
+    game.tick(3_500);
+    const { actions } = game.world.scene;
+    for (let i = 0; i < 2; i++) actions.clickIngredient(nextIngredient(game.guide()) ?? '');
+    game.tick(15_000);
+    actions.clickCustomer(game.world.scene.floor.customers[0]?.id ?? -1);
+    expect(game.shown()).toBe('basics_gold');
+  });
+
   it('can be completed by following the guide, and then customers flow normally', () => {
     const game = newGame(withSeats());
     game.tick(3_500);
@@ -29,7 +56,7 @@ describe('the first tutorial, played in the real game', () => {
     game.tick(4_600);
     expect(game.shown()).toBeNull();
     expect(game.state.tutorial.completedSteps).toEqual(expect.arrayContaining(['basics_gold']));
-    expect(game.state.tutorial.completedSteps).toHaveLength(5);
+    expect(game.state.tutorial.completedSteps).toHaveLength(6);
     expect(game.state.currencies.gold.gt(0)).toBe(true);
 
     game.tick(30_000);
