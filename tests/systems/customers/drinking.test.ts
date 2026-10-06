@@ -35,7 +35,7 @@ describe('drinking customers', () => {
 });
 
 describe('customer preferences when ordering', () => {
-  const fan: CustomerDef = { id: 'fan', minReputation: 0, patienceSeconds: 1, spendMultiplier: 1, likes: ['luck'] };
+  const fan: CustomerDef = { id: 'fan', minLevel: 1, patienceSeconds: 1, spendMultiplier: 1, likes: ['luck'] };
   const speedy = { ...catalog.recipes[1]!, id: 'speedy', effect: 'speed' as const };
   const prefCatalog = { customerTypes: [fan], recipes: [catalog.recipes[0]!, speedy] };
 

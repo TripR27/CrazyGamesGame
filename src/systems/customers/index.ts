@@ -9,4 +9,5 @@ export type {
   CustomerInstance,
 } from './types';
 export { meanSpawnIntervalMs } from './spawn-timing';
+export { pickCustomerType, priciestRecipe } from './pick-type';
 export { updateCustomers } from './update';

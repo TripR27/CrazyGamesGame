@@ -12,14 +12,15 @@ describe('game content', () => {
     expect(validateContent(hasKey)).toEqual([]);
   });
 
-  it('has the first content set: 6 ingredients, 5 recipes, 3 customer types', () => {
+  it('has the first content set: 6 ingredients, 5 recipes, 3 customer types and a VIP', () => {
     expect(ingredients).toHaveLength(6);
     expect(recipes).toHaveLength(5);
-    expect(customers).toHaveLength(3);
+    expect(customers.filter((c) => c.vip !== true)).toHaveLength(3);
+    expect(customers.filter((c) => c.vip === true)).toHaveLength(1);
   });
 
-  it('lets a new player start: a customer with no reputation requirement', () => {
-    expect(customers.some((c) => c.minReputation === 0)).toBe(true);
+  it('lets a new player start: a regular customer at the first level', () => {
+    expect(customers.some((c) => c.minLevel === 1 && c.vip !== true)).toBe(true);
   });
 
   it('has a starter recipe made only of shop ingredients', () => {

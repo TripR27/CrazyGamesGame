@@ -3,6 +3,7 @@ import { likesLesson } from './likes';
 import { seatsLesson } from './seats';
 import { staffLesson } from './staff';
 import { upgradeLesson } from './upgrade';
+import { vipLesson } from './vip';
 import type { TutorialStep } from './types';
 
 export type { EventTrigger, Trigger, TutorialEvent, TutorialStep } from './types';
@@ -14,4 +15,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...upgradeLesson,
   ...seatsLesson,
   ...staffLesson,
+  ...vipLesson,
 ];

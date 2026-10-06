@@ -47,7 +47,8 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null) ||
     (event === 'seats:affordable' && affordableSeats() !== null) ||
     (event === 'staff:affordable' && affordableStaff() !== null) ||
-    (event === 'likes:ordered' && waitingCustomers(floor).some((c) => c.liked));
+    (event === 'likes:ordered' && waitingCustomers(floor).some((c) => c.liked)) ||
+    (event === 'vip:arrived' && waitingCustomers(floor).some((c) => c.vip));
   const machine = createTutorialMachine(TUTORIAL_STEPS, progress, alreadyHolds);
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));

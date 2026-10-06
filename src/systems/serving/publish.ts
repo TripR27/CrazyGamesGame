@@ -9,6 +9,7 @@ export function serveAndPublish(deps: ServeDeps & { bus: EventBus<GameEvents> },
   if (outcome.kind === 'served') {
     deps.bus.emit('customer:served', outcome.event);
     if (outcome.event.liked) deps.bus.emit('likes:served', { id: customerId });
+    if (outcome.event.vip) deps.bus.emit('vip:served', { id: customerId });
   } else if (outcome.kind === 'refused') {
     deps.bus.emit('customer:refused', outcome.event);
   }

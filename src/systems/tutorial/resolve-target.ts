@@ -1,4 +1,6 @@
-import { likedCustomer, nextIngredient, readyCustomerId, type GuideContext } from './guide';
+import { likedCustomer, nextIngredient, readyCustomerId, vipCustomer, type GuideContext } from './guide';
+
+const pointAt = (customer: { id: number } | undefined): string | null => (customer === undefined ? null : `customer:${customer.id}`);
 
 type AliasResolver = (ctx: GuideContext) => string | null;
 
@@ -17,10 +19,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
     const id = readyCustomerId(ctx);
     return id === undefined ? null : `customer:${id}`;
   },
-  'guide-liked': (ctx) => {
-    const customer = likedCustomer(ctx);
-    return customer === undefined ? null : `customer:${customer.id}`;
-  },
+  'guide-liked': (ctx) => pointAt(likedCustomer(ctx)),
+  'guide-vip': (ctx) => pointAt(vipCustomer(ctx)),
   // Closed shop: point at the button first; open shop: point at the upgrade itself.
   'guide-staff': (ctx) => inShop(ctx, ctx.affordableStaffId),
   'guide-seats': (ctx) => inShop(ctx, ctx.affordableSeatsId),

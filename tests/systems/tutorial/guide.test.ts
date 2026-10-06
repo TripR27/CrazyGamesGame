@@ -3,7 +3,7 @@ import { guideRecipe, likedCustomer, nextIngredient, readyCustomerId, resolveTar
 import { recipes } from '../fixtures';
 
 /** A waiting customer; `liked` when they like the effect of what they ordered. */
-const w = (id: number, recipeId: string, liked = false) => ({ id, recipeId, liked });
+const w = (id: number, recipeId: string, liked = false, vip = false) => ({ id, recipeId, liked, vip });
 
 const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   knownRecipes: recipes,

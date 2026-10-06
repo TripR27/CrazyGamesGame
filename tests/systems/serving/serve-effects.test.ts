@@ -11,7 +11,7 @@ import { ab, economy, floorWith, station } from '../fixtures';
 /** One customer of type `fan` (who likes `likes`) waits for a 10-gold drink with `effect`, which is ready. */
 function setup(effect: Effect, likes: Effect[], rng: Rng = () => 0.5) {
   const drink = { ...ab, effect };
-  const fan: CustomerDef = { id: 'fan', minReputation: 0, patienceSeconds: 60, spendMultiplier: 1, likes };
+  const fan: CustomerDef = { id: 'fan', minLevel: 1, patienceSeconds: 60, spendMultiplier: 1, likes };
   const floor = floorWith(['fan', 'ab']);
   floor.customers[0]!.liked = likes.includes(effect);
   const s = station();

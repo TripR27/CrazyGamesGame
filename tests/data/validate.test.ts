@@ -20,7 +20,7 @@ const rec = (id: string, over: Partial<RecipeDef> = {}): RecipeDef => ({
   id, tier: 1, rarity: 'common', ingredients: ['a', 'b'], brewSeconds: 3, basePrice: 5, effect: 'luck', ...over,
 });
 const cust = (id: string, over: Partial<CustomerDef> = {}): CustomerDef => ({
-  id, minReputation: 0, patienceSeconds: 30, spendMultiplier: 1, likes: ['luck'], ...over,
+  id, minLevel: 1, patienceSeconds: 30, spendMultiplier: 1, likes: ['luck'], ...over,
 });
 const base = (): ContentTable[] => [ingredientTable([ing('a'), ing('b')])];
 const problems = (...tables: ContentTable[]): string[] => validateContent(allKeys, tables);
@@ -67,7 +67,7 @@ describe('validateContent', () => {
   it('reports invalid numbers and unknown effects or rarities', () => {
     const bad = rec('r1', { brewSeconds: 0, basePrice: -1, tier: 0, effect: 'rage' as never, rarity: 'meh' as never });
     expect(problems(...base(), recipeTable([bad]))).toHaveLength(5);
-    expect(problems(customerTable([cust('c1', { spendMultiplier: 0, minReputation: -1 })]))).toHaveLength(2);
+    expect(problems(customerTable([cust('c1', { spendMultiplier: 0, minLevel: 0 })]))).toHaveLength(2);
   });
 
   it('reports a bad ingredient source', () => {

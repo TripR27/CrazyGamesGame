@@ -15,5 +15,7 @@ export const tutorial: Messages = {
   'tutorial.seats_done.text': 'A new chair! Customers come in gradually, so keep an eye on the door.',
   'tutorial.staff_hire.text': 'Tired of doing everything yourself? Hire {staff} in the shop. They work while you complain.',
   'tutorial.staff_done.text': 'Hired! They are slower than you, but they never ask for a break. They even keep working when you close the tab.',
+  'tutorial.vip_spot.text': 'A VIP! Royalty wants {royal}, the fanciest thing we make. Pays triple, waits for nobody.',
+  'tutorial.vip_done.text': 'Ka-ching. Keep the crown happy and the crown keeps paying.',
   'tutorial.upgrade_done.text': 'Ahh, shopping. Your gold went down and somehow you feel richer. Welcome to economics.',
 };

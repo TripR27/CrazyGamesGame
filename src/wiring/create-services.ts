@@ -14,8 +14,9 @@ import { CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { createPlayerActions } from '@/systems/actions';
 import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
-import { createFloor, startCustomerSystem } from '@/systems/customers';
+import { createFloor, startCustomerSystem, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
+import { watchReputationLevels } from '@/systems/reputation';
 import { createOffline, type OfflineServices } from './create-offline';
 import { createTutorial, type TutorialServices } from './create-tutorial';
 import { startStaffWork } from './start-staff';
@@ -40,18 +41,13 @@ export interface GameWorld {
   targets: TargetRegistry;
 }
 
-/**
- * The composition root for the game world: builds the runtime objects (customer floor, cauldron and bar),
- * starts the systems that run on the tick, and returns what the scenes need.
- */
-export function createServices({ store, bus, rng, clock = systemClock }: WiringDeps): GameWorld {
-  const catalog = { customerTypes: customers, recipes };
-  const floor = createFloor(CUSTOMER_SLOTS.length);
-  const station = createStation(BREWING.storageCapacity);
-  syncStationStats(store, station);
-  const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
-  const tutorial = createTutorial({ store, bus, floor, station });
-  const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
+interface CustomerWiring extends Pick<WiringDeps, 'store' | 'bus' | 'rng'> {
+  floor: CustomerFloor;
+  catalog: CustomerCatalog;
+}
+
+/** Runs the customers: as many as the player has seats, and while a lesson is on screen just one. */
+function startCustomers({ store, bus, rng, floor, catalog }: CustomerWiring, inLesson: () => boolean): void {
   // The player starts with one seat and buys more: that many customers at most.
   const seats = (): number => Math.floor(getMultipliers(store.getState()).seats.toNumber());
   startCustomerSystem({
@@ -61,7 +57,7 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
     catalog,
     getContext: () => ({
       reputation: store.getState().reputation,
-      unlockedRecipeIds: knownIds(),
+      unlockedRecipeIds: store.getState().recipesDiscovered,
       // While a lesson is on screen: one customer at a time, who does not lose patience, so it can always
       // point at the right person and nobody leaves in the middle of a lesson. A lesson that has not
       // started yet (waiting for its moment) does not hold the game back.
@@ -69,6 +65,23 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
       freezePatience: inLesson(),
     }),
   });
+}
+
+/**
+ * The composition root for the game world: builds the runtime objects (customer floor, cauldron and bar),
+ * starts the systems that run on the tick, and returns what the scenes need.
+ */
+export function createServices({ store, bus, rng, clock = systemClock }: WiringDeps): GameWorld {
+  const catalog = { customerTypes: customers, recipes };
+  const floor = createFloor(CUSTOMER_SLOTS.length);
+  const station = createStation(BREWING.storageCapacity);
+  syncStationStats(store, station);
+  // Reaching a reputation level teaches its recipes; done first, so customers can order them at once.
+  watchReputationLevels(store, bus);
+  const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
+  const tutorial = createTutorial({ store, bus, floor, station });
+  const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
+  startCustomers({ store, bus, rng, floor, catalog }, inLesson);
   startBrewSystem(station, bus);
   watchShop(store, bus);
   startStaffWork({ store, bus, floor, station, rng, catalog });

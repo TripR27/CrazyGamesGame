@@ -11,15 +11,15 @@ import {
   type CustomerFloor,
 } from '@/systems/customers';
 
-const customer = (id: string, minReputation: number, patienceSeconds: number): CustomerDef => ({
-  id, minReputation, patienceSeconds, spendMultiplier: 1, likes: [],
+const customer = (id: string, minLevel: number, patienceSeconds: number): CustomerDef => ({
+  id, minLevel, patienceSeconds, spendMultiplier: 1, likes: [],
 });
 const recipe = (id: string): RecipeDef => ({
   id, tier: 1, rarity: 'common', ingredients: ['a', 'b'], brewSeconds: 3, basePrice: 5, effect: 'luck',
 });
 
 export const catalog: CustomerCatalog = {
-  customerTypes: [customer('plain', 0, 20), customer('fancy', 10, 30), customer('royal', 50, 40)],
+  customerTypes: [customer('plain', 1, 20), customer('fancy', 2, 30), customer('royal', 4, 40)],
   recipes: [recipe('r1'), recipe('r2'), recipe('r3')],
 };
 

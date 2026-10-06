@@ -3,6 +3,7 @@ const BODY_COLORS: Readonly<Record<string, number>> = {
   knight: 0x8d99a8,
   elf: 0x58b368,
   dwarf: 0xa5683a,
+  king: 0xd4a017,
 };
 
 const FALLBACK_COLOR = 0xb36bd1;

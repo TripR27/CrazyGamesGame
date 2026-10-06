@@ -23,6 +23,7 @@ export interface GameEvents {
     tip: Num;
     extraReputation: number;
     liked: boolean;
+    vip: boolean;
     messageKey: string;
   };
   'customer:refused': { id: number; seat: number; recipeId: string; reason: RefuseReason; messageKey: string };
@@ -30,6 +31,11 @@ export interface GameEvents {
   'likes:ordered': { id: number };
   /** A customer got a drink they like. */
   'likes:served': { id: number };
+  /** A VIP sat down, and a VIP got their drink. */
+  'vip:arrived': { id: number };
+  'vip:served': { id: number };
+  /** The player reached a new reputation level (1 is the first); fired once for every level on the way. */
+  'reputation:levelUp': { level: number };
   'ingredient:clicked': { id: string };
   'brew:started': { recipeId: string };
   'brew:done': { recipeId: string };

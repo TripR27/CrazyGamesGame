@@ -22,7 +22,7 @@ describe('average reward', () => {
   });
 
   it('leaves out customers whose reputation is not reached and counts the sell multiplier', () => {
-    const vip = { ...rich, id: 'vip', minReputation: 50 };
+    const vip = { ...rich, id: 'vip', minLevel: 4 };
     expect(averageReward(recipes, [plain, vip], 0, num(2)).gold.toNumber()).toBe(40);
     expect(averageReward(recipes, [plain, vip], 50, num(1)).gold.toNumber()).toBe(25);
   });
@@ -45,6 +45,18 @@ describe('average reward with drink effects', () => {
     const fan = { ...plain, likes: ['charm' as const] };
     // Charm liked: 3 reputation, ordered twice as often as the 1-reputation drink: (2 x 3 + 1) / 3.
     expect(averageReward([recipes[0]!, charming], [fan], 0, num(1)).reputation).toBeCloseTo(7 / 3);
+  });
+});
+
+describe('average reward with VIPs', () => {
+  const king = { ...rich, id: 'king', minLevel: 3, spendMultiplier: 3, vip: true, reputationBonus: 3 };
+
+  it('mixes in VIPs by their chance once their level is reached; they order the priciest drink', () => {
+    expect(averageReward(recipes, [plain, king], 0, num(1)).gold.toNumber()).toBe(20); // level 1: no VIP yet
+    // Level 3: 90% regular (avg 20) and 10% king (30 x 3 = 90): 18 + 9.
+    const mixed = averageReward(recipes, [plain, king], 25, num(1));
+    expect(mixed.gold.toNumber()).toBeCloseTo(27);
+    expect(mixed.reputation).toBeCloseTo(0.9 * 1 + 0.1 * 4);
   });
 });
 

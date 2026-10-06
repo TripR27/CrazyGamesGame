@@ -39,3 +39,33 @@
 .hud-item--reputation .hud-value {
   color: #ff9bd0;
 }
+
+.hud-level {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: 4px;
+  font-size: 12px;
+  color: #ffd9ee;
+}
+
+.hud-level-bar {
+  display: block;
+  width: 96px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.hud-level-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #ff9bd0;
+  transition: width 0.3s ease-out;
+}
+
+.hud-item--reputation {
+  align-items: center;
+}
