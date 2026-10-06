@@ -1,4 +1,6 @@
 import type { Rng } from '@/core/rng';
+import { SPAWNING } from '@/data/customers/spawning';
+import { freeSeats } from './floor';
 import { advancePatience } from './patience';
 import { trySpawn } from './spawn';
 import { nextSpawnDelayMs } from './spawn-timing';
@@ -6,7 +8,8 @@ import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } 
 
 /**
  * One simulation step: patience runs down, then a new customer may arrive.
- * When the tavern is full the timer stays at zero, so a seat that frees up is refilled on the next step.
+ * While the tavern is full the timer does not drop below the refill delay, so when a seat frees up the
+ * next customer still needs a moment to walk in: customers come gradually, not in a stream.
  */
 export function updateCustomers(
   floor: CustomerFloor,
@@ -16,7 +19,8 @@ export function updateCustomers(
   deltaMs: number,
 ): CustomerChange[] {
   const changes = context.freezePatience ? [] : advancePatience(floor, deltaMs);
-  floor.spawnInMs = Math.max(0, floor.spawnInMs - deltaMs);
+  const full = floor.customers.length >= context.maxCustomers || freeSeats(floor).length === 0;
+  floor.spawnInMs = Math.max(full ? SPAWNING.refillDelayMs : 0, floor.spawnInMs - deltaMs);
   if (floor.spawnInMs > 0) return changes;
 
   const arrived = trySpawn(floor, context, catalog, rng);

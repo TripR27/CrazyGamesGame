@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { GameState } from '@/core/state';
 import { nextIngredient } from '@/systems/tutorial';
-import { newGame, playBasics } from './helpers';
+import { newGame, playBasics, withSeats } from './helpers';
 
 describe('the first tutorial: replaying, skipping, mistakes and reloads', () => {
   it('can be replayed with a customer already seated, without getting stuck', () => {
     const game = newGame();
-    game.tick(2_000);
+    game.tick(3_500);
     game.world.tutorial.machine.skip();
     game.tick(20_000);
     game.world.tutorial.machine.restart();
@@ -17,8 +17,8 @@ describe('the first tutorial: replaying, skipping, mistakes and reloads', () => 
   });
 
   it('lifts the one-customer limit as soon as the tutorial is skipped', () => {
-    const game = newGame();
-    game.tick(2_000);
+    const game = newGame(withSeats());
+    game.tick(3_500);
     game.world.tutorial.machine.skip();
     game.tick(40_000);
     expect(game.world.scene.floor.customers.length).toBeGreaterThan(1);
@@ -26,7 +26,7 @@ describe('the first tutorial: replaying, skipping, mistakes and reloads', () => 
 
   it('is not stuck when the player makes mistakes: a fizzle just brings the guide back to the first ingredient', () => {
     const game = newGame();
-    game.tick(2_000);
+    game.tick(3_500);
     const { actions } = game.world.scene;
     actions.clickIngredient('swamp_slime');
     actions.clickIngredient('glowcap'); // no recipe has both: the cauldron fizzles
@@ -38,7 +38,7 @@ describe('the first tutorial: replaying, skipping, mistakes and reloads', () => 
 
   it('restarts the lesson from its first step after a reload in the middle of brewing', () => {
     const first = newGame();
-    first.tick(2_000);
+    first.tick(3_500);
     first.world.scene.actions.clickIngredient(nextIngredient(first.guide()) ?? '');
     first.world.scene.actions.clickIngredient(nextIngredient(first.guide()) ?? '');
     first.tick(15_000); // drink ready: the open step is the one that needs the bar
@@ -49,7 +49,7 @@ describe('the first tutorial: replaying, skipping, mistakes and reloads', () => 
     const second = newGame(saved);
     expect(second.state.tutorial.completedSteps).toEqual([]);
     expect(second.shown()).toBeNull();
-    second.tick(2_000);
+    second.tick(3_500);
     expect(second.shown()).toBe('basics_add');
   });
 });

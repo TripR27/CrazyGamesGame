@@ -44,7 +44,7 @@ describe('offline earnings', () => {
 
   it('are limited by how fast customers come in, however fast the staff are', () => {
     const fast = computeOffline(input({ rates: { brew: 5, serve: 5 } }));
-    expect(fast.served).toBe(225); // 3600 s x 0.125 customers per second x 0.5
+    expect(fast.served).toBe(150); // 3600 s x (1 customer per 12 s) x 0.5
   });
 
   it('need both a brewer and a waitress', () => {

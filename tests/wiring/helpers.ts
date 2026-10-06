@@ -7,6 +7,13 @@ import { createStore } from '@/core/store';
 import { nextIngredient, readyCustomerId } from '@/systems/tutorial';
 import { createServices } from '@/wiring/create-services';
 
+/** A fresh state in which the player already bought the seats, so more than one customer can sit. */
+export function withSeats(levels = 6): GameState {
+  const state = createInitialState(0);
+  state.upgrades = { extra_seat: levels };
+  return state;
+}
+
 export function newGame(state: GameState = createInitialState(0)) {
   const bus = createEventBus<GameEvents>();
   const store = createStore(state);

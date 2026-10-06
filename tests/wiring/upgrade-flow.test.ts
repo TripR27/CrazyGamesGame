@@ -10,6 +10,7 @@ function afterBasics(gold: number) {
   const state = createInitialState(0);
   state.tutorial.completedSteps = ['basics_add', 'basics_finish', 'basics_wait', 'basics_serve', 'basics_gold'];
   state.currencies.gold = num(gold);
+  state.upgrades = { extra_seat: 6 }; // seats are not what these tests are about
   return newGame(state);
 }
 
@@ -23,7 +24,7 @@ describe('the upgrade hint, played in the real game', () => {
 
   it('starts when the player earns enough, points at the shop, then at the buy button', () => {
     const game = newGame();
-    game.tick(2_000);
+    game.tick(3_500);
     playBasics(game);
     game.tick(4_600);
     expect(game.shown()).toBeNull();

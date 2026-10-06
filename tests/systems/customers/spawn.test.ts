@@ -62,14 +62,22 @@ describe('spawning customers', () => {
     expect(freeSeats(floor)).toEqual([]);
   });
 
-  it('refills a seat on the next step after someone leaves a full tavern', () => {
+  it('does not refill a freed seat at once: the next customer needs the refill delay to walk in', () => {
     const floor = newFloor(1);
     run(floor, context(), 30_000, undefined, patientCatalog);
     const first = floor.customers[0];
     expect(floor.customers).toHaveLength(1);
     dismiss(floor, first?.id ?? -1, 'served');
-    const changes = run(floor, context(), 100, undefined, patientCatalog);
-    expect(changes).toEqual([{ kind: 'arrived', id: 2 }]);
+    expect(run(floor, context(), SPAWNING.refillDelayMs - 200, undefined, patientCatalog)).toEqual([]);
+    expect(run(floor, context(), 300, undefined, patientCatalog)).toEqual([{ kind: 'arrived', id: 2 }]);
+  });
+
+  it('seats at most as many customers as the player has seats', () => {
+    const floor = newFloor(7);
+    run(floor, context({ maxCustomers: 1 }), 300_000, undefined, patientCatalog);
+    expect(floor.customers).toHaveLength(1);
+    run(floor, context({ maxCustomers: 3 }), 300_000, undefined, patientCatalog);
+    expect(floor.customers).toHaveLength(3);
   });
 });
 

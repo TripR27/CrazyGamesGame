@@ -25,6 +25,9 @@ export interface GameEvents {
   'upgrade:bought': { id: string; count: number };
   /** Same as `upgrade:affordable`, but for staff: the player can pay for a hire or a training level. */
   'staff:affordable': Record<string, never>;
+  /** Same again for the first extra seat. */
+  'seats:affordable': Record<string, never>;
+  'seats:bought': { id: string };
   /** A staff upgrade was bought (a hire or a training level). */
   'staff:hired': { id: string };
   /** The shop panel was opened or closed (the tutorial follows this). */

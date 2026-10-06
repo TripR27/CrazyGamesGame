@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { newGame, playBasics } from './helpers';
+import { newGame, playBasics, withSeats } from './helpers';
 
 describe('the first tutorial, played in the real game', () => {
   it('shows nothing until the first customer sits down, and then only one customer comes', () => {
     const { tick, shown, world } = newGame();
     expect(shown()).toBeNull();
-    tick(2_000);
+    tick(3_500);
     expect(shown()).toBe('basics_add');
     tick(40_000);
     expect(world.scene.floor.customers).toHaveLength(1);
@@ -13,7 +13,7 @@ describe('the first tutorial, played in the real game', () => {
 
   it('keeps that customer waiting for as long as the tutorial runs, patience bar full', () => {
     const { tick, world } = newGame();
-    tick(2_000);
+    tick(3_500);
     const [first] = world.scene.floor.customers;
     tick(300_000);
     expect(world.scene.floor.customers).toEqual([first]);
@@ -21,8 +21,8 @@ describe('the first tutorial, played in the real game', () => {
   });
 
   it('can be completed by following the guide, and then customers flow normally', () => {
-    const game = newGame();
-    game.tick(2_000);
+    const game = newGame(withSeats());
+    game.tick(3_500);
     expect(game.saves).toHaveBeenCalled(); // progress asks for a save, so a reload resumes
     playBasics(game);
     expect(game.shown()).toBe('basics_gold');

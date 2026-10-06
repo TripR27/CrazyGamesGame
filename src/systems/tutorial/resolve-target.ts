@@ -2,6 +2,11 @@ import { nextIngredient, readyCustomerId, type GuideContext } from './guide';
 
 type AliasResolver = (ctx: GuideContext) => string | null;
 
+const inShop = (ctx: GuideContext, upgradeId: string | null): string | null => {
+  if (!ctx.shopOpen) return 'shop-button';
+  return upgradeId === null ? null : `upgrade:${upgradeId}`;
+};
+
 /** Targets that depend on the game situation. New alias = one more entry (also add it to data/tutorial/targets.ts). */
 const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-ingredient': (ctx) => {
@@ -12,11 +17,9 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
     const id = readyCustomerId(ctx);
     return id === undefined ? null : `customer:${id}`;
   },
-  // Closed shop: point at the button first; open shop: point at the hire itself.
-  'guide-staff': (ctx) => {
-    if (!ctx.shopOpen) return 'shop-button';
-    return ctx.affordableStaffId === null ? null : `upgrade:${ctx.affordableStaffId}`;
-  },
+  // Closed shop: point at the button first; open shop: point at the upgrade itself.
+  'guide-staff': (ctx) => inShop(ctx, ctx.affordableStaffId),
+  'guide-seats': (ctx) => inShop(ctx, ctx.affordableSeatsId),
   'guide-upgrade': (ctx) => (ctx.affordableUpgradeId === null ? null : `upgrade:${ctx.affordableUpgradeId}`),
 };
 
