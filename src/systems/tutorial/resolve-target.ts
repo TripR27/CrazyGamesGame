@@ -10,11 +10,9 @@ const toTab = (ctx: GuideContext, tab: string): string | undefined => {
   return ctx.openTab === null ? 'panel-button' : `tab:${tab}`;
 };
 
-const inShop = (ctx: GuideContext, upgradeId: string | null): string | null => {
-  const way = toTab(ctx, 'shop');
-  if (way !== undefined) return way;
-  return upgradeId === null ? null : `upgrade:${upgradeId}`;
-};
+/** A target inside the shop (`kind:id`, e.g. `upgrade:extra_seat`); the way to the Shop tab first. */
+const inShop = (ctx: GuideContext, kind: string, id: string | null): string | null =>
+  toTab(ctx, 'shop') ?? (id === null ? null : `${kind}:${id}`);
 
 /** Targets that depend on the game situation. New alias = one more entry (also add it to data/tutorial/targets.ts). */
 const ALIASES: Readonly<Record<string, AliasResolver>> = {
@@ -36,9 +34,11 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-shop': (ctx) => toTab(ctx, 'shop') ?? null,
   'guide-book': (ctx) => toTab(ctx, 'recipes') ?? null,
   // In the shop: the way there first, then the upgrade itself.
-  'guide-staff': (ctx) => inShop(ctx, ctx.affordableStaffId),
-  'guide-seats': (ctx) => inShop(ctx, ctx.affordableSeatsId),
-  'guide-upgrade': (ctx) => inShop(ctx, ctx.affordableUpgradeId),
+  'guide-staff': (ctx) => inShop(ctx, 'upgrade', ctx.affordableStaffId),
+  'guide-seats': (ctx) => inShop(ctx, 'upgrade', ctx.affordableSeatsId),
+  'guide-upgrade': (ctx) => inShop(ctx, 'upgrade', ctx.affordableUpgradeId),
+  'guide-ingredient-buy': (ctx) => inShop(ctx, 'ingredient-buy', ctx.affordableIngredientId),
+  'guide-new-ingredient': (ctx) => (ctx.newestIngredientId === null ? null : `ingredient:${ctx.newestIngredientId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */

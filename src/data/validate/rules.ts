@@ -3,6 +3,8 @@ const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 export const isValidId = (id: string): boolean => ID_PATTERN.test(id);
 export const isPositive = (n: number): boolean => Number.isFinite(n) && n > 0;
 export const isTier = (n: number): boolean => Number.isInteger(n) && n >= 1;
+export const tierRule = (tier: number): string[] =>
+  isTier(tier) ? [] : [`tier must be a whole number >= 1, got ${tier}`];
 
 export function oneOf(value: string, allowed: readonly string[], label: string): string[] {
   return allowed.includes(value) ? [] : [`${label} "${value}" is not one of ${allowed.join(', ')}`];

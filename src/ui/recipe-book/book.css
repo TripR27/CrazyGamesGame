@@ -30,3 +30,4 @@
 
 .book-details, .book-hint { margin: 4px 0 0; font-size: 13px; line-height: 1.3; }
 .book-hint { font-style: italic; }
+.book-needs { margin: 4px 0 0; font-size: 13px; font-weight: bold; color: #b0441c; }

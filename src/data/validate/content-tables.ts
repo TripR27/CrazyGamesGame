@@ -6,7 +6,8 @@ import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { TUTORIAL_STEPS } from '@/data/tutorial';
 import { upgrades } from '@/data/upgrades';
 import type { ContentTable } from './table';
-import { customerTable, feedbackTable, ingredientTable, recipeTable, upgradeTable } from './tables';
+import { customerTable, feedbackTable, recipeTable, upgradeTable } from './tables';
+import { ingredientTable } from './ingredient-table';
 import { reputationTable } from './reputation-table';
 import { tutorialTable } from './tutorial-table';
 

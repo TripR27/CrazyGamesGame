@@ -31,6 +31,7 @@ export function createBookCard(entry: BookEntry): HTMLElement {
     const head = createEl('div', 'book-card-head');
     head.append(createEl('strong', 'book-name', t('book.hidden_name')), rarityTag(entry.rarity));
     card.append(head, createEl('p', 'book-hint', entry.hint));
+    if (entry.needs !== undefined) card.append(createEl('p', 'book-needs', entry.needs));
   } else {
     card.append(createEl('strong', 'book-name', t('book.hidden_name')), createEl('p', 'book-hint', entry.unlock));
   }

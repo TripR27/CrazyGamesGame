@@ -8,10 +8,11 @@ import { addIngredient, emptyCauldron, publishBrewEvent, type BrewStation } from
 import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
 import { createDrinkSelection, type DrinkSelection, type EconomyStore } from '@/systems/serving';
 import { buyUpgrade, type BuyAmount, type UpgradeStore } from '@/systems/upgrades';
+import { createIngredientActions, type IngredientActionDeps, type IngredientActions } from './ingredient-actions';
 import { createServeActions, type ServeActions } from './serve-actions';
 
 /** Everything the player can do with the mouse. The scene calls these and never touches game rules. */
-export interface PlayerActions extends ServeActions {
+export interface PlayerActions extends ServeActions, IngredientActions {
   clickIngredient(ingredientId: string): void;
   clickCauldron(): void;
   /** Buy levels of an upgrade; does nothing when it cannot be afforded. */
@@ -41,6 +42,8 @@ export interface PlayerActionDeps {
   getDiscoverable?(): readonly RecipeDef[];
   /** The drink picked from the bar; shared with the scene, which shows it. A fresh one when left out. */
   selection?: DrinkSelection;
+  /** The ingredient shop; buying ingredients does nothing when left out. */
+  ingredients?: Omit<IngredientActionDeps, 'bus'>;
 }
 
 export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
@@ -49,6 +52,7 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
   const getSellMultiplier = deps.getSellMultiplier;
   return {
     ...createServeActions({ bus, floor, station, economy, catalog, rng, getSellMultiplier, selection }),
+    buyIngredient: deps.ingredients === undefined ? () => undefined : createIngredientActions({ bus, ...deps.ingredients }).buyIngredient,
     clickIngredient(ingredientId) {
       bus.emit('ingredient:clicked', { id: ingredientId });
       const known = catalog.recipes.filter((r) => deps.getKnownRecipeIds().includes(r.id));

@@ -41,6 +41,13 @@ describe('validateContent', () => {
     expect(out).toEqual(['recipes.r1: unknown ingredient "ghost"']);
   });
 
+  it('reports a shop purchase at a wrong level, for free, or of a dungeon ingredient', () => {
+    const out = problems(ingredientTable([
+      ing('a', { buy: { level: 1, cost: 10 } }), ing('b', { buy: { level: 2, cost: 0 } }), ing('c', { source: 'dungeon:cave', buy: { level: 2, cost: 5 } }),
+    ]));
+    expect(out).toEqual([expect.stringMatching(/^ingredients\.a: buy\.level/), expect.stringMatching(/^ingredients\.b: buy\.cost/), 'ingredients.c: only shop ingredients can be bought']);
+  });
+
   it('reports repeated ingredients and wrong ingredient counts', () => {
     const out = problems(...base(), recipeTable([rec('r1', { ingredients: ['a', 'a'] })]));
     expect(out).toEqual(['recipes.r1: ingredient "a" is listed twice']);

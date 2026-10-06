@@ -1,33 +1,17 @@
 import { EFFECTS, RARITIES } from '@/data/common';
 import type { FeedbackPool } from '@/data/feedback';
 import type { CustomerDef } from '@/data/customers';
-import type { IngredientDef } from '@/data/ingredients';
 import type { RecipeDef } from '@/data/recipes';
 import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import type { UpgradeDef } from '@/data/upgrades';
-import { duplicates, isTier, oneOf, positive } from './rules';
+import { duplicates, isTier, oneOf, positive, tierRule } from './rules';
 import { defineTable, type ContentTable } from './table';
 
-const SOURCE_PATTERN = /^(shop|dungeon:[a-z][a-z0-9_]*)$/;
 const comboKey = (ids: readonly string[]): string => [...ids].sort().join('+');
 const isSubset = (small: readonly string[], big: readonly string[]): boolean =>
   small.every((id) => big.includes(id));
-const tierRule = (tier: number): string[] =>
-  isTier(tier) ? [] : [`tier must be a whole number >= 1, got ${tier}`];
 
 /** The table factories take items so tests can feed them deliberately broken data. */
-export const ingredientTable = (items: readonly IngredientDef[]): ContentTable =>
-  defineTable({
-    domain: 'ingredients',
-    items,
-    textFields: ['name'],
-    check: (i) => [
-      ...tierRule(i.tier),
-      ...oneOf(i.rarity, RARITIES, 'rarity'),
-      ...(SOURCE_PATTERN.test(i.source) ? [] : [`source "${i.source}" must be shop or dungeon:<id>`]),
-    ],
-  });
-
 export const recipeTable = (items: readonly RecipeDef[]): ContentTable =>
   defineTable({
     domain: 'recipes',

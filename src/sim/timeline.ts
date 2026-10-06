@@ -13,13 +13,13 @@ export interface TimelineEntry {
 /** What happened during a simulated run, read from the game bus: milestones, purchases and money earned. */
 export interface Timeline {
   entries: TimelineEntry[];
-  /** Times of every upgrade purchase (to count purchases in the first minutes). */
+  /** Times of every purchase, upgrades and ingredients (to count purchases in the first minutes). */
   purchases: number[];
   /** Gold earned by serving (prices and tips), with the time of each serve. */
   earned: { ms: number; gold: Num }[];
 }
 
-const name = (domain: 'upgrades' | 'recipes' | 'reputation', id: string): string => t(textKey(domain, id, 'name'));
+const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients', id: string): string => t(textKey(domain, id, 'name'));
 
 /** Starts recording; `now` gives the simulated time. Only firsts are written to the timeline, to keep it short. */
 export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Timeline {
@@ -43,6 +43,10 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
   });
   bus.on('recipe:discovered', ({ recipeId }) => once(`recipe:${recipeId}`, `discovered ${name('recipes', recipeId)}`));
   bus.on('vip:arrived', () => once('vip', 'first VIP'));
+  bus.on('ingredient:bought', ({ id }) => {
+    timeline.purchases.push(now());
+    once(`ingredient:${id}`, `bought ${name('ingredients', id)}`);
+  });
   return timeline;
 }
 

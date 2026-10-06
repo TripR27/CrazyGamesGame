@@ -18,6 +18,8 @@ export const tutorial: Messages = {
   'tutorial.any_upgrade': 'an upgrade',
   'tutorial.seats_buy.text': 'One customer at a time? Buy an Extra Seat in the Shop tab. More chairs, more thirst.',
   'tutorial.seats_done.text': 'A new chair! Customers come in gradually, so keep an eye on the door.',
+  'tutorial.ingredient_buy.text': 'Fresh stock! {shopIngredient} is for sale in the Shop tab. Buy it once and it stays on the shelf for good.',
+  'tutorial.ingredient_done.text': 'There it is, on the shelf. The recipe book knows what to throw in with it. I am ready. Probably.',
   'tutorial.staff_hire.text': 'Tired of doing everything yourself? Hire {staff} in the Shop tab. They work while you complain.',
   'tutorial.staff_done.text': 'Hired! They are slower than you, but they never ask for a break. They even keep working when you close the tab.',
   'tutorial.vip_spot.text': 'A VIP! Royalty wants {royal}, the fanciest thing we make. Pays triple, waits for nobody.',

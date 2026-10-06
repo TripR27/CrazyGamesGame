@@ -15,7 +15,7 @@ import { mountTutorial, type TutorialUiSource } from './tutorial/tutorial-view';
 
 export interface UiServices {
   source: HudSource & ShopSource & BookSource;
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop' | 'closeShop' | 'openBook' | 'closeBook'>;
+  actions: Pick<PlayerActions, 'buyUpgrade' | 'buyIngredient' | 'openShop' | 'closeShop' | 'openBook' | 'closeBook'>;
   tutorial: TutorialUiSource;
   targets: TargetRegistry;
   /** How much room a side panel takes next to the game. */

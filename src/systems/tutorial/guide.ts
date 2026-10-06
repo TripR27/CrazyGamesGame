@@ -15,6 +15,9 @@ export interface GuideContext {
   affordableSeatsId: string | null;
   /** The first staff upgrade (hire or training) the player can pay for right now, if any. */
   affordableStaffId: string | null;
+  /** The first ingredient the player can buy in the shop right now, and the one bought last, if any. */
+  affordableIngredientId: string | null;
+  newestIngredientId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes'), or null while the panel is folded away. */
   openTab: string | null;
 }

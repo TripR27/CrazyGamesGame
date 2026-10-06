@@ -1,5 +1,6 @@
 import { basicsLesson } from './basics';
 import { bookLesson } from './book';
+import { ingredientLesson } from './ingredient';
 import { likesLesson } from './likes';
 import { seatsLesson } from './seats';
 import { staffLesson } from './staff';
@@ -16,6 +17,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...upgradeLesson,
   ...seatsLesson,
   ...bookLesson,
+  ...ingredientLesson,
   ...staffLesson,
   ...vipLesson,
 ];

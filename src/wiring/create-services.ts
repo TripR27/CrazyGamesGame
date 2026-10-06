@@ -7,20 +7,20 @@ import type { GameState } from '@/core/state';
 import type { Store } from '@/core/store';
 import { BREWING } from '@/data/brewing';
 import { customers } from '@/data/customers';
-import { ingredients } from '@/data/ingredients';
-import { recipes, type RecipeDef } from '@/data/recipes';
+import { recipes } from '@/data/recipes';
 import { upgrades } from '@/data/upgrades';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import type { SceneServices } from '@/scene/services';
 import { createPlayerActions } from '@/systems/actions';
-import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
+import { createStation, startBrewSystem } from '@/systems/brewing';
 import { createFloor } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
-import { discoverableRecipes, recordDiscoveries } from '@/systems/recipes';
+import { recordDiscoveries } from '@/systems/recipes';
 import { watchReputationLevels } from '@/systems/reputation';
 import { createDrinkSelection } from '@/systems/serving';
 import { createOffline, type OfflineServices } from './create-offline';
 import { createTutorial, type TutorialServices } from './create-tutorial';
+import { createIngredientShelf } from './ingredient-shelf';
 import { startCustomers } from './start-customers';
 import { startStaffWork } from './start-staff';
 import { syncStationStats } from './sync-station';
@@ -54,13 +54,13 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
   // Announces each new reputation level (the HUD shows a message).
   watchReputationLevels(store, bus);
   recordDiscoveries(store, bus);
-  const discoverable = (): readonly RecipeDef[] => discoverableRecipes(store.getState(), recipes);
+  const shelf = createIngredientShelf(store);
   const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
-  const tutorial = createTutorial({ store, bus, floor, station });
+  const tutorial = createTutorial({ store, bus, floor, station, ingredients: shelf.catalog });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomers({ store, bus, rng, floor, catalog }, inLesson);
   startBrewSystem(station, bus);
-  watchShop(store, bus);
+  watchShop(store, bus, shelf.catalog);
   startStaffWork({ store, bus, floor, station, rng, catalog });
   const selection = createDrinkSelection(station);
   const actions = createPlayerActions({
@@ -68,12 +68,10 @@ export function createServices({ store, bus, rng, clock = systemClock }: WiringD
     upgradeStore: store,
     upgradeDefs: upgrades,
     getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
-    getDiscoverable: discoverable,
+    getDiscoverable: shelf.getDiscoverable,
+    ingredients: { store, catalog: shelf.catalog },
   });
-  // The shelf also offers what a discoverable recipe needs, otherwise it could never be found.
-  const getShelf = (): readonly string[] =>
-    shelfIngredients(ingredients, [...recipes.filter((r) => knownIds().includes(r.id)), ...discoverable()]).map((i) => i.id);
   const targets = createTargetRegistry();
   const offline = createOffline({ store, bus, clock, catalog });
-  return { scene: { bus, floor, station, selection, actions, getShelf, targets }, tutorial, offline, targets };
+  return { scene: { bus, floor, station, selection, actions, getShelf: shelf.getShelf, targets }, tutorial, offline, targets };
 }

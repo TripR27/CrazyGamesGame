@@ -5,7 +5,7 @@ import { newGame, playBasics } from './helpers';
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'staff_hire', 'staff_done',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done',
 ];
 
 /** Every lesson before the VIP one is done, and the player has `reputation`. */
