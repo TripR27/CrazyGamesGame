@@ -9,7 +9,7 @@ import { mountTutorial, type TutorialUiSource } from './tutorial/tutorial-view';
 
 export interface UiServices {
   source: HudSource & ShopSource;
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop'>;
+  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop' | 'closeShop'>;
   tutorial: TutorialUiSource;
   targets: TargetRegistry;
   /** How much room a side panel takes next to the game. */

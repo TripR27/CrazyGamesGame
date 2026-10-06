@@ -79,3 +79,5 @@
 }
 .shop-buy:hover:not(:disabled) { background: #a6e676; }
 .shop-buy:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+
+.shop-kind { margin: 6px 0 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }

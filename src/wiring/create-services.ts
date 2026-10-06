@@ -15,9 +15,10 @@ import { createPlayerActions } from '@/systems/actions';
 import { createStation, shelfIngredients, startBrewSystem } from '@/systems/brewing';
 import { createFloor, startCustomerSystem } from '@/systems/customers';
 import { getMultipliers } from '@/systems/economy';
-import { watchAffordable } from '@/systems/upgrades';
 import { createTutorial, type TutorialServices } from './create-tutorial';
+import { startStaffWork } from './start-staff';
 import { syncStationStats } from './sync-station';
+import { watchShop } from './watch-shop';
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
 
@@ -64,7 +65,8 @@ export function createServices({ store, bus, rng }: WiringDeps): GameWorld {
   });
   startBrewSystem(station, bus);
 
-  watchAffordable(store, bus, upgrades);
+  watchShop(store, bus);
+  startStaffWork({ store, bus, floor, station, rng, catalog });
 
   const actions = createPlayerActions({
     bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds,

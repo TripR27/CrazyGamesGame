@@ -23,6 +23,11 @@ export interface GameEvents {
   /** The player can pay for an upgrade after not being able to; fires on each such moment. */
   'upgrade:affordable': Record<string, never>;
   'upgrade:bought': { id: string; count: number };
-  /** The shop panel was opened (the tutorial follows this). */
+  /** Same as `upgrade:affordable`, but for staff: the player can pay for a hire or a training level. */
+  'staff:affordable': Record<string, never>;
+  /** A staff upgrade was bought (a hire or a training level). */
+  'staff:hired': { id: string };
+  /** The shop panel was opened or closed (the tutorial follows this). */
   'shop:opened': Record<string, never>;
+  'shop:closed': Record<string, never>;
 }

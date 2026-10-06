@@ -9,5 +9,7 @@ export const tutorial: Messages = {
   'tutorial.basics_gold.text': 'Gold! Shiny. Keep the drinks coming and I will keep bubbling.',
   'tutorial.upgrade_open.text': 'Psst. You have gold burning a hole in your pocket. Open the shop.',
   'tutorial.upgrade_buy.text': 'Buy {upgrade}. Gold only counts when it is spent. That is the whole joke.',
+  'tutorial.staff_hire.text': 'Tired of doing everything yourself? Hire {staff} in the shop. They work while you complain.',
+  'tutorial.staff_done.text': 'Hired! They are slower than you, but they never ask for a break. Yet.',
   'tutorial.upgrade_done.text': 'Ahh, shopping. Your gold went down and somehow you feel richer. Welcome to economics.',
 };

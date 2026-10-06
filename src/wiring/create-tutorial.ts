@@ -7,7 +7,7 @@ import { TUTORIAL_STEPS, type TutorialEvent } from '@/data/tutorial';
 import { upgrades } from '@/data/upgrades';
 import type { BrewStation } from '@/systems/brewing';
 import type { CustomerFloor } from '@/systems/customers';
-import { firstAffordable } from '@/systems/upgrades';
+import { firstAffordable, staffOnly, withoutStaff } from '@/systems/upgrades';
 import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
 
 export interface TutorialDeps {
@@ -34,11 +34,17 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     get: () => store.getState().tutorial,
     update: (mutator) => store.update((state) => mutator(state.tutorial)),
   };
-  const affordable = (): string | null => firstAffordable(store.getState(), upgrades)?.id ?? null;
+  const affordable = (): string | null => firstAffordable(store.getState(), withoutStaff(upgrades))?.id ?? null;
+  const affordableStaff = (): string | null => firstAffordable(store.getState(), staffOnly(upgrades))?.id ?? null;
+  // The tutorial has to know whether the shop is open to point at the button or at the hire.
+  let shopOpen = false;
+  bus.on('shop:opened', () => void (shopOpen = true));
+  bus.on('shop:closed', () => void (shopOpen = false));
   // A situation that already holds counts as the start of a lesson: a customer who sat down before the
   // tutorial (re)started, or gold that was already enough for an upgrade (the event would not fire again).
   const alreadyHolds = (event: TutorialEvent): boolean =>
-    (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null);
+    (event === 'customer:arrived' && floor.customers.length > 0) || (event === 'upgrade:affordable' && affordable() !== null) ||
+    (event === 'staff:affordable' && affordableStaff() !== null);
   const machine = createTutorialMachine(TUTORIAL_STEPS, progress, alreadyHolds);
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
@@ -53,6 +59,8 @@ export function createTutorial({ store, bus, floor, station }: TutorialDeps): Tu
     readyRecipeIds: station.ready,
     customers: floor.customers,
     affordableUpgradeId: affordable(),
+    affordableStaffId: affordableStaff(),
+    shopOpen,
   });
   return { machine, getGuideContext };
 }
