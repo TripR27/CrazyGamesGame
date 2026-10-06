@@ -95,7 +95,7 @@
 - De tutorial wijst de poster aan bij de eerste ontdekking (doelenregister: `recipe-poster`).
 - Open vragen: poster en paneel allebei, of alleen de poster? Hoe leesbaar is hij op 1280x720 en op een Chromebook, en hoe past hij in de pixel-art-stijl (stap 21)?
 
-**Plan:** niet bouwen buiten de stappen. Beslissen bij het begin van stap 12.
+**Plan:** het receptenboek is in stap 12 als zijpaneel gebouwd (knop Recipes). De poster wacht op de art-pass (stap 21), omdat hij pas met echte art leesbaar en mooi wordt; dan linkt hij naar hetzelfde paneel.
 
 ---
 
