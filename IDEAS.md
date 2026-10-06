@@ -111,6 +111,12 @@
 - Hoeveel keuze en hoeveel idle: handmatig uitrusten of automatisch, en wat gebeurt er offline?
 - Past een held visueel in de gekozen stijl (pixel art, zie SPEC.md stap 21)?
 
+**Wens (eigenaar, 2026-10-06): bij de helden (het Heroes-tabblad) meer zelf laten doen.** Niet alleen idle (sturen en wachten), maar ook echte gameplay voor de speler. Mogelijke richtingen om in het gesprek te bespreken:
+- Een korte actieve expeditie: de speler kiest onderweg (pad links of rechts, vechten of sluipen, welk drankje nu drinken), met invloed op de buit.
+- Een klein gevecht of minigame bij de kerker-baas (timing-klik, kaarten of dobbelstenen), terwijl gewone expedities idle blijven.
+- Actief meedoen geeft een bonus (meer buit, korter), idle blijft mogelijk maar levert minder op, net als bij brouwen (idle 30-40% van actief).
+- Zelf drankjes voor de held brouwen en meegeven als echte keuze (welk effect past bij welke kerker).
+
 **Plan:** eerst praten, dan SPEC.md aanpassen. Niet bouwen.
 
 ---
