@@ -4,8 +4,8 @@ import type { Num } from '@/core/numbers';
 import type { Rng } from '@/core/rng';
 import type { UpgradeDef } from '@/data/upgrades';
 import { addIngredient, emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
-import { publishChange, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
-import { serveCustomer, type EconomyStore } from '@/systems/serving';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
+import { serveAndPublish, type EconomyStore } from '@/systems/serving';
 import { buyUpgrade, type BuyAmount, type UpgradeStore } from '@/systems/upgrades';
 
 /** Everything the player can do with the mouse. The scene calls these and never touches game rules. */
@@ -17,6 +17,7 @@ export interface PlayerActions {
   buyUpgrade(upgradeId: string, amount: BuyAmount): void;
   /** The shop panel was opened. Announced so the tutorial can follow along. */
   openShop(): void;
+  closeShop(): void;
 }
 
 export interface PlayerActionDeps {
@@ -46,23 +47,21 @@ export function createPlayerActions(deps: PlayerActionDeps): PlayerActions {
       emptyCauldron(station);
     },
     clickCustomer(customerId) {
-      const outcome = serveCustomer({ floor, station, economy, catalog, rng, getSellMultiplier: deps.getSellMultiplier }, customerId);
-      if (outcome.kind === 'served') {
-        publishChange(bus, outcome.change);
-        bus.emit('customer:served', outcome.event);
-      } else if (outcome.kind === 'refused') {
-        bus.emit('customer:refused', outcome.event);
-      }
+      serveAndPublish({ bus, floor, station, economy, catalog, rng, getSellMultiplier: deps.getSellMultiplier }, customerId);
     },
     buyUpgrade(upgradeId, amount) {
       const def = deps.upgradeDefs.find((u) => u.id === upgradeId);
       const count = def === undefined ? 0 : buyUpgrade(deps.upgradeStore, def, amount);
       if (def === undefined || count === 0) return;
       bus.emit('upgrade:bought', { id: def.id, count });
+      if (def.kind === 'staff') bus.emit('staff:hired', { id: def.id });
       bus.emit('saveRequested', {});
     },
     openShop() {
       bus.emit('shop:opened', {});
+    },
+    closeShop() {
+      bus.emit('shop:closed', {});
     },
   };
 }

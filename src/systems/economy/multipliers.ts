@@ -1,6 +1,6 @@
 import { num, type Num } from '@/core/numbers';
 import type { UpgradeLevels } from '@/core/state';
-import { BASE_STATS, upgrades, type UpgradeDef, type UpgradeStat } from '@/data/upgrades';
+import { BASE_STATS, UPGRADE_STATS, upgrades, type UpgradeDef, type UpgradeStat } from '@/data/upgrades';
 import { levelOf } from '@/systems/upgrades/level';
 
 /** The final value of every stat: what the rest of the game reads. */
@@ -29,6 +29,6 @@ function applyUpgrades(stat: UpgradeStat, levels: UpgradeLevels, defs: readonly 
  * prestige, achievements and events join here later without the callers changing.
  */
 export function getMultipliers(state: MultiplierState, defs: readonly UpgradeDef[] = upgrades): Multipliers {
-  const stat = (s: UpgradeStat): Num => applyUpgrades(s, state.upgrades, defs);
-  return { brewSpeed: stat('brewSpeed'), sellPrice: stat('sellPrice'), storage: stat('storage') };
+  const entries = UPGRADE_STATS.map((stat) => [stat, applyUpgrades(stat, state.upgrades, defs)] as const);
+  return Object.fromEntries(entries) as Multipliers;
 }

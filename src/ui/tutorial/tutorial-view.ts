@@ -20,6 +20,7 @@ function speech(stepId: string, ctx: GuideContext): string {
     drink: name('recipes', guideRecipe(ctx)?.id),
     ingredient: name('ingredients', nextIngredient(ctx)),
     upgrade: name('upgrades', ctx.affordableUpgradeId ?? undefined),
+    staff: name('upgrades', ctx.affordableStaffId ?? undefined),
   });
 }
 

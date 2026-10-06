@@ -12,6 +12,11 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
     const id = readyCustomerId(ctx);
     return id === undefined ? null : `customer:${id}`;
   },
+  // Closed shop: point at the button first; open shop: point at the hire itself.
+  'guide-staff': (ctx) => {
+    if (!ctx.shopOpen) return 'shop-button';
+    return ctx.affordableStaffId === null ? null : `upgrade:${ctx.affordableStaffId}`;
+  },
   'guide-upgrade': (ctx) => (ctx.affordableUpgradeId === null ? null : `upgrade:${ctx.affordableUpgradeId}`),
 };
 

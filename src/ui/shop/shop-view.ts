@@ -27,7 +27,7 @@ export interface ShopHosts {
 export function mountShop(
   { root, layout }: ShopHosts,
   source: ShopSource,
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop'>,
+  actions: Pick<PlayerActions, 'buyUpgrade' | 'openShop' | 'closeShop'>,
   targets: TargetRegistry,
 ): () => void {
   let amount: BuyAmount = 1;
@@ -38,8 +38,12 @@ export function mountShop(
   });
   root.append(button, panel);
 
+  let kind = '';
   const rows = upgrades.map((def) => {
     const row = createUpgradeRow(() => actions.buyUpgrade(def.id, amount));
+    // A small heading above the first upgrade of each kind (the list is ordered by kind).
+    if (def.kind !== kind) list.append(createEl('h3', 'shop-kind', t(`shop.kind_${def.kind}`)));
+    kind = def.kind;
     list.append(row.el);
     return { def, row };
   });
@@ -49,7 +53,7 @@ export function mountShop(
     picker.select(amount);
     for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
   }
-  bindPanelToggle(button, panel, layout, actions.openShop);
+  bindPanelToggle(button, panel, layout, { onOpen: actions.openShop, onClose: actions.closeShop });
   const unsubscribe = source.subscribe(render);
   render();
 
