@@ -1,4 +1,5 @@
 import { EFFECTS, RARITIES } from '@/data/common';
+import { FEEDBACK_POOLS, type FeedbackPool } from '@/data/feedback';
 import { customers, type CustomerDef } from '@/data/customers';
 import { ingredients, type IngredientDef } from '@/data/ingredients';
 import { recipes, type RecipeDef } from '@/data/recipes';
@@ -8,6 +9,8 @@ import { defineTable, type ContentTable } from './table';
 
 const SOURCE_PATTERN = /^(shop|dungeon:[a-z][a-z0-9_]*)$/;
 const comboKey = (ids: readonly string[]): string => [...ids].sort().join('+');
+const isSubset = (small: readonly string[], big: readonly string[]): boolean =>
+  small.every((id) => big.includes(id));
 const tierRule = (tier: number): string[] =>
   isTier(tier) ? [] : [`tier must be a whole number >= 1, got ${tier}`];
 
@@ -41,10 +44,18 @@ export const recipeTable = (items: readonly RecipeDef[]): ContentTable =>
         .filter((id) => !ctx.has('ingredients', id))
         .map((id) => `unknown ingredient "${id}"`),
     ],
-    checkSet: (all) =>
-      duplicates(all.map((r) => comboKey(r.ingredients))).map(
+    checkSet: (all) => [
+      ...duplicates(all.map((r) => comboKey(r.ingredients))).map(
         (combo) => `two recipes share the combination ${combo}`,
       ),
+      // Brewing starts as soon as the cauldron matches a recipe, so a recipe inside a bigger one could never be finished.
+      ...all.flatMap((a) =>
+        all
+          .filter((b) => a.id !== b.id && a.ingredients.length < b.ingredients.length)
+          .filter((b) => isSubset(a.ingredients, b.ingredients))
+          .map((b) => `recipe ${a.id} is a part of recipe ${b.id}`),
+      ),
+    ],
   });
 
 export const customerTable = (items: readonly CustomerDef[]): ContentTable =>
@@ -72,9 +83,18 @@ export const upgradeTable = (items: readonly UpgradeDef[]): ContentTable =>
     ],
   });
 
+export const feedbackTable = (items: readonly FeedbackPool[]): ContentTable =>
+  defineTable({
+    domain: 'feedback',
+    items,
+    textFields: (pool) => Array.from({ length: pool.lines }, (_, i) => String(i + 1)),
+    check: (pool) => positive(pool.lines, 'lines'),
+  });
+
 export const CONTENT_TABLES: readonly ContentTable[] = [
   ingredientTable(ingredients),
   recipeTable(recipes),
   customerTable(customers),
   upgradeTable(upgrades),
+  feedbackTable(FEEDBACK_POOLS),
 ];
