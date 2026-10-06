@@ -41,6 +41,18 @@ describe('customer patience', () => {
   });
 });
 
+describe('frozen patience', () => {
+  it('stops patience from running down while frozen, and continues afterwards', () => {
+    const floor = floorWithOneCustomer();
+    run(floor, context({ freezePatience: true, maxCustomers: 1 }), 120_000);
+    expect(floor.customers).toHaveLength(1);
+    expect(floor.customers[0]?.patienceMs).toBe(floor.customers[0]?.patienceMaxMs);
+
+    run(floor, context({ maxCustomers: 1 }), 5_000);
+    expect(floor.customers[0]?.patienceMs).toBe(15_000);
+  });
+});
+
 describe('dismiss', () => {
   it('removes a served customer and reports why they left', () => {
     const floor = floorWithOneCustomer();

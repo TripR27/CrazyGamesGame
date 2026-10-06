@@ -1,0 +1,89 @@
+.tut { position: absolute; inset: 0; font-family: sans-serif; pointer-events: none; }
+.tut[hidden], .tut-spot[hidden], .tut-arrow[hidden] { display: none; }
+
+.tut-spot {
+  position: absolute;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2000px rgba(10, 6, 2, 0.5), 0 0 0 3px #f5c542;
+  transition: left 0.15s, top 0.15s, width 0.15s, height 0.15s;
+}
+
+.tut-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+  border-top: 28px solid #f5c542;
+  animation: tut-bob 0.8s ease-in-out infinite alternate;
+}
+.tut-arrow--up { border-top: 0; border-bottom: 28px solid #f5c542; animation-name: tut-bob-up; }
+@keyframes tut-bob { to { transform: translateY(8px); } }
+@keyframes tut-bob-up { to { transform: translateY(-8px); } }
+
+.tut-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 640px;
+  box-sizing: border-box;
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: #fff7e0;
+  border: 3px solid #5e3a18;
+  color: #3b2410;
+  font-size: 19px;
+  line-height: 1.25;
+}
+.tut-text { flex: 1; margin: 0; }
+
+.tut-skip {
+  flex: none;
+  padding: 6px 12px;
+  border: 2px solid #5e3a18;
+  border-radius: 10px;
+  background: #f2dfb0;
+  color: #3b2410;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.tut-skip:hover { background: #f5c542; }
+
+/* A grumpy cauldron: dark pot, green brew on top, cross eyes and heavy brows. */
+.tut-mascot {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 46px;
+  border: 3px solid #1a1a22;
+  border-radius: 50% 50% 42% 42%;
+  background:
+    radial-gradient(circle at 17px 28px, #1a1a22 0 2px, #fff 3px 6px, transparent 7px),
+    radial-gradient(circle at 37px 28px, #1a1a22 0 2px, #fff 3px 6px, transparent 7px),
+    #2b2b33;
+}
+.tut-mascot::before {
+  content: '';
+  position: absolute;
+  inset: -9px 4px auto;
+  height: 14px;
+  border: 3px solid #45454f;
+  border-radius: 50%;
+  background: #7be05a;
+}
+.tut-mascot::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 8px;
+  width: 14px;
+  height: 3px;
+  background: #1a1a22;
+  transform: rotate(18deg);
+  box-shadow: 20px 0 0 #1a1a22;
+}

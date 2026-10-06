@@ -25,6 +25,10 @@ export interface CustomerFloor {
 export interface CustomerContext {
   reputation: number;
   unlockedRecipeIds: readonly string[];
+  /** Most customers allowed in the tavern at once (the tutorial lowers this to one). */
+  maxCustomers: number;
+  /** Patience stops running down (the tutorial freezes it so nobody leaves in the middle of a lesson). */
+  freezePatience: boolean;
 }
 
 /** The content tables, passed in so tests and the simulator can use their own. */

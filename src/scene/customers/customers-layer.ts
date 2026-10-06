@@ -20,6 +20,8 @@ interface LayerContext {
   services: SceneServices;
   pool: Pool<CustomerSprite>;
   active: Map<number, CustomerSprite>;
+  /** Removes the tutorial target of each customer who is seated. */
+  unregister: Map<number, () => void>;
 }
 
 function walkTo(ctx: LayerContext, sprite: CustomerSprite, x: number, y: number, onDone?: () => void): void {
@@ -40,12 +42,16 @@ function onArrived(ctx: LayerContext, id: number): void {
   sprite.container.setPosition(DOOR_ENTRY.x, DOOR_ENTRY.y).setVisible(true);
   walkTo(ctx, sprite, slot.x, slot.y);
   ctx.active.set(id, sprite);
+  const box = sprite.container;
+  ctx.unregister.set(id, ctx.services.targets.register(`customer:${id}`, () => ({ x: box.x - 38, y: box.y - 112, w: 76, h: 118 })));
 }
 
 function onLeft(ctx: LayerContext, id: number): void {
   const sprite = ctx.active.get(id);
   if (sprite === undefined) return;
   ctx.active.delete(id);
+  ctx.unregister.get(id)?.();
+  ctx.unregister.delete(id);
   sprite.customerId = null;
   sprite.setOrderVisible(false);
   walkTo(ctx, sprite, DOOR_ENTRY.x, DOOR_ENTRY.y, () => ctx.pool.release(sprite));
@@ -71,6 +77,7 @@ export function createCustomersLayer(scene: Scene, services: SceneServices): Cus
     scene,
     services,
     active: new Map(),
+    unregister: new Map(),
     pool: createPool<CustomerSprite>({
       create: () => createCustomerSprite(scene, services.actions.clickCustomer),
       reset: (sprite) => sprite.container.setVisible(false),

@@ -15,7 +15,7 @@ export function updateCustomers(
   rng: Rng,
   deltaMs: number,
 ): CustomerChange[] {
-  const changes = advancePatience(floor, deltaMs);
+  const changes = context.freezePatience ? [] : advancePatience(floor, deltaMs);
   floor.spawnInMs = Math.max(0, floor.spawnInMs - deltaMs);
   if (floor.spawnInMs > 0) return changes;
 

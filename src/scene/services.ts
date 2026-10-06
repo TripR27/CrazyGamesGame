@@ -1,5 +1,6 @@
 import type { EventBus } from '@/core/events';
 import type { GameEvents } from '@/core/game-events';
+import type { TargetRegistry } from '@/core/target-registry';
 import type { PlayerActions } from '@/systems/actions';
 import type { BrewStation } from '@/systems/brewing';
 import type { CustomerFloor } from '@/systems/customers';
@@ -13,4 +14,6 @@ export interface SceneServices {
   actions: PlayerActions;
   /** Ingredient ids to show on the shelf; read again every frame so new ones appear. */
   getShelf(): readonly string[];
+  /** Scene objects the tutorial can point at register themselves here. */
+  targets: TargetRegistry;
 }

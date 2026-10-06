@@ -30,6 +30,14 @@ describe('spawning customers', () => {
     expect(new Set(floor.customers.map((c) => c.recipeId))).toEqual(new Set(['r3']));
   });
 
+  it('never has more customers than the context allows, and fills up again when the limit is lifted', () => {
+    const floor = newFloor();
+    run(floor, context({ maxCustomers: 1 }), 120_000, undefined, patientCatalog);
+    expect(floor.customers).toHaveLength(1);
+    run(floor, context(), 60_000, undefined, patientCatalog);
+    expect(floor.customers.length).toBeGreaterThan(1);
+  });
+
   it('spawns nobody while no recipe is known, then starts as soon as one is', () => {
     const floor = newFloor();
     expect(run(floor, context({ unlockedRecipeIds: [] }), 20_000)).toEqual([]);

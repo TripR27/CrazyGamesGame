@@ -1,9 +1,9 @@
 import { EFFECTS, RARITIES } from '@/data/common';
-import { FEEDBACK_POOLS, type FeedbackPool } from '@/data/feedback';
-import { customers, type CustomerDef } from '@/data/customers';
-import { ingredients, type IngredientDef } from '@/data/ingredients';
-import { recipes, type RecipeDef } from '@/data/recipes';
-import { upgrades, type UpgradeDef } from '@/data/upgrades';
+import type { FeedbackPool } from '@/data/feedback';
+import type { CustomerDef } from '@/data/customers';
+import type { IngredientDef } from '@/data/ingredients';
+import type { RecipeDef } from '@/data/recipes';
+import type { UpgradeDef } from '@/data/upgrades';
 import { duplicates, isTier, oneOf, positive } from './rules';
 import { defineTable, type ContentTable } from './table';
 
@@ -90,11 +90,3 @@ export const feedbackTable = (items: readonly FeedbackPool[]): ContentTable =>
     textFields: (pool) => Array.from({ length: pool.lines }, (_, i) => String(i + 1)),
     check: (pool) => positive(pool.lines, 'lines'),
   });
-
-export const CONTENT_TABLES: readonly ContentTable[] = [
-  ingredientTable(ingredients),
-  recipeTable(recipes),
-  customerTable(customers),
-  upgradeTable(upgrades),
-  feedbackTable(FEEDBACK_POOLS),
-];
