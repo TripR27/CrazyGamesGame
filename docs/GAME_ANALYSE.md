@@ -274,20 +274,64 @@ Core loop + ~30 recepten + personeel + 3 kamers + helden (basisversie) + prestig
 - **Browser-throttling:** tabbladen op de achtergrond vertragen timers sterk. Daarom werken we met `Date.now()`-delta in plaats van tel-ticks, zodat de idle-voortgang klopt.
 - **Save-versies en migratie:** elke save krijgt een versienummer zodat we later nieuwe velden kunnen toevoegen zonder spelers hun voortgang te laten verliezen.
 - **Event-systeem** (achievements, tutorial-hints, statistieken) via een simpele event-bus.
-- **Performance:** objectpooling voor klanten en partikels, spritesheets/atlassen, lazy loading van latere content, doel 60 FPS op een gemiddelde laptop en bruikbaar op middenklasse telefoons.
+- **Performance:** objectpooling voor klanten en partikels (zero-allocation in de game-loop), spritesheets/atlassen, lazy loading van latere content, doel 60 FPS op een gemiddelde laptop en bruikbaar op middenklasse telefoons.
 
-### Mappenstructuur (voorstel)
+### Architectuur: plat, per feature (besluit 2026-10-07)
+
+De eerste opzet had veel kleine lagen (`core/`, `systems/`, `wiring/`, `sim/`, `data/`) met bestanden van gemiddeld 29 regels: voor één persoon onleesbaar ("ravioli-code"). De architectuur is daarom vlak gemaakt: **een feature is een map** met logica, data en view bij elkaar. Een map is maximaal één niveau diep.
+
 ```
-/src
-  /core        simulatie, economie, save/load, tijd
-  /data        recepten, klanten, helden, kerkers, upgrades (JSON/TS)
-  /game        scenes, entities, rendering
-  /ui          menu's, HUD, receptenboek
-  /platform    CrazyGames SDK-wrapper (+ lokale mock)
-  /audio
-/public        assets (sprites, audio)
-/tools         scripts (bijv. balans-export)
+src/
+  main.ts  config.ts
+  shared/      state, events, time (ticker), numbers, random, pool, targets, save, storage, debug
+  app/         world.ts (bouwt alles, bepaalt de tick-volgorde), Phaser-scene en DOM-schil
+  customers/  brewing/  recipes/  serving/  staff/  economy/
+  rooms/  reputation/  offline/  tutorial/            (toekomst: heroes/, prestige/, achievements/, audio/, platform/)
+  i18n/        translator.ts, en.ts
+  dev/         balans-simulator
 ```
+
+Per feature: `<feature>.ts` (spelregels en acties, puur) en `*-view.ts` (Phaser of DOM). Groot of kring-brekend? Dan komt er een `*-data.ts` (recepten, upgrades, klanttypes, tutorialstappen) of `*-model.ts` (pure view-models) bij. Alleen `*-view.ts`, `*-scene.ts` en `main.ts` kennen Phaser en DOM; al het andere draait ook in Node (Vitest, simulator, offline-berekening).
+
+```mermaid
+flowchart TB
+  main["main.ts"] --> world["app/world.ts: createWorld()"]
+  main --> shell["app/: Phaser-scene + DOM-schil"]
+
+  subgraph feat["Features: logica + data + view bij elkaar"]
+    direction LR
+    customers["customers"] ~~~ brewing["brewing"] ~~~ recipes["recipes"] ~~~ serving["serving"]
+    staff["staff"] ~~~ economy["economy"] ~~~ rooms["rooms"] ~~~ reputation["reputation"]
+    offline["offline"] ~~~ tutorial["tutorial"]
+  end
+
+  subgraph shared["shared/"]
+    direction LR
+    state["state + store"] ~~~ events["event-bus"] ~~~ time["ticker"] ~~~ pool["pool.ts"] ~~~ save["save + storage"]
+  end
+
+  world --> feat
+  shell --> feat
+  feat --> shared
+```
+
+```mermaid
+sequenceDiagram
+  actor Speler
+  participant View as *-view.ts (Phaser/DOM)
+  participant F as feature (bijv. serving.ts)
+  participant W as World (store + bus)
+  Speler->>View: klik op klant
+  View->>F: serveCustomer(world, id)
+  F->>W: store.update + bus.emit('customer:served')
+  W-->>View: event: sprite en tekst reageren
+  Note over W,F: elke 100 ms: tick, vaste volgorde van de start-aanroepen<br/>in createWorld: tutorial, customers, brewing, staff
+```
+
+- **World:** één object `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. Spelersacties zijn gewone functies per feature die `world` (of een `Pick<World, ...>`) krijgen; rekenfuncties (prijs, kosten, niveau) blijven puur. Tijd, willekeur en opslag worden ingespoten, dus tests en de simulator zijn deterministisch.
+- **Afhankelijkheden:** `app` → features → `shared`. Features mogen elkaar importeren, maar niet in een kring tussen bestanden (`npm run cycles` bewaakt dat).
+- **Bestandsgrootte:** 150 tot 300 regels per bestand als de functies bij elkaar horen.
+- Het volledige regelwerk (en wat bewust is weggelaten: barrels, wiring, aparte store-interfaces) staat in `CLAUDE.md` en `docs/SPECS.md` hoofdstuk 4 en 9.
 
 ### SDK-wrapper
 Alles wat CrazyGames raakt zit in **één module** met een mock voor lokaal ontwikkelen. Zo kunnen we de game ook los van CrazyGames draaien en testen.
