@@ -3,7 +3,7 @@ import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { levelFor, recipesUnlockedUpTo, REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
-import { effectName } from '@/serving/effects';
+import { effectIcon } from '@/serving/effects';
 import { textKey } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { formatNumber, num } from '@/shared/numbers';
@@ -77,7 +77,8 @@ function knownEntry(r: RecipeDef): BookEntry {
     details: [
       t('book.brew_time', { s: r.brewSeconds }),
       t('book.price', { n: formatNumber(num(r.basePrice)) }),
-      effectName(r.effect),
+      // Only the icon: the legend at the top of the book says what it does.
+      effectIcon(r.effect),
     ],
     rarity: r.rarity,
   };

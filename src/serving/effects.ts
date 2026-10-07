@@ -1,7 +1,7 @@
 import type { CustomerDef } from '@/customers/customer-data';
 import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
-import type { Effect } from '@/shared/content';
+import { EFFECTS, type Effect } from '@/shared/content';
 import { ZERO, type Num } from '@/shared/numbers';
 import type { Rng } from '@/shared/random';
 
@@ -83,12 +83,21 @@ export const tipSize = (price: Num, bonus: Pick<DrinkBonus, 'tipShare'>): Num =>
 /** The icon of a drink effect (an emoji placeholder until the art pass). */
 export const effectIcon = (effect: Effect): string => t(`effects.${effect}.icon`);
 
-/** A text with the effect's icon in front, e.g. "⚡ Speed: drinks faster". */
+/** A text with the effect's icon in front, e.g. "⚡ speed". */
 export const withEffectIcon = (effect: Effect, text: string): string =>
   t('effects.with_icon', { icon: effectIcon(effect), text });
 
-/** The effect as the book shows it: icon, name and what it does. */
-export const effectName = (effect: Effect): string => withEffectIcon(effect, t(`effects.${effect}.name`));
+/** One line of the effect legend in the recipe book: the icon, the name and what it does. */
+export interface EffectLegendLine {
+  effect: Effect;
+  icon: string;
+  name: string;
+  does: string;
+}
+
+/** The legend at the top of the recipe book, one line per effect; recipe cards then show only the icon. */
+export const effectLegend = (): EffectLegendLine[] =>
+  EFFECTS.map((effect) => ({ effect, icon: effectIcon(effect), name: t(`effects.${effect}.name`), does: t(`effects.${effect}.does`) }));
 
 /** Numbers for serving a drink. */
 export const SERVING = {

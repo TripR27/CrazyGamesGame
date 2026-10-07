@@ -4,6 +4,7 @@ import { ingredientColor } from '@/brewing/brewing-view';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { type BookEntry, toBookView, type BookState } from '@/recipes/recipes';
+import { effectLegend } from '@/serving/effects';
 import type { Listener } from '@/shared/state';
 import './recipe-book.css';
 
@@ -42,6 +43,19 @@ export function createBookCard(entry: BookEntry): HTMLElement {
   return card;
 }
 
+/** The legend at the top of the book: what each effect icon means, and what a ♥ does. Built once (the text never changes). */
+export function createLegend(): HTMLElement {
+  const legend = createEl('div', 'book-legend');
+  const list = createEl('ul', 'book-legend-list');
+  for (const line of effectLegend()) {
+    const item = createEl('li', 'book-legend-item');
+    item.append(createEl('span', 'book-legend-icon', line.icon), createEl('span', 'book-legend-text', t('book.legend_does', { name: line.name, does: line.does })));
+    list.append(item);
+  }
+  legend.append(createEl('h3', 'book-legend-title', t('book.legend_title')), list, createEl('p', 'book-legend-liked', t('book.legend_liked')));
+  return legend;
+}
+
 export interface BookSource {
   getState(): BookState;
   subscribe(listener: Listener<BookState>): () => void;
@@ -53,7 +67,7 @@ export interface BookHosts {
 }
 
 /**
- * The Recipes tab of the side panel, with every drink: how to make the ones the player knows, a hint for
+ * The Recipes tab of the side panel: the effect legend on top, then every drink: how to make the ones the player knows, a hint for
  * the ones they can discover, and the level that unlocks the rest. Returns an unmount function.
  */
 export function mountRecipeBook(
@@ -66,7 +80,7 @@ export function mountRecipeBook(
   const head = createEl('div', 'book-head');
   head.append(createEl('h2', 'book-title', t('book.title')), progress);
   const grid = createEl('div', 'book-grid');
-  panel.append(head, grid);
+  panel.append(head, createLegend(), grid);
 
   // Rebuilt only when something the book shows changed (a discovery or a new level), not on every gold tick.
   let shown = '';
