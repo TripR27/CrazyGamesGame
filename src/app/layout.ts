@@ -111,3 +111,16 @@ export const ROOM_SPOTS: Readonly<Record<string, RoomSpot>> = {
 
 /** Every customer seat: downstairs first, then each room's seats in room order (the seat numbers of the game). */
 export const SEAT_SLOTS: readonly Point[] = [...CUSTOMER_SLOTS, ...ROOMS.flatMap((r) => ROOM_SPOTS[r.id]?.seats ?? [])];
+
+/**
+ * Where each decoration sits downstairs (its whole drawing fits in the rect): torches and trophies on the back wall,
+ * rugs on the floor. One entry per decoration in decor/decor.ts.
+ */
+export const DECOR_SPOTS: Readonly<Record<string, Rect>> = {
+  wall_torch: { x: 196, y: 320, w: 28, h: 80 },
+  woven_rug: { x: 230, y: 572, w: 420, h: 24 },
+  boar_trophy: { x: 925, y: 320, w: 90, h: 84 },
+  everburning_torch: { x: 828, y: 320, w: 28, h: 80 },
+  royal_carpet: { x: 870, y: 590, w: 360, h: 36 },
+  golden_tankard: { x: 1100, y: 320, w: 90, h: 84 },
+};

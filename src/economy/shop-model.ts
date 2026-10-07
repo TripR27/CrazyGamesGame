@@ -1,3 +1,4 @@
+import { type DecorDef, decorOffer, type DecorState } from '@/decor/decor';
 import { type IngredientDef, ingredientOffer, type IngredientCatalog, type IngredientShopState } from '@/brewing/ingredients';
 import type { UpgradeDef, UpgradeEffect } from '@/economy/upgrade-data';
 import { quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
@@ -79,14 +80,28 @@ export function toOneTimeRowView(labels: OneTimeLabels, offer: OneTimeOffer): Ro
   };
 }
 
+/** The amount of each effect by stat, for the texts of rooms and decorations (`{brewSpeed}`, `{vipChance}`, …). */
+const effectAmounts = (effects: readonly UpgradeEffect[]): Record<string, string> =>
+  Object.fromEntries(effects.map((e) => [e.stat, effectAmount(e)]));
+
 /** The description of a room, with its seats and the amount of each effect filled in (`{seats}`, `{brewSpeed}`, …). */
 export function roomDescription(room: RoomDef): string {
-  const amounts = Object.fromEntries(room.effects.map((e) => [e.stat, effectAmount(e)]));
-  return t(textKey('rooms', room.id, 'description'), { seats: room.seats, ...amounts });
+  return t(textKey('rooms', room.id, 'description'), { seats: room.seats, ...effectAmounts(room.effects) });
 }
 
 /** One room in the shop: locked until its level, then for sale once (built rooms leave the shop). */
 export function toRoomRowView(room: RoomDef, state: RoomState): RowView {
   const labels = { name: t(textKey('rooms', room.id, 'name')), description: roomDescription(room), level: room.buy.level, buyKey: 'shop.build_once' };
   return toOneTimeRowView(labels, roomOffer(state, room));
+}
+
+/** One decoration in the shop: locked until its level, then for sale once (bought ones leave the shop). */
+export function toDecorRowView(def: DecorDef, state: DecorState): RowView {
+  const labels = {
+    name: t(textKey('decor', def.id, 'name')),
+    description: t(textKey('decor', def.id, 'description'), effectAmounts(def.effects)),
+    level: def.buy.level,
+    buyKey: 'shop.buy_once',
+  };
+  return toOneTimeRowView(labels, decorOffer(state, def));
 }

@@ -8,7 +8,7 @@ import { createEventBus, type GameEvents } from '@/shared/events';
 import { num } from '@/shared/numbers';
 import { createInitialState, createStore } from '@/shared/state';
 
-const content: Content = { ...catalog, upgrades: upgradeDefs, rooms: [], ingredients: [] };
+const content: Content = { ...catalog, upgrades: upgradeDefs, rooms: [], decor: [], ingredients: [] };
 
 /** The real game state with `gold` and the given known recipes. */
 function gameStore(gold: number, known: string[]) {

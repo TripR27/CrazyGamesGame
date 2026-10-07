@@ -1,7 +1,8 @@
 import { type ContentTable, customerTable, feedbackTable, recipeTable, upgradeTable, isTier, oneOf, positive, tierRule, defineTable } from './validate-core';
 import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers } from '@/customers/customer-data';
-import { upgrades, UPGRADE_STATS } from '@/economy/upgrade-data';
+import { DECORATIONS, type DecorDef } from '@/decor/decor';
+import { upgrades, UPGRADE_STATS, type UpgradeEffect } from '@/economy/upgrade-data';
 import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
 import { ROOMS, type RoomDef } from '@/rooms/rooms';
@@ -48,6 +49,15 @@ export const reputationTable = (items: readonly ReputationLevel[]): ContentTable
     ],
   });
 
+/** A one-time purchase (room, decoration) opens at a level after the first and costs gold. */
+const oneTimeRule = (buy: { level: number; cost: number }): string[] => [
+  ...(isTier(buy.level) && buy.level >= 2 && buy.level <= REPUTATION_LEVELS.length
+    ? [] : [`buy.level must be a level from 2 to ${REPUTATION_LEVELS.length}`]),
+  ...positive(buy.cost, 'buy.cost'),
+];
+
+const effectRule = (e: UpgradeEffect): string[] => [...oneOf(e.stat, UPGRADE_STATS, 'effect stat'), ...positive(e.perLevel, 'effect perLevel')];
+
 /** Rooms open at a level after the first, cost gold, have a whole number of seats and bonuses on known stats. */
 export const roomTable = (items: readonly RoomDef[]): ContentTable =>
   defineTable({
@@ -55,12 +65,23 @@ export const roomTable = (items: readonly RoomDef[]): ContentTable =>
     items,
     textFields: ['name', 'description'],
     check: (room) => [
-      ...(isTier(room.buy.level) && room.buy.level >= 2 && room.buy.level <= REPUTATION_LEVELS.length
-        ? [] : [`buy.level must be a level from 2 to ${REPUTATION_LEVELS.length}`]),
-      ...positive(room.buy.cost, 'buy.cost'),
+      ...oneTimeRule(room.buy),
       ...(Number.isInteger(room.seats) && room.seats >= 0 ? [] : ['seats must be a whole number >= 0']),
       ...(room.seats > 0 || room.effects.length > 0 ? [] : ['a room must add seats or an effect']),
-      ...room.effects.flatMap((e) => [...oneOf(e.stat, UPGRADE_STATS, 'effect stat'), ...positive(e.perLevel, 'effect perLevel')]),
+      ...room.effects.flatMap(effectRule),
+    ],
+  });
+
+/** Decorations open at a level after the first, cost gold and give at least one bonus on a known stat. */
+export const decorTable = (items: readonly DecorDef[]): ContentTable =>
+  defineTable({
+    domain: 'decor',
+    items,
+    textFields: ['name', 'description'],
+    check: (def) => [
+      ...oneTimeRule(def.buy),
+      ...(def.effects.length > 0 ? [] : ['a decoration must give a bonus']),
+      ...def.effects.flatMap(effectRule),
     ],
   });
 
@@ -96,4 +117,5 @@ export const CONTENT_TABLES: readonly ContentTable[] = [
   tutorialTable(TUTORIAL_STEPS),
   reputationTable(REPUTATION_LEVELS),
   roomTable(ROOMS),
+  decorTable(DECORATIONS),
 ];

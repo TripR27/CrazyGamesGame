@@ -3,6 +3,7 @@ import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/bre
 import { ingredients, watchIngredientShop, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
 import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFloor } from '@/customers/customers';
+import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { createOffline, type OfflineServices } from '@/offline/offline';
@@ -33,13 +34,14 @@ export function syncStationStats(store: Store<GameState>, station: BrewStation):
   return store.subscribe(apply);
 }
 
-/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient and room become affordable. */
+/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient, room and decoration become affordable. */
 export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, content: Content): void {
   watchAffordable(store, bus, generalOnly(content.upgrades));
   watchAffordable(store, bus, seatsOnly(content.upgrades), 'seats:affordable');
   watchAffordable(store, bus, staffOnly(content.upgrades), 'staff:affordable');
   watchIngredientShop(store, bus, content);
   watchRoomShop(store, bus, content.rooms);
+  watchDecorShop(store, bus, content.decor);
 }
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
@@ -116,10 +118,11 @@ export interface Content {
   recipes: readonly RecipeDef[];
   upgrades: readonly UpgradeDef[];
   rooms: readonly RoomDef[];
+  decor: readonly DecorDef[];
   ingredients: readonly IngredientDef[];
 }
 
-export const content: Content = { customerTypes: customers, recipes, upgrades, rooms: ROOMS, ingredients };
+export const content: Content = { customerTypes: customers, recipes, upgrades, rooms: ROOMS, decor: DECORATIONS, ingredients };
 
 export interface WorldDeps {
   store: Store<GameState>;

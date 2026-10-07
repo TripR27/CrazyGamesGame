@@ -35,7 +35,7 @@ export interface TutorialStep {
 export const GUIDE_TARGETS = [
   'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
-  'guide-room-buy', 'guide-new-room',
+  'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
@@ -233,6 +233,28 @@ export const roomLesson: readonly TutorialStep[] = [
   },
 ];
 
+/**
+ * The hint for the first decoration: starts once one can be bought, then points at it in the tavern. Decorations are
+ * for sale long before this lesson's turn, so buying one early only counts while the hint is on screen (it must not
+ * skip the lessons before it); a player who already owns one gets just the closing line.
+ */
+export const decorLesson: readonly TutorialStep[] = [
+  {
+    id: 'decor_buy',
+    lesson: 'decor',
+    startWhen: { kind: 'event', event: 'decor:affordable' },
+    target: 'guide-decor-buy',
+    completeOn: { kind: 'event', event: 'decor:bought' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'decor_done',
+    lesson: 'decor',
+    target: 'guide-new-decor',
+    completeOn: { kind: 'after', ms: 5500 },
+  },
+];
+
 /** All tutorial steps in order. A new lesson is a new file plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...basicsLesson,
@@ -244,4 +266,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...staffLesson,
   ...vipLesson,
   ...roomLesson,
+  ...decorLesson,
 ];

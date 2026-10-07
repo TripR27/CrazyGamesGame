@@ -29,6 +29,8 @@ export interface GameState {
   ingredientsBought: string[];
   /** Room ids built on the upper floor (one-time purchases). */
   roomsBuilt: string[];
+  /** Decoration ids bought for downstairs (one-time purchases). */
+  decorBought: string[];
   upgrades: UpgradeLevels;
   tutorial: TutorialProgress;
 }
@@ -41,6 +43,7 @@ export function createInitialState(now: number): GameState {
     recipesDiscovered: [...STARTER_RECIPE_IDS],
     ingredientsBought: [],
     roomsBuilt: [],
+    decorBought: [],
     upgrades: {},
     tutorial: { completedSteps: [], skipped: false },
   };

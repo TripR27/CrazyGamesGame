@@ -5,13 +5,13 @@ export type Rarity = (typeof RARITIES)[number];
 export const EFFECTS = ['strength', 'speed', 'luck', 'charm'] as const;
 export type Effect = (typeof EFFECTS)[number];
 
-/** Something bought once in the shop: for sale from reputation `level` on, for `cost` gold (ingredients, rooms). */
+/** Something bought once in the shop: for sale from reputation `level` on, for `cost` gold (ingredients, rooms, decorations). */
 export interface OneTimePurchase {
   level: number;
   cost: number;
 }
 
-export type ContentDomain = 'ingredients' | 'recipes' | 'customers' | 'upgrades' | 'feedback' | 'tutorial' | 'reputation' | 'rooms';
+export type ContentDomain = 'ingredients' | 'recipes' | 'customers' | 'upgrades' | 'feedback' | 'tutorial' | 'reputation' | 'rooms' | 'decor';
 
 /** Content data holds ids only; every visible string lives in i18n under `domain.id.field`. */
 export function textKey(domain: ContentDomain, id: string, field: string): string {

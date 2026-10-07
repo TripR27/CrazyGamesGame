@@ -25,6 +25,9 @@ export interface GuideContext {
   /** The first room the player can build right now, and the one built last, if any. */
   affordableRoomId: string | null;
   newestRoomId: string | null;
+  /** The first decoration the player can buy right now, and the one bought last, if any. */
+  affordableDecorId: string | null;
+  newestDecorId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -110,6 +113,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-new-ingredient': (ctx) => (ctx.newestIngredientId === null ? null : `ingredient:${ctx.newestIngredientId}`),
   'guide-room-buy': (ctx) => inShop(ctx, 'room-buy', ctx.affordableRoomId),
   'guide-new-room': (ctx) => (ctx.newestRoomId === null ? null : `room:${ctx.newestRoomId}`),
+  'guide-decor-buy': (ctx) => inShop(ctx, 'decor-buy', ctx.affordableDecorId),
+  'guide-new-decor': (ctx) => (ctx.newestDecorId === null ? null : `decor:${ctx.newestDecorId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */
@@ -169,6 +174,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     liked: name('recipes', likedCustomer(ctx)?.recipeId),
     royal: name('recipes', vipCustomer(ctx)?.recipeId),
     room: ctx.affordableRoomId === null ? '' : t(textKey('rooms', ctx.affordableRoomId, 'name')),
+    decor: ctx.affordableDecorId === null ? '' : t(textKey('decor', ctx.affordableDecorId, 'name')),
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
     ...likedEffect(ctx),
   });

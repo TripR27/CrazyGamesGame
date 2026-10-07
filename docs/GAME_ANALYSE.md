@@ -286,7 +286,7 @@ src/
   shared/      state, events, time (ticker), numbers, random, pool, targets, save, storage, debug
   app/         world.ts (bouwt alles, bepaalt de tick-volgorde), Phaser-scene en DOM-schil
   customers/  brewing/  recipes/  serving/  staff/  economy/
-  rooms/  reputation/  offline/  tutorial/            (toekomst: heroes/, prestige/, achievements/, audio/, platform/)
+  rooms/  decor/  reputation/  offline/  tutorial/    (toekomst: heroes/, prestige/, achievements/, audio/, platform/)
   i18n/        translator.ts, en.ts
   dev/         balans-simulator
 ```
@@ -302,7 +302,7 @@ flowchart TB
     direction LR
     customers["customers"] ~~~ brewing["brewing"] ~~~ recipes["recipes"] ~~~ serving["serving"]
     staff["staff"] ~~~ economy["economy"] ~~~ rooms["rooms"] ~~~ reputation["reputation"]
-    offline["offline"] ~~~ tutorial["tutorial"]
+    decor["decor"] ~~~ offline["offline"] ~~~ tutorial["tutorial"]
   end
 
   subgraph shared["shared/"]

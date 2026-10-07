@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ingredientTable, reputationTable, roomTable, tutorialTable } from './validate-content';
+import { decorTable, ingredientTable, reputationTable, roomTable, tutorialTable } from './validate-content';
 import { validateContent, type ContentTable, customerTable, feedbackTable, recipeTable, upgradeTable } from './validate-core';
 import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
+import type { DecorDef } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { hasKey } from '@/i18n/translator';
 import { recipes, STARTER_RECIPE_IDS, type RecipeDef } from '@/recipes/recipe-data';
@@ -234,5 +235,22 @@ describe('upgrade validation', () => {
   it('rejects an upgrade that changes nothing', () => {
     const idle = upgrade({ effect: { stat: 'brewSpeed', mode: 'multiply', perLevel: 0 } });
     expect(upgradeProblems(idle)).toEqual(['upgrades.u1: effect.perLevel must be a positive number, got 0']);
+  });
+});
+
+const decorItem = (over: Partial<DecorDef> = {}): DecorDef => ({
+  id: 'd', buy: { level: 2, cost: 10 }, effects: [{ stat: 'sellPrice', mode: 'multiply', perLevel: 0.03 }], ...over,
+});
+const decorProblems = (d: DecorDef): string[] => validateContent(() => true, [decorTable([d])]);
+
+describe('decoration validation', () => {
+  it('accepts a decoration with a bonus', () => {
+    expect(decorProblems(decorItem())).toEqual([]);
+  });
+
+  it('reports a wrong level, a free decoration and one without a bonus', () => {
+    expect(decorProblems(decorItem({ buy: { level: 1, cost: 10 } }))).toEqual([expect.stringMatching(/buy\.level/)]);
+    expect(decorProblems(decorItem({ buy: { level: 2, cost: 0 } }))).toEqual([expect.stringMatching(/buy\.cost/)]);
+    expect(decorProblems(decorItem({ effects: [] }))).toEqual(['decor.d: a decoration must give a bonus']);
   });
 });

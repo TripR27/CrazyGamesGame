@@ -49,6 +49,8 @@ export function mountTutorial(root: HTMLElement, source: TutorialUiSource, targe
   parts.skip.addEventListener('click', () => source.machine.skip());
 
   let frame = 0;
+  // The target pointed at last: a new one is scrolled into view once (a buy button low in the shop list).
+  let pointedAt: string | null = null;
   const render = (): void => {
     const step = source.machine.visibleStep();
     parts.view.hidden = step === null;
@@ -59,6 +61,8 @@ export function mountTutorial(root: HTMLElement, source: TutorialUiSource, targe
       const line = speech(step.id, ctx);
       if (parts.text.textContent !== line) parts.text.textContent = line;
       const id = resolveTarget(step.target, ctx);
+      if (id !== pointedAt && id !== null) targets.reveal(id);
+      pointedAt = id;
       showTarget(parts, id === null ? null : targets.resolve(id));
       frame = requestAnimationFrame(follow);
     };

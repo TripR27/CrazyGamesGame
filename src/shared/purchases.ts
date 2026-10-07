@@ -27,7 +27,7 @@ export function oneTimeOffer(price: OneTimePurchase | undefined, owned: boolean,
 }
 
 /** Events that announce "something in the shop can be bought now". */
-export type BuyableEvent = 'ingredients:affordable' | 'rooms:affordable';
+export type BuyableEvent = 'ingredients:affordable' | 'rooms:affordable' | 'decor:affordable';
 
 export interface WatchSource<S> {
   getState(): S;

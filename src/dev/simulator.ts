@@ -3,6 +3,7 @@ import { clickIngredient } from '@/brewing/brewing';
 import { buyIngredientById, firstBuyableIngredient } from '@/brewing/ingredients';
 import { discoverableNow } from '@/recipes/recipes';
 import { waitingCustomers } from '@/customers/customers';
+import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor, getMultipliers } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
@@ -30,7 +31,7 @@ export interface Timeline {
   earned: { ms: number; gold: Num }[];
 }
 
-const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms', id: string): string => t(textKey(domain, id, 'name'));
+const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor', id: string): string => t(textKey(domain, id, 'name'));
 
 /** Starts recording; `now` gives the simulated time. Only firsts are written to the timeline, to keep it short. */
 export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Timeline {
@@ -62,6 +63,10 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     timeline.purchases.push(now());
     once(`room:${id}`, `built ${name('rooms', id)}`);
   });
+  bus.on('decor:bought', ({ id }) => {
+    timeline.purchases.push(now());
+    once(`decor:${id}`, `bought ${name('decor', id)}`);
+  });
   return timeline;
 }
 
@@ -87,7 +92,8 @@ function upgradeBudget(state: GameState): Num {
 
 /**
  * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
- * then the cheapest upgrade, but while a room is for sale it saves up for it. Returns true when it bought something.
+ * then a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up for it (it only buys
+ * what costs a small share of the room). Returns true when it bought something.
  */
 export function shopOnce(world: World, state: GameState): boolean {
   const ingredient = firstBuyableIngredient(state, world.content);
@@ -100,13 +106,19 @@ export function shopOnce(world: World, state: GameState): boolean {
     buildRoomById(world, room.id);
     return true;
   }
-  const upgrade = cheapestUpgrade(state, upgradeBudget(state));
+  const budget = upgradeBudget(state);
+  const decor = firstBuyableDecor(state, DECORATIONS);
+  if (decor !== undefined && num(decor.buy.cost).lte(budget)) {
+    buyDecorById(world, decor.id);
+    return true;
+  }
+  const upgrade = cheapestUpgrade(state, budget);
   if (upgrade !== undefined) buyUpgradeById(world, upgrade, 1);
   return upgrade !== undefined;
 }
 
 export interface BotOptions {
-  /** Shop: ingredients, rooms (saving up for them) and the cheapest upgrade, one purchase at a time (sim/shopping.ts). */
+  /** Shop: ingredients, rooms (saving up for them), decorations and the cheapest upgrade, one purchase at a time (sim/shopping.ts). */
   buys: boolean;
 }
 

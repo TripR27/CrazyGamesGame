@@ -164,6 +164,22 @@ export const rooms: Messages = {
   'rooms.sign_for_sale': '{name}\nBuild in the shop: {cost}',
 };
 
+/** The decorations downstairs. `{sellPrice}`, `{brewSpeed}` and `{vipChance}` are filled in from data. */
+export const decor: Messages = {
+  'decor.wall_torch.name': 'Wall Torch',
+  'decor.wall_torch.description': 'Drinks sell {sellPrice} higher. Everything looks expensive by torchlight.',
+  'decor.woven_rug.name': 'Woven Rug',
+  'decor.woven_rug.description': 'The cauldron brews {brewSpeed} faster. Warm feet, quick hands.',
+  'decor.boar_trophy.name': 'Boar Trophy',
+  'decor.boar_trophy.description': 'Drinks sell {sellPrice} higher. Nobody haggles while the boar is watching.',
+  'decor.everburning_torch.name': 'Everburning Torch',
+  'decor.everburning_torch.description': 'The cauldron brews {brewSpeed} faster. Never goes out, never stops showing off.',
+  'decor.royal_carpet.name': 'Royal Carpet',
+  'decor.royal_carpet.description': '{vipChance} VIPs. Royalty can smell a red carpet from three kingdoms away.',
+  'decor.golden_tankard.name': 'Golden Tankard',
+  'decor.golden_tankard.description': 'Drinks sell {sellPrice} higher. Too heavy to drink from, perfect for bragging.',
+};
+
 export const shop: Messages = {
   'shop.tab': 'Shop',
   'shop.title': 'Upgrades',
@@ -175,6 +191,7 @@ export const shop: Messages = {
   'shop.owned': 'Owned',
   'shop.kind_rooms': 'Rooms',
   'shop.build_once': 'Build · {cost}',
+  'shop.kind_decor': 'Decorations',
   'shop.kind_cauldron': 'Cauldron',
   'shop.kind_tavern': 'Tavern',
   'shop.kind_staff': 'Staff',
@@ -213,6 +230,8 @@ export const tutorial: Messages = {
   'tutorial.vip_done.text': 'Ka-ching. Keep the crown happy and the crown keeps paying.',
   'tutorial.room_buy.text': 'This shack has an upstairs? Build the {room} in the Shop tab. More room, more customers, more chaos.',
   'tutorial.room_done.text': 'Look up! A brand new room. Customers will find it on their own. They always find the drinks.',
+  'tutorial.decor_buy.text': 'This place looks like a cave. Buy the {decor} in the Shop tab. Pretty things pay off, a little.',
+  'tutorial.decor_done.text': 'Fancy! Every decoration gives a small bonus forever. Almost respectable in here now.',
   'tutorial.upgrade_done.text': 'Ahh, shopping. Your gold went down and somehow you feel richer. Welcome to economics.',
 };
 
@@ -262,4 +281,5 @@ export const en: Messages = {
   ...book,
   ...panel,
   ...rooms,
+  ...decor,
 };

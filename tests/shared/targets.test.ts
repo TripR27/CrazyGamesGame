@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createTargetRegistry } from '@/shared/targets';
 
 describe('target registry', () => {
@@ -33,5 +33,16 @@ describe('target registry', () => {
     registry.register('b', () => ({ x: 2, y: 2, w: 2, h: 2 }));
     removeOld();
     expect(registry.resolve('b')?.x).toBe(2);
+  });
+
+  it('scrolls a target into view when asked, and ignores targets that cannot scroll', () => {
+    const registry = createTargetRegistry();
+    const reveal = vi.fn();
+    registry.register('shop-row', () => null, reveal);
+    registry.register('cauldron', () => ({ x: 1, y: 1, w: 1, h: 1 }));
+    registry.reveal('shop-row');
+    registry.reveal('cauldron');
+    registry.reveal('nope');
+    expect(reveal).toHaveBeenCalledTimes(1);
   });
 });
