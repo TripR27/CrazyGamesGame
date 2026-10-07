@@ -36,7 +36,7 @@
 
 ## 3. Offline verdienen: wat er na Night Shift nog kan
 
-Night Shift zelf (kopen en upgraden) staat in SPECS.md, stap 14d. Nog open:
+Night Shift zelf (kopen en upgraden) is gebouwd in stap 14d (SPECS.md, hoofdstuk 4). Nog open:
 - Een rewarded ad die de offline-opbrengst verdubbelt (stap 20).
 - Een tak van de prestige-boom (stap 17) die het offline-aandeel of de duur verder verhoogt.
 
