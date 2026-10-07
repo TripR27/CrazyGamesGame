@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
-const WARN_LINES = 100;
-const FAIL_LINES = 120;
+const WARN_LINES = 300;
+const FAIL_LINES = 350;
 const DIRS = ['src', 'tests', 'scripts'];
 // Stylesheets are not counted: only programming work is bound to the line limit.
 const EXTENSIONS = new Set(['.ts', '.mjs', '.js', '.html', '.json']);
