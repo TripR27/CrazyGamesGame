@@ -82,6 +82,9 @@ export interface GameEvents {
   /** Same for the rooms on the upper floor; `room:built` once per room. */
   'rooms:affordable': Record<string, never>;
   'room:built': { id: string };
+  /** Same for the decorations downstairs; `decor:bought` once per decoration. */
+  'decor:affordable': Record<string, never>;
+  'decor:bought': { id: string };
   /** Something in the scene (a boarded-up room) asks the side panel to open on the Shop tab. */
   'shop:requested': Record<string, never>;
   /** A staff upgrade was bought (a hire or a training level). */

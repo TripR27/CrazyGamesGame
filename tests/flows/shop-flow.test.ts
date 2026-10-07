@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { buyUpgradeById } from '@/economy/upgrades';
 import { buildRoomById, requestShop } from '@/rooms/rooms';
 import { buyIngredientById, shelfIds } from '@/brewing/ingredients';
+import { buyDecorById } from '@/decor/decor';
 import { newGame, playBasics, playLikes } from './helpers';
 import { BREWING } from '@/brewing/brewing';
 import { num } from '@/shared/numbers';
@@ -54,11 +55,13 @@ describe('ingredients in an older save', () => {
   });
 });
 
-/** Every lesson before the room lesson is done; the player has `reputation` and `gold`. */
+/** Every lesson before the room lesson is done (and the decoration lesson after it); the player has `reputation` and `gold`. */
 function gameRooms(reputation: number, gold: number, seats = 0) {
   const state = createInitialState(0);
   const roomFirst = TUTORIAL_STEPS.findIndex((s) => s.lesson === 'room');
-  state.tutorial.completedSteps = TUTORIAL_STEPS.slice(0, roomFirst).map((s) => s.id);
+  // The decoration lesson (after this one) is not what these tests are about.
+  const decor = TUTORIAL_STEPS.filter((s) => s.lesson === 'decor');
+  state.tutorial.completedSteps = [...TUTORIAL_STEPS.slice(0, roomFirst), ...decor].map((s) => s.id);
   state.reputation = reputation;
   state.currencies.gold = num(gold);
   state.upgrades = { extra_seat: seats };
@@ -99,6 +102,50 @@ describe('the room hint, played in the real gameRooms', () => {
     expect(resolveTarget('guide-new-room', g.guide())).toBe('room:extension');
     g.tick(5_600);
     expect(g.shown()).toBeNull();
+  });
+});
+
+/** Every lesson before the decoration lesson is done; the player has `reputation`, `gold` and the `bought` decorations. */
+function gameDecor(reputation: number, gold: number, bought: string[] = []) {
+  const state = createInitialState(0);
+  const decorFirst = TUTORIAL_STEPS.findIndex((s) => s.lesson === 'decor');
+  state.tutorial.completedSteps = TUTORIAL_STEPS.slice(0, decorFirst).map((s) => s.id);
+  state.reputation = reputation;
+  state.currencies.gold = num(gold);
+  state.decorBought = bought;
+  return newGame(state);
+}
+
+describe('the decoration hint, played in the real game', () => {
+  it('waits for a decoration the player can buy, points the way to it, then at the decoration itself', () => {
+    const g = gameDecor(10, 100);
+    expect(g.shown()).toBeNull();
+    g.store.update((s) => void (s.currencies.gold = num(300)));
+    expect(g.shown()).toBe('decor_buy');
+    expect(resolveTarget('guide-decor-buy', g.guide())).toBe('panel-button');
+    g.world.bus.emit('shop:opened', {});
+    expect(resolveTarget('guide-decor-buy', g.guide())).toBe('decor-buy:wall_torch');
+    buyDecorById(g.world, 'wall_torch');
+    expect(g.shown()).toBe('decor_done');
+    expect(resolveTarget('guide-new-decor', g.guide())).toBe('decor:wall_torch');
+    g.tick(5_600);
+    expect(g.shown()).toBeNull();
+  });
+
+  it('only gives the closing line to a player who already owns a decoration', () => {
+    const g = gameDecor(10, 0, ['wall_torch']);
+    expect(g.shown()).toBe('decor_done');
+  });
+
+  it('never skips earlier lessons when a decoration is bought early', () => {
+    const g = afterBasics(1000);
+    g.store.update((s) => void (s.reputation = 10));
+    buyDecorById(g.world, 'wall_torch');
+    expect(g.state.decorBought).toEqual(['wall_torch']);
+    const done = g.state.tutorial.completedSteps;
+    expect(done).not.toContain('upgrade_open');
+    expect(done).not.toContain('room_buy');
+    expect(done).not.toContain('decor_buy');
   });
 });
 

@@ -6,6 +6,7 @@ import { shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { createCustomersLayer, type CustomersLayer } from '@/customers/customers-view';
+import { createDecorView, type DecorView } from '@/decor/decor-view';
 import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
 import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
@@ -31,6 +32,7 @@ interface Views {
   cauldron: CauldronView;
   ready: ReadyView;
   rooms: RoomsView;
+  decor: DecorView;
 }
 
 /** Placeholder cross-section of the tavern: static shapes on one Graphics object, plus the live parts. */
@@ -49,11 +51,14 @@ export class TavernScene extends Scene {
     drawTables(g);
     drawBar(g);
     drawCauldron(g);
-    drawCustomerSlots(g);
+    // Decorations lie on the backdrop; the seat outlines go on top, so a rug never hides where customers sit.
+    const decor = createDecorView(this, world);
+    drawCustomerSlots(this.add.graphics());
     // The rooms come first, so customers upstairs are drawn in front of them.
     const rooms = createRoomsView(this, world);
     this.views = {
       rooms,
+      decor,
       shelf: createShelfView(this, () => shelfIds(world), (id) => clickIngredient(world, id), world.targets),
       cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
       ready: createReadyView(this, {
@@ -81,6 +86,7 @@ export class TavernScene extends Scene {
     this.views.cauldron.update();
     this.views.ready.update();
     this.views.rooms.update();
+    this.views.decor.update();
     this.views.customers.update();
   }
 }

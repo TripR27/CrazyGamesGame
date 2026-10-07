@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BAR, BUILDING, CAULDRON, CUSTOMER_SLOTS, DOOR, FLOOR_Y, HUD_HEIGHT, INGREDIENT_SLOTS, READY_SLOTS, SHELF, TABLES, type Rect, ROOM_SPOTS, SEAT_SLOTS, UPPER_FLOOR_Y } from '@/app/layout';
+import { BAR, BUILDING, CAULDRON, CUSTOMER_SLOTS, DECOR_SPOTS, DOOR, FLOOR_Y, GROUND_Y, HUD_HEIGHT, INGREDIENT_SLOTS, READY_SLOTS, SHELF, TABLES, type Rect, ROOM_SPOTS, SEAT_SLOTS, UPPER_FLOOR_Y } from '@/app/layout';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { upgrades } from '@/economy/upgrade-data';
 import { getMultipliers } from '@/economy/upgrades';
+import { DECORATIONS } from '@/decor/decor';
 import { ROOMS, totalSeats } from '@/rooms/rooms';
 
 const overlaps = (a: Rect, b: Rect): boolean =>
@@ -110,5 +111,19 @@ describe('the upper floor', () => {
     const maxed = Object.fromEntries(upgrades.map((u) => [u.id, u.maxLevel ?? Infinity]));
     const storage = getMultipliers({ upgrades: maxed, roomsBuilt: ROOMS.map((r) => r.id) }).storage.toNumber();
     expect(READY_SLOTS.length).toBeGreaterThanOrEqual(storage);
+  });
+
+  it('has a spot downstairs for every decoration: on the wall or on the floor, clear of the furniture and of each other', () => {
+    const spots = DECORATIONS.map((d) => DECOR_SPOTS[d.id]);
+    expect(spots.every((s) => s !== undefined)).toBe(true);
+    const rects = spots.filter((s): s is Rect => s !== undefined);
+    const apart = (a: Rect, b: Rect): boolean => a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+    for (const rect of rects) {
+      expect(inside(rect, BUILDING)).toBe(true);
+      expect(rect.y).toBeGreaterThan(UPPER_FLOOR_Y);
+      expect(rect.y + rect.h <= FLOOR_Y || (rect.y >= FLOOR_Y && rect.y + rect.h <= GROUND_Y)).toBe(true);
+      for (const thing of [SHELF, DOOR, BAR, CAULDRON]) expect(apart(rect, thing)).toBe(true);
+    }
+    rects.forEach((a, i) => rects.slice(i + 1).forEach((b) => expect(apart(a, b)).toBe(true)));
   });
 });

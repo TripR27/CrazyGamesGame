@@ -1,7 +1,8 @@
 import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
+import { DECORATIONS, buyDecorById, decorOffer, type DecorState } from '@/decor/decor';
 import { buyIngredientById, ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
-import { type RowView, isIngredientListed, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
+import { type RowView, isIngredientListed, toDecorRowView, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, type BuyAmount, type UpgradeState } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
@@ -10,6 +11,9 @@ import { ROOMS, buildRoomById, roomOffer, type RoomState } from '@/rooms/rooms';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
 import './shop.css';
+
+/** Scrolls a buy button into view in the shop list (only as far as needed), so the tutorial arrow is never off-screen. */
+const reveal = (button: HTMLElement): void => button.scrollIntoView({ block: 'nearest' });
 
 export interface UpgradeRow {
   el: HTMLElement;
@@ -62,7 +66,7 @@ export function createAmountPicker(onPick: (amount: BuyAmount) => void): { el: H
   };
 }
 
-export type OneTimeState = IngredientShopState & RoomState;
+export type OneTimeState = IngredientShopState & RoomState & DecorState;
 
 export interface OneTimeGroupHosts {
   list: HTMLElement;
@@ -71,7 +75,7 @@ export interface OneTimeGroupHosts {
   world: World;
 }
 
-/** The groups at the top of the shop: ingredients, then rooms. Returns the render function for both. */
+/** The groups at the top of the shop: ingredients, rooms, then decorations. Returns the render function for all of them. */
 export function mountOneTimeGroups({ list, root, panel, world }: OneTimeGroupHosts): (state: OneTimeState) => void {
   const catalog = { ingredients, recipes };
   const renderIngredients = mountOneTimeSection<OneTimeState>({
@@ -96,9 +100,21 @@ export function mountOneTimeGroups({ list, root, panel, world }: OneTimeGroupHos
     })),
     onBuy: (id) => buildRoomById(world, id),
   });
+  const renderDecor = mountOneTimeSection<OneTimeState>({
+    list, root, panel, targets: world.targets,
+    headingKey: 'shop.kind_decor',
+    targetPrefix: 'decor-buy',
+    entries: DECORATIONS.map((def) => ({
+      id: def.id,
+      listed: (state) => isListed(decorOffer(state, def)),
+      view: (state) => toDecorRowView(def, state),
+    })),
+    onBuy: (id) => buyDecorById(world, id),
+  });
   return (state) => {
     renderIngredients(state);
     renderRooms(state);
+    renderDecor(state);
   };
 }
 
@@ -123,7 +139,7 @@ export interface OneTimeSectionParts<S> {
 }
 
 /**
- * A group of one-time purchases in the shop (ingredients, rooms): one row per entry still for sale. Bought ones
+ * A group of one-time purchases in the shop (ingredients, rooms, decorations): one row per entry still for sale. Bought ones
  * leave the shop, and the heading goes when nothing is left. Returns the render function.
  */
 export function mountOneTimeSection<S>(parts: OneTimeSectionParts<S>): (state: S) => void {
@@ -133,7 +149,7 @@ export function mountOneTimeSection<S>(parts: OneTimeSectionParts<S>): (state: S
   const rows = entries.map((entry) => {
     const row = createUpgradeRow(() => onBuy(entry.id));
     list.append(row.el);
-    targets.register(`${parts.targetPrefix}:${entry.id}`, () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root)));
+    targets.register(`${parts.targetPrefix}:${entry.id}`, () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy));
     return { entry, row };
   });
   return (state) => {
@@ -165,7 +181,7 @@ export interface TargetParts {
 /** Each buy button (while the shop tab is on screen) is something the tutorial can point at. */
 export function registerTargets(targets: TargetRegistry, { root, panel, rows }: TargetParts): () => void {
   const removers = rows.map(({ def, row }) =>
-    targets.register(`upgrade:${def.id}`, () => (panel.hidden ? null : domBounds(row.buy, root))),
+    targets.register(`upgrade:${def.id}`, () => (panel.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy)),
   );
   return () => removers.forEach((remove) => remove());
 }
@@ -183,7 +199,7 @@ export interface ShopHosts {
   panels: SidePanels;
 }
 
-/** The Shop tab of the side panel: ingredients and rooms for sale, then one row per upgrade. Returns an unmount function. */
+/** The Shop tab of the side panel: ingredients, rooms and decorations for sale, then one row per upgrade. Returns an unmount function. */
 export function mountShop(
   { root, panels }: ShopHosts,
   world: World,

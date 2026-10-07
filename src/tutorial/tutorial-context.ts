@@ -1,6 +1,7 @@
 import type { BrewStation } from '@/brewing/brewing';
 import { firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
 import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
+import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { recipes } from '@/recipes/recipe-data';
@@ -41,6 +42,8 @@ interface World {
 
 type Check = (world: World) => boolean;
 
+const hasDecor = (state: GameState): boolean => state.decorBought.length > 0;
+
 const canBuy = (group: (defs: readonly UpgradeDef[]) => UpgradeDef[]): Check => ({ store }) =>
   firstAffordable(store.getState(), group(upgrades)) !== undefined;
 
@@ -57,6 +60,9 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'staff:affordable': canBuy(staffOnly),
   'ingredients:affordable': ({ store, ingredients }) => firstBuyableIngredient(store.getState(), ingredients) !== undefined,
   'rooms:affordable': ({ store }) => firstBuildableRoom(store.getState(), ROOMS) !== undefined,
+  // An owned decoration counts too: the lesson then shows and is done at once (see decorLesson).
+  'decor:affordable': ({ store }) => hasDecor(store.getState()) || firstBuyableDecor(store.getState(), DECORATIONS) !== undefined,
+  'decor:bought': ({ store }) => hasDecor(store.getState()),
   'likes:ordered': ({ floor }) => waitingCustomers(floor).some((c) => c.liked),
   'vip:arrived': ({ floor }) => waitingCustomers(floor).some((c) => c.vip),
   'reputation:levelUp': ({ store }) => levelFor(store.getState().reputation) > 1,
@@ -117,6 +123,8 @@ export function createTutorial({ store, bus, floor, station, ingredients }: Tuto
     newestIngredientId: store.getState().ingredientsBought.at(-1) ?? null,
     affordableRoomId: firstBuildableRoom(store.getState(), ROOMS)?.id ?? null,
     newestRoomId: store.getState().roomsBuilt.at(-1) ?? null,
+    affordableDecorId: firstBuyableDecor(store.getState(), DECORATIONS)?.id ?? null,
+    newestDecorId: store.getState().decorBought.at(-1) ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

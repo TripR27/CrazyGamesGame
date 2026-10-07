@@ -1,4 +1,5 @@
 import type { World } from '@/app/world';
+import { DECORATIONS, type DecorDef } from '@/decor/decor';
 import { type UpgradeDef, BASE_STATS, upgrades, UPGRADE_STATS, type UpgradeEffect, type UpgradeStat } from '@/economy/upgrade-data';
 import { ROOMS, type RoomDef } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
@@ -147,9 +148,11 @@ export interface MultiplierState {
   upgrades: UpgradeLevels;
   /** Built rooms; left out means none. */
   roomsBuilt?: readonly string[];
+  /** Bought decorations; left out means none. */
+  decorBought?: readonly string[];
 }
 
-/** One bonus and how many times it counts (an upgrade's level, or 1 for a built room). */
+/** One bonus and how many times it counts (an upgrade's level, or 1 for a built room or a bought decoration). */
 interface Source {
   effect: UpgradeEffect;
   times: number;
@@ -165,18 +168,20 @@ function applySources(stat: UpgradeStat, sources: readonly Source[]): Num {
 }
 
 /**
- * The one place where every source of a bonus is added up: upgrades and built rooms; prestige, achievements and
+ * The one place where every source of a bonus is added up: upgrades, built rooms and decorations; prestige, achievements and
  * events join here later without the callers changing.
  */
 export function getMultipliers(
   state: MultiplierState,
   defs: readonly UpgradeDef[] = upgrades,
   rooms: readonly RoomDef[] = ROOMS,
+  decor: readonly DecorDef[] = DECORATIONS,
 ): Multipliers {
   const built = rooms.filter((r) => (state.roomsBuilt ?? []).includes(r.id));
+  const decorated = decor.filter((d) => (state.decorBought ?? []).includes(d.id));
   const sources: Source[] = [
     ...defs.map((def) => ({ effect: def.effect, times: levelOf(state.upgrades, def) })),
-    ...built.flatMap((room) => room.effects.map((effect) => ({ effect, times: 1 }))),
+    ...[...built, ...decorated].flatMap((owned) => owned.effects.map((effect) => ({ effect, times: 1 }))),
   ];
   const entries = UPGRADE_STATS.map((stat) => [stat, applySources(stat, sources)] as const);
   return Object.fromEntries(entries) as Multipliers;

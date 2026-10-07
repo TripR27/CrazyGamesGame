@@ -18,6 +18,8 @@ const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   newestIngredientId: null,
   affordableRoomId: null,
   newestRoomId: null,
+  affordableDecorId: null,
+  newestDecorId: null,
   openTab: null,
   ...over,
 });
@@ -97,6 +99,8 @@ const ctx2 = (over: Partial<GuideContext> = {}): GuideContext => ({
   newestIngredientId: null,
   affordableRoomId: null,
   newestRoomId: null,
+  affordableDecorId: null,
+  newestDecorId: null,
   openTab: null,
   ...over,
 });
