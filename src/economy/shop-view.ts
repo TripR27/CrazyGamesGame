@@ -1,16 +1,14 @@
 import type { PlayerActions } from '@/app/actions';
+import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
 import { ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
 import { type RowView, isIngredientListed, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
 import type { BuyAmount, UpgradeState } from '@/economy/upgrades';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { ROOMS, roomOffer, type RoomState } from '@/rooms/rooms';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
-import { createEl } from '@/ui/dom';
-import { domBounds } from '@/ui/dom-bounds';
-import type { SidePanels } from '@/ui/side-panels';
 import './shop.css';
 
 export interface UpgradeRow {

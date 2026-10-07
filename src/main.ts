@@ -1,6 +1,8 @@
+import { createGame } from '@/app/tavern-scene';
+import { createSideLayout } from '@/app/ui-model';
+import { placeGame, mountUi } from '@/app/viewport-view';
 import { createServices } from '@/app/world';
 import { customers } from '@/customers/customer-data';
-import { createGame } from '@/game';
 import { toLevelUpView } from '@/reputation/reputation';
 import { createLocalStorageAdapter, startAutosave, registerDebugCommands, startLoopDriver } from '@/shared/browser';
 import { debug, createEventBus, type GameEvents } from '@/shared/events';
@@ -8,9 +10,6 @@ import { systemRng } from '@/shared/random';
 import { createSaveManager } from '@/shared/save';
 import { createInitialState, type GameState, createStore } from '@/shared/state';
 import { systemClock, createTicker } from '@/shared/time';
-import { placeGame } from '@/ui/game-viewport';
-import { mountUi } from '@/ui/mount';
-import { createSideLayout } from '@/ui/side-layout';
 
 const clock = systemClock;
 const manager = createSaveManager<GameState>({

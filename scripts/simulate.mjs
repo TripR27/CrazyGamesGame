@@ -7,7 +7,7 @@ const seed = Number(process.argv[3] ?? 1);
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' });
 try {
-  const { simulationReport } = await server.ssrLoadModule('/src/sim/index.ts');
+  const { simulationReport } = await server.ssrLoadModule('/src/dev/simulator-report.ts');
   console.log(simulationReport({ minutes, seed }));
 } finally {
   await server.close();

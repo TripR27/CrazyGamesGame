@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from 'phaser';
+import { CAULDRON, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } from '@/app/layout';
 import { brewProgress, type BrewStation } from '@/brewing/brewing';
-import { t } from '@/i18n/index';
-import { CAULDRON, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } from '@/scene/layout';
+import { t } from '@/i18n/translator';
 import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
 

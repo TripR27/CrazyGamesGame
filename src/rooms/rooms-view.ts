@@ -1,11 +1,10 @@
 import type { GameObjects, Scene } from 'phaser';
-import { t } from '@/i18n/index';
+import type { Graphics } from '@/app/backdrop-view';
+import { type Rect, ROOM_SPOTS, UPPER_BEAM, type RoomSpot } from '@/app/layout';
+import type { SceneServices } from '@/app/tavern-scene';
+import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { type RoomDef, ROOMS } from '@/rooms/rooms';
-import type { Rect } from '@/scene/layout';
-import { ROOM_SPOTS, UPPER_BEAM, type RoomSpot } from '@/scene/layout-rooms';
-import type { SceneServices } from '@/scene/services';
-import type { Graphics } from '@/scene/sprites/draw';
 import { textKey } from '@/shared/content';
 import { formatNumber } from '@/shared/numbers';
 import type { OneTimeOffer } from '@/shared/purchases';

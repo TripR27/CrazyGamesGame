@@ -1,8 +1,8 @@
-import { t } from '@/i18n/index';
+import { createEl } from '@/app/panels-view';
+import { t } from '@/i18n/translator';
 import type { Bounds, TargetRegistry } from '@/shared/targets';
 import type { TutorialMachine } from '@/tutorial/tutorial';
 import { type GuideContext, resolveTarget, arrowPlacement, spotlightBounds, speech } from '@/tutorial/tutorial-guide';
-import { createEl } from '@/ui/dom';
 import './tutorial.css';
 
 export interface TutorialUiSource {

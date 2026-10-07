@@ -1,10 +1,9 @@
 import type { Scene, GameObjects } from 'phaser';
+import { DOOR_ENTRY, SEAT_SLOTS } from '@/app/layout';
+import type { SceneServices } from '@/app/tavern-scene';
 import { findCustomer, isWaiting } from '@/customers/customers';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
-import { DOOR_ENTRY } from '@/scene/layout';
-import { SEAT_SLOTS } from '@/scene/layout-rooms';
-import type { SceneServices } from '@/scene/services';
 import { effectIcon } from '@/serving/effects';
 import { type Effect, textKey } from '@/shared/content';
 import { createPool, type Pool } from '@/shared/pool';

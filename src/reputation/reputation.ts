@@ -1,6 +1,6 @@
 import { ingredients as allIngredients, type IngredientDef } from '@/brewing/ingredients';
 import type { CustomerDef } from '@/customers/customer-data';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import type { RecipeId } from '@/recipes/recipe-data';
 import { textKey } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';

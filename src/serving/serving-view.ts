@@ -1,9 +1,8 @@
 import type { GameObjects, Scene } from 'phaser';
-import { t } from '@/i18n/index';
+import { CAULDRON, SEAT_SLOTS } from '@/app/layout';
+import type { SceneServices } from '@/app/tavern-scene';
+import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
-import { CAULDRON } from '@/scene/layout';
-import { SEAT_SLOTS } from '@/scene/layout-rooms';
-import type { SceneServices } from '@/scene/services';
 import { withEffectIcon } from '@/serving/effects';
 import { type Effect, textKey } from '@/shared/content';
 import { formatNumber, type Num } from '@/shared/numbers';

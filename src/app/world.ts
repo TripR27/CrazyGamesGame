@@ -1,4 +1,6 @@
 import { createPlayerActions } from '@/app/actions';
+import { CUSTOMER_SLOTS } from '@/app/layout';
+import type { SceneServices } from '@/app/tavern-scene';
 import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/brewing/brewing';
 import { type IngredientCatalog, watchIngredientShop, createIngredientShelf } from '@/brewing/ingredients';
 import { customers } from '@/customers/customer-data';
@@ -10,8 +12,6 @@ import { recipes } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
 import { watchReputationLevels } from '@/reputation/reputation';
 import { ROOMS, watchRoomShop, openSeats, type SeatPlan, roomOffer, totalSeats } from '@/rooms/rooms';
-import { CUSTOMER_SLOTS } from '@/scene/layout';
-import type { SceneServices } from '@/scene/services';
 import { createDrinkSelection } from '@/serving/serving';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';

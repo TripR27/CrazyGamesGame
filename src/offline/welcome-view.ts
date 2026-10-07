@@ -1,5 +1,5 @@
+import { createEl } from '@/app/panels-view';
 import { type OfflineInbox, toWelcomeView } from '@/offline/offline';
-import { createEl } from '@/ui/dom';
 import './welcome.css';
 
 /** The "welcome back" window: shown when a report arrives (or was already waiting), closed with one button. */

@@ -1,13 +1,11 @@
 import type { PlayerActions } from '@/app/actions';
+import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
 import { ingredientColor } from '@/brewing/brewing-view';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { type BookEntry, toBookView, type BookState } from '@/recipes/recipes';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
-import { createEl } from '@/ui/dom';
-import { domBounds } from '@/ui/dom-bounds';
-import type { SidePanels } from '@/ui/side-panels';
 import './recipe-book.css';
 
 const cssColor = (id: string): string => `#${ingredientColor(id).toString(16).padStart(6, '0')}`;

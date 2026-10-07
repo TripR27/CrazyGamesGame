@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { orderLabel } from '@/customers/customers-view';
-import { hasKey } from '@/i18n/index';
+import { hasKey } from '@/i18n/translator';
 import { EFFECT_POWER, LIKED_ORDER_WEIGHT, drinkBonus, isLiked, orderWeight, rollTip, tipSize } from '@/serving/effects';
 import { bonusLines } from '@/serving/serving-view';
 import { type Effect, EFFECTS } from '@/shared/content';

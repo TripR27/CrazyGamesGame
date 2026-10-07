@@ -1,3 +1,4 @@
+import { en } from '@/i18n/en';
 import { debug } from '@/shared/events';
 
 export type Messages = Readonly<Record<string, string>>;
@@ -40,3 +41,8 @@ export function createTranslator({ messages, fallback }: TranslatorOptions): Tra
     },
   };
 }
+
+const translator = createTranslator({ messages: en });
+
+export const t = translator.t;
+export const hasKey = translator.has;

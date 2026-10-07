@@ -1,7 +1,7 @@
 import { type IngredientDef, ingredientOffer, type IngredientCatalog, type IngredientShopState } from '@/brewing/ingredients';
 import type { UpgradeDef, UpgradeEffect } from '@/economy/upgrade-data';
 import { quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { type RoomDef, roomOffer, type RoomState } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';

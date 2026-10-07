@@ -1,5 +1,5 @@
 import type { CustomerDef } from '@/customers/customer-data';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import type { Effect } from '@/shared/content';
 import { ZERO, type Num } from '@/shared/numbers';

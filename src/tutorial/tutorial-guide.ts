@@ -1,4 +1,4 @@
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { withEffectIcon } from '@/serving/effects';
 import { textKey } from '@/shared/content';

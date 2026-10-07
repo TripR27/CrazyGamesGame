@@ -1,5 +1,5 @@
 import { ingredients as allIngredients, type IngredientDef, ownedIngredients } from '@/brewing/ingredients';
-import { t } from '@/i18n/index';
+import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { levelFor, recipesUnlockedUpTo, REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
 import { effectName } from '@/serving/effects';

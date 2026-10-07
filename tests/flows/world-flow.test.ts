@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { newGame } from './helpers';
+import { CUSTOMER_SLOTS } from '@/app/layout';
 import { SPAWNING } from '@/customers/customer-data';
 import type { OfflineReport } from '@/offline/offline';
-import { CUSTOMER_SLOTS } from '@/scene/layout';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
 import { resolveTarget } from '@/tutorial/tutorial-guide';
