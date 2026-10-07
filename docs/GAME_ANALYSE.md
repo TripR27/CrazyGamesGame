@@ -129,6 +129,7 @@ Voorbeeld-ladder:
 - **Kerkers:** meerdere zones (Moeras, Grot, Vulkaan, Sterrentoren, Drakenhol). Diepere zone = betere ingrediënten, hogere vereiste level.
 - **Risico:** held kan "gewond" raken (cooldown), maar niet sterven. Geen echte straf, geen frustratie.
 - Het meenemen van **eigen drankjes** is de koppeling met de brouw-loop, en dus het hart van het concept: drankkwaliteit bepaalt het succes.
+- **Eerste versie (uitgewerkt 2026-10-07):** krijger en magiër, het Moeras als eerste kerker, een tweede ketel in de gildekamer voor heldendrankjes, en kerker-ingrediënten als voorraad die opraakt. Details: SPECS.md, hoofdstuk 4, Helden.
 
 ### 5.6 Minigames en events (later)
 - Casino-hoek: simpele dobbelspellen of kaarten.
