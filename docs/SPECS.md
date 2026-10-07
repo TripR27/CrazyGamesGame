@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** chore `chore-flatten-architecture` (architectuur vlak maken, zie hoofdstuk 14). **Laatst afgerond stap:** 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
+**Nu bezig:** niets (chore `chore-flatten-architecture`, de vlakke architectuur, staat klaar om te mergen: zie hoofdstuk 14). **Laatst afgerond stap:** 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -65,7 +65,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ### Hoe dwing je dit af (voor jou)
 - **`CLAUDE.md`** in de projectroot (wordt in stap 1 gemaakt, en ik maak hem nu al aan) wordt automatisch bij elke sessie geladen en verwijst hiernaar. Dat is de betrouwbaarste manier.
-- **`npm run check`** bewaakt de regelrichtlijn: ESLint waarschuwt vanaf 300 regels en `scripts/check-lines.mjs` waarschuwt vanaf 301 en **faalt vanaf 351 regels**. Wat niet door de check komt, is niet klaar.
+- **`npm run check`** bewaakt de regelrichtlijn: ESLint waarschuwt vanaf 300 regels, `scripts/check-lines.mjs` waarschuwt vanaf 301 en **faalt vanaf 351 regels**, en `scripts/check-cycles.mjs` faalt op importkringen tussen bestanden. Wat niet door de check komt, is niet klaar.
 - Optioneel in stap 1: een hook in Claude Code-instellingen die na elke bestandswijziging de regelcheck draait (kan via de `update-config` skill; vraag erom).
 - Jij kunt altijd zeggen: "Doe stap N", en ik lees eerst dit bestand.
 
@@ -132,12 +132,12 @@ app/              world.ts (createWorld), Phaser-scene, DOM-schil
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/
                   reputation/ offline/ tutorial/   (later heroes/ prestige/ achievements/ audio/ platform/)
    ↓
-shared/           state, events, time, numbers, random, pool, targets, save, storage, debug
+shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
 
-- Afhankelijkheid gaat van boven naar beneden. Features mogen elkaar importeren, maar **nooit in een kring tussen bestanden**.
-- **Alleen `*-view.ts`, `*-scene.ts` en `main.ts` importeren `phaser` of gebruiken `document`/`window`.** Alle andere bestanden (ook `app/world.ts`) zijn puur, dus testbaar met Vitest, bruikbaar door de simulator en geschikt voor de offline-berekening. Pure logica importeert nooit een `-view`-bestand. ESLint bewaakt dit met `no-restricted-imports` op bestandsnaam.
-- Views lezen de state en roepen **feature-functies** aan (`serveCustomer(world, id)`). Ze berekenen zelf geen spelregels.
+- Afhankelijkheid gaat van boven naar beneden. Features mogen elkaar importeren, maar **nooit in een kring tussen bestanden**: `npm run cycles` (`scripts/check-cycles.mjs`, onderdeel van `npm run check`) faalt erop. Type-only imports (`import type`) tellen niet mee, dus een feature-bestand mag `World` uit `app/world.ts` als type importeren.
+- **Alleen `*-view.ts`, `*-scene.ts` en `main.ts` importeren `phaser` of gebruiken `document`/`window`.** Alle andere bestanden (ook `app/world.ts`) zijn puur, dus testbaar met Vitest, bruikbaar door de simulator en geschikt voor de offline-berekening. Pure logica importeert nooit een `-view`-bestand. ESLint bewaakt dit met `no-restricted-imports` en `no-restricted-globals` op bestandsnaam. Uitzondering buiten de views: `shared/browser.ts` (loop-driver, autosave, localStorage en debug-commando's), want dat is de enige plek waar `core`-code de browser raakt.
+- Views lezen de state en roepen **feature-functies** aan (`clickCustomer(world, id)`, `buyUpgradeById(world, id, amount)`). Ze berekenen zelf geen spelregels. Meldingen aan de tutorial die alleen een UI-feit zijn (`shop:opened`, `book:closed`) zenden de views zelf uit met `world.bus.emit`.
 - Services als `platform/`, `audio/` en `i18n/` mogen door views gebruikt worden; pure logica gebruikt `platform/` alleen via een interface.
 
 ```
@@ -145,25 +145,34 @@ crazyGamesGame/
   CLAUDE.md               (blijft in de hoofdmap: Claude Code laadt hem automatisch)
   docs/                   SPECS.md, GAME_ANALYSE.md, IDEAS.md, later ASSETS.md
   index.html  package.json  vite.config.ts  tsconfig.json  eslint.config.js
-  scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/dev/), pixel/
+  scripts/        check-lines.mjs, check-cycles.mjs, simulate.mjs (start de balans-simulator uit src/dev/), pixel/
   public/         assets (svg, spritesheets, audio)
   src/
     main.ts  config.ts      opstart (kort!)
-    shared/                 state.ts (GameState + store), events.ts (bus + GameEvents), time.ts (clock, ticker, loop),
-                            numbers.ts (Decimal + format), random.ts, pool.ts, targets.ts, save.ts, storage.ts, debug.ts
-    app/                    world.ts, tavern-scene.ts, backdrop.ts, layout.ts, hud-view.ts, panels-view.ts, viewport-view.ts
+    shared/                 state.ts (GameState + store), events.ts (bus, GameEvents, debug), time.ts (clock, ticker),
+                            numbers.ts (Decimal, format), random.ts (rng + vrolijke meldingen), pool.ts, targets.ts,
+                            content.ts (Rarity, Effect, textKey), purchases.ts (eenmalige aankopen), save.ts (+ storage),
+                            browser.ts (loop-driver, autosave, localStorage; de enige browser-koppeling)
+    app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
+                            hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
     customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  reputation/  offline/  tutorial/
-                            per feature: <feature>.ts, <feature>-data.ts, <feature>-model.ts?, *-view.ts
+                            per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
+                            echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
+                            *-model.ts (pure view-models, bijv. economy/shop-model.ts)
     i18n/                   translator.ts, en.ts (later nl.ts)
     dev/                    simulator.ts, simulator-report.ts
-  tests/                    één bestand per feature (spiegelt de featuremappen); flows/ voor integratietests
+  tests/                    één bestand per feature (spiegelt de featuremappen); flows/ (spelen in de echte `World`), content/ (validatie van de data-tabellen), fixtures.ts
 ```
 
 Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: hoofdstuk 1 en 9.
 
 ### World
 
-`createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, ingrediënten) en is in tests te vervangen door een kleine catalogus. Acties (`clickIngredient`, `buyUpgrade`) en tick-updates (`updateCustomers`, `advanceBrewing`, `updateStaff`) krijgen `world`. Rekenfuncties blijven puur. `world.ts` bevat ook de **ene** `bus.on('tick')` met de vaste volgorde: tutorial, klanten, brouwen, personeel.
+`createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, ingrediënten) en is in tests te vervangen door een kleine catalogus. Spelersacties en dingen die de views nodig hebben zijn gewone functies per feature die `world` krijgen (of met `Pick<World, ...>` alleen de delen die ze gebruiken, zodat tests geen volledige wereld hoeven te bouwen): `clickIngredient`, `buyUpgradeById`, `clickCustomer`, `shelfIds`, `roomOfferById`. Rekenfuncties (prijs, kosten, niveau, `matchRecipe`) blijven puur en nemen waarden.
+
+**Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel. De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
+
+Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root, world, ...)`). De views lezen de echte `content`-tabellen uit de feature-bestanden; `world.content` is bedoeld voor logica en tests.
 
 ### State
 
@@ -194,12 +203,12 @@ Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: 
 
 Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, zonder tekstmuur en zonder apart scherm (past bij "land direct in gameplay" van CrazyGames).
 
-- **Statemachine in `systems/tutorial`** (puur TS, getest met Vitest). Stappen zijn data in `data/tutorial/`: `{ id, lesson, startWhen?, target, completeOn, needsLiveState? }`. De tekst is de i18n-sleutel `tutorial.<id>.text` (geen `textKey`-veld; dezelfde conventie als andere content).
+- **Statemachine in `tutorial/tutorial.ts`** (puur TS, getest met Vitest). Stappen zijn data in `tutorial/tutorial-steps.ts`: `{ id, lesson, startWhen?, target, completeOn, needsLiveState? }`. De tekst is de i18n-sleutel `tutorial.<id>.text` (geen `textKey`-veld; dezelfde conventie als andere content).
   - `startWhen`/`completeOn` luisteren naar **echte spel-events** uit de event-bus (bijv. `ingredient:clicked`, `brew:done`, `customer:served`, `upgrade:bought`) of naar een state-conditie (bijv. "genoeg goud voor eerste upgrade").
   - De speler klikt dus nooit op "volgende"; de tutorial gaat verder wanneer de speler de actie echt uitvoert.
-- **Registry van doelen (`target`):** `core/target-registry.ts`. DOM-elementen en Phaser-objecten melden zich aan met een id en een functie die hun huidige positie in ontwerp-pixels geeft (`ingredient:<id>`, `customer:<id>`, `cauldron`, `hud-gold`, later `shop-button`). Bewegende doelen worden gevolgd. Een stap kan ook een **gids-alias** als doel hebben (`guide-ingredient`, `guide-customer`) die `systems/tutorial/guide.ts` tijdens het spelen omzet naar het juiste doel, zodat de tutorial altijd het drankje van een echt wachtende klant uitlegt.
+- **Registry van doelen (`target`):** `shared/targets.ts`. DOM-elementen en Phaser-objecten melden zich aan met een id en een functie die hun huidige positie in ontwerp-pixels geeft (`ingredient:<id>`, `customer:<id>`, `cauldron`, `hud-gold`, later `shop-button`). Bewegende doelen worden gevolgd. Een stap kan ook een **gids-alias** als doel hebben (`guide-ingredient`, `guide-customer`) die `tutorial/tutorial-guide.ts` tijdens het spelen omzet naar het juiste doel, zodat de tutorial altijd het drankje van een echt wachtende klant uitlegt.
 - **Tijdens een les:** maximaal **één klant** in de taverne en het **geduld staat stil** (de balk blijft vol), zodat niemand midden in de les vertrekt. Daarna loopt alles normaal. Dit geldt alleen zolang een stap **zichtbaar** is: een les die nog op haar moment wacht (de upgrade-hint wacht op genoeg goud) houdt het spel niet tegen.
-- **UI in `ui/tutorial`:** gedimde overlay met een "spotlight"-gat om het doel, een pulserende pijl en een korte spraakbel van een mascotte. Maximaal 1 à 2 korte zinnen per stap, in humoristische toon (i18n-sleutels).
+- **UI in `tutorial/tutorial-view.ts`:** gedimde overlay met een "spotlight"-gat om het doel, een pulserende pijl en een korte spraakbel van een mascotte. Maximaal 1 à 2 korte zinnen per stap, in humoristische toon (i18n-sleutels).
 - **Mascotte (werktitel):** een chagrijnige pratende ketel. Placeholder tot stap 21.
 - **Nooit blokkerend of vervelend:**
   - Altijd een zichtbare "Skip"-knop.
@@ -216,15 +225,15 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 
 ### Economie (code-kant)
 
-- Upgradekosten: `kosten(n) = round(basis × groeifactor^n)` (hele munten), groeifactor per upgrade in `data/upgrades/`. Een pakket van k niveaus kost de geometrische som in één formule (`systems/upgrades/cost.ts`), zodat de getoonde prijs voor x10 en max exact is wat er afgaat. Niveaus staan in `state.upgrades` (open map id → niveau).
-- Multipliers worden samengevoegd in één functie `getMultipliers(state)` (`systems/economy/`) zodat bronnen (prestige, upgrades, achievements, events) op één plek optellen/vermenigvuldigen. Eerst telt 'add', dan 'multiply'. Basiswaarden per stat staan in `data/upgrades/base-stats.ts`; de bar en de ketel lezen hun waarden via `wiring/sync-station.ts`.
-- Alle balansgetallen staan in `data/`, nooit in `systems/`.
+- Upgradekosten: `kosten(n) = round(basis × groeifactor^n)` (hele munten), groeifactor per upgrade in `economy/upgrade-data.ts`. Een pakket van k niveaus kost de geometrische som in één formule (`economy/upgrades.ts`), zodat de getoonde prijs voor x10 en max exact is wat er afgaat. Niveaus staan in `state.upgrades` (open map id → niveau).
+- Multipliers worden samengevoegd in één functie `getMultipliers(state)` (`economy/upgrades.ts`) zodat bronnen (prestige, upgrades, achievements, events) op één plek optellen/vermenigvuldigen. Eerst telt 'add', dan 'multiply'. Basiswaarden per stat staan in `economy/upgrade-data.ts`; de bar en de ketel lezen hun waarden via `app/world.ts`.
+- Alle balansgetallen staan in de `*-data.ts`-bestanden of als constanten bovenaan een feature-bestand, nooit midden in logica.
 
 ### Klanteninstroom en plekken (besluit eigenaar, 2026-10-06; gebouwd in stap 11a)
 
 - Klanten komen **geleidelijk**: aan het begin niet meteen veel en niet snel achter elkaar. De eerste klant komt na 3 seconden (`SPAWNING.firstDelayMs`), daarna gemiddeld elke 12 seconden, korter met reputatie (2% van de basis per punt, nooit onder 3 s). Een vrijgekomen plek wordt niet meteen gevuld: de volgende klant heeft minstens `refillDelayMs` (2,5 s) nodig om binnen te lopen.
 - De speler begint met **1 plek**: maximaal **1 klant tegelijk** in de taverne. Extra plekken worden gekocht met de upgrade **Extra Seat** (stat `seats`, basis 1, +1 per niveau, kosten 40 met groei 1,8, max 6 niveaus). De 7 klantplekken beneden (`CUSTOMER_SLOTS`) zijn de bovengrens van Extra Seat; een test bewaakt dat. Kamers (stap 14a) zetten er plekken bóven bij (zie Kamers).
-- `maxCustomers = min(plekken, tutorialgrens)` staat in `wiring/create-services.ts`; alle getallen staan in `data/customers/spawning.ts` en `data/upgrades/tier01.ts`, en zijn placeholders (stap 13).
+- `maxCustomers = min(plekken, tutorialgrens)` staat in `app/world.ts` (`customerContext`); alle getallen staan in `customers/customer-data.ts` en `economy/upgrade-data.ts`, en zijn placeholders (stap 13).
 - De offline-berekening (stap 10b) gebruikt dezelfde gemiddelde klantinterval (`meanSpawnIntervalMs`), maar houdt nog geen rekening met het aantal plekken; bij het afstellen in stap 13 meenemen.
 
 ### Drankeffecten en voorkeuren (besluit eigenaar, 2026-10-06; gebouwd in stap 11b)
@@ -233,16 +242,16 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
 - **Kracht:** de klant betaalt 25% meer (voorkeur 50%), verwerkt in `computePayout`. **Snelheid:** de klant drinkt 40% korter (voorkeur 80%), dus de plek komt sneller vrij. **Geluk:** 25% kans op een fooi van de helft van de prijs (voorkeur 50% kans). **Charme:** +1 reputatie bovenop de gewone reputatie per bediening (voorkeur +2).
 - **Drinkfase:** een bediende klant vertrekt niet meteen, maar blijft `SERVING.drinkMs` (5 s) zitten met een kroes. Hij wacht niet meer (geen geduld, geen bubbel, klikken doet niets) maar houdt zijn plek bezet. Het drinken loopt ook door tijdens een les, anders zou de enige plek bezet blijven.
 - **Bestellen:** een klant bestelt een drankje dat hij lekker vindt twee keer zo vaak als een ander bekend drankje (`LIKED_ORDER_WEIGHT`). Voorkeuren nu: ridder snelheid en geluk, elf charme, dwerg kracht.
-- Code: getallen in `data/effects.ts` en `data/brewing.ts`; één regel per effect in `systems/effects/bonus.ts` (een nieuw effect is één regel erbij); de fooi in `tip.ts`. Alle getallen zijn placeholders (stap 13).
+- Code: getallen in `serving/effects.ts` en `brewing/brewing.ts`; één regel per effect in `serving/effects.ts` (een nieuw effect is één regel erbij); de fooi in `tip.ts`. Alle getallen zijn placeholders (stap 13).
 - Offline (stap 10b) telt kracht, de verwachte fooi en charme mee, en weegt de bestellingen zoals de klanten ze kiezen. De drinkfase en het aantal plekken tellen offline nog niet mee.
 
 ### Reputatieniveaus en VIP-klanten (besluit eigenaar, 2026-10-06; gebouwd in stap 11c)
 
-- **6 niveaus** (`data/reputation/levels.ts`, namen in i18n `reputation.<id>.name`): Shabby Shack (0), Local Haunt (10), Cozy Inn (25), Popular Pub (50), Famous Tavern (100), Legendary Hall (200). Niveau 1 is het eerste. `levelFor`, `levelProgress` en `recipesTaughtUpTo` staan in `systems/reputation/level.ts`.
+- **6 niveaus** (`reputation/reputation.ts`, namen in i18n `reputation.<id>.name`): Shabby Shack (0), Local Haunt (10), Cozy Inn (25), Popular Pub (50), Famous Tavern (100), Legendary Hall (200). Niveau 1 is het eerste. `levelFor`, `levelProgress` en `recipesTaughtUpTo` staan in `reputation/reputation.ts`.
 - **Gates:** klanttypes hebben `minLevel` (elf 2, dwerg 3, koning 3). Een niveau maakt recepten ontdekbaar (`unlocks`, sinds stap 12; in 11c leerde het ze direct). Welke recepten bij welk niveau horen, staat in hoofdstuk 4, Receptenboek, en in het logboek van stap 12. Kamers (stap 14a) hebben ook een niveau-eis.
-- **Bewaker** (`systems/reputation/watch.ts`): leert bij een nieuw niveau de recepten en meldt `reputation:levelUp` (één keer per niveau, ook na een grote sprong, bijvoorbeeld offline). Een save die al voorbij een niveau is, krijgt de recepten stil bij het laden.
-- **HUD:** naast de reputatie de naam van het niveau en een balkje naar het volgende. Bij een nieuw niveau verschijnt 4,5 s een melding met wat erbij komt (nieuwe klant, nieuw recept) (`ui/level-up/`).
-- **VIP-klanten:** gewone klanttypes met `vip: true` en een eigen `reputationBonus` (nu King Grumblebeard: niveau 3, betaalt 3x, +3 reputatie, 30 s geduld). Zodra een VIP open is, is elke nieuwe klant met kans `VIP_SPAWN.chance` (10%) een VIP (`systems/customers/pick-type.ts`). Een VIP bestelt het **duurste bekende drankje**, heeft een kroon in de bubbel en een gouden kleur. Boos vertrekken kost niets. Een nieuwe VIP is alleen data.
+- **Bewaker** (`reputation/reputation.ts`): leert bij een nieuw niveau de recepten en meldt `reputation:levelUp` (één keer per niveau, ook na een grote sprong, bijvoorbeeld offline). Een save die al voorbij een niveau is, krijgt de recepten stil bij het laden.
+- **HUD:** naast de reputatie de naam van het niveau en een balkje naar het volgende. Bij een nieuw niveau verschijnt 4,5 s een melding met wat erbij komt (nieuwe klant, nieuw recept) (`reputation/level-up-view.ts`).
+- **VIP-klanten:** gewone klanttypes met `vip: true` en een eigen `reputationBonus` (nu King Grumblebeard: niveau 3, betaalt 3x, +3 reputatie, 30 s geduld). Zodra een VIP open is, is elke nieuwe klant met kans `VIP_SPAWN.chance` (10%) een VIP (`customers/customers.ts`). Een VIP bestelt het **duurste bekende drankje**, heeft een kroon in de bubbel en een gouden kleur. Boos vertrekken kost niets. Een nieuwe VIP is alleen data.
 - **Offline** telt niveaus en VIP's mee: de gewone klanten van het niveau en de VIP's naar hun kans.
 - Alle getallen zijn placeholders (stap 13).
 
@@ -252,35 +261,35 @@ De eigenaar speelde t/m stap 13 en vond het spel goed, met vier punten:
 
 1. **Effecten waren niet duidelijk.** De voorkeursles noemt kracht, snelheid, geluk en charme tegelijk; wat ze doen ontdekte de eigenaar pas via het receptenboek. **Besluit: effect-iconen** (stap 13b): elk effect krijgt een icoon (💪 kracht, ⚡ snelheid, 🍀 geluk, 💖 charme; emoji als placeholder tot stap 21) in de bestelbubbel, in het receptenboek en in de zwevende tekst na het serveren (bijv. "⚡ quick drinker"). Een voorkeur toont het icoon met een ♥. De voorkeursles noemt alleen het effect van het drankje dat de klant bestelt, met icoon, en de afsluitzin verwijst naar het boek voor de rest. De legenda komt in stap 14c; de andere ideeën (uitleg per effect bij de eerste keer, klantkaartje) staan in IDEAS.md, punt 5.
 2. **Serveren vanuit het drankje.** **Besluit: eerst het drankje, dan de klant** (stap 13b): klik een drankje op de bar; het licht op en de klanten die het besteld hebben krijgen een markering. Klik dan een klant om het te geven (verkeerde klant = de bekende weigering, het drankje blijft geselecteerd). Opnieuw op het drankje klikken of op een lege plek heft de selectie op. Direct een klant klikken zonder selectie blijft werken zoals nu. De basisles wijst het drankje en daarna de klant aan.
-3. **Eén knop voor de panelen.** In plaats van de knoppen Recipes, Shop en Close: **één knop die het zijpaneel uitklapt en weer inklapt** (stap 13b), met bovenin het paneel **tabbladen** (Shop | Recipes; later ook Settings, Heroes). Het paneel opent op het laatst gebruikte tabblad. Technisch: `ui/side-panels.ts` wordt een paneel met tabbladen in plaats van losse panelen; de tutorial wijst de uitklapknop aan en daarna het juiste tabblad (doelen `panel-button` en `tab:<id>`).
+3. **Eén knop voor de panelen.** In plaats van de knoppen Recipes, Shop en Close: **één knop die het zijpaneel uitklapt en weer inklapt** (stap 13b), met bovenin het paneel **tabbladen** (Shop | Recipes; later ook Settings, Heroes). Het paneel opent op het laatst gebruikte tabblad. Technisch: `app/panels-view.ts` wordt een paneel met tabbladen in plaats van losse panelen; de tutorial wijst de uitklapknop aan en daarna het juiste tabblad (doelen `panel-button` en `tab:<id>`).
 4. **Niveau 2 bracht te veel tegelijk** (alle drie de tier-2-ingrediënten op het schap, ook voor recepten van latere niveaus). **Besluit: ingrediënten koop je in de winkel** (stap 13c): een niveau maakt een ingrediënt koopbaar (eenmalige aankoop, groep "Ingredients" in de winkel). Pas na de aankoop staat het op het schap. Een recept is ontdekbaar als zijn niveau bereikt is **én** de speler alle ingrediënten heeft. Voorstel: niveau 2 Fire Pepper, niveau 3 Moon Grape, niveau 4 Troll Sweat (recepten per niveau daarop afstemmen). Ingrediënten blijven per gebruik gratis.
 
 Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de speler **ontdekt** heeft; een ontdekbaar recept bestelt niemand.
 
 **Gebouwd in stap 13c (punt 4):**
-- **Data:** een winkelingrediënt kan `buy: { level, cost }` hebben (`data/ingredients/`); zonder `buy` is het een basisingrediënt dat vanaf het begin op het schap staat. Nu: Fire Pepper op niveau 2 voor 40 goud, Moon Grape op 3 voor 150, Troll Sweat op 4 voor 600. De recepten per niveau pasten al bij dit voorstel (niveau 2: Bog Lantern, Dragon's Hiccup, Swamp Fire; 3: Moonlight Merlot, Honeyed Moon; 4: Troll's Toll, Gym Sock Mead, Spicy Spores); een test bewaakt dat een niveau geen recept opent waarvan een ingrediënt pas later te koop is.
+- **Data:** een winkelingrediënt kan `buy: { level, cost }` hebben (`brewing/ingredients.ts`); zonder `buy` is het een basisingrediënt dat vanaf het begin op het schap staat. Nu: Fire Pepper op niveau 2 voor 40 goud, Moon Grape op 3 voor 150, Troll Sweat op 4 voor 600. De recepten per niveau pasten al bij dit voorstel (niveau 2: Bog Lantern, Dragon's Hiccup, Swamp Fire; 3: Moonlight Merlot, Honeyed Moon; 4: Troll's Toll, Gym Sock Mead, Spicy Spores); een test bewaakt dat een niveau geen recept opent waarvan een ingrediënt pas later te koop is.
 - **State:** `ingredientsBought` (lijst ids; oude saves krijgen via `reconcile` een lege lijst).
-- **Bezit** (`systems/ingredients/owned.ts`): basis, plus gekocht, plus alles wat een **bekend** recept gebruikt. Dat laatste houdt oude saves (die tier-2-recepten al kenden) brouwbaar zonder migratie. Het schap toont precies het bezit; de oude regel "tot de hoogste tier van bekende en ontdekbare recepten" (`systems/brewing/shelf.ts`) is weg.
+- **Bezit** (`brewing/ingredients.ts`): basis, plus gekocht, plus alles wat een **bekend** recept gebruikt. Dat laatste houdt oude saves (die tier-2-recepten al kenden) brouwbaar zonder migratie. Het schap toont precies het bezit; de oude regel "tot de hoogste tier van bekende en ontdekbare recepten" (die in de schap-code) is weg.
 - **Ontdekken:** een recept is ontdekbaar met niveau én alle ingrediënten in bezit (`discoverableRecipes(state, recipes, owned)`).
-- **Winkel:** groep "Ingredients" bovenaan het Shop-tabblad, per ingrediënt "Unlocks at <niveau>" of "Buy · <prijs>" (`ui/shop/ingredient-section.ts`). **Een gekocht ingrediënt verdwijnt uit de winkel** (wens eigenaar: overzichtelijker); is alles gekocht, dan verdwijnt ook de kop. Actie `buyIngredient(id)`, event `ingredient:bought`; `ingredients:affordable` meldt wanneer er iets te kopen valt.
+- **Winkel:** groep "Ingredients" bovenaan het Shop-tabblad, per ingrediënt "Unlocks at <niveau>" of "Buy · <prijs>" (`economy/shop-view.ts`). **Een gekocht ingrediënt verdwijnt uit de winkel** (wens eigenaar: overzichtelijker); is alles gekocht, dan verdwijnt ook de kop. Actie `buyIngredient(id)`, event `ingredient:bought`; `ingredients:affordable` meldt wanneer er iets te kopen valt.
 - **Melding en boek:** de niveaumelding zegt "New in the shop: <ingrediënt>"; een ontdekbaar recept waarvoor nog een ingrediënt ontbreekt, zegt in het boek "Needs <ingrediënt> from the shop".
 - **Tutorial-hint** (les `ingredient`, na het boek, vóór personeel): start zodra een ingrediënt te koop én betaalbaar is (of meteen als dat al zo is), wijst Menu, tabblad Shop en de koopknop aan (alias `guide-ingredient-buy`), en daarna het nieuwe ingrediënt op het schap (`guide-new-ingredient`).
 
 **Gebouwd in stap 13b (punten 1 t/m 3; keuzes van de eigenaar via vragen):**
-- **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `scene/effects/bonus-lines.ts`).
-- **Serveren:** `DrinkSelection` (`systems/serving/selection.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`systems/actions/serve-actions.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
-- **Paneel:** één knop "☰ Menu" / "✕" rechtsboven in het spel; bovenin het paneel tabbladen Shop | Recipes (`ui/side-panels.ts`, logica zonder DOM in `ui/side-panel-state.ts`). Het paneel opent op het laatst gebruikte tabblad, **alleen binnen de sessie** (na herladen weer Shop). De tutorial volgt welk tabblad open is via `wiring/follow-open-tab.ts`.
+- **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `serving/serving-view.ts`).
+- **Serveren:** `DrinkSelection` (`serving/serving.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`serving/serving.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
+- **Paneel:** één knop "☰ Menu" / "✕" rechtsboven in het spel; bovenin het paneel tabbladen Shop | Recipes (`app/panels-view.ts`, logica zonder DOM in `app/ui-model.ts`). Het paneel opent op het laatst gebruikte tabblad, **alleen binnen de sessie** (na herladen weer Shop). De tutorial volgt welk tabblad open is via `tutorial/tutorial-context.ts`.
 
 ### Kamers (besluit eigenaar, 2026-10-06; gebouwd in stap 14a)
 
-- **Bovenverdieping:** boven de taverne staan drie kamervakken naast elkaar (`scene/layout-rooms.ts`). Niet gebouwd: dichtgetimmerd met een bordje ("Unlocks at <niveau>" of "Build in the shop: <prijs>"); klikken opent het zijpaneel op Shop (event `shop:requested`). Gebouwd: ingericht met placeholder-meubels (`scene/rooms/room-furniture.ts`, één tekenfunctie per kamer), en klanten zitten er. Klanten lopen voorlopig in een rechte lijn naar boven (echte animaties in stap 21).
-- **De kamers** (`data/rooms/`, placeholder-prijzen afgesteld met de simulator):
+- **Bovenverdieping:** boven de taverne staan drie kamervakken naast elkaar (`app/layout.ts`). Niet gebouwd: dichtgetimmerd met een bordje ("Unlocks at <niveau>" of "Build in the shop: <prijs>"); klikken opent het zijpaneel op Shop (event `shop:requested`). Gebouwd: ingericht met placeholder-meubels (`rooms/rooms-view.ts`, één tekenfunctie per kamer), en klanten zitten er. Klanten lopen voorlopig in een rechte lijn naar boven (echte animaties in stap 21).
+- **De kamers** (`rooms/rooms.ts`, placeholder-prijzen afgesteld met de simulator):
   - **Extension** (niveau 3, 1.500): +3 plekken boven.
   - **Alchemy Lab** (niveau 4, 8.000): ketel 25% sneller, +1 drankje op de bar (de bar heeft nu 6 plekken in de scene).
   - **VIP Lounge** (niveau 5, 30.000): VIP-kans ×2 (nieuwe stat `vipChance`, basis 10%), +2 plekken boven.
-- **Plekken:** stoelnummers zijn eerst de 7 beneden, dan per kamer (`systems/rooms/seats.ts`). Open zijn de gekochte plekken beneden (Extra Seat) plus alle plekken van gebouwde kamers; klanten kiezen alleen open plekken (`openSeats` in de klantcontext).
+- **Plekken:** stoelnummers zijn eerst de 7 beneden, dan per kamer (`rooms/rooms.ts`). Open zijn de gekochte plekken beneden (Extra Seat) plus alle plekken van gebouwde kamers; klanten kiezen alleen open plekken (`openSeats` in de klantcontext).
 - **Bonussen:** kamers gebruiken dezelfde effecten als upgrades en tellen mee in `getMultipliers` (één keer per gebouwde kamer). Offline telt de VIP-kans mee.
-- **Kopen:** groep "Rooms" in het Shop-tabblad; een gebouwde kamer verdwijnt eruit. Ingrediënten en kamers delen één module voor eenmalige aankopen (`systems/purchases/`) en één winkelonderdeel (`ui/shop/one-time-section.ts`).
+- **Kopen:** groep "Rooms" in het Shop-tabblad; een gebouwde kamer verdwijnt eruit. Ingrediënten en kamers delen één module voor eenmalige aankopen (`shared/purchases.ts`) en één winkelonderdeel (`economy/shop-view.ts`).
 - **State:** `roomsBuilt` (lijst ids).
 - **Tutorial-hint** (les `room`, na de VIP-les): start zodra een kamer te bouwen én betaalbaar is; wijst Menu, Shop en de bouwknop aan, en daarna de nieuwe kamer.
 - **Decoraties** komen in stap 14b.
@@ -308,20 +317,20 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
-- De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `ui/side-layout.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
+- De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
 - **Ontdekt recept:** naam, ingrediënten (met hun plaatje of kleur), brouwtijd, prijs, effect en zeldzaamheid. Zo hoeft de speler niets te onthouden en kan hij het recept zonder gokken opnieuw brouwen.
 - **Onontdekt recept:** een silhouet met een korte hint (`recipes.<id>.hint`), en bovenaan de voortgang X/N.
 - Ingrediënten die de speler nog niet kent (die uit kerkers komen) staan als "?" tot hij ze heeft gehad.
 - ~~Poster op de muur~~: **vervallen** (besluit eigenaar, 2026-10-06, ideeënronde): het receptenboek in het menu is genoeg.
 - **Gebouwd in stap 12 (keuzes van Claude, de eigenaar liet de aanbevolen keuze over):**
-  - **Ontdekken:** een niveau maakt recepten *ontdekbaar* (`unlocks` in `data/reputation/levels.ts`), niet bekend. Past de inhoud van de ketel precies op een ontdekbaar recept, dan komt er "Eureka! <drankje>!" en begint het meteen te brouwen; het recept is vanaf dan bekend (`systems/recipes/discovery.ts`, event `recipe:discovered`). Een combinatie die op geen bekend of ontdekbaar recept kan uitkomen, mislukt zoals voorheen. Klanten bestellen alleen bekende recepten.
+  - **Ontdekken:** een niveau maakt recepten *ontdekbaar* (`unlocks` in `reputation/reputation.ts`), niet bekend. Past de inhoud van de ketel precies op een ontdekbaar recept, dan komt er "Eureka! <drankje>!" en begint het meteen te brouwen; het recept is vanaf dan bekend (`recipes/recipes.ts`, event `recipe:discovered`). Een combinatie die op geen bekend of ontdekbaar recept kan uitkomen, mislukt zoals voorheen. Klanten bestellen alleen bekende recepten.
   - **Niveau 1 maakt niets ontdekbaar:** in tier 1 is elke combinatie van twee ingrediënten een recept, en een nieuwe speler zou tijdens de basisles per ongeluk iets kunnen brouwen wat niemand besteld heeft. De eerste ontdekkingen komen op niveau 2.
   - **Het schap** toonde de ingrediënten tot de hoogste tier van de bekende én ontdekbare recepten. *Sinds stap 13c:* het schap toont de basisingrediënten plus de gekochte (zie Speelbaarheid, "Gebouwd in stap 13c").
-  - **Paneel en knop:** een zijpaneel met een eigen knop "Recipes" links van Shop. Er is steeds maar één paneel open (`ui/side-panels.ts`; opent de speler het ene, dan sluit het andere). Per recept een kaartje: **bekend** (naam, zeldzaamheid, ingrediënten met hun kleur van het schap, brouwtijd, prijs en effect), **ontdekbaar** (silhouet "???" met zeldzaamheid en hint) of **op slot** ("Unlocks at <niveau>"). Bovenaan X/N. De melding bij een nieuw niveau noemt het aantal nieuwe recepten, niet de namen.
+  - **Paneel en knop:** een zijpaneel met een eigen knop "Recipes" links van Shop. Er is steeds maar één paneel open (`app/panels-view.ts`; opent de speler het ene, dan sluit het andere). Per recept een kaartje: **bekend** (naam, zeldzaamheid, ingrediënten met hun kleur van het schap, brouwtijd, prijs en effect), **ontdekbaar** (silhouet "???" met zeldzaamheid en hint) of **op slot** ("Unlocks at <niveau>"). Bovenaan X/N. De melding bij een nieuw niveau noemt het aantal nieuwe recepten, niet de namen.
   - **Poster op de muur:** niet gebouwd en later vervallen (ideeënronde 2026-10-06).
   - **Tutorial-hint:** een les `book` (na de plekken-les, vóór personeel) die start bij het eerste nieuwe niveau (`reputation:levelUp`, of meteen als het niveau al bereikt is): de ketel wijst de knop aan en daarna de kop van het open boek.
 
-- **Balans-simulator** (gebouwd in stap 13): `npm run simulate [-- minuten [seed]]` (standaard 60 minuten, seed 1). `scripts/simulate.mjs` laat de bestaande Vite de TypeScript-code laden (`ssrLoadModule`, geen nieuwe dependency); de logica staat in `src/sim/`: een speler-bot (`bot.ts`: serveert klaarstaande drankjes, probeert eerst nieuwe recepten, brouwt dan bestellingen, koopt de goedkoopste betaalbare upgrade; één klik per 0,7 s), een tijdlijn uit de spelgebeurtenissen (`timeline.ts`), de runner (`run.ts`: het echte spel via `createServices`, vaste seed, gesimuleerde klok, tutorial overgeslagen) en het rapport (`report.ts`). Het rapport toont de eerste keer van elke mijlpaal, een tabel per minuut en de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6. **Idle versus actief:** dezelfde run (zelfde seed) waarin de speler de laatste 10 minuten niets doet; doel 30-40%. Doel later: eerste prestige na ~1 tot 2 uur (prestige komt in stap 17).
+- **Balans-simulator** (gebouwd in stap 13): `npm run simulate [-- minuten [seed]]` (standaard 60 minuten, seed 1). `scripts/simulate.mjs` laat de bestaande Vite de TypeScript-code laden (`ssrLoadModule`, geen nieuwe dependency); de logica staat in `src/dev/`: een speler-bot (`bot.ts`: serveert klaarstaande drankjes, probeert eerst nieuwe recepten, brouwt dan bestellingen, koopt de goedkoopste betaalbare upgrade; één klik per 0,7 s), een tijdlijn uit de spelgebeurtenissen (`timeline.ts`), de runner (`run.ts`: het echte spel via `createServices`, vaste seed, gesimuleerde klok, tutorial overgeslagen) en het rapport (`report.ts`). Het rapport toont de eerste keer van elke mijlpaal, een tabel per minuut en de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6. **Idle versus actief:** dezelfde run (zelfde seed) waarin de speler de laatste 10 minuten niets doet; doel 30-40%. Doel later: eerste prestige na ~1 tot 2 uur (prestige komt in stap 17).
 
 ### Rendering
 
@@ -329,7 +338,7 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft nu 3 kamervakken (stap 14a); de gildekamer (stap 15) wordt de vierde.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
-- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `ui/side-layout.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
+- DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `app/ui-model.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
 
 ### Assets
@@ -411,7 +420,7 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 - **Anti-over-engineering:** geen `index.ts`-barrels; geen wiring-, dispatcher-, manager-, facade- of actions-laag die alleen doorgeeft; geen nieuw bestand of nieuwe map voor minder dan ~50 regels; geen abstractie "voor later". Een nieuwe feature = een map plus één regel in `app/world.ts`.
 - **Zero-allocation in de game-loop:** `shared/pool.ts` blijft voor klant-sprites, zwevende tekst en partikels. In `update()` van views en in tick-handlers geen nieuwe arrays, objecten, closures of spreads per frame/tick als het te vermijden is. Bij een refactor worden algoritmes verplaatst, niet herschreven (ook de volgorde van RNG-aanroepen blijft gelijk).
 - Functies overzichtelijk (lint: max 60 regels), liever pure functies dan klassen. Klassen alleen waar Phaser het vraagt (Scenes).
-- Geen magische getallen in logica: naar `data/` of constanten.
+- Geen magische getallen in logica: naar een `*-data.ts`-bestand of constanten.
 - Geen commentaar dat herhaalt wat de code doet; wel één regel *waarom* bij niet-voor-de-hand-liggende keuzes.
 - Imports met pad-alias `@/` naar `src/`.
 - Geen `console.log` in productie (een `debug()`-helper die in de build verdwijnt).
@@ -554,10 +563,48 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
 
 ### Chore: vlakke architectuur (2026-10-07, `chore-flatten-architecture`)
-- **Gedaan (fase 0, documentatie):** de eigenaar vond de architectuur te ver doorgeslagen in SOLID: 245 bestanden in `src/` van gemiddeld 29 regels (187 van ten hoogste 40 regels), 25 `index.ts`-barrels, een `wiring/`-laag en `systems/actions/` die alleen doorgaven, een eigen store-interface per systeem en tot vier mappen diepe paden. Voorstel en akkoord (2026-10-07): features worden mappen met logica, data en view bij elkaar (`src/<feature>/`), `shared/` vervangt core, save en runtime, `app/` bevat `createWorld` en de Phaser/DOM-schil, bestanden worden 150 tot 300 regels, functielimiet 60, Phaser/DOM alleen in `*-view.ts`/`*-scene.ts`/`main.ts`. `CLAUDE.md`, `GAME_ANALYSE.md` hoofdstuk 11 (met Mermaid-diagrammen) en SPECS.md hoofdstuk 1, 3, 4, 7, 9, 10, 11 en 13 zijn bijgewerkt.
-- **Waarom:** voor één ontwikkelaar is het mentale model te groot; kleine bestanden en doorgeeflagen kosten meer leesbaarheid dan ze opleveren. Regressie-orakel: baseline `npm run check` groen (79 testbestanden, 407 tests) en `npm run simulate -- 60 1` is deterministisch; de uitvoer moet na elke fase byte-identiek zijn.
-- **Afwijkingen van de werkafspraken:** geen genummerde stap (branch `chore-flatten-architecture`), één commit per fase (ongeveer 8) in plaats van 2 tot 3. Mergen en pushen alleen na uitdrukkelijke opdracht.
-- **Nog te doen:** fase 1 t/m 6 (lint aanpassen; `shared/`; `World`; features van klein naar groot; `app/`, `i18n/`, `dev/`; opruimen en prestatie-audit). Daarna deze entry afronden met de paden-tabel (oud → nieuw) en de padverwijzingen in hoofdstuk 4 bijwerken.
+- **Gedaan:** de eigenaar vond de architectuur te ver doorgeslagen in SOLID (ravioli-code). Voor: 245 bestanden in `src/` van gemiddeld 29 regels (187 van ten hoogste 40 regels), 25 `index.ts`-barrels, een `wiring/`-laag, een `PlayerActions`-facade met 14 deps, een eigen store-interface per systeem en paden tot vier mappen diep. Na: **54 bestanden** (mediaan 104 regels, grootste 265), **0 barrels**, tests van 84 naar 37 bestanden, alle paden `src/<feature>/<bestand>.ts`. Uitgevoerd in fasen, elke fase met `npm run check` groen en `npm run simulate -- 60 1` **byte-identiek** aan de baseline van vóór de refactor:
+  0. documentatie (CLAUDE.md, GAME_ANALYSE.md hoofdstuk 11 met Mermaid-diagrammen, SPECS.md hoofdstuk 1, 3, 4, 7, 9, 10, 11, 13);
+  1. limieten: 300 (waarschuwing) en 350 (fout) regels, functies 60;
+  2. `shared/` (core, save en runtime samen);
+  3. reputation, recipes, rooms, `shared/content.ts` en `shared/purchases.ts`;
+  4. economy, customers, brewing, serving (met effects) en staff;
+  5. offline, tutorial en het ontbinden van `wiring/`;
+  6. `app/` (scene en ui-schil), `i18n/en.ts`, `dev/` (simulator) en `tests/content/` (validatie van de data-tabellen);
+  7. één `World` (`app/world.ts`, `createWorld`) in plaats van `createServices` en `PlayerActions`; spelersacties zijn functies per feature (`clickIngredient`, `buyUpgradeById`, `clickCustomer`...);
+  8. lintregel op bestandsnaam (Phaser/DOM alleen in `*-view.ts`, `*-scene.ts`, `main.ts`, `shared/browser.ts`) en `scripts/check-cycles.mjs` (importkringen); de vier kringen die dat vond zijn opgelost.
+  Gecontroleerd in de browser (dev-server): het spel laadt zonder consolefouten, ingrediënt klikken, brouwen, drankje pakken, klant bedienen (goud en reputatie omhoog), tutorial loopt door, menu met Shop-tab opent. `vite build` slaagt, bundel gelijk (388 kB gzip).
+- **Waarom:** voor één ontwikkelaar is het mentale model te groot; kleine bestanden en doorgeeflagen kosten meer leesbaarheid dan ze opleveren. Bestanden zijn nu 150 tot 300 regels met bij elkaar horende functies. Gedrag, state, UI en mechanics zijn niet veranderd (simulator identiek, 407 tests ongewijzigd in aantal).
+- **Afwijkingen van het voorstel:** (1) de tick-volgorde staat niet in één `bus.on('tick')` maar in de volgorde van de `start…`-aanroepen in `createWorld` (de systemen hebben interne toestand, en de unit tests starten ze los); (2) de kleine structurele `…Store`/`…State`-interfaces van de pure functies (bijv. `UpgradeStore`, `RoomStore`, `LevelStore`, `EconomyStore`) zijn **blijven bestaan**: tests bouwen daarmee kleine toestanden, en alleen de facades en factories zijn weggehaald; (3) `*-data.ts` bestaat alleen waar de data groot is of een importkring breekt (`recipe-data`, `upgrade-data`, `customer-data`, `tutorial-steps`); (4) `reputation/level-up-model.ts` (45 regels) en `shared/random.ts` (rng + vrolijke meldingen) zijn kleine bestanden om kringen te vermijden; (5) `createInitialState` in `shared/state.ts` importeert nog `STARTER_RECIPE_IDS` uit `recipes/recipe-data.ts` (shared kent dus één feature); (6) de views lezen de echte data-tabellen, niet `world.content`; (7) één commit per fase (9 commits) in plaats van 2 tot 3.
+- **Bekende prestatiepunten (bestaand, niet veroorzaakt door de refactor, niet aangepast om het gedrag gelijk te houden):** `shelfIds(world)` maakt elke frame een nieuwe array (het schap leest `update()` elke frame) en `roomOfferById` plus `roomSign` bouwen elke frame teksten per kamer. Dat zijn kandidaten voor een aparte opruimstap (cache op state-wijziging) om het zero-allocation-doel te halen.
+- **Paden-tabel (oud → nieuw), voor het lezen van oudere logboek-entries:**
+
+| Oud | Nieuw |
+|---|---|
+| `core/` (state, store, events, game-events, ticker, clock, numbers, format, suffixes, rng, pool, target-registry, debug) | `shared/state.ts`, `events.ts`, `time.ts`, `numbers.ts`, `random.ts`, `pool.ts`, `targets.ts` |
+| `save/*`, `runtime/*` | `shared/save.ts` (codec, envelope, migrate, reconcile, manager, storage-interface en geheugenadapter), `shared/browser.ts` (loop-driver, autosave, localStorage, debug-commando's) |
+| `data/common.ts`, `data/text-key.ts`, `data/feedback.ts`, `systems/feedback.ts` | `shared/content.ts`, `shared/random.ts` |
+| `systems/purchases/` | `shared/purchases.ts` |
+| `data/customers/`, `systems/customers/`, `scene/customers/` | `customers/customer-data.ts`, `customers.ts`, `customers-view.ts` |
+| `data/brewing.ts`, `systems/brewing/`, `scene/brewing/` | `brewing/brewing.ts` (`SERVING` staat nu in `serving/effects.ts`), `brewing-view.ts` |
+| `data/ingredients/`, `systems/ingredients/`, `wiring/ingredient-shelf.ts` | `brewing/ingredients.ts` |
+| `data/recipes/`, `systems/recipes/`, `ui/recipe-book/` | `recipes/recipe-data.ts`, `recipes.ts`, `recipe-book-view.ts` |
+| `data/effects.ts`, `systems/effects/`, `systems/serving/`, `scene/effects/` | `serving/effects.ts`, `serving.ts`, `serving-view.ts` |
+| `systems/staff/` | `staff/staff.ts` |
+| `data/upgrades/`, `systems/upgrades/`, `systems/economy/`, `ui/shop/` | `economy/upgrade-data.ts`, `upgrades.ts`, `shop-model.ts`, `shop-view.ts` |
+| `data/rooms/`, `systems/rooms/`, `scene/rooms/` | `rooms/rooms.ts`, `rooms-view.ts` |
+| `data/reputation/`, `systems/reputation/`, `ui/level-up/` | `reputation/reputation.ts`, `level-up-model.ts`, `level-up-view.ts` |
+| `data/offline.ts`, `systems/offline/`, `ui/welcome/`, `wiring/create-offline.ts` | `offline/offline.ts`, `welcome-view.ts` |
+| `data/tutorial/`, `systems/tutorial/`, `ui/tutorial/`, `wiring/create-tutorial.ts` e.a. | `tutorial/tutorial-steps.ts`, `tutorial.ts`, `tutorial-guide.ts`, `tutorial-context.ts`, `tutorial-view.ts` |
+| `wiring/create-services.ts` (+ start-customers, start-staff, sync-station, watch-shop), `systems/actions/` | `app/world.ts` (`createWorld`); acties staan in de features |
+| `scene/` (boot, tavern, layout, palette, sprites), `ui/` (hud, panels, fit, mount), `game.ts` | `app/tavern-scene.ts`, `backdrop-view.ts`, `layout.ts`, `ui-model.ts`, `hud-view.ts`, `panels-view.ts`, `viewport-view.ts` |
+| `sim/` | `dev/simulator.ts`, `simulator-report.ts` |
+| `data/validate/` | `tests/content/validate-core.ts`, `validate-content.ts` |
+| `i18n/en/*.ts`, `i18n/index.ts` | `i18n/en.ts`, `i18n/translator.ts` |
+| `tests/<oude map>/…` | `tests/<feature>.test.ts`, `tests/flows/`, `tests/content/` |
+
+- **Nu te proberen:** `npm run dev` (spel speelt als voorheen), `npm run check` (nu ook `npm run cycles`), `npm run simulate -- 60 1`.
+- **Nog te doen / volgende stap:** mergen naar `main` als de eigenaar dat zegt; daarna weer verder met stap 14b (Decoraties). Eventueel een aparte opruimstap voor de per-frame-allocaties hierboven en voor de resterende smalle store-interfaces.
 
 ### Chore: ideeënronde (2026-10-06, `chore-ideas-review`)
 - **Gedaan:** alle punten uit IDEAS.md met de eigenaar doorgenomen (vragen in vier rondes), de besluiten vastgelegd in hoofdstuk 4 ("Besluiten uit de ideeënronde" en "Helden") en in het stappenplan (nieuwe stappen 14c, 14d en 16b; 15 en 16 aangescherpt). IDEAS.md opgeschoond: volledig uitgewerkte ideeën zijn eruit (afspraak eigenaar: wat in SPECS.md staat, gaat uit IDEAS.md); alleen open punten blijven. De hernoeming van SPEC.md naar SPECS.md (door de eigenaar) is vastgelegd, en alle documentatie staat nu in `docs/` (wens eigenaar; CLAUDE.md blijft in de hoofdmap omdat Claude Code hem daar automatisch laadt). Alle verwijzingen zijn bijgewerkt.

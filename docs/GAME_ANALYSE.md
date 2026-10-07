@@ -291,7 +291,7 @@ src/
   dev/         balans-simulator
 ```
 
-Per feature: `<feature>.ts` (spelregels, puur), `<feature>-data.ts` (content en balansgetallen), `<feature>-model.ts` (pure view-models, optioneel) en `*-view.ts` (Phaser of DOM). Alleen `*-view.ts`, `*-scene.ts` en `main.ts` kennen Phaser en DOM; al het andere draait ook in Node (Vitest, simulator, offline-berekening).
+Per feature: `<feature>.ts` (spelregels en acties, puur) en `*-view.ts` (Phaser of DOM). Groot of kring-brekend? Dan komt er een `*-data.ts` (recepten, upgrades, klanttypes, tutorialstappen) of `*-model.ts` (pure view-models) bij. Alleen `*-view.ts`, `*-scene.ts` en `main.ts` kennen Phaser en DOM; al het andere draait ook in Node (Vitest, simulator, offline-berekening).
 
 ```mermaid
 flowchart TB
@@ -325,11 +325,11 @@ sequenceDiagram
   View->>F: serveCustomer(world, id)
   F->>W: store.update + bus.emit('customer:served')
   W-->>View: event: sprite en tekst reageren
-  Note over W,F: elke 100 ms: tick, vaste volgorde in world.ts:<br/>tutorial, customers, brewing, staff
+  Note over W,F: elke 100 ms: tick, vaste volgorde van de start-aanroepen<br/>in createWorld: tutorial, customers, brewing, staff
 ```
 
-- **World:** één object `{ store, bus, rng, clock, content, floor, station, selection }`. Acties en tick-updates krijgen `world`; rekenfuncties (prijs, kosten, niveau) blijven puur. Tijd, willekeur en opslag worden ingespoten, dus tests en de simulator zijn deterministisch.
-- **Afhankelijkheden:** `app` → features → `shared`. Features mogen elkaar importeren, maar niet in een kring tussen bestanden.
+- **World:** één object `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. Spelersacties zijn gewone functies per feature die `world` (of een `Pick<World, ...>`) krijgen; rekenfuncties (prijs, kosten, niveau) blijven puur. Tijd, willekeur en opslag worden ingespoten, dus tests en de simulator zijn deterministisch.
+- **Afhankelijkheden:** `app` → features → `shared`. Features mogen elkaar importeren, maar niet in een kring tussen bestanden (`npm run cycles` bewaakt dat).
 - **Bestandsgrootte:** 150 tot 300 regels per bestand als de functies bij elkaar horen.
 - Het volledige regelwerk (en wat bewust is weggelaten: barrels, wiring, aparte store-interfaces) staat in `CLAUDE.md` en `docs/SPECS.md` hoofdstuk 4 en 9.
 
