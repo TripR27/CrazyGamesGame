@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (chore `chore-flatten-architecture`, de vlakke architectuur, staat klaar om te mergen: zie hoofdstuk 14). **Laatst afgerond stap:** 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
+**Nu bezig:** niets (stap 14b staat op `step-14b-decorations` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14b (Decoraties). **Volgende stap:** 14c (Legenda in het receptenboek), daarna 14d (Night Shift: offline verdienen kopen).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -34,7 +34,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 13b | Speelbaarheid (UX-ronde 1) | ✅ | `step-13b-ux` |
 | 13c | Ingrediënten in de winkel | ✅ | `step-13c-ingredients` |
 | 14a | Kamers (bovenverdieping) | ✅ | `step-14a-rooms` |
-| 14b | Decoraties (goud-sink) | ⬜ | |
+| 14b | Decoraties (goud-sink) | ✅ | `step-14b-decorations` |
 | 14c | Legenda van effecten in het receptenboek | ⬜ | |
 | 14d | Night Shift: offline verdienen kopen | ⬜ | |
 | 15 | Helden, gildekamer en uitrusting | ⬜ | |
@@ -129,7 +129,7 @@ main.ts
    ↓
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
-features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/
+features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
                   reputation/ offline/ tutorial/   (later heroes/ prestige/ achievements/ audio/ platform/)
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
@@ -155,7 +155,7 @@ crazyGamesGame/
                             browser.ts (loop-driver, autosave, localStorage; de enige browser-koppeling)
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
-    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  reputation/  offline/  tutorial/
+    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
@@ -168,7 +168,7 @@ Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: 
 
 ### World
 
-`createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, ingrediënten) en is in tests te vervangen door een kleine catalogus. Spelersacties en dingen die de views nodig hebben zijn gewone functies per feature die `world` krijgen (of met `Pick<World, ...>` alleen de delen die ze gebruiken, zodat tests geen volledige wereld hoeven te bouwen): `clickIngredient`, `buyUpgradeById`, `clickCustomer`, `shelfIds`, `roomOfferById`. Rekenfuncties (prijs, kosten, niveau, `matchRecipe`) blijven puur en nemen waarden.
+`createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, decoraties, ingrediënten) en is in tests te vervangen door een kleine catalogus. Spelersacties en dingen die de views nodig hebben zijn gewone functies per feature die `world` krijgen (of met `Pick<World, ...>` alleen de delen die ze gebruiken, zodat tests geen volledige wereld hoeven te bouwen): `clickIngredient`, `buyUpgradeById`, `clickCustomer`, `shelfIds`, `roomOfferById`. Rekenfuncties (prijs, kosten, niveau, `matchRecipe`) blijven puur en nemen waarden.
 
 **Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel. De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
 
@@ -217,8 +217,9 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
+- **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
 - **Fasering:** basis-tutorial (ingrediënt → ketel → wachten → serveren → eerste goud) in **stap 8**. Elke latere stap met een nieuwe functie levert een **korte contextuele hint** die pas verschijnt zodra de functie voor het eerst beschikbaar is (eerste upgrade, eerste medewerker, eerste ontdekking, eerste held, enz.). Een les kan starten op een **toestand** door een event uit te zenden zodra die toestand ontstaat (bijv. `upgrade:affordable`); een toestand die al geldt bij laden telt via `alreadyHolds` als gestart.
 - **Tests:** stappen volgen elkaar correct op, overslaan werkt, out-of-order acties lopen niet vast, herladen hervat op de juiste stap.
@@ -292,7 +293,27 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 - **Kopen:** groep "Rooms" in het Shop-tabblad; een gebouwde kamer verdwijnt eruit. Ingrediënten en kamers delen één module voor eenmalige aankopen (`shared/purchases.ts`) en één winkelonderdeel (`economy/shop-view.ts`).
 - **State:** `roomsBuilt` (lijst ids).
 - **Tutorial-hint** (les `room`, na de VIP-les): start zodra een kamer te bouwen én betaalbaar is; wijst Menu, Shop en de bouwknop aan, en daarna de nieuwe kamer.
-- **Decoraties** komen in stap 14b.
+- **Decoraties:** zie Decoraties hieronder (stap 14b).
+
+### Decoraties (gebouwd in stap 14b)
+
+- **Wat:** zes decoraties beneden in de taverne, elk **één keer** te kopen in de winkel (keuze eigenaar: eenmalig, geen niveaus), als goud-sink met een **kleine bonus** op een stat die al bestaat (keuze eigenaar: geen nieuwe stat). Data, logica en de actie `buyDecorById` in `decor/decor.ts`; de tekeningen in `decor/decor-view.ts`.
+- **De decoraties** (placeholder-prijzen, afgesteld met de simulator):
+
+| Decoratie | Soort | Niveau | Prijs | Bonus |
+|---|---|---|---|---|
+| Wall Torch | fakkel | 2 | 300 | drankjes +3% duurder |
+| Woven Rug | tapijt | 3 | 1.000 | ketel +5% sneller |
+| Boar Trophy | trofee | 3 | 2.500 | drankjes +4% duurder |
+| Everburning Torch | fakkel | 4 | 6.000 | ketel +5% sneller |
+| Royal Carpet | tapijt | 5 | 20.000 | VIP-kans +25% |
+| Golden Tankard | trofee | 6 | 60.000 | drankjes +8% duurder |
+
+- **Bonussen:** tellen mee in `getMultipliers` (één keer per gekochte decoratie, net als kamers), dus ook offline.
+- **Kopen:** groep "Decorations" in het Shop-tabblad, onder Rooms; een gekochte decoratie verdwijnt eruit. Zelfde module voor eenmalige aankopen (`shared/purchases.ts`) en hetzelfde winkelonderdeel als ingrediënten en kamers. Event `decor:bought`; `decor:affordable` meldt wanneer er iets te kopen valt.
+- **Scene:** fakkels en trofeeën aan de achterwand, tapijten op de vloer, op vaste plekken (`DECOR_SPOTS` in `app/layout.ts`; een test bewaakt dat ze het schap, de deur, de bar en de ketel niet raken). Alleen zichtbaar na aankoop. De view tekent alles op één Graphics-object en tekent alleen opnieuw als het aantal gekochte decoraties verandert (geen allocaties per frame). De stoelmarkeringen liggen bovenop, zodat een tapijt ze niet bedekt.
+- **State:** `decorBought` (lijst ids; oude saves krijgen via `reconcile` een lege lijst).
+- **Tutorial-hint** (les `decor`, na de kamerles): start zodra een decoratie te koop én betaalbaar is; wijst Menu, Shop en de koopknop aan (alias `guide-decor-buy`), en daarna de nieuwe decoratie in de taverne (`guide-new-decor`). Decoraties zijn al vanaf niveau 2 te koop, dus ver vóór deze les aan de beurt is. Daarom telt de koopstap alleen als hij in beeld is (`onlyWhenShown`); anders zou een vroege aankoop via "een latere actie al gedaan" de personeels-, VIP- en kamerles afvinken. Heeft de speler al een decoratie zodra de les aan de beurt is, dan verschijnt alleen de afsluitzin.
 
 ### Besluiten uit de ideeënronde (eigenaar, 2026-10-06)
 
@@ -366,6 +387,7 @@ Customer   { id, minLevel, patienceSeconds, spendMultiplier, likes: effect[], vi
 ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
+Decor      { id, buy: { level, cost }, effects: UpgradeEffect[] }          // stap 14b; tekst decor.<id>.name/.description
 Hero       { id, class, baseStats, hireCost }
 Dungeon    { id, minHeroLevel, durationSeconds, drops: ingredient id weighted[] }
 ```
@@ -510,7 +532,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 13c: Ingrediënten in de winkel.** Een niveau maakt een ingrediënt koopbaar (eenmalig, groep Ingredients); het schap toont de basisingrediënten plus de gekochte; recepten zijn ontdekbaar met niveau én ingrediënten; de niveaumelding noemt het nieuwe ingrediënt. Tutorial-hint: eerste ingrediënt kopen. Daarna `npm run simulate` en de getallen opnieuw afstellen.
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
 - [x] **Stap 14a: Kamers.** Uitbreidingen (uitbouw met extra tafels, alchemielab, VIP-lounge) als kamervakken op een bovenverdieping in de scene, te bouwen in de winkel. Tutorial-hint: eerste kamer. Zie hoofdstuk 4, Kamers. (Stap 14 is op 2026-10-06 gesplitst in 14a en 14b, keuze eigenaar.)
-- [ ] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie.
+- [x] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie. Zie hoofdstuk 4, Decoraties.
 - [ ] **Stap 14c: Legenda van effecten in het receptenboek.** Bovenaan het receptenboek een legenda met de vier effecten (icoon, naam, wat het doet); bij elk recept alleen nog het icoon in plaats van de tekst. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
 - [ ] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
@@ -561,6 +583,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 14b: Decoraties (2026-10-07, `step-14b-decorations`)
+- **Gedaan:** (code in `src/decor/decor.ts`, `src/decor/decor-view.ts`, `DECOR_SPOTS` in `src/app/layout.ts`, en kleine aanvullingen in `app/world.ts`, `app/tavern-scene.ts`, `economy/upgrades.ts`, `economy/shop-model.ts`, `economy/shop-view.ts`, `shared/` (state, events, purchases, content, targets), `tutorial/`, `i18n/en.ts` en `dev/simulator.ts`; tests in `tests/decor.test.ts`, `tests/flows/shop-flow.test.ts`, `tests/layout.test.ts`, `tests/content/`, `tests/shared/targets.test.ts`)
+  - **Decoraties:** zie hoofdstuk 4, Decoraties. Een nieuwe feature-map `decor/` plus één regel in `createWorld` (`watchDecorShop`) en een tabel in `Content`.
+  - **Simulator:** de bot koopt een betaalbare decoratie vóór de goedkoopste upgrade, maar terwijl hij voor een kamer spaart alleen als ze onder 10% van de kamerprijs blijft (net als upgrades); de tijdlijn toont "bought <decoratie>".
+  - **Tutorial in een lange winkel:** met zes extra rijen vielen de koopknoppen onderaan de winkel (decoraties, maar ook personeel) buiten het paneel, en wees de pijl onder het paneel. Opgelost met `reveal` in het doelregister: de winkel scrolt de knop in beeld zodra de pijl ernaar wijst (hoofdstuk 4, Tutorial).
+  - 13 tests erbij (420 totaal).
+- **Waarom (keuzes, afgesproken met de eigenaar):** eenmalig kopen en alleen bestaande stats (de aanbevolen opties), zodat de module voor eenmalige aankopen, de winkelgroep en `getMultipliers` hergebruikt worden en er geen nieuwe regels in klanten of serveren nodig zijn. Twee van elke soort (fakkel, tapijt, trofee) van niveau 2 tot 6, met prijzen die oplopen tot ver na de laatste kamer: een goud-sink voor het midden en het einde van een run. De les staat achteraan in de rij en telt een aankoop alleen in beeld, zodat een vroege aankoop geen eerdere lessen overslaat.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels. Zonder dat de bot decoraties koopt, was `npm run simulate -- 60 1` byte-identiek aan `main` (de nieuwe code verandert verder niets). Met decoraties, simulator 60 minuten (seeds 1/2/3): Wall Torch op 9:13 / 9:41 / 9:15, Woven Rug 12:50 / 13:27 / 13:55, Boar Trophy 15:38 / 15:19 / 17:06, Everburning Torch 22:22 / 24:11 / 24:13, Royal Carpet 26:30 / 27:34 / 27:49, Golden Tankard 33:50 / 34:27 / 34:25. Kamers ongeveer even vroeg als voorheen (Extension 8:40 / 9:03 / 9:06, VIP Lounge 20:41 / 22:23 / 22:44). Aankopen in de eerste 5 minuten 16 / 17 / 16, eerste medewerker 4:26, eerste ontdekking 1:20 (ongewijzigd). Idle 33% / 41% / 40% (op `main` 28% / 33% / 35%); omdat dat hoger leek, ook seeds 4/5/6 gemeten: 36% / 37% / 33% tegen 37% / 33% / 38% op `main`. Het verschil is ruis van het korte meetvenster van 10 minuten (zie ook stap 13c); gemiddeld over zes seeds 37% (`main` 34%), binnen het doel. In de browser (testsaves): de les verscheen op niveau 4 met 2.000 goud, wees Menu aan, de winkel scrolde naar de groep Decorations en de pijl stond op "Buy · 300"; na het kopen hing de fakkel aan de muur met de pijl erop en de afsluitzin. Met alle decoraties en kamers: fakkels links en naast de ketel, zwijnenkop en gouden kroes boven de bar, blauw kleed onder de tafels, rode loper voor de bar, stoelmarkeringen erbovenop. Geen consolefouten. `vite build` slaagt (390 kB gzip, was 388).
+- **Afwijkingen van het plan:** het in beeld scrollen van winkelknoppen voor de tutorial (`reveal`) is mee gebouwd, omdat de hint anders onder het paneel wees; het helpt ook de bestaande lessen. Verder geen.
+- **Nu te proberen:** speel tot Local Haunt en spaar 300 goud: de groep Decorations staat in de winkel en de fakkel hangt na het kopen aan de muur. De hint van de ketel komt pas na de kamerles.
+- **Nog te doen / volgende stap:** stap 14c, Legenda van effecten in het receptenboek. De winkel wordt lang (ingrediënten, kamers, decoraties, upgrades); groepen inklappen of tabbladen staan al op de checklist in IDEAS.md, punt 2.
 
 ### Chore: vlakke architectuur (2026-10-07, `chore-flatten-architecture`)
 - **Gedaan:** de eigenaar vond de architectuur te ver doorgeslagen in SOLID (ravioli-code). Voor: 245 bestanden in `src/` van gemiddeld 29 regels (187 van ten hoogste 40 regels), 25 `index.ts`-barrels, een `wiring/`-laag, een `PlayerActions`-facade met 14 deps, een eigen store-interface per systeem en paden tot vier mappen diep. Na: **54 bestanden** (mediaan 104 regels, grootste 265), **0 barrels**, tests van 84 naar 37 bestanden, alle paden `src/<feature>/<bestand>.ts`. Uitgevoerd in fasen, elke fase met `npm run check` groen en `npm run simulate -- 60 1` **byte-identiek** aan de baseline van vóór de refactor:
