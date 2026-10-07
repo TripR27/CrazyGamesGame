@@ -1,10 +1,10 @@
+import type { PlayerActions } from '@/app/actions';
 import { ingredientColor } from '@/brewing/brewing-view';
 import { t } from '@/i18n/index';
 import { recipes } from '@/recipes/recipe-data';
 import { type BookEntry, toBookView, type BookState } from '@/recipes/recipes';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
-import type { PlayerActions } from '@/systems/actions/player-actions';
 import { createEl } from '@/ui/dom';
 import { domBounds } from '@/ui/dom-bounds';
 import type { SidePanels } from '@/ui/side-panels';

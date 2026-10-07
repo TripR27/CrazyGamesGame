@@ -1,6 +1,5 @@
 import { BREWING } from '@/brewing/brewing';
 import { VIP_SPAWN } from '@/customers/customer-data';
-import { OFFLINE } from '@/data/offline';
 
 export type UpgradeId = string;
 
@@ -39,7 +38,8 @@ export const BASE_STATS: Readonly<Record<UpgradeStat, number>> = {
   storage: BREWING.storageCapacity,
   autoBrew: 0,
   autoServe: 0,
-  offlineHours: OFFLINE.limitHours,
+  /** How long staff keep working while away; upgrades (later: prestige) raise it. */
+  offlineHours: 2,
   seats: 1,
   vipChance: VIP_SPAWN.chance,
 };

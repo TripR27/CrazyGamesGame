@@ -1,3 +1,4 @@
+import { createServices } from '@/app/world';
 import { customers } from '@/customers/customer-data';
 import { createGame } from '@/game';
 import { toLevelUpView } from '@/reputation/reputation';
@@ -10,7 +11,6 @@ import { systemClock, createTicker } from '@/shared/time';
 import { placeGame } from '@/ui/game-viewport';
 import { mountUi } from '@/ui/mount';
 import { createSideLayout } from '@/ui/side-layout';
-import { createServices } from '@/wiring/create-services';
 
 const clock = systemClock;
 const manager = createSaveManager<GameState>({

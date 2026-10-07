@@ -1,7 +1,6 @@
-import { KNOWN_TARGETS } from '@/data/tutorial/targets';
-import type { TutorialStep } from '@/data/tutorial/types';
 import { positive } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import { KNOWN_TARGETS, type TutorialStep } from '@/tutorial/tutorial-steps';
 
 /** Lessons whose steps are not next to each other: "restart the lesson" would then skip steps. */
 function splitLessons(steps: readonly TutorialStep[]): string[] {

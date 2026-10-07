@@ -1,17 +1,17 @@
+import type { PlayerActions } from '@/app/actions';
 import { mountShop, type ShopSource } from '@/economy/shop-view';
+import type { OfflineInbox } from '@/offline/offline';
+import { mountWelcomeBack } from '@/offline/welcome-view';
 import { mountRecipeBook, type BookSource } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
 import type { LevelUpView } from '@/reputation/reputation';
 import type { TargetRegistry } from '@/shared/targets';
-import type { PlayerActions } from '@/systems/actions/player-actions';
-import type { OfflineInbox } from '@/systems/offline/inbox';
+import { mountTutorial, type TutorialUiSource } from '@/tutorial/tutorial-view';
 import type { Fit } from '@/ui/fit-math';
 import { fitToViewport } from '@/ui/fit-root';
 import { mountHud, type HudSource } from '@/ui/hud';
 import type { SideLayout } from '@/ui/side-layout';
 import { createSidePanels } from '@/ui/side-panels';
-import { mountTutorial, type TutorialUiSource } from '@/ui/tutorial/tutorial-view';
-import { mountWelcomeBack } from '@/ui/welcome/welcome-back';
 
 export interface UiServices {
   source: HudSource & ShopSource & BookSource;

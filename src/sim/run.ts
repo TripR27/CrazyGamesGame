@@ -1,3 +1,4 @@
+import { createServices } from '@/app/world';
 import { getMultipliers } from '@/economy/upgrades';
 import { levelFor } from '@/reputation/reputation';
 import { ROOMS } from '@/rooms/rooms';
@@ -7,7 +8,6 @@ import { createSeededRng } from '@/shared/random';
 import { createInitialState, type GameState, createStore } from '@/shared/state';
 import { createBot, type BotOptions } from '@/sim/bot';
 import { recordTimeline, type Timeline } from '@/sim/timeline';
-import { createServices } from '@/wiring/create-services';
 
 const STEP_MS = 100;
 const MINUTE_MS = 60_000;

@@ -1,6 +1,5 @@
 import { ingredients } from '@/brewing/ingredients';
 import { customers } from '@/customers/customer-data';
-import { TUTORIAL_STEPS } from '@/data/tutorial/index';
 import { ingredientTable } from '@/data/validate/ingredient-table';
 import { reputationTable } from '@/data/validate/reputation-table';
 import { roomTable } from '@/data/validate/room-table';
@@ -12,6 +11,7 @@ import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { ROOMS } from '@/rooms/rooms';
 import { FEEDBACK_POOLS } from '@/shared/random';
+import { TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
 
 /** Every content list the validator checks. A new domain is one more line here. */
 export const CONTENT_TABLES: readonly ContentTable[] = [

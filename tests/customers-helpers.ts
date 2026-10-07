@@ -3,7 +3,6 @@ import { createFloor, type CustomerCatalog, type CustomerChange, type CustomerCo
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { createSeededRng } from '@/shared/random';
 
-
 const customer = (id: string, minLevel: number, patienceSeconds: number): CustomerDef => ({
   id, minLevel, patienceSeconds, spendMultiplier: 1, likes: [],
 });

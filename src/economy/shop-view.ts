@@ -1,3 +1,4 @@
+import type { PlayerActions } from '@/app/actions';
 import { ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
 import { type RowView, isIngredientListed, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
@@ -7,7 +8,6 @@ import { recipes } from '@/recipes/recipe-data';
 import { ROOMS, roomOffer, type RoomState } from '@/rooms/rooms';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
-import type { PlayerActions } from '@/systems/actions/player-actions';
 import { createEl } from '@/ui/dom';
 import { domBounds } from '@/ui/dom-bounds';
 import type { SidePanels } from '@/ui/side-panels';

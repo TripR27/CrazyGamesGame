@@ -9,7 +9,6 @@ import { num, ONE } from '@/shared/numbers';
 import { createSeededRng } from '@/shared/random';
 import { createStore } from '@/shared/state';
 
-
 // Speed only changes how long a customer drinks, so prices in these tests stay plain.
 const recipe = (id: string, ingredients: RecipeDef['ingredients'], brewSeconds: number, basePrice: number): RecipeDef => ({
   id, tier: 1, rarity: 'common', ingredients, brewSeconds, basePrice, effect: 'speed',
