@@ -9,10 +9,11 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lines": "node scripts/check-lines.mjs",
+    "cycles": "node scripts/check-cycles.mjs",
     "pixel:preview": "node scripts/pixel/preview.mjs",
     "simulate": "node scripts/simulate.mjs",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run lines && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run lines && npm run cycles && npm run test"
   },
   "dependencies": {
     "break_infinity.js": "^2.2.0",

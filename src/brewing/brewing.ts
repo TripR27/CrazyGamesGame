@@ -1,5 +1,5 @@
 import type { World } from '@/app/world';
-import { discoverableNow } from '@/brewing/ingredients';
+import { discoverableNow } from '@/recipes/recipes';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import type { BrewNotice, EventBus, GameEvents } from '@/shared/events';
 import { type Rng, feedbackKey } from '@/shared/random';
@@ -12,12 +12,6 @@ export const BREWING = {
   storageCapacity: 3,
   /** Unfinished ingredients the player left for this long may be cleared by the brewer, so it is never stuck. */
   staleCauldronMs: 15_000,
-} as const;
-
-export const SERVING = {
-  reputationPerServe: 1,
-  /** A served customer stays this long to drink before the seat frees up (speed drinks make it shorter). */
-  drinkMs: 5000,
 } as const;
 
 export interface ActiveBrew {

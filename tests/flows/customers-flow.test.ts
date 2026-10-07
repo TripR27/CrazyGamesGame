@@ -1,7 +1,7 @@
+import { SERVING } from '@/serving/effects';
 import { describe, expect, it, vi } from 'vitest';
 import { buyUpgradeById } from '@/economy/upgrades';
 import { newGame, playBasics } from './helpers';
-import { SERVING } from '@/brewing/brewing';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
 import { resolveTarget } from '@/tutorial/tutorial-guide';

@@ -1,6 +1,6 @@
+import { SERVING } from '@/serving/effects';
 import { describe, expect, it, vi } from 'vitest';
 import { ab, catalog, economy, floorWith, plain, rich, rng, station } from './fixtures';
-import { SERVING } from '@/brewing/brewing';
 import type { CustomerDef } from '@/customers/customer-data';
 import { computePayout, serveCustomer, type ServeDeps, serveAndPublish } from '@/serving/serving';
 import type { Effect } from '@/shared/content';

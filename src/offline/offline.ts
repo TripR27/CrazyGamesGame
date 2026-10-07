@@ -1,11 +1,10 @@
-import { SERVING } from '@/brewing/brewing';
 import { type CustomerDef, VIP_SPAWN } from '@/customers/customer-data';
 import { priciestRecipe, meanSpawnIntervalMs, type CustomerCatalog } from '@/customers/customers';
 import { getMultipliers } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { type RecipeDef, recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
-import { drinkBonus, orderWeight, tipSize } from '@/serving/effects';
+import { drinkBonus, orderWeight, tipSize, SERVING } from '@/serving/effects';
 import { computePayout } from '@/serving/serving';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { type Num, num, ZERO, formatNumber } from '@/shared/numbers';

@@ -89,3 +89,10 @@ export const withEffectIcon = (effect: Effect, text: string): string =>
 
 /** The effect as the book shows it: icon, name and what it does. */
 export const effectName = (effect: Effect): string => withEffectIcon(effect, t(`effects.${effect}.name`));
+
+/** Numbers for serving a drink. */
+export const SERVING = {
+  reputationPerServe: 1,
+  /** A served customer stays this long to drink before the seat frees up (speed drinks make it shorter). */
+  drinkMs: 5000,
+} as const;

@@ -1,10 +1,10 @@
 import type { World } from '@/app/world';
 import { getMultipliers } from '@/economy/upgrades';
-import { type BrewStation, SERVING } from '@/brewing/brewing';
+import type { BrewStation } from '@/brewing/brewing';
 import type { CustomerDef } from '@/customers/customer-data';
 import { startDrinking, findCustomer, isWaiting, type CustomerCatalog, type CustomerFloor } from '@/customers/customers';
 import type { RecipeDef } from '@/recipes/recipe-data';
-import { drinkBonus, rollTip } from '@/serving/effects';
+import { drinkBonus, rollTip, SERVING } from '@/serving/effects';
 import type { GameEvents, EventBus } from '@/shared/events';
 import { type Num, num, ONE } from '@/shared/numbers';
 import { type Rng, feedbackKey } from '@/shared/random';

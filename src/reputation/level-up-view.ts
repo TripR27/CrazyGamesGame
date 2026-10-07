@@ -1,5 +1,5 @@
 import { createEl } from '@/app/panels-view';
-import type { LevelUpView } from '@/reputation/reputation';
+import type { LevelUpView } from '@/reputation/level-up-model';
 import './level-up.css';
 
 const SHOW_MS = 4500;

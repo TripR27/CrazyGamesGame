@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { customers } from '@/customers/customer-data';
-import { type ReputationLevel, levelFor, levelProgress, recipesUnlockedUpTo, watchReputationLevels, type LevelState, toLevelUpView } from '@/reputation/reputation';
+import { type ReputationLevel, levelFor, levelProgress, recipesUnlockedUpTo, watchReputationLevels, type LevelState } from '@/reputation/reputation';
+import { toLevelUpView } from '@/reputation/level-up-model';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { createStore } from '@/shared/state';
 

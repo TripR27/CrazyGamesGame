@@ -7,7 +7,7 @@ import { mountShop } from '@/economy/shop-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
 import { mountRecipeBook } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
-import { toLevelUpView } from '@/reputation/reputation';
+import { toLevelUpView } from '@/reputation/level-up-model';
 import { mountTutorial } from '@/tutorial/tutorial-view';
 
 /**

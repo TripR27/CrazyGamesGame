@@ -1,6 +1,5 @@
 import type { World } from '@/app/world';
 import type { RecipeDef } from '@/recipes/recipe-data';
-import { discoverableRecipes } from '@/recipes/recipes';
 import type { OneTimePurchase, Rarity } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Num } from '@/shared/numbers';
@@ -116,11 +115,6 @@ export function watchIngredientShop(source: WatchSource<IngredientShopState>, bu
 /** Ingredient ids on the shelf: the basic ones plus what the player bought (read every frame by the scene). */
 export function shelfIds({ store, content }: Pick<World, 'store' | 'content'>): readonly string[] {
   return ownedIngredients(store.getState(), content.ingredients, content.recipes).map((i) => i.id);
-}
-
-/** Recipes the player could discover now: level reached and every ingredient on the shelf. */
-export function discoverableNow(world: Pick<World, 'store' | 'content'>): readonly RecipeDef[] {
-  return discoverableRecipes(world.store.getState(), world.content.recipes, shelfIds(world));
 }
 
 /** Buy an ingredient in the shop (one time); does nothing when it is locked, owned or too expensive. */

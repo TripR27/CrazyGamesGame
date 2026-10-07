@@ -1,6 +1,7 @@
 import { type World, createWorld } from '@/app/world';
 import { clickIngredient } from '@/brewing/brewing';
-import { buyIngredientById, discoverableNow, firstBuyableIngredient } from '@/brewing/ingredients';
+import { buyIngredientById, firstBuyableIngredient } from '@/brewing/ingredients';
+import { discoverableNow } from '@/recipes/recipes';
 import { waitingCustomers } from '@/customers/customers';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor, getMultipliers } from '@/economy/upgrades';

@@ -1,4 +1,5 @@
-import { ingredients as allIngredients, type IngredientDef, ownedIngredients } from '@/brewing/ingredients';
+import { shelfIds, ingredients as allIngredients, type IngredientDef, ownedIngredients } from '@/brewing/ingredients';
+import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { levelFor, recipesUnlockedUpTo, REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
@@ -110,4 +111,9 @@ export function toBookView(
   });
   const found = recipes.filter((r) => state.recipesDiscovered.includes(r.id)).length;
   return { progress: t('book.progress', { found, total: recipes.length }), entries };
+}
+
+/** Recipes the player could discover now: level reached and every ingredient on the shelf. */
+export function discoverableNow(world: Pick<World, 'store' | 'content'>): readonly RecipeDef[] {
+  return discoverableRecipes(world.store.getState(), world.content.recipes, shelfIds(world));
 }
