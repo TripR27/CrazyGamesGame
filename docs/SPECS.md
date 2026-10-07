@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. **Laatst afgerond:** stap 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
+**Nu bezig:** chore `chore-flatten-architecture` (architectuur vlak maken, zie hoofdstuk 14). **Laatst afgerond stap:** 14a (Kamers). **Volgende stap:** 14b (Decoraties), daarna 14c (Legenda in het receptenboek) en 14d (Night Shift: offline verdienen kopen).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -52,12 +52,12 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ## 1. Harde regels (altijd van toepassing)
 
-1. **Houd bestanden klein: richtlijn 100 regels per bestand** in `src/`, `tests/` en `scripts/` (geteld als ruwe regels). Het doel is niet de grens zelf, maar **SOLID werken**: kleine bestanden met één verantwoordelijkheid. Een paar regels erover (tot ~120) is toelaatbaar als splitsen het onnodig verknipt; daarboven is splitsen verplicht. Vermijd bewust te veel regels. Ook data wordt gesplitst (recepten per tier). Uitgezonderd: config in de projectroot, lockfiles, `.md`-bestanden en stylesheets (`.css`): de grens geldt voor programmeerwerk.
-2. **SOLID is verplicht** (zie hoofdstuk 9): elke module heeft één reden om te veranderen, uitbreiden gaat via nieuwe data of nieuwe modules, en afhankelijkheden lopen via interfaces.
+1. **Bestandsgrootte: richtlijn 150 tot 300 regels** per bestand in `src/`, `tests/` en `scripts/` (geteld als ruwe regels), zolang de functies in het bestand bij elkaar horen. ESLint waarschuwt vanaf 300 regels en `scripts/check-lines.mjs` faalt vanaf 350. Splits pas als een bestand twee echt verschillende redenen heeft om te veranderen, niet om de regeltelling. Maak geen nieuw bestand of nieuwe map voor minder dan ~50 regels. Uitgezonderd: config in de projectroot, lockfiles, `.md`-bestanden en stylesheets (`.css`).
+2. **Plat en per feature (zie hoofdstuk 4 en 9).** Een feature is één map met logica, data en view; geen `index.ts`-barrels, geen wiring-, dispatcher- of manager-lagen, geen interface met één implementatie (behalve tijd, RNG, opslag en platform). Pragmatisch SOLID: één reden om te veranderen per feature-bestand, uitbreiden via data.
 3. **Eén stap per keer.** Geen code buiten de scope van de gevraagde stap.
 4. **Een stap is pas klaar als `npm run check` slaagt** (typecheck + lint + regelgrens + tests) en de "Klaar wanneer"-punten van de stap kloppen.
 5. **Geen nieuwe dependencies zonder te vragen.** De toegestane lijst staat in hoofdstuk 3.
-6. **Game-logica kent geen Phaser en geen DOM** (zie lagen, hoofdstuk 4).
+6. **Alleen `*-view.ts`, `*-scene.ts` en `main.ts` kennen Phaser en DOM.** Alle andere bestanden zijn puur TypeScript (zie hoofdstuk 4).
 7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
 8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
 9. **Na elke stap wordt SPECS.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
@@ -65,7 +65,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ### Hoe dwing je dit af (voor jou)
 - **`CLAUDE.md`** in de projectroot (wordt in stap 1 gemaakt, en ik maak hem nu al aan) wordt automatisch bij elke sessie geladen en verwijst hiernaar. Dat is de betrouwbaarste manier.
-- **`npm run check`** bewaakt de regelrichtlijn: ESLint waarschuwt vanaf 100 regels en `scripts/check-lines.mjs` waarschuwt vanaf 101 en **faalt vanaf 121 regels**. Wat niet door de check komt, is niet klaar.
+- **`npm run check`** bewaakt de regelrichtlijn: ESLint waarschuwt vanaf 300 regels en `scripts/check-lines.mjs` waarschuwt vanaf 301 en **faalt vanaf 351 regels**. Wat niet door de check komt, is niet klaar.
 - Optioneel in stap 1: een hook in Claude Code-instellingen die na elke bestandswijziging de regelcheck draait (kan via de `update-config` skill; vraag erom).
 - Jij kunt altijd zeggen: "Doe stap N", en ik lees eerst dit bestand.
 
@@ -108,8 +108,8 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Engine | **Phaser 4** | 4.2.x (stabiel sinds april 2026) | Fallback: Phaser 3.90. Check bundlegrootte in stap 1. |
 | Build/dev | Vite | 8.x | `base: './'`, productiebuild naar `dist/` |
 | Grote getallen | `break_infinity.js` | 2.2.x | Opslaan als string in save |
-| Tests | Vitest | 5.x | Alleen voor `core/` en `systems/` (puur TS) |
-| Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Waarschuwing `max-lines: 100`, fout `max-lines-per-function: 40` |
+| Tests | Vitest | 5.x | Voor alle pure logica (alles behalve `*-view.ts`/`*-scene.ts`) |
+| Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Waarschuwing `max-lines: 300`, fout `max-lines-per-function: 60` |
 | UI | **Vanilla TypeScript + DOM** voor HUD/menu's, Phaser-canvas voor de taverne | n.v.t. | Geen React/Vue (bundlegrootte, eenvoud) |
 | Opslag | via `Storage`-adapter: SDK data-module of `localStorage` | n.v.t. | |
 | Audio | Phaser's eigen audio | n.v.t. | Geen Howler nodig |
@@ -122,64 +122,61 @@ Alles buiten deze lijst: eerst vragen.
 
 ## 4. Architectuur
 
-### Lagen (afhankelijkheid gaat alleen naar beneden)
+### Lagen en mappen (plat, per feature; besluit 2026-10-07)
 
 ```
-ui/ + scene/        (DOM en Phaser: tonen en input)
-      ↓
-systems/            (spelregels: puur TypeScript)
-      ↓
-core/ + data/       (state, tijd, getallen, save, content-tabellen)
-
-platform/  audio/  i18n/   (diensten; mogen door ui/scene gebruikt worden,
-                            systems/core mogen alleen platform/ via een interface)
+main.ts
+   ↓
+app/              world.ts (createWorld), Phaser-scene, DOM-schil
+   ↓
+features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/
+                  reputation/ offline/ tutorial/   (later heroes/ prestige/ achievements/ audio/ platform/)
+   ↓
+shared/           state, events, time, numbers, random, pool, targets, save, storage, debug
 ```
 
-- `core/` en `systems/` importeren **nooit** `phaser`, `document` of `window`. Daardoor testbaar met Vitest en geschikt voor offline-berekening.
-- `ui/` en `scene/` lezen alleen de state en roepen **acties** aan (functies uit `systems/`). Ze berekenen zelf geen spelregels.
-- Eén rijtje ESLint-regels (`no-restricted-imports`) bewaakt dit.
-
-### Mappenstructuur
+- Afhankelijkheid gaat van boven naar beneden. Features mogen elkaar importeren, maar **nooit in een kring tussen bestanden**.
+- **Alleen `*-view.ts`, `*-scene.ts` en `main.ts` importeren `phaser` of gebruiken `document`/`window`.** Alle andere bestanden (ook `app/world.ts`) zijn puur, dus testbaar met Vitest, bruikbaar door de simulator en geschikt voor de offline-berekening. Pure logica importeert nooit een `-view`-bestand. ESLint bewaakt dit met `no-restricted-imports` op bestandsnaam.
+- Views lezen de state en roepen **feature-functies** aan (`serveCustomer(world, id)`). Ze berekenen zelf geen spelregels.
+- Services als `platform/`, `audio/` en `i18n/` mogen door views gebruikt worden; pure logica gebruikt `platform/` alleen via een interface.
 
 ```
 crazyGamesGame/
   CLAUDE.md               (blijft in de hoofdmap: Claude Code laadt hem automatisch)
   docs/                   SPECS.md, GAME_ANALYSE.md, IDEAS.md, later ASSETS.md
   index.html  package.json  vite.config.ts  tsconfig.json  eslint.config.js
-  scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/sim/)
+  scripts/        check-lines.mjs, simulate.mjs (start de balans-simulator uit src/dev/), pixel/
   public/         assets (svg, spritesheets, audio)
   src/
-    main.ts                 opstart (kort!)
-    core/                   state, store, tick, events, numbers (Decimal), format
-    save/                   serialize, migrate, storage-adapter, autosave
-    data/                   ingredients/, recipes/tier01.ts.., customers/, upgrades/,
-                            rooms/, heroes/, dungeons/, achievements/, tutorial/
-    systems/                brewing, customers, economy, reputation, upgrades, staff,
-                            heroes, expeditions, prestige, offline, achievements, tutorial
-    scene/                  boot, tavern, sprites/ (klant, ketel, held), effects
-    ui/                     hud, shop, recipe-book, heroes, prestige, settings, toast, tutorial/
-    wiring/                 composition root: bouwt de runtime-objecten, start de systemen, levert services aan de scenes
-    runtime/                browser-koppelingen voor core (loop-driver: timers en tab-zichtbaarheid)
-    platform/               crazygames (SDK-wrapper), mock, ads, gameplay-state
-    audio/                  sfx, music, mute-logic
-    i18n/                   index.ts (t()), en/*.ts, nl/*.ts (later)
-  tests/                    spiegelt src/ (core en systems)
+    main.ts  config.ts      opstart (kort!)
+    shared/                 state.ts (GameState + store), events.ts (bus + GameEvents), time.ts (clock, ticker, loop),
+                            numbers.ts (Decimal + format), random.ts, pool.ts, targets.ts, save.ts, storage.ts, debug.ts
+    app/                    world.ts, tavern-scene.ts, backdrop.ts, layout.ts, hud-view.ts, panels-view.ts, viewport-view.ts
+    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  reputation/  offline/  tutorial/
+                            per feature: <feature>.ts, <feature>-data.ts, <feature>-model.ts?, *-view.ts
+    i18n/                   translator.ts, en.ts (later nl.ts)
+    dev/                    simulator.ts, simulator-report.ts
+  tests/                    één bestand per feature (spiegelt de featuremappen); flows/ voor integratietests
 ```
 
-Bestandsnamen: `kebab-case.ts`. Eén verantwoordelijkheid per bestand; een bestand dat dichter dan ~80 regels komt wordt direct gesplitst.
+Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: hoofdstuk 1 en 9.
+
+### World
+
+`createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, ingrediënten) en is in tests te vervangen door een kleine catalogus. Acties (`clickIngredient`, `buyUpgrade`) en tick-updates (`updateCustomers`, `advanceBrewing`, `updateStaff`) krijgen `world`. Rekenfuncties blijven puur. `world.ts` bevat ook de **ene** `bus.on('tick')` met de vaste volgorde: tutorial, klanten, brouwen, personeel.
 
 ### State
 
 - **Eén** `GameState`-object, volledig JSON-serialiseerbaar (Decimal als string bij opslaan).
-- Wijzigingen alleen via acties in `systems/` (`(state, params) => void` of nieuwe state). Na wijziging roept de store `notify()` aan; UI abonneert zich.
-- **Niet in de state:** wie er op dit moment in de taverne zit (`CustomerFloor` in `systems/customers`) is runtime en wordt niet opgeslagen; de taverne begint bij elk laden leeg.
+- Wijzigingen alleen via acties in de features (`(world, params) => void`). Na wijziging roept de store `notify()` aan; UI abonneert zich.
+- **Niet in de state:** wie er op dit moment in de taverne zit (`CustomerFloor` in `customers/`) is runtime en wordt niet opgeslagen; de taverne begint bij elk laden leeg.
 - State bevat o.a.: `meta` (versie, laatst-gezien-tijd), `currencies`, `reputation`, `recipesDiscovered`, `ingredients`, `upgrades`, `staff`, `rooms`, `heroes`, `expeditions` (met absolute eindtijd), `prestige`, `achievements`, `settings`, `stats`.
 
 ### Tijd en tick
 
 - Vaste simulatiestap van **100 ms**, losgekoppeld van framerate.
 - Tijd wordt altijd gemeten met `Date.now()`-verschil (accumulator), niet met "aantal ticks", omdat achtergrondtabs door de browser worden afgeknepen.
-- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `systems/offline` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `wiring/create-offline.ts`.
+- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `offline/` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `offline/offline.ts`.
 - Expedities slaan een absolute `endsAt` op en worden bij laden direct afgehandeld.
 
 ### Save
@@ -382,9 +379,9 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 
 ## 7. Teststrategie
 
-- **Vitest** voor `core/` en `systems/`: kosten-formules, offline-berekening, save/migratie, prestige-berekening, receptontdekking.
+- **Vitest** voor alle pure logica (`shared/` en de feature-bestanden zonder `-view`): kosten-formules, offline-berekening, save/migratie, prestige-berekening, receptontdekking.
 - **Handmatig in browser** (ik gebruik de ingebouwde browser) na elke visuele stap: laden, geen console-errors, framerate-indruk.
-- **Balans-simulator** vanaf stap 13.
+- **Balans-simulator** vanaf stap 13. Sinds de vlakke architectuur ook het regressie-orakel bij refactors: `npm run simulate -- 60 1` is deterministisch en moet voor en na een refactor byte-identiek zijn.
 - **Save-compatibiliteitstest:** een vastgezette oude save moet na elke versie laden (fixture in `tests/fixtures/`).
 
 ---
@@ -406,13 +403,14 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 ## 9. Code-conventies
 
 - `strict` TypeScript, geen `any`, geen `// @ts-ignore`.
-- **SOLID (verplicht)**, vertaald naar dit project:
-  - **S (single responsibility):** één bestand, één taak. Een systeem berekent, een scene tekent, een UI-paneel toont. Raakt een wijziging twee soorten dingen, dan is het bestand te groot.
-  - **O (open/closed):** uitbreiden zonder bestaande code te wijzigen. Nieuwe recepten, klanten, upgrades, kerkers en kamers zijn nieuwe data of nieuwe kleine modules, geen `if`-ketens in bestaande systemen. Gedrag per type via een registry of tabel.
-  - **L (Liskov):** elke implementatie van een interface (bijv. `StorageAdapter`, `Platform`, upgrade-effecten) moet inwisselbaar zijn zonder verrassingen, zodat de mock en de echte SDK zich gelijk gedragen.
-  - **I (interface segregation):** kleine, gerichte interfaces. Een systeem dat alleen goud nodig heeft, krijgt geen hele `GameState`, maar het stuk dat het nodig heeft.
-  - **D (dependency inversion):** logica hangt af van interfaces, niet van concrete diensten (opslag, platform, tijd, willekeur). Tijd en RNG worden ingespoten, zodat tests en de simulator deterministisch zijn.
-- Functies kort (lint: max 40 regels), liever pure functies dan klassen. Klassen alleen waar Phaser het vraagt (Scenes).
+- **Pragmatisch SOLID, plat en per feature** (besluit 2026-10-07, na een te ver doorgeslagen eerste opzet):
+  - **S:** één reden om te veranderen per **feature-bestand** (een feature hoort bij elkaar in één map). Niet: één functie per bestand.
+  - **O:** uitbreiden via data of een tabel/registry, geen `if`-ketens op type. Een nieuw recept, klanttype, upgrade of kamer is nieuwe data.
+  - **L en D:** alleen bij echte naden: tijd (`Clock`), willekeur (`Rng`), opslag (`StorageAdapter`: localStorage, geheugen, later de SDK) en later het platform. Die worden ingespoten via `World`, zodat tests en de simulator deterministisch zijn. Geen interface, factory of adapter met maar één implementatie.
+  - **I:** rekenfuncties nemen alleen de waarden die ze nodig hebben (`computePayout(recipe, type, multiplier)`); acties en tick-updates nemen `world`. Geen eigen `XStore`/`XDeps`-interfaces met optionele velden.
+- **Anti-over-engineering:** geen `index.ts`-barrels; geen wiring-, dispatcher-, manager-, facade- of actions-laag die alleen doorgeeft; geen nieuw bestand of nieuwe map voor minder dan ~50 regels; geen abstractie "voor later". Een nieuwe feature = een map plus één regel in `app/world.ts`.
+- **Zero-allocation in de game-loop:** `shared/pool.ts` blijft voor klant-sprites, zwevende tekst en partikels. In `update()` van views en in tick-handlers geen nieuwe arrays, objecten, closures of spreads per frame/tick als het te vermijden is. Bij een refactor worden algoritmes verplaatst, niet herschreven (ook de volgorde van RNG-aanroepen blijft gelijk).
+- Functies overzichtelijk (lint: max 60 regels), liever pure functies dan klassen. Klassen alleen waar Phaser het vraagt (Scenes).
 - Geen magische getallen in logica: naar `data/` of constanten.
 - Geen commentaar dat herhaalt wat de code doet; wel één regel *waarom* bij niet-voor-de-hand-liggende keuzes.
 - Imports met pad-alias `@/` naar `src/`.
@@ -425,7 +423,7 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 1. De stap-beschrijving is volledig uitgevoerd, niets extra's.
 2. `npm run check` slaagt (typecheck, lint, regelgrens, tests).
 3. Visuele stappen: in de browser gecontroleerd, geen console-fouten.
-4. Geen bestand > 120 regels, en bestanden boven 100 regels zijn bewust (en gemeld) of worden gesplitst. SOLID gecontroleerd.
+4. Geen bestand > 350 regels; bestanden boven 300 regels zijn bewust (en gemeld) of worden gesplitst. Geen onnodige abstractielagen toegevoegd (hoofdstuk 9).
 5. Heeft de stap een nieuwe speler-functie? Dan hoort daar een korte **tutorial-hint** bij (zie hoofdstuk 4, Tutorial).
 6. **SPECS.md is bijgewerkt (verplicht, laatste commit van de stap):**
    - Voortgangsoverzicht bovenaan: status van de stap, branch, wat de volgende stap is.
@@ -442,14 +440,14 @@ Een stap is **niet** klaar als punt 6 ontbreekt.
 
 - Begin elke codeer-sessie met het lezen van dit bestand en `CLAUDE.md`.
 - Vraag bij twijfel over een speelkeuze (balans, humor, volgorde); neem technische standaardkeuzes zelf en meld ze.
-- Houd bestanden rond 100 regels; zie je een bestand groeien of meerdere verantwoordelijkheden krijgen, splits het direct.
+- Houd bestanden tussen 150 en 300 regels met bij elkaar horende functies; krijgt een bestand twee echt verschillende redenen om te veranderen of komt het boven 300 regels, splits het dan. Voeg kleine dingen toe aan het feature-bestand in plaats van een nieuw bestand te maken.
 - Als een stap te groot blijkt: stop, stel een opsplitsing voor.
 
 ### Git-werkwijze (per stap)
 Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 
 1. **Branch per stap:** `step-NN-korte-naam` (bijv. `step-07-brew-and-serve`), aangemaakt vanaf een bijgewerkte `main`.
-2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven. Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
+2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven (bij een grote refactor één commit per fase, elk een groen terugvalpunt). Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
 3. **Laatste commit van de stap** is de SPECS.md-update (hoofdstuk 10, punt 6).
 4. **Terug mergen naar `main`:** alleen nadat jij het resultaat hebt bekeken en zegt dat het mag ("merge stap N"). Standaard `--no-ff`, zodat elke stap als blok in de geschiedenis zichtbaar blijft.
 5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Besluit 2026-10-06: mergen en pushen alleen als jij het **per stap** zegt; een eerdere toestemming geldt niet automatisch voor de volgende stap. Geen force-push, geen herschrijven van geschiedenis op `main`.
@@ -532,7 +530,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 | Browser knijpt timers af op achtergrondtab | Altijd tijdsverschil met `Date.now()`; offline-formules |
 | Grote getallen en afrondfouten | Decimal overal in de economie; tests met extreme waarden |
 | Saves breken bij update | Versie + migraties + fixture-test |
-| 100-regelsregel leidt tot veel kleine bestanden | Bewust; duidelijke mappen en indexbestanden |
+| Te ver doorgeslagen SOLID leidde tot 245 bestanden van gemiddeld 29 regels (ravioli-code) | Opgelost op 2026-10-07: plat en per feature, 150-300 regels per bestand, geen barrels of wiring-lagen (hoofdstuk 4 en 9) |
 | Balans te traag/snel | Simulator (stap 13), alle getallen in `data/` |
 | Twee tabs tegelijk overschrijven elkaars save (zelfde `localStorage`) | CrazyGames toont de game normaal in één iframe; de data-module van de SDK (stap 20) synchroniseert per account. Eventueel later: `storage`-event of een tab-lock als dit een probleem blijkt |
 | Art-kwaliteit van zelfgeschreven pixel art | Eenvoudige sprites lukken (experiment gelukt); complexe sprites extern laten maken of CC0 gebruiken; thumbnail apart aandacht |
@@ -552,6 +550,14 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+> **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Chore: vlakke architectuur (2026-10-07, `chore-flatten-architecture`)
+- **Gedaan (fase 0, documentatie):** de eigenaar vond de architectuur te ver doorgeslagen in SOLID: 245 bestanden in `src/` van gemiddeld 29 regels (187 van ten hoogste 40 regels), 25 `index.ts`-barrels, een `wiring/`-laag en `systems/actions/` die alleen doorgaven, een eigen store-interface per systeem en tot vier mappen diepe paden. Voorstel en akkoord (2026-10-07): features worden mappen met logica, data en view bij elkaar (`src/<feature>/`), `shared/` vervangt core, save en runtime, `app/` bevat `createWorld` en de Phaser/DOM-schil, bestanden worden 150 tot 300 regels, functielimiet 60, Phaser/DOM alleen in `*-view.ts`/`*-scene.ts`/`main.ts`. `CLAUDE.md`, `GAME_ANALYSE.md` hoofdstuk 11 (met Mermaid-diagrammen) en SPECS.md hoofdstuk 1, 3, 4, 7, 9, 10, 11 en 13 zijn bijgewerkt.
+- **Waarom:** voor één ontwikkelaar is het mentale model te groot; kleine bestanden en doorgeeflagen kosten meer leesbaarheid dan ze opleveren. Regressie-orakel: baseline `npm run check` groen (79 testbestanden, 407 tests) en `npm run simulate -- 60 1` is deterministisch; de uitvoer moet na elke fase byte-identiek zijn.
+- **Afwijkingen van de werkafspraken:** geen genummerde stap (branch `chore-flatten-architecture`), één commit per fase (ongeveer 8) in plaats van 2 tot 3. Mergen en pushen alleen na uitdrukkelijke opdracht.
+- **Nog te doen:** fase 1 t/m 6 (lint aanpassen; `shared/`; `World`; features van klein naar groot; `app/`, `i18n/`, `dev/`; opruimen en prestatie-audit). Daarna deze entry afronden met de paden-tabel (oud → nieuw) en de padverwijzingen in hoofdstuk 4 bijwerken.
 
 ### Chore: ideeënronde (2026-10-06, `chore-ideas-review`)
 - **Gedaan:** alle punten uit IDEAS.md met de eigenaar doorgenomen (vragen in vier rondes), de besluiten vastgelegd in hoofdstuk 4 ("Besluiten uit de ideeënronde" en "Helden") en in het stappenplan (nieuwe stappen 14c, 14d en 16b; 15 en 16 aangescherpt). IDEAS.md opgeschoond: volledig uitgewerkte ideeën zijn eruit (afspraak eigenaar: wat in SPECS.md staat, gaat uit IDEAS.md); alleen open punten blijven. De hernoeming van SPEC.md naar SPECS.md (door de eigenaar) is vastgelegd, en alle documentatie staat nu in `docs/` (wens eigenaar; CLAUDE.md blijft in de hoofdmap omdat Claude Code hem daar automatisch laadt). Alle verwijzingen zijn bijgewerkt.
