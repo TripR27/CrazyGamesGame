@@ -42,12 +42,11 @@ Night Shift zelf (kopen en upgraden) is gebouwd in stap 14d (SPECS.md, hoofdstuk
 
 ---
 
-## 4. Helden: open vragen voor de uitwerking van stap 15
+## 4. Helden: nog open
 
-De keuzes (gildekamer, vier actieve onderdelen, idle kan maar actief loont meer, klein beginnen) staan in SPECS.md, hoofdstuk 4, Helden. Nog te beslissen bij stap 15 en 16:
-- Welke 2 klassen het eerst komen (krijger, boogschutter, magiër of schurk).
-- Welke keuzekaartjes en welke drankeffecten bij de eerste kerker horen.
+De heldenlaag is uitgewerkt met de eigenaar (SPECS.md, hoofdstuk 4, Helden, en stap 15a t/m 16c). Nog open:
 - Hoe een held er in pixel art uitziet (stap 21).
+- Later: de boogschutter en de schurk als extra klassen, en diepere kerkers (Grot, Vulkaan, Sterrentoren, Drakenhol uit GAME_ANALYSE 5.5).
 
 ---
 

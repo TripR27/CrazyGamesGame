@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (stap 14d staat op `step-14d-night-shift` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14d (Night Shift: offline verdienen kopen). **Volgende stap:** 15 (Helden, gildekamer en uitrusting); eerst de open vragen uit IDEAS.md punt 4 met de eigenaar beslissen.
+**Nu bezig:** niets (stap 14d staat op `step-14d-night-shift` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14d (Night Shift: offline verdienen kopen). **Volgende stap:** 15a (Gildekamer, helden en eerste expeditie). De heldenlaag is uitgewerkt met de eigenaar (hoofdstuk 4, Helden; chore `chore-heroes-design`).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -37,9 +37,11 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 14b | Decoraties (goud-sink) | ✅ | `step-14b-decorations` |
 | 14c | Legenda van effecten in het receptenboek | ✅ | `step-14c-effect-legend` |
 | 14d | Night Shift: offline verdienen kopen | ✅ | `step-14d-night-shift` |
-| 15 | Helden, gildekamer en uitrusting | ⬜ | |
-| 16 | Expedities met keuzes en drankjes | ⬜ | |
+| 15a | Gildekamer, helden en eerste expeditie | ⬜ | |
+| 15b | Uitrusting | ⬜ | |
+| 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ⬜ | |
 | 16b | Baasgevecht (timing-minigame) | ⬜ | |
+| 16c | Quartermaster: helden op auto en offline | ⬜ | |
 | 17 | Prestige | ⬜ | |
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
@@ -329,20 +331,61 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
   - **Welkom-venster:** met personeel maar zonder Night Shift: "Your staff went home. With Night Shift they could have earned 1.2K gold." en "Buy Night Shift in the shop…" (`offlineWithMissed` in `offline/offline.ts` rekent het bedrag uit met het aandeel van Night Shift). Zonder volledige bezetting blijft de oude zin, nu met Night Shift erbij.
   - **Tutorial-hint:** de afsluitzin van de personeelsles noemt Night Shift ("Buy Night Shift in the Shop tab and they even work while you are away"); de oude zin beloofde dat het personeel altijd doorwerkt.
   - **Weergave:** een stat die een aandeel is (`offlineShare`) toont een toegevoegd bedrag als percentage ("+5%").
-- **Helden (stap 15, 16, 16b), zie ook Helden hieronder.**
+- **Helden (stap 15a t/m 16c), zie ook Helden hieronder.**
 - **Achievements (stap 18):** zoals gepland.
 - **Niet in het plan:** het weekly leaderboard (pas als CrazyGames ons uitnodigt, zie IDEAS.md punt 1), de punten over de schermindeling (checklist voor stap 21 en 22, IDEAS.md punt 2), en de poster (vervallen).
 
-### Helden (besluit eigenaar, 2026-10-06; stap 15, 16 en 16b)
+### Helden (besluit eigenaar, 2026-10-06; uitgewerkt 2026-10-07; stap 15a, 15b, 16, 16b en 16c)
 
 - **Niet alleen idle:** de eigenaar wil bij de helden echte gameplay. Actief meespelen levert duidelijk meer op; idle blijft mogelijk (standaardkeuzes, ook offline) en levert minder, net als bij brouwen (idle ongeveer 30-40% van actief).
 - **Zichtbaar:** de helden wonen in een **gildekamer** op de bovenverdieping (een vierde kamer, te bouwen zoals de andere; de indeling van de bovenverdieping moet daarvoor opnieuw verdeeld worden). Je ziet ze vertrekken en terugkomen.
 - **Actieve onderdelen (alle vier gekozen):**
-  1. **Uitrusting zelf kiezen** (zwaard, schild, helm, amulet), met keuzes per kerker (stap 15).
+  1. **Uitrusting zelf kiezen** (zwaard, schild, helm, amulet), met keuzes per kerker (stap 15b).
   2. **Drankjes meegeven als keuze:** de speler brouwt zelf wat de held meeneemt; het effect (kracht, snelheid, geluk, charme) helpt in bepaalde kerkers (stap 16).
   3. **Keuzes onderweg:** tijdens een expeditie korte keuzekaartjes (pad links of rechts, vechten of sluipen, welk drankje nu drinken) met invloed op buit en duur (stap 16).
   4. **Baasgevecht:** een korte **timing-klik**-minigame aan het eind van een kerker (stap 16b).
 - **Klein beginnen:** 2 klassen en 1 kerker in de eerste versie; meer klassen en kerkers als data zodra het leuk blijkt. Helden kunnen niet sterven (gewond = cooldown).
+
+**Uitwerking (vragen aan de eigenaar, 2026-10-07).** De keuzes zijn van de eigenaar. Getallen en namen gemarkeerd met *(voorstel)* komen van Claude; het zijn placeholders die in de stap zelf met de simulator worden afgesteld.
+
+- **Klassen:** **krijger** en **magiër**, één van elk (dus 2 helden). Elk heeft een naam, een level en eigen uitrusting; ze gaan los op pad. De krijger is sterker tegen de baas en bij vechten. De magiër haalt meer uit meegegeven drankjes *(voorstel: +50% drankeffect)* en is zwakker tegen de baas. Meer plekken of klassen kunnen later (prestige, upgrade, data).
+- **Gildekamer:** te bouwen vanaf **niveau 5 (Famous Tavern)**, rond minuut 13 in de simulator, als vierde kamer. De bovenverdieping wordt verdeeld in vier vakken *(voorstel: prijs 15.000; de krijger komt mee met de kamer, de magiër huur je erbij voor 8.000)*. Je ziet de helden er wonen, vertrekken en terugkomen. In het zijpaneel komt een tabblad **Heroes**.
+- **Kerker: het Moeras.** Thema: kikkers, modder en een chagrijnige moerasheks als baas. Een expeditie duurt **1 tot 3 minuten** (snelheid en keuzes verkorten of verlengen). De tijd loopt als absolute eindtijd en loopt ook door als het spel dicht is.
+- **Beloning: kerker-ingrediënten** (hoofdzaak), daarnaast XP en soms uitrusting *(voorstel: Bog Pearl en Witch Moss)*. Kerker-ingrediënten zijn een **voorraad die opraakt**: elk drankje ermee kost er één. Zo blijven de helden nodig en hangen beide loops aan elkaar.
+  - Recepten met kerker-ingrediënten zijn duur *(voorstel: 3 tot 4 nieuwe recepten op niveau 5 en 6)*. Klanten bestellen ze alleen als er voorraad is. De brouwer gebruikt ze alleen voor zo'n bestelling.
+  - Het schap toont een kerker-ingrediënt met het aantal erop, en grijs bij 0. In het receptenboek staat een nog nooit gevonden ingrediënt als "?".
+  - Offline telt de voorraad niet mee: de offline-formule rekent alleen met recepten zonder kerker-ingrediënten.
+- **Groei:** expedities geven **XP**, en XP maakt **levels**. Een hoger level maakt de held sterker (minder kans gewond, meer schade tegen de baas) en opent later diepere kerkers *(voorstel: max level 10, Moeras aanbevolen vanaf level 1)*. Levels resetten bij prestige (GAME_ANALYSE 5.7).
+- **Uitrusting:** vier vakken, **elk met een eigen rol**:
+  - **Zwaard:** meer buit bij vechten.
+  - **Schild:** minder kans om gewond te raken.
+  - **Helm:** sneller terug.
+  - **Amulet:** meegegeven drankjes werken sterker.
+
+  Per kerker is iets anders handig, dus kiezen loont. Een simpel stuk per vak koop je met goud in het tabblad Heroes (ook een goud-sink). Betere en zeldzame stukken vind je als buit. Een stuk draagt telkens één held; wisselen kan als de held thuis is.
+- **Drankjes meegeven: de heldenketel.** In de gildekamer staat een **tweede ketel** (wens eigenaar). Zo blijft de taverneketel met de brouwer gewoon doorwerken (idle staat niet stil), en het personeel of een volle bar kan het heldendrankje niet afpakken of blokkeren.
+  - Klik de heldenketel: die licht op en de volgende ingrediënten van het schap gaan erin. Zodra hij brouwt, springt het schap vanzelf terug naar de taverneketel.
+  - Wat klaar is, gaat direct in de **rugzak** van de held die thuis klaarstaat (maximaal **2 drankjes**) en komt nooit op de bar. De brouwer raakt de heldenketel nooit aan.
+  - Een drankje dat al op de bar staat, kun je ook oppakken en aan de held geven (hetzelfde gebaar als bij een klant).
+- **Drankeffecten op expeditie** (dezelfde iconen als in de taverne):
+  - **Kracht:** sterker in gevechten en tegen de baas.
+  - **Snelheid:** sneller terug.
+  - **Geluk:** meer of zeldzamere buit.
+  - **Charme:** betere uitkomst bij figuren onderweg (bijv. de heks die om een drankje vraagt).
+- **Keuzekaartjes:** **2 per expeditie**, met voorbeelden *(voorstel)*:
+  - pad door de modder (sneller) of over de vlonders (veiliger);
+  - een reuzenkikker: vechten (meer buit, kans gewond) of sluipen (veilig);
+  - nu een drankje drinken;
+  - een figuur die om een drankje vraagt.
+
+  Een kaartje blokkeert niets. Wie niet binnen ~10 seconden kiest, krijgt de **veilige standaardkeuze**; offline is het altijd de standaard. Actief kiezen levert meer op.
+- **Baasgevecht (16b): een timing-balk met 3 slagen.** Een wijzer zwaait heen en weer; klik als hij in het groene vak staat. Elke goede slag doet schade, en kracht-drankjes maken het groene vak groter. Werkt met muis en touch. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit.
+- **Gewond:** een gewonde held rust kort in de gildekamer *(voorstel: 90 seconden)*. Dat kost geen buit en geen XP. Geef je hem een drankje (uit de heldenketel of van de bar), dan is hij meteen weer fit.
+- **Idle (16c): na een aankoop** *(werknaam: Quartermaster)* krijgt **elke held een knop "Auto"** die je **op elk moment** aan of uit zet.
+  - Op Auto vertrekt de held vanzelf opnieuw, met standaardkeuzes en de standaarduitkomst tegen de baas, ook offline (binnen de offline-limiet).
+  - Kies je toch zelf een kaartje of speel je de baas, dan telt jouw keuze.
+  - Zet je Auto uit, dan maakt de held de lopende expeditie af en wacht daarna op jou.
+  - Doel, zoals bij brouwen: idle levert ongeveer 30-40% van actief spelen.
 
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
@@ -365,7 +408,7 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
-- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft nu 3 kamervakken (stap 14a); de gildekamer (stap 15) wordt de vierde.
+- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft nu 3 kamervakken (stap 14a); de gildekamer (stap 15a) wordt de vierde.
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `app/ui-model.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
@@ -396,8 +439,12 @@ ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
 Decor      { id, buy: { level, cost }, effects: UpgradeEffect[] }          // stap 14b; tekst decor.<id>.name/.description
-Hero       { id, class, baseStats, hireCost }
-Dungeon    { id, minHeroLevel, durationSeconds, drops: ingredient id weighted[] }
+HeroClass  { id, bossPower, potionPower, hire: { cost } | 'withGuildRoom' }   // stap 15a; tekst heroes.<id>.name
+Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15b; zonder buy: alleen buit
+Dungeon    { id, recommendedLevel, durationSeconds, drops: { ingredient, weight, amount }[], gearDrops, cards: Card[], boss }   // 15a en 16
+Card       { id, options: { id, default?, outcome }[] }   // stap 16; outcome: duur, buit, kans gewond
+// State (schets): heroes per klasse { level, xp, gear per vak, bag: recipe id[], auto, injuredUntil, expedition?: { dungeon, endsAt, choices } },
+// gearOwned: id[], ingredientStock: { [kerker-ingrediënt]: aantal }
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -545,9 +592,15 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
 - [x] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* zonder Night Shift levert afwezig zijn niets op en toont het welkom-venster het gemiste bedrag, met Night Shift werkt offline zoals nu, upgrades verhogen aandeel en duur, tests slagen.
-- [ ] **Stap 15: Helden, gildekamer en uitrusting.** Een gildekamer op de bovenverdieping (te bouwen zoals de andere kamers) waar de helden wonen; inhuren, 2 klassen om mee te beginnen, levelen, uitrusting zelf kiezen (zwaard, schild, helm, amulet), Heroes-tabblad in het zijpaneel. Tutorial-hint: eerste held. Zie hoofdstuk 4, Helden.
-- [ ] **Stap 16: Expedities met keuzes en drankjes.** Held + kerker (1 om mee te beginnen) + zelf gebrouwen meegegeven drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); onderweg keuzekaartjes (pad, vechten of sluipen, drankje drinken) met invloed op buit en duur; idle kan met standaardkeuzes, actief meespelen levert duidelijk meer op; offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
-- [ ] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een korte timing-klik-minigame tegen de baas (muis en touch). Wie niet meespeelt, krijgt de standaard-uitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
+*Stap 15 en 16 zijn op 2026-10-07 opgesplitst in 15a, 15b, 16, 16b en 16c (keuze eigenaar). De uitwerking staat in hoofdstuk 4, Helden.*
+- [ ] **Stap 15a: Gildekamer, helden en eerste expeditie.** De gildekamer als vierde kamer (niveau 5); de bovenverdieping wordt verdeeld in vier vakken. De krijger komt mee met de kamer, de magiër is te huren. Tabblad Heroes in het zijpaneel. Eenvoudige expeditie naar het Moeras: vertrekken, een timer met absolute eindtijd (ook offline), terugkomen met kerker-ingrediënten en XP. Levels, en gewond met korte rust (een drankje van de bar geneest). Kerker-ingrediënten als voorraad: het schap toont het aantal, brouwen verbruikt er een, klanten bestellen zo'n recept alleen bij voorraad, en 3-4 nieuwe recepten. Tutorial-hint: eerste held op pad sturen.
+  *Klaar wanneer:* de gildekamer is te bouwen en toont de helden, een held gaat op expeditie en komt (ook na herladen of offline) terug met ingrediënten en XP, een recept met een kerker-ingrediënt verbruikt voorraad en wordt zonder voorraad niet besteld, de simulator haalt nog de tempodoelen, tests slagen.
+- [ ] **Stap 15b: Uitrusting.** Vier vakken (zwaard, schild, helm, amulet), elk met een eigen rol. Simpele stukken te koop in het tabblad Heroes; betere stukken als buit uit het Moeras. Aan- en uittrekken als de held thuis is. Tutorial-hint: eerste uitrusting.
+  *Klaar wanneer:* elk vak merkbaar zijn rol doet, gekochte en gevonden stukken te dragen zijn, tests slagen.
+- [ ] **Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes.** De tweede ketel in de gildekamer (ketel aanklikken, dan ingrediënten; het schap springt daarna terug). Drankjes gaan in de rugzak (max 2), of van de bar naar de held. De vier drankeffecten krijgen elk een rol op expeditie; de magiër haalt er meer uit. 2 keuzekaartjes per expeditie met een standaardkeuze na ~10 s. Receptencontent naar ~20 tot 30. Tutorial-hint: eerste heldendrankje en eerste kaartje.
+  *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
+- [ ] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een timing-balk met 3 slagen tegen de moerasheks (muis en touch); kracht-drankjes maken het groene vak groter. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
+- [ ] **Stap 16c: Quartermaster, helden op auto en offline.** Een aankoop geeft elke held een knop Auto (aan/uit, op elk moment). Op Auto vertrekt hij vanzelf opnieuw met standaardkeuzes, ook offline binnen de offline-limiet; zelf kiezen telt altijd. Het offline-rapport noemt de expedities. Daarna `npm run simulate` met helden (idle 30-40% van actief). Tutorial-hint: Auto-knop.
 - [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
 ### Fase D: Afwerking
@@ -591,6 +644,25 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Chore: uitwerking van de helden (2026-10-07, `chore-heroes-design`)
+- **Gedaan:** met de eigenaar de open vragen over de helden doorgenomen (vijf vragenrondes) en vastgelegd in hoofdstuk 4, Helden ("Uitwerking"), het datamodel (hoofdstuk 5) en het stappenplan. Stap 15 en 16 zijn opgesplitst in 15a, 15b, 16, 16b en 16c. Daarnaast IDEAS.md (punt 4 bijgewerkt) en GAME_ANALYSE.md 5.5 (verwijzing). Geen code.
+- **Waarom:** de eigenaar wilde eerst een duidelijk beeld van de heldenlaag voordat er gecodeerd wordt.
+- **Keuzes van de eigenaar:**
+  - krijger en magiër, één van elk;
+  - kerker-ingrediënten als hoofdbeloning, en die vormen een voorraad die opraakt;
+  - gildekamer op niveau 5;
+  - expedities van 1 tot 3 minuten in het Moeras;
+  - uitrusting met een rol per vak, basis te koop en betere stukken als buit;
+  - groei via XP en levels;
+  - drankjes meegeven zoals serveren, maar via een **tweede ketel in de gildekamer** (voorstel van de eigenaar: zo staat idle niet stil en kunnen het personeel en een volle bar niet in de weg zitten);
+  - een rol per drankeffect;
+  - 2 keuzekaartjes met een standaardkeuze;
+  - een timing-balk met 3 slagen als baasgevecht;
+  - gewond is een korte rust, en een drankje geneest;
+  - idle na een aankoop, met een Auto-knop per held die je op elk moment omzet (wens eigenaar: makkelijk wisselen tussen idle en zelf spelen).
+- **Voorstellen van Claude (placeholders):** prijzen, namen van ingrediënten en recepten, de rusttijd, max level 10 en de voorbeeldkaartjes. Ze worden in de stappen zelf afgesteld.
+- **Nog te doen / volgende stap:** stap 15a.
 
 ### Stap 14d: Night Shift, offline verdienen kopen (2026-10-07, `step-14d-night-shift`)
 - **Gedaan:** (code in `src/economy/upgrade-data.ts`, `src/economy/upgrades.ts`, `src/economy/shop-model.ts`, `src/economy/shop-view.ts`, `src/offline/offline.ts`, `src/i18n/en.ts`; tests in `tests/offline.test.ts`, `tests/shop-model.test.ts`, `tests/flows/world-flow.test.ts`, `tests/content/validate-core.ts`)
