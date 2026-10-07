@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (stap 14b staat op `step-14b-decorations` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14b (Decoraties). **Volgende stap:** 14c (Legenda in het receptenboek), daarna 14d (Night Shift: offline verdienen kopen).
+**Nu bezig:** niets (stap 14c staat op `step-14c-effect-legend` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14c (Legenda in het receptenboek). **Volgende stap:** 14d (Night Shift: offline verdienen kopen).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -35,7 +35,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 13c | Ingrediënten in de winkel | ✅ | `step-13c-ingredients` |
 | 14a | Kamers (bovenverdieping) | ✅ | `step-14a-rooms` |
 | 14b | Decoraties (goud-sink) | ✅ | `step-14b-decorations` |
-| 14c | Legenda van effecten in het receptenboek | ⬜ | |
+| 14c | Legenda van effecten in het receptenboek | ✅ | `step-14c-effect-legend` |
 | 14d | Night Shift: offline verdienen kopen | ⬜ | |
 | 15 | Helden, gildekamer en uitrusting | ⬜ | |
 | 16 | Expedities met keuzes en drankjes | ⬜ | |
@@ -277,7 +277,7 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 - **Tutorial-hint** (les `ingredient`, na het boek, vóór personeel): start zodra een ingrediënt te koop én betaalbaar is (of meteen als dat al zo is), wijst Menu, tabblad Shop en de koopknop aan (alias `guide-ingredient-buy`), en daarna het nieuwe ingrediënt op het schap (`guide-new-ingredient`).
 
 **Gebouwd in stap 13b (punten 1 t/m 3; keuzes van de eigenaar via vragen):**
-- **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster". Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `serving/serving-view.ts`).
+- **Iconen:** in i18n (`effects.<id>.icon`, plus `short`, `does` en `served` per effect). Bubbel "⚡ Glowcap Stout", voorkeur "♥⚡ …", VIP "👑 …". Boek: "⚡ Speed: drinks faster" (sinds stap 14c alleen het icoon, met een legenda bovenaan het boek). Na het serveren zweeft **altijd een effectregel**: 💪 "Big spender!", ⚡ "Quick drinker!", 🍀 "+N tip!" of "No tip this time", 💖 "+N reputation"; met "♥x2" erachter bij een voorkeur, en de reputatiebonus van een VIP als aparte regel (één regel per effect in `serving/serving-view.ts`).
 - **Serveren:** `DrinkSelection` (`serving/serving.ts`) onthoudt het opgepakte **soort** drankje; het vervalt vanzelf als dat drankje niet meer op de bar staat (bijv. de serveerster nam het). Acties `clickReadyDrink(slot)` en `cancelSelection()` (`serving/serving.ts`); `serveCustomer` krijgt het aangeboden drankje mee. Het opgepakte drankje wordt geel en komt iets omhoog; klanten die het besteld hebben krijgen een **groene bubbel met een ▼**. Na het geven vervalt de selectie. Event `drink:picked`; de basisles heeft een stap `basics_pick`.
 - **Paneel:** één knop "☰ Menu" / "✕" rechtsboven in het spel; bovenin het paneel tabbladen Shop | Recipes (`app/panels-view.ts`, logica zonder DOM in `app/ui-model.ts`). Het paneel opent op het laatst gebruikte tabblad, **alleen binnen de sessie** (na herladen weer Shop). De tutorial volgt welk tabblad open is via `tutorial/tutorial-context.ts`.
 
@@ -320,6 +320,7 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 
 - **Legenda van effecten (stap 14c):** bovenaan het receptenboek een legenda met de vier effecten (icoon, naam en wat het doet). Bij elk recept staat dan alleen nog het icoon, niet meer de tekst "Speed: drinks faster". Klantkaartje bij hover en uitleg bij de eerste keer zijn niet gekozen.
+  *Gebouwd in stap 14c:* een vak "What drinks do" tussen de kop van het boek en de kaartjes, met per effect het icoon, de naam en wat het doet ("⚡ Speed: they drink faster and free the seat sooner"; de bestaande i18n-sleutels `effects.<id>.icon`, `.name` en `.does`), en een regel over de ♥ (telt dubbel). Een receptkaartje toont nu "4s brew · 8 gold · 💖". De legenda komt uit `effectLegend()` in `serving/effects.ts` en wordt één keer gebouwd (`recipes/recipe-book-view.ts`); `effects.<id>.name` is nu alleen de naam ("Speed"), de oude `effectName` is weg.
 - **Night Shift, offline verdienen kopen (stap 14d):** offline verdienen gebeurt niet meer vanzelf. Zodra de speler een eerste medewerker heeft, staat "Night Shift" (werknaam) in de winkel als eenmalige aankoop; daarna komen upgrades voor het offline-aandeel (nu vast 50%, wordt een stat) en de duur (stat `offlineHours`). Zonder aankoop telt afwezig niets, maar het welkom-venster toont wat het personeel had kunnen verdienen ("Your staff could have earned 1.2K…") met een verwijzing naar de winkel. Prijs met de simulator afstellen. Later kan een rewarded ad (stap 20) de opbrengst verdubbelen.
 - **Helden (stap 15, 16, 16b), zie ook Helden hieronder.**
 - **Achievements (stap 18):** zoals gepland.
@@ -533,7 +534,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* niveau 2 brengt één nieuw ingrediënt in de winkel en geen ongebruikte ingrediënten op het schap, kopen zet het op het schap, de simulator haalt nog steeds de tempodoelen, tests slagen.
 - [x] **Stap 14a: Kamers.** Uitbreidingen (uitbouw met extra tafels, alchemielab, VIP-lounge) als kamervakken op een bovenverdieping in de scene, te bouwen in de winkel. Tutorial-hint: eerste kamer. Zie hoofdstuk 4, Kamers. (Stap 14 is op 2026-10-06 gesplitst in 14a en 14b, keuze eigenaar.)
 - [x] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie. Zie hoofdstuk 4, Decoraties.
-- [ ] **Stap 14c: Legenda van effecten in het receptenboek.** Bovenaan het receptenboek een legenda met de vier effecten (icoon, naam, wat het doet); bij elk recept alleen nog het icoon in plaats van de tekst. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
+- [x] **Stap 14c: Legenda van effecten in het receptenboek.** Bovenaan het receptenboek een legenda met de vier effecten (icoon, naam, wat het doet); bij elk recept alleen nog het icoon in plaats van de tekst. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
 - [ ] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* zonder Night Shift levert afwezig zijn niets op en toont het welkom-venster het gemiste bedrag, met Night Shift werkt offline zoals nu, upgrades verhogen aandeel en duur, tests slagen.
@@ -583,6 +584,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 14c: Legenda van effecten in het receptenboek (2026-10-07, `step-14c-effect-legend`)
+- **Gedaan:** (code in `src/serving/effects.ts` (`effectLegend`), `src/recipes/recipes.ts`, `src/recipes/recipe-book-view.ts`, `src/recipes/recipe-book.css`, `src/i18n/en.ts`; test in `tests/recipes.test.ts`)
+  - **Legenda:** zie hoofdstuk 4, Besluiten uit de ideeënronde ("Gebouwd in stap 14c").
+  - **Kaartjes:** alleen nog het icoon van het effect na brouwtijd en prijs.
+  - **Teksten:** `effects.<id>.name` is ingekort tot de naam (was "Speed: drinks faster"); nieuw zijn `book.legend_title`, `book.legend_does` en `book.legend_liked`.
+  - 1 test erbij (421 totaal); de boektest verwacht nu het icoon.
+- **Waarom (keuzes):** de bestaande `does`-teksten (ook gebruikt door de voorkeursles) leggen meer uit dan de oude korte naam, dus die staan in de legenda. Geen getallen in de legenda (bijv. "+25%"): die zijn placeholders en de eigenaar vroeg om icoon, naam en wat het doet. De ♥-regel erbij, omdat de bubbel en de les de ♥ gebruiken en het boek de plek is waar de les naar verwijst. Geen nieuwe tutorial-hint: dit is geen nieuwe speler-functie, en de afsluitzin van de voorkeursles verwijst al naar het boek.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels. `npm run simulate -- 60 1` is byte-identiek aan `main` (geen spelregel veranderd). In de browser: tabblad Recipes toont bovenaan "What drinks do" met de vier regels en de ♥-regel, daaronder de kaartjes met "4s brew · 8 gold · 💖". Geen consolefouten.
+- **Afwijkingen van het plan:** geen.
+- **Nu te proberen:** open het menu en het tabblad Recipes.
+- **Nog te doen / volgende stap:** stap 14d, Night Shift (offline verdienen kopen). Als de legenda niet genoeg blijkt: IDEAS.md, punt 5.
 
 ### Stap 14b: Decoraties (2026-10-07, `step-14b-decorations`)
 - **Gedaan:** (code in `src/decor/decor.ts`, `src/decor/decor-view.ts`, `DECOR_SPOTS` in `src/app/layout.ts`, en kleine aanvullingen in `app/world.ts`, `app/tavern-scene.ts`, `economy/upgrades.ts`, `economy/shop-model.ts`, `economy/shop-view.ts`, `shared/` (state, events, purchases, content, targets), `tutorial/`, `i18n/en.ts` en `dev/simulator.ts`; tests in `tests/decor.test.ts`, `tests/flows/shop-flow.test.ts`, `tests/layout.test.ts`, `tests/content/`, `tests/shared/targets.test.ts`)

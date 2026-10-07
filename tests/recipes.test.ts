@@ -3,6 +3,8 @@ import { ab, cde, rng, station } from './fixtures';
 import { addIngredient } from '@/brewing/brewing';
 import { recipes } from '@/recipes/recipe-data';
 import { discoverableRecipes, recordDiscoveries, type DiscoveryState, toBookView, type BookEntry } from '@/recipes/recipes';
+import { effectLegend } from '@/serving/effects';
+import { EFFECTS } from '@/shared/content';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { createStore } from '@/shared/state';
 
@@ -77,7 +79,7 @@ describe('the recipe book', () => {
       id: 'slime_sap',
       name: 'Slime Sap',
       ingredients: [{ id: 'swamp_slime', name: 'Swamp Slime' }, { id: 'wild_honey', name: 'Wild Honey' }],
-      details: ['4s brew', '8 gold', '💖 Charm: more reputation'],
+      details: ['4s brew', '8 gold', '💖'],
       rarity: 'common',
     });
   });
@@ -87,6 +89,17 @@ describe('the recipe book', () => {
     expect(entry(view.entries, 'bog_lantern')).toMatchObject({ kind: 'hidden', rarity: 'common' });
     expect(entry(view.entries, 'bog_lantern')).toHaveProperty('hint', expect.stringContaining('Swamp'));
     expect(entry(view.entries, 'moonlight_merlot')).toEqual({ kind: 'locked', id: 'moonlight_merlot', unlock: 'Unlocks at Cozy Inn' });
+  });
+
+  it('explains every effect once in the legend on top, so a card only needs the icon', () => {
+    const legend = effectLegend();
+    expect(legend.map((l) => l.effect)).toEqual([...EFFECTS]);
+    expect(legend.find((l) => l.effect === 'speed')).toEqual({
+      effect: 'speed', icon: '⚡', name: 'Speed', does: 'they drink faster and free the seat sooner',
+    });
+    const cards = toBookView({ recipesDiscovered: recipes.map((r) => r.id), reputation: 0, ingredientsBought: [] }, recipes).entries;
+    const icons = new Set(legend.map((l) => l.icon));
+    expect(cards.every((c) => c.kind === 'known' && icons.has(c.details.at(-1) ?? ''))).toBe(true);
   });
 
   it('lists every recipe, in content order', () => {
