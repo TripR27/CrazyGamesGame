@@ -1,3 +1,4 @@
+import { mountShop, type ShopSource } from '@/economy/shop-view';
 import { mountRecipeBook, type BookSource } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
 import type { LevelUpView } from '@/reputation/reputation';
@@ -7,7 +8,6 @@ import type { OfflineInbox } from '@/systems/offline/inbox';
 import type { Fit } from '@/ui/fit-math';
 import { fitToViewport } from '@/ui/fit-root';
 import { mountHud, type HudSource } from '@/ui/hud';
-import { mountShop, type ShopSource } from '@/ui/shop/shop-view';
 import type { SideLayout } from '@/ui/side-layout';
 import { createSidePanels } from '@/ui/side-panels';
 import { mountTutorial, type TutorialUiSource } from '@/ui/tutorial/tutorial-view';

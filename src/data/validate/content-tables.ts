@@ -1,13 +1,13 @@
-import { customers } from '@/data/customers/index';
-import { ingredients } from '@/data/ingredients/index';
+import { ingredients } from '@/brewing/ingredients';
+import { customers } from '@/customers/customer-data';
 import { TUTORIAL_STEPS } from '@/data/tutorial/index';
-import { upgrades } from '@/data/upgrades/index';
 import { ingredientTable } from '@/data/validate/ingredient-table';
 import { reputationTable } from '@/data/validate/reputation-table';
 import { roomTable } from '@/data/validate/room-table';
 import type { ContentTable } from '@/data/validate/table';
 import { customerTable, feedbackTable, recipeTable, upgradeTable } from '@/data/validate/tables';
 import { tutorialTable } from '@/data/validate/tutorial-table';
+import { upgrades } from '@/economy/upgrade-data';
 import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { ROOMS } from '@/rooms/rooms';

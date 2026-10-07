@@ -1,4 +1,4 @@
-import type { IngredientId } from '@/data/ingredients/types';
+import type { IngredientId } from '@/brewing/ingredients';
 import type { Effect, Rarity } from '@/shared/content';
 
 export type RecipeId = string;

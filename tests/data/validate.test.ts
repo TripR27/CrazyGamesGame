@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { CustomerDef } from '@/data/customers/types';
-import { ingredients } from '@/data/ingredients/index';
-import type { IngredientDef } from '@/data/ingredients/types';
+import { ingredients, type IngredientDef } from '@/brewing/ingredients';
+import type { CustomerDef } from '@/customers/customer-data';
 import { validateContent } from '@/data/validate/index';
 import { ingredientTable } from '@/data/validate/ingredient-table';
 import type { ContentTable } from '@/data/validate/table';

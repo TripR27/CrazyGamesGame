@@ -1,6 +1,6 @@
 import type { LevelUpView } from '@/reputation/reputation';
 import { createEl } from '@/ui/dom';
-import '../ui/level-up/level-up.css';
+import './level-up.css';
 
 const SHOW_MS = 4500;
 

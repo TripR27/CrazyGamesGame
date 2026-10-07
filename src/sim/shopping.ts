@@ -1,11 +1,10 @@
-import { upgrades } from '@/data/upgrades/index';
+import { firstBuyableIngredient, type IngredientShelf } from '@/brewing/ingredients';
+import { upgrades } from '@/economy/upgrade-data';
+import { quoteFor } from '@/economy/upgrades';
 import { ROOMS, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
 import type { Num } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
-import { firstBuyableIngredient } from '@/systems/ingredients/offer';
-import { quoteFor } from '@/systems/upgrades/buy';
 import type { GameWorld } from '@/wiring/create-services';
-import type { IngredientShelf } from '@/wiring/ingredient-shelf';
 
 /** While saving for a room, the bot still buys upgrades that cost less than this share of the room. */
 const SAVING_SHARE = 0.1;

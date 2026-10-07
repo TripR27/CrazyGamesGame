@@ -1,19 +1,17 @@
+import type { BrewStation } from '@/brewing/brewing';
+import { firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
+import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { TUTORIAL_STEPS } from '@/data/tutorial/index';
 import type { TutorialEvent } from '@/data/tutorial/types';
-import { upgrades } from '@/data/upgrades/index';
+import { upgrades } from '@/economy/upgrade-data';
+import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { recipes } from '@/recipes/recipe-data';
 import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { GameState, Store } from '@/shared/state';
-import type { BrewStation } from '@/systems/brewing/types';
-import { waitingCustomers } from '@/systems/customers/floor';
-import type { CustomerFloor } from '@/systems/customers/types';
-import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients/offer';
 import type { GuideContext } from '@/systems/tutorial/guide';
 import { createTutorialMachine } from '@/systems/tutorial/machine';
 import type { ProgressStore, TutorialMachine } from '@/systems/tutorial/types';
-import { firstAffordable } from '@/systems/upgrades/affordable';
-import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 import { followOpenTab } from '@/wiring/follow-open-tab';
 import { createAlreadyHolds } from '@/wiring/tutorial-already-holds';
 

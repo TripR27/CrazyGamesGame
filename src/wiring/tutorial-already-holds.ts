@@ -1,15 +1,12 @@
+import { firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
+import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import type { TutorialEvent } from '@/data/tutorial/types';
-import { upgrades } from '@/data/upgrades/index';
-import type { UpgradeDef } from '@/data/upgrades/types';
+import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
+import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { levelFor } from '@/reputation/reputation';
 import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
 import type { GameState, Store } from '@/shared/state';
-import { waitingCustomers } from '@/systems/customers/floor';
-import type { CustomerFloor } from '@/systems/customers/types';
-import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients/offer';
 import type { AlreadyHolds } from '@/systems/tutorial/types';
-import { firstAffordable } from '@/systems/upgrades/affordable';
-import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 
 /** What the checks may look at: the saved state, the customers, and the side-panel tab on screen. */
 interface World {

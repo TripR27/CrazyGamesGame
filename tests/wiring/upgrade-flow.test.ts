@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { newGame, playBasics, playLikes } from './helpers';
-import { BREWING } from '@/data/brewing';
+import { BREWING } from '@/brewing/brewing';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
 import { resolveTarget } from '@/systems/tutorial/resolve-target';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { plain, recipes, rich } from '../fixtures';
+import { plain, recipes, rich } from '../../fixtures';
 import { num } from '@/shared/numbers';
 import { computeOffline, type OfflineInput } from '@/systems/offline/compute';
 import { averageReward } from '@/systems/offline/earnings';

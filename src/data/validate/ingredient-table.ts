@@ -1,4 +1,4 @@
-import type { IngredientDef } from '@/data/ingredients/types';
+import type { IngredientDef } from '@/brewing/ingredients';
 import { isTier, oneOf, positive, tierRule } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';

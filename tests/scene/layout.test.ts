@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { upgrades } from '@/data/upgrades/index';
+import { upgrades } from '@/economy/upgrade-data';
+import { getMultipliers } from '@/economy/upgrades';
 import { BAR, BUILDING, CAULDRON, CUSTOMER_SLOTS, DOOR, FLOOR_Y, HUD_HEIGHT, INGREDIENT_SLOTS, READY_SLOTS, SHELF, TABLES, type Rect } from '@/scene/layout';
-import { getMultipliers } from '@/systems/economy/multipliers';
 
 const overlaps = (a: Rect, b: Rect): boolean =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;

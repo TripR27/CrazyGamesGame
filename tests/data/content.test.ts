@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { customers } from '@/data/customers/index';
-import { ingredients } from '@/data/ingredients/index';
+import { ingredients } from '@/brewing/ingredients';
+import { customers } from '@/customers/customer-data';
 import { validateContent } from '@/data/validate/index';
 import { hasKey } from '@/i18n/index';
 import { recipes, STARTER_RECIPE_IDS } from '@/recipes/recipe-data';

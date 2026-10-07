@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { getMultipliers } from '@/economy/upgrades';
 import { ROOMS, buildRoom, firstBuildableRoom, roomOffer, type RoomState, openSeats, roomSeatNumbers, totalSeats } from '@/rooms/rooms';
 import { num } from '@/shared/numbers';
 import { createStore } from '@/shared/state';
-import { getMultipliers } from '@/systems/economy/multipliers';
 
 const room = (id: string) => {
   const def = ROOMS.find((r) => r.id === id);

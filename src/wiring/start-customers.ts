@@ -1,10 +1,9 @@
+import { startCustomerSystem, type CustomerCatalog, type CustomerFloor } from '@/customers/customers';
+import { getMultipliers } from '@/economy/upgrades';
 import { openSeats, type SeatPlan } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';
-import { startCustomerSystem } from '@/systems/customers/system';
-import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
-import { getMultipliers } from '@/systems/economy/multipliers';
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
 

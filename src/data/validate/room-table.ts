@@ -1,6 +1,6 @@
-import { UPGRADE_STATS } from '@/data/upgrades/types';
 import { isTier, oneOf, positive } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import { UPGRADE_STATS } from '@/economy/upgrade-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import type { RoomDef } from '@/rooms/rooms';
 

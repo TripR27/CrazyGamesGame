@@ -1,9 +1,9 @@
+import { createIngredientShelf, type IngredientShelf } from '@/brewing/ingredients';
+import { waitingCustomers } from '@/customers/customers';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import type { GameState, Store } from '@/shared/state';
 import { shopOnce } from '@/sim/shopping';
-import { waitingCustomers } from '@/systems/customers/floor';
 import type { GameWorld } from '@/wiring/create-services';
-import { createIngredientShelf, type IngredientShelf } from '@/wiring/ingredient-shelf';
 
 export interface BotOptions {
   /** Shop: ingredients, rooms (saving up for them) and the cheapest upgrade, one purchase at a time (sim/shopping.ts). */

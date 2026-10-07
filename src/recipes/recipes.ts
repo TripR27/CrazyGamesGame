@@ -1,14 +1,12 @@
-import { ingredients as allIngredients } from '@/data/ingredients/index';
-import type { IngredientDef } from '@/data/ingredients/types';
+import { ingredients as allIngredients, type IngredientDef, ownedIngredients } from '@/brewing/ingredients';
 import { t } from '@/i18n/index';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { levelFor, recipesUnlockedUpTo, REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
-import { effectName } from '@/scene/effects/effect-text';
+import { effectName } from '@/serving/effects';
 import { textKey } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { formatNumber, num } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
-import { ownedIngredients } from '@/systems/ingredients/owned';
 
 /** The part of the state discovery looks at and changes (interface segregation: not the whole state). */
 export interface DiscoveryState {

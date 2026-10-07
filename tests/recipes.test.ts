@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ab, cde, rng, station } from './systems/fixtures';
+import { ab, cde, rng, station } from './fixtures';
+import { addIngredient } from '@/brewing/brewing';
 import { recipes } from '@/recipes/recipe-data';
 import { discoverableRecipes, recordDiscoveries, type DiscoveryState, toBookView, type BookEntry } from '@/recipes/recipes';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { createStore } from '@/shared/state';
-import { addIngredient } from '@/systems/brewing/add-ingredient';
 
 describe('discovering a recipe in the cauldron', () => {
   it('announces a discoverable recipe as a discovery, then brews it', () => {

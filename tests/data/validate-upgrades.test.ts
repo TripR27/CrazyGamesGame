@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { upgrades } from '@/data/upgrades/index';
-import type { UpgradeDef } from '@/data/upgrades/types';
 import { validateContent } from '@/data/validate/index';
 import { upgradeTable } from '@/data/validate/tables';
+import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 
 const problems = (...items: UpgradeDef[]): string[] => validateContent(() => true, [upgradeTable(items)]);
 const upgrade = (over: Partial<UpgradeDef> = {}): UpgradeDef => ({

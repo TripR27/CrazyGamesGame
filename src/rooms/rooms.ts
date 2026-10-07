@@ -1,4 +1,4 @@
-import type { UpgradeEffect } from '@/data/upgrades/types';
+import type { UpgradeEffect } from '@/economy/upgrade-data';
 import type { OneTimePurchase } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { oneTimeOffer, type BuyerState, type OneTimeOffer, watchBuyable, type WatchSource } from '@/shared/purchases';

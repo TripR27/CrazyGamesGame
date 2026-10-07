@@ -1,5 +1,5 @@
 import { t } from '@/i18n/index';
-import { withEffectIcon } from '@/scene/effects/effect-text';
+import { withEffectIcon } from '@/serving/effects';
 import { textKey } from '@/shared/content';
 import { guideRecipe, likedCustomer, nextIngredient, vipCustomer, type GuideContext } from '@/systems/tutorial/guide';
 

@@ -1,7 +1,7 @@
-import type { CustomerDef } from '@/data/customers/types';
-import type { UpgradeDef } from '@/data/upgrades/types';
+import type { CustomerDef } from '@/customers/customer-data';
 import { duplicates, isTier, oneOf, positive, tierRule } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import type { UpgradeDef } from '@/economy/upgrade-data';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { EFFECTS, RARITIES } from '@/shared/content';

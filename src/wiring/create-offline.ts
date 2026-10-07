@@ -1,10 +1,10 @@
+import type { CustomerCatalog } from '@/customers/customers';
 import { OFFLINE } from '@/data/offline';
+import { getMultipliers } from '@/economy/upgrades';
 import { recipes } from '@/recipes/recipe-data';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { touchLastSeen, type GameState, type Store } from '@/shared/state';
 import type { Clock } from '@/shared/time';
-import type { CustomerCatalog } from '@/systems/customers/types';
-import { getMultipliers } from '@/systems/economy/multipliers';
 import { applyOffline } from '@/systems/offline/apply';
 import { computeOffline } from '@/systems/offline/compute';
 import { createOfflineInbox, type OfflineInbox } from '@/systems/offline/inbox';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { recipes } from '../fixtures';
+import { recipes } from '../../fixtures';
 import type { GuideContext } from '@/systems/tutorial/guide';
 import { resolveTarget } from '@/systems/tutorial/resolve-target';
 

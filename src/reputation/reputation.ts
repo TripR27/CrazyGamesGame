@@ -1,6 +1,5 @@
-import type { CustomerDef } from '@/data/customers/types';
-import { ingredients as allIngredients } from '@/data/ingredients/index';
-import type { IngredientDef } from '@/data/ingredients/types';
+import { ingredients as allIngredients, type IngredientDef } from '@/brewing/ingredients';
+import type { CustomerDef } from '@/customers/customer-data';
 import { t } from '@/i18n/index';
 import type { RecipeId } from '@/recipes/recipe-data';
 import { textKey } from '@/shared/content';

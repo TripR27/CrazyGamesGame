@@ -1,11 +1,9 @@
-import { upgrades } from '@/data/upgrades/index';
+import { type IngredientCatalog, watchIngredientShop } from '@/brewing/ingredients';
+import { upgrades } from '@/economy/upgrade-data';
+import { watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { ROOMS, watchRoomShop } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { GameState, Store } from '@/shared/state';
-import type { IngredientCatalog } from '@/systems/ingredients/offer';
-import { watchIngredientShop } from '@/systems/ingredients/watch';
-import { watchAffordable } from '@/systems/upgrades/affordable';
-import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 
 /** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient and room become affordable. */
 export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, ingredients: IngredientCatalog): void {

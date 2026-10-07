@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { newGame } from './helpers';
-import { SPAWNING } from '@/data/customers/spawning';
+import { SPAWNING } from '@/customers/customer-data';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';

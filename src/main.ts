@@ -1,4 +1,4 @@
-import { customers } from '@/data/customers/index';
+import { customers } from '@/customers/customer-data';
 import { createGame } from '@/game';
 import { toLevelUpView } from '@/reputation/reputation';
 import { createLocalStorageAdapter, startAutosave, registerDebugCommands, startLoopDriver } from '@/shared/browser';
