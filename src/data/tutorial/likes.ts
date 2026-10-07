@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for customer preferences: starts at the first order of a liked drink (♥), done once one is served. */
 export const likesLesson: readonly TutorialStep[] = [

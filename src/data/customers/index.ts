@@ -1,6 +1,4 @@
-import type { CustomerDef } from './types';
-
-export type { CustomerDef, CustomerId } from './types';
+import type { CustomerDef } from '@/data/customers/types';
 
 // Placeholder numbers; tuned in step 13.
 export const customers: readonly CustomerDef[] = [

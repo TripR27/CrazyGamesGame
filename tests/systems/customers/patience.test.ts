@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { dismiss, findCustomer } from '@/systems/customers';
-import { advancePatience } from '@/systems/customers/patience';
 import { context, FIRST_DELAY, newFloor, run } from './helpers';
+import { dismiss, findCustomer } from '@/systems/customers/floor';
+import { advancePatience } from '@/systems/customers/patience';
 
 function floorWithOneCustomer() {
   const floor = newFloor();

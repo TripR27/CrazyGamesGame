@@ -1,10 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { startBrewSystem } from '@/systems/brewing';
-import { waitingCustomers } from '@/systems/customers';
-import { startStaff } from '@/systems/staff';
 import { ab, catalog, cde, economy, floorWith, rng, station } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { startBrewSystem } from '@/systems/brewing/system';
+import { waitingCustomers } from '@/systems/customers/floor';
+import { startStaff } from '@/systems/staff/system';
 
 function crew(rates: { brew: number; serve: number }, orders: Array<[string, string]>) {
   const bus = createEventBus<GameEvents>();

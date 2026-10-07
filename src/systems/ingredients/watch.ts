@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { watchBuyable, type WatchSource } from '@/systems/purchases';
-import { firstBuyableIngredient, type IngredientCatalog, type IngredientShopState } from './offer';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { firstBuyableIngredient, type IngredientCatalog, type IngredientShopState } from '@/systems/ingredients/offer';
+import { watchBuyable, type WatchSource } from '@/systems/purchases/watch';
 
 /** Publishes `ingredients:affordable` each time an ingredient becomes buyable. Returns a stop function. */
 export function watchIngredientShop(source: WatchSource<IngredientShopState>, bus: EventBus<GameEvents>, catalog: IngredientCatalog): () => void {

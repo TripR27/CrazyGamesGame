@@ -1,4 +1,4 @@
-import type { Bounds } from '@/core/target-registry';
+import type { Bounds } from '@/shared/targets';
 
 /** Bounds of a DOM element in design pixels (undoing the overlay's scale), for the target registry. */
 export function domBounds(el: HTMLElement, root: HTMLElement): Bounds {

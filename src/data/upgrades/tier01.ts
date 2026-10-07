@@ -1,4 +1,4 @@
-import type { UpgradeDef } from './types';
+import type { UpgradeDef } from '@/data/upgrades/types';
 
 /** First shop upgrades. Placeholder numbers: tuned in step 13. */
 export const tier01Upgrades: readonly UpgradeDef[] = [

@@ -1,8 +1,9 @@
-import type { CustomerDef } from '@/data/customers';
-import { ingredients as allIngredients, type IngredientDef } from '@/data/ingredients';
+import type { CustomerDef } from '@/data/customers/types';
+import { ingredients as allIngredients } from '@/data/ingredients/index';
+import type { IngredientDef } from '@/data/ingredients/types';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
 
 export interface LevelUpView {
   title: string;

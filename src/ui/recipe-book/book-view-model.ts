@@ -1,14 +1,14 @@
-import { formatNumber } from '@/core/format';
-import { num } from '@/core/numbers';
-import type { GameState } from '@/core/state';
-import { ingredients as allIngredients, type IngredientDef } from '@/data/ingredients';
-import type { RecipeDef } from '@/data/recipes';
+import { ingredients as allIngredients } from '@/data/ingredients/index';
+import type { IngredientDef } from '@/data/ingredients/types';
+import type { RecipeDef } from '@/data/recipes/types';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
+import { t } from '@/i18n/index';
 import { effectName } from '@/scene/effects/effect-text';
-import { t } from '@/i18n';
-import { ownedIngredients } from '@/systems/ingredients';
-import { levelFor } from '@/systems/reputation';
+import { formatNumber, num } from '@/shared/numbers';
+import type { GameState } from '@/shared/state';
+import { ownedIngredients } from '@/systems/ingredients/owned';
+import { levelFor } from '@/systems/reputation/level';
 
 /** What the book needs from the state (interface segregation). */
 export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation' | 'ingredientsBought'>;

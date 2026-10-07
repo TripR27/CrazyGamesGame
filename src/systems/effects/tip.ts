@@ -1,6 +1,6 @@
-import { ZERO, type Num } from '@/core/numbers';
-import type { Rng } from '@/core/rng';
-import type { DrinkBonus } from './bonus';
+import { ZERO, type Num } from '@/shared/numbers';
+import type { Rng } from '@/shared/random';
+import type { DrinkBonus } from '@/systems/effects/bonus';
 
 /** The tip a lucky drink brings: by chance, a share of the price in whole coins (at least 1). Zero otherwise. */
 export function rollTip(price: Num, bonus: Pick<DrinkBonus, 'tipChance' | 'tipShare'>, rng: Rng): Num {

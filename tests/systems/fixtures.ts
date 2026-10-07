@@ -1,13 +1,14 @@
-import { createSeededRng } from '@/core/rng';
-import { num, ONE } from '@/core/numbers';
-import { createStore } from '@/core/store';
-import type { CustomerDef } from '@/data/customers';
-import type { RecipeDef } from '@/data/recipes';
-import type { UpgradeDef } from '@/data/upgrades';
-import { createStation } from '@/systems/brewing';
-import { createFloor, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
-import type { EconomyState } from '@/systems/serving';
-import type { UpgradeState } from '@/systems/upgrades';
+import type { CustomerDef } from '@/data/customers/types';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import { num, ONE } from '@/shared/numbers';
+import { createSeededRng } from '@/shared/random';
+import { createStore } from '@/shared/state';
+import { createStation } from '@/systems/brewing/station';
+import { createFloor } from '@/systems/customers/floor';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
+import type { EconomyState } from '@/systems/serving/types';
+import type { UpgradeState } from '@/systems/upgrades/buy';
 
 // Speed only changes how long a customer drinks, so prices in these tests stay plain.
 const recipe = (id: string, ingredients: RecipeDef['ingredients'], brewSeconds: number, basePrice: number): RecipeDef => ({

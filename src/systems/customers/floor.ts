@@ -1,6 +1,6 @@
-import type { LeaveReason } from '@/core/game-events';
 import { SPAWNING } from '@/data/customers/spawning';
-import type { CustomerChange, CustomerFloor, CustomerInstance } from './types';
+import type { LeaveReason } from '@/shared/events';
+import type { CustomerChange, CustomerFloor, CustomerInstance } from '@/systems/customers/types';
 
 export function createFloor(capacity: number): CustomerFloor {
   return { capacity, customers: [], nextId: 1, spawnInMs: SPAWNING.firstDelayMs };

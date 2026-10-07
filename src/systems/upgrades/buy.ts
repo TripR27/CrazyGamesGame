@@ -1,8 +1,8 @@
-import type { Num } from '@/core/numbers';
-import type { UpgradeLevels } from '@/core/state';
-import type { UpgradeDef } from '@/data/upgrades';
-import { levelOf, levelsLeft } from './level';
-import { quote, type BuyAmount, type Quote } from './quote';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import type { Num } from '@/shared/numbers';
+import type { UpgradeLevels } from '@/shared/state';
+import { levelOf, levelsLeft } from '@/systems/upgrades/level';
+import { quote, type BuyAmount, type Quote } from '@/systems/upgrades/quote';
 
 /** The part of the game state that buying changes (interface segregation: not the whole state). */
 export interface UpgradeState {

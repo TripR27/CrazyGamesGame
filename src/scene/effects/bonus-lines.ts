@@ -1,8 +1,7 @@
-import { formatNumber } from '@/core/format';
-import type { Num } from '@/core/numbers';
 import type { Effect } from '@/data/common';
-import { t } from '@/i18n';
-import { withEffectIcon } from './effect-text';
+import { t } from '@/i18n/index';
+import { withEffectIcon } from '@/scene/effects/effect-text';
+import { formatNumber, type Num } from '@/shared/numbers';
 
 export const GOLD_COLOR = '#f5c542';
 const CHARM_COLOR = '#ffb3e6';

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { num } from '@/core/numbers';
-import { createStore } from '@/core/store';
-import { applyOffline, createOfflineInbox, type OfflineReport, type OfflineState } from '@/systems/offline';
+import { num } from '@/shared/numbers';
+import { createStore } from '@/shared/state';
+import { applyOffline, type OfflineState } from '@/systems/offline/apply';
+import { createOfflineInbox } from '@/systems/offline/inbox';
+import type { OfflineReport } from '@/systems/offline/types';
 
 const report = (over: Partial<OfflineReport> = {}): OfflineReport => ({
   awayMs: 1000, countedMs: 1000, capped: false, limitHours: 2, hadStaff: true, served: 4, gold: num(80), reputation: 4, ...over,

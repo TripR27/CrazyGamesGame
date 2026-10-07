@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The first lesson: ingredient, cauldron, wait, pick the drink up, hand it over, first gold. */
 export const basicsLesson: readonly TutorialStep[] = [

@@ -1,9 +1,9 @@
-import type { TargetRegistry } from '@/core/target-registry';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
+import type { TargetRegistry } from '@/shared/targets';
 import { createEl } from '@/ui/dom';
 import { domBounds } from '@/ui/dom-bounds';
-import type { RowView } from './shop-view-model';
-import { createUpgradeRow } from './upgrade-row';
+import type { RowView } from '@/ui/shop/shop-view-model';
+import { createUpgradeRow } from '@/ui/shop/upgrade-row';
 
 /** One thing sold once: how to show it right now, and whether it is still in the shop. */
 export interface OneTimeEntry<S> {

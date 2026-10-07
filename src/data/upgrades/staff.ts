@@ -1,4 +1,4 @@
-import type { UpgradeDef } from './types';
+import type { UpgradeDef } from '@/data/upgrades/types';
 
 /**
  * Staff: level 1 is the hire, each further level is training. The effect is actions per second,

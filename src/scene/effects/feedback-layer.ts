@@ -1,13 +1,13 @@
 import type { Scene } from 'phaser';
-import { formatNumber } from '@/core/format';
-import { recipes } from '@/data/recipes';
+import { recipes } from '@/data/recipes/index';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
+import { bonusLines, GOLD_COLOR } from '@/scene/effects/bonus-lines';
+import { createFloatingTexts } from '@/scene/effects/floating-text';
 import { CAULDRON } from '@/scene/layout';
 import { SEAT_SLOTS } from '@/scene/layout-rooms';
 import type { SceneServices } from '@/scene/services';
-import { bonusLines, GOLD_COLOR } from './bonus-lines';
-import { createFloatingTexts } from './floating-text';
+import { formatNumber } from '@/shared/numbers';
 
 const BAD_COLOR = '#ffc2b8';
 const LINE_ABOVE_SLOT = 125;

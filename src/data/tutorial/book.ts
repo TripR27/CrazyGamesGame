@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the recipe book: once the first recipes can be discovered (level 2), open the book tab and read. */
 export const bookLesson: readonly TutorialStep[] = [

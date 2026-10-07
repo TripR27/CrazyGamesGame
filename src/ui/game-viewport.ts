@@ -1,5 +1,5 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import type { Fit } from './fit-math';
+import type { Fit } from '@/ui/fit-math';
 
 /**
  * Puts the canvas container exactly where the game part of the frame is, then lets the engine fit again.

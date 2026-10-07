@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createSeededRng } from '@/core/rng';
-import type { CustomerDef } from '@/data/customers';
-import { VIP_SPAWN } from '@/data/customers/vip';
-import { pickCustomerType, priciestRecipe } from '@/systems/customers';
-import { serveCustomer } from '@/systems/serving';
 import { catalog as fixtureCatalog, economy, floorWith, station } from '../fixtures';
 import { catalog, context, newFloor, patientCatalog, run } from './helpers';
+import type { CustomerDef } from '@/data/customers/types';
+import { VIP_SPAWN } from '@/data/customers/vip';
+import { createSeededRng } from '@/shared/random';
+import { pickCustomerType, priciestRecipe } from '@/systems/customers/pick-type';
+import { serveCustomer } from '@/systems/serving/serve';
 
 const regular: CustomerDef = { id: 'regular', minLevel: 1, patienceSeconds: 60, spendMultiplier: 1, likes: [] };
 const king: CustomerDef = { id: 'king', minLevel: 3, patienceSeconds: 30, spendMultiplier: 3, likes: [], vip: true, reputationBonus: 3 };

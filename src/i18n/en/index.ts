@@ -1,18 +1,18 @@
+import { book } from '@/i18n/en/book';
+import { customers } from '@/i18n/en/customers';
+import { effects } from '@/i18n/en/effects';
+import { feedback } from '@/i18n/en/feedback';
+import { hud } from '@/i18n/en/hud';
+import { ingredients } from '@/i18n/en/ingredients';
+import { panel } from '@/i18n/en/panel';
+import { recipes } from '@/i18n/en/recipes';
+import { reputation } from '@/i18n/en/reputation';
+import { rooms } from '@/i18n/en/rooms';
+import { shop } from '@/i18n/en/shop';
+import { tutorial } from '@/i18n/en/tutorial';
+import { upgrades } from '@/i18n/en/upgrades';
+import { welcome } from '@/i18n/en/welcome';
 import type { Messages } from '@/i18n/translator';
-import { book } from './book';
-import { customers } from './customers';
-import { effects } from './effects';
-import { feedback } from './feedback';
-import { hud } from './hud';
-import { panel } from './panel';
-import { ingredients } from './ingredients';
-import { recipes } from './recipes';
-import { reputation } from './reputation';
-import { rooms } from './rooms';
-import { shop } from './shop';
-import { tutorial } from './tutorial';
-import { upgrades } from './upgrades';
-import { welcome } from './welcome';
 
 /** One file per domain; adding a domain means adding a spread here. */
 export const en: Messages = {

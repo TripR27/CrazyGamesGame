@@ -1,5 +1,5 @@
 import { createEl } from '@/ui/dom';
-import type { RowView } from './shop-view-model';
+import type { RowView } from '@/ui/shop/shop-view-model';
 
 export interface UpgradeRow {
   el: HTMLElement;

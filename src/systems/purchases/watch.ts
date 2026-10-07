@@ -1,5 +1,4 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
+import type { EventBus, GameEvents } from '@/shared/events';
 
 /** Events that announce "something in the shop can be bought now". */
 export type BuyableEvent = 'ingredients:affordable' | 'rooms:affordable';

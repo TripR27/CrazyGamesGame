@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInitialState } from '@/core/state';
-import { createStore } from '@/core/store';
+import { createInitialState, createStore } from '@/shared/state';
 
 describe('createInitialState', () => {
   it('starts empty with the given timestamps', () => {

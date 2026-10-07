@@ -1,4 +1,4 @@
-import type { GameEvents } from '@/core/game-events';
+import type { GameEvents } from '@/shared/events';
 
 export type TutorialEvent = keyof GameEvents;
 

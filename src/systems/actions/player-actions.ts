@@ -1,16 +1,20 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Num } from '@/core/numbers';
-import type { Rng } from '@/core/rng';
-import type { RecipeDef } from '@/data/recipes';
-import type { UpgradeDef } from '@/data/upgrades';
-import { addIngredient, emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
-import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
-import { createDrinkSelection, type DrinkSelection, type EconomyStore } from '@/systems/serving';
-import { buyUpgrade, type BuyAmount, type UpgradeStore } from '@/systems/upgrades';
-import { createIngredientActions, type IngredientActionDeps, type IngredientActions } from './ingredient-actions';
-import { createRoomActions, type RoomActionDeps, type RoomActions } from './room-actions';
-import { createServeActions, type ServeActions } from './serve-actions';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { Num } from '@/shared/numbers';
+import type { Rng } from '@/shared/random';
+import { createIngredientActions, type IngredientActionDeps, type IngredientActions } from '@/systems/actions/ingredient-actions';
+import { createRoomActions, type RoomActionDeps, type RoomActions } from '@/systems/actions/room-actions';
+import { createServeActions, type ServeActions } from '@/systems/actions/serve-actions';
+import { addIngredient } from '@/systems/brewing/add-ingredient';
+import { emptyCauldron } from '@/systems/brewing/station';
+import { publishBrewEvent } from '@/systems/brewing/system';
+import type { BrewStation } from '@/systems/brewing/types';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
+import { createDrinkSelection, type DrinkSelection } from '@/systems/serving/selection';
+import type { EconomyStore } from '@/systems/serving/types';
+import { buyUpgrade, type UpgradeStore } from '@/systems/upgrades/buy';
+import type { BuyAmount } from '@/systems/upgrades/quote';
 
 /** Everything the player can do with the mouse. The scene calls these and never touches game rules. */
 export interface PlayerActions extends ServeActions, IngredientActions, RoomActions {

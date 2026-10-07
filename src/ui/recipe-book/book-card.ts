@@ -1,7 +1,7 @@
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
 import { ingredientColor } from '@/scene/brewing/ingredient-look';
 import { createEl } from '@/ui/dom';
-import type { BookEntry } from './book-view-model';
+import type { BookEntry } from '@/ui/recipe-book/book-view-model';
 
 const cssColor = (id: string): string => `#${ingredientColor(id).toString(16).padStart(6, '0')}`;
 

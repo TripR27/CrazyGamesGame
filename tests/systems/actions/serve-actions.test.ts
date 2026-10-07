@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { createPlayerActions } from '@/systems/actions';
-import { createDrinkSelection } from '@/systems/serving';
 import { catalog, economy, floorWith, noUpgrades, rng, station } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createPlayerActions } from '@/systems/actions/player-actions';
+import { createDrinkSelection } from '@/systems/serving/selection';
 
 /** Customer 1 ordered ab, customer 2 ordered cde; both drinks stand on the bar. */
 function game() {

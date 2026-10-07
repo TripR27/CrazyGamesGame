@@ -1,15 +1,13 @@
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Num } from '@/core/numbers';
-import { createSeededRng } from '@/core/rng';
-import { createInitialState, type GameState } from '@/core/state';
-import { createStore } from '@/core/store';
-import { ROOMS } from '@/data/rooms';
-import { getMultipliers } from '@/systems/economy';
-import { levelFor } from '@/systems/reputation';
+import { ROOMS } from '@/data/rooms/index';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import type { Num } from '@/shared/numbers';
+import { createSeededRng } from '@/shared/random';
+import { createInitialState, type GameState, createStore } from '@/shared/state';
+import { createBot, type BotOptions } from '@/sim/bot';
+import { recordTimeline, type Timeline } from '@/sim/timeline';
+import { getMultipliers } from '@/systems/economy/multipliers';
+import { levelFor } from '@/systems/reputation/level';
 import { createServices } from '@/wiring/create-services';
-import { createBot, type BotOptions } from './bot';
-import { recordTimeline, type Timeline } from './timeline';
 
 const STEP_MS = 100;
 const MINUTE_MS = 60_000;

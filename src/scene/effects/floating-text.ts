@@ -1,5 +1,5 @@
 import type { GameObjects, Scene } from 'phaser';
-import { createPool } from '@/core/pool';
+import { createPool } from '@/shared/pool';
 
 const RISE_PX = 50;
 const DURATION_MS = 2200;

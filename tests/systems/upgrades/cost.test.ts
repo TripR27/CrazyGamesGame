@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { levelCost, packCost } from '@/systems/upgrades';
-import { quote } from '@/systems/upgrades/quote';
 import { priceUp } from '../fixtures';
+import { num } from '@/shared/numbers';
+import { levelCost, packCost } from '@/systems/upgrades/cost';
+import { quote } from '@/systems/upgrades/quote';
 
 // priceUp costs 10, 20, 40 for levels 0, 1, 2 (max level 3).
 const uncapped = { ...priceUp, maxLevel: undefined };

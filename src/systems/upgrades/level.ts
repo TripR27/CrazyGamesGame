@@ -1,5 +1,5 @@
-import type { UpgradeLevels } from '@/core/state';
-import type { UpgradeDef } from '@/data/upgrades';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import type { UpgradeLevels } from '@/shared/state';
 
 /** Owned level of an upgrade; never above its max, even if an old save or a content change says so. */
 export function levelOf(levels: UpgradeLevels, def: UpgradeDef): number {

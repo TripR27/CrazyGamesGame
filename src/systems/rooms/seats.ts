@@ -1,4 +1,4 @@
-import type { RoomDef } from '@/data/rooms';
+import type { RoomDef } from '@/data/rooms/types';
 
 /** The seats of the tavern: `ground` places downstairs, then each room's seats in the order of the rooms. */
 export interface SeatPlan {

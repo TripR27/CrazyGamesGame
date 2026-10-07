@@ -1,9 +1,9 @@
-import { pickRandom, type Rng } from '@/core/rng';
-import { isLiked } from '@/systems/effects';
-import { levelFor } from '@/systems/reputation';
-import { pickCustomerType, pickOrder } from './pick-type';
-import { freeSeats } from './floor';
-import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from './types';
+import { pickRandom, type Rng } from '@/shared/random';
+import { freeSeats } from '@/systems/customers/floor';
+import { pickCustomerType, pickOrder } from '@/systems/customers/pick-type';
+import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';
+import { isLiked } from '@/systems/effects/bonus';
+import { levelFor } from '@/systems/reputation/level';
 
 /**
  * Seat one new customer if there is a free seat, a customer type the reputation level allows,

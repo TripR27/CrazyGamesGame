@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { BREWING } from '@/data/brewing';
-import { createStaleWatch, startStaff } from '@/systems/staff';
 import { ab, catalog, economy, floorWith, rng, station } from '../fixtures';
+import { BREWING } from '@/data/brewing';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createStaleWatch } from '@/systems/staff/stale-cauldron';
+import { startStaff } from '@/systems/staff/system';
 
 describe('a stale cauldron', () => {
   it('counts as stale only after the same contents sat there for the limit', () => {

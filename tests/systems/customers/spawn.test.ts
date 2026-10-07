@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createSeededRng } from '@/core/rng';
-import { SPAWNING } from '@/data/customers/spawning';
-import { dismiss, freeSeats } from '@/systems/customers';
-import { nextSpawnDelayMs } from '@/systems/customers/spawn-timing';
 import { context, FIRST_DELAY, newFloor, patientCatalog, run } from './helpers';
+import { SPAWNING } from '@/data/customers/spawning';
+import { createSeededRng } from '@/shared/random';
+import { dismiss, freeSeats } from '@/systems/customers/floor';
+import { nextSpawnDelayMs } from '@/systems/customers/spawn-timing';
 
 describe('spawning customers', () => {
   it('brings the first customer after the first delay, not before', () => {

@@ -1,6 +1,6 @@
-import { formatNumber } from '@/core/format';
-import type { SimResult } from './run';
-import { earnedBetween } from './timeline';
+import { formatNumber } from '@/shared/numbers';
+import type { SimResult } from '@/sim/run';
+import { earnedBetween } from '@/sim/timeline';
 
 const MINUTE_MS = 60_000;
 

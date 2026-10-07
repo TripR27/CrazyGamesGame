@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
+import { createEventBus } from '@/shared/events';
 
 interface TestEvents {
   ping: { n: number };

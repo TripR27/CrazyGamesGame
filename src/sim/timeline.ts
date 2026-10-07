@@ -1,9 +1,8 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { num, type Num } from '@/core/numbers';
 import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { num, type Num } from '@/shared/numbers';
 
 export interface TimelineEntry {
   ms: number;

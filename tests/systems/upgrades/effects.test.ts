@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { addIngredient, createStation } from '@/systems/brewing';
-import { serveCustomer } from '@/systems/serving';
 import { ab, catalog, economy, floorWith, rng } from '../fixtures';
+import { num } from '@/shared/numbers';
+import { addIngredient } from '@/systems/brewing/add-ingredient';
+import { createStation } from '@/systems/brewing/station';
+import { serveCustomer } from '@/systems/serving/serve';
 
 describe('brew speed', () => {
   it('shortens the brew time by the speed factor', () => {

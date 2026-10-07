@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { GameState } from '@/core/state';
-import { nextIngredient } from '@/systems/tutorial';
 import { newGame, playBasics, withSeats } from './helpers';
+import type { GameState } from '@/shared/state';
+import { nextIngredient } from '@/systems/tutorial/guide';
 
 describe('the first tutorial: replaying, skipping, mistakes and reloads', () => {
   it('can be replayed with a customer already seated, without getting stuck', () => {

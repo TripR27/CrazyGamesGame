@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first extra seat: you start with one seat, so more customers need a purchase. */
 export const seatsLesson: readonly TutorialStep[] = [

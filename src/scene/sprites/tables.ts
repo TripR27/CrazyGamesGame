@@ -1,6 +1,6 @@
 import { FLOOR_Y, TABLES } from '@/scene/layout';
 import { PALETTE } from '@/scene/palette';
-import { fillRect, type Graphics } from './draw';
+import { fillRect, type Graphics } from '@/scene/sprites/draw';
 
 const LEG_WIDTH = 10;
 const LEG_INSET = 12;

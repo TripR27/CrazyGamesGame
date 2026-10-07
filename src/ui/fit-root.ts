@@ -1,6 +1,6 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { computeFit, type Fit } from './fit-math';
-import type { SideLayout } from './side-layout';
+import { computeFit, type Fit } from '@/ui/fit-math';
+import type { SideLayout } from '@/ui/side-layout';
 
 /**
  * Makes the overlay a design-space box that is scaled and centred like the canvas, so HUD elements stay

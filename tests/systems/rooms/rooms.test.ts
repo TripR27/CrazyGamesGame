@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { createStore } from '@/core/store';
-import { ROOMS } from '@/data/rooms';
-import { getMultipliers } from '@/systems/economy';
-import { buildRoom, firstBuildableRoom, openSeats, roomOffer, roomSeatNumbers, totalSeats, type RoomState } from '@/systems/rooms';
+import { ROOMS } from '@/data/rooms/index';
+import { num } from '@/shared/numbers';
+import { createStore } from '@/shared/state';
+import { getMultipliers } from '@/systems/economy/multipliers';
+import { buildRoom, firstBuildableRoom, roomOffer, type RoomState } from '@/systems/rooms/offer';
+import { openSeats, roomSeatNumbers, totalSeats } from '@/systems/rooms/seats';
 
 const room = (id: string) => {
   const def = ROOMS.find((r) => r.id === id);

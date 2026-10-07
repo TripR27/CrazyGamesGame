@@ -1,4 +1,4 @@
-import type { Num } from '@/core/numbers';
+import type { Num } from '@/shared/numbers';
 
 /** What happened while the player was away. Shown in the welcome-back window. */
 export interface OfflineReport {

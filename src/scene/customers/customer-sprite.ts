@@ -1,5 +1,5 @@
 import type { GameObjects, Scene } from 'phaser';
-import { bodyColorFor, SKIN_COLOR } from './customer-look';
+import { bodyColorFor, SKIN_COLOR } from '@/scene/customers/customer-look';
 
 const BAR_WIDTH = 44;
 const BAR_Y = -70;

@@ -1,6 +1,7 @@
-import type { TutorialProgress } from '@/core/state';
-import type { TutorialStep } from '@/data/tutorial';
-import { createTutorialMachine, type AlreadyHolds } from '@/systems/tutorial';
+import type { TutorialStep } from '@/data/tutorial/types';
+import type { TutorialProgress } from '@/shared/state';
+import { createTutorialMachine } from '@/systems/tutorial/machine';
+import type { AlreadyHolds } from '@/systems/tutorial/types';
 
 export const steps: TutorialStep[] = [
   { id: 'a', lesson: 'l', startWhen: { kind: 'event', event: 'customer:arrived' }, target: 'cauldron', completeOn: { kind: 'event', event: 'ingredient:clicked' } },

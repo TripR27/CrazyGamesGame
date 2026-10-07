@@ -1,9 +1,9 @@
 import type { GameObjects, Scene } from 'phaser';
-import type { TargetRegistry } from '@/core/target-registry';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
 import { READY_SLOTS } from '@/scene/layout';
-import type { BrewStation } from '@/systems/brewing';
+import type { TargetRegistry } from '@/shared/targets';
+import type { BrewStation } from '@/systems/brewing/types';
 
 const MUG = { w: 30, h: 28, color: 0xd9a441, foam: 0xfff2cc, edge: 0x5e3a18, picked: 0xfff36b };
 const PICK_LIFT = 8;

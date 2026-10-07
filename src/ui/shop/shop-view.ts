@@ -1,15 +1,16 @@
-import type { Listener } from '@/core/store';
-import type { TargetRegistry } from '@/core/target-registry';
-import { upgrades } from '@/data/upgrades';
-import { t } from '@/i18n';
-import type { PlayerActions } from '@/systems/actions';
-import type { BuyAmount, UpgradeState } from '@/systems/upgrades';
+import { upgrades } from '@/data/upgrades/index';
+import { t } from '@/i18n/index';
+import type { Listener } from '@/shared/state';
+import type { TargetRegistry } from '@/shared/targets';
+import type { PlayerActions } from '@/systems/actions/player-actions';
+import type { UpgradeState } from '@/systems/upgrades/buy';
+import type { BuyAmount } from '@/systems/upgrades/quote';
 import { createEl } from '@/ui/dom';
+import { mountOneTimeGroups, type OneTimeState } from '@/ui/shop/one-time-groups';
+import { buildPanel, registerTargets } from '@/ui/shop/shop-panel';
+import { toRowView } from '@/ui/shop/shop-view-model';
+import { createUpgradeRow } from '@/ui/shop/upgrade-row';
 import type { SidePanels } from '@/ui/side-panels';
-import { mountOneTimeGroups, type OneTimeState } from './one-time-groups';
-import { buildPanel, registerTargets } from './shop-panel';
-import { toRowView } from './shop-view-model';
-import { createUpgradeRow } from './upgrade-row';
 import './shop.css';
 
 type ShopState = UpgradeState & OneTimeState;

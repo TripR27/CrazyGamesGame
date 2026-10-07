@@ -1,4 +1,4 @@
-import { likedCustomer, nextIngredient, readyCustomerId, readyDrinkSlot, vipCustomer, type GuideContext } from './guide';
+import { likedCustomer, nextIngredient, readyCustomerId, readyDrinkSlot, vipCustomer, type GuideContext } from '@/systems/tutorial/guide';
 
 const pointAt = (customer: { id: number } | undefined): string | null => (customer === undefined ? null : `customer:${customer.id}`);
 

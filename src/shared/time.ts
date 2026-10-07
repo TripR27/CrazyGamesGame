@@ -1,4 +1,8 @@
-import type { Clock } from '@/core/clock';
+export interface Clock {
+  now(): number;
+}
+
+export const systemClock: Clock = { now: () => Date.now() };
 
 export const DEFAULT_STEP_MS = 100;
 export const DEFAULT_GAP_THRESHOLD_MS = 5000;

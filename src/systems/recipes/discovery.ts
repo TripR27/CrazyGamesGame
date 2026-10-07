@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { RecipeDef } from '@/data/recipes';
-import { levelFor, recipesUnlockedUpTo } from '@/systems/reputation';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { levelFor, recipesUnlockedUpTo } from '@/systems/reputation/level';
 
 /** The part of the state discovery looks at and changes (interface segregation: not the whole state). */
 export interface DiscoveryState {

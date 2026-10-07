@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { createInitialState } from '@/core/state';
-import { BREWING } from '@/data/brewing';
-import { resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics, playLikes } from './helpers';
+import { BREWING } from '@/data/brewing';
+import { num } from '@/shared/numbers';
+import { createInitialState } from '@/shared/state';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 /** A game in which the basics lesson is done and the player has `gold`. */
 function afterBasics(gold: number) {

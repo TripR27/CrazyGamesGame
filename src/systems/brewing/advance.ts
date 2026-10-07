@@ -1,4 +1,4 @@
-import type { BrewEvent, BrewStation } from './types';
+import type { BrewEvent, BrewStation } from '@/systems/brewing/types';
 
 /** Run the brew timer. When it ends, the drink goes onto the bar. */
 export function advanceBrewing(station: BrewStation, deltaMs: number): BrewEvent[] {

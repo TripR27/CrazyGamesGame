@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first room: starts once one can be built, then points at it on the upper floor. */
 export const roomLesson: readonly TutorialStep[] = [

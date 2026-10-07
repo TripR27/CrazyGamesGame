@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { resolveTarget, type GuideContext } from '@/systems/tutorial';
 import { recipes } from '../fixtures';
+import type { GuideContext } from '@/systems/tutorial/guide';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   knownRecipes: recipes,

@@ -1,9 +1,9 @@
-import type { RoomDef } from '@/data/rooms';
+import type { RoomDef } from '@/data/rooms/types';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
-import { roomOffer, type RoomState } from '@/systems/rooms';
-import { effectAmount, type RowView } from './shop-view-model';
-import { toOneTimeRowView } from './one-time-view-model';
+import { t } from '@/i18n/index';
+import { roomOffer, type RoomState } from '@/systems/rooms/offer';
+import { toOneTimeRowView } from '@/ui/shop/one-time-view-model';
+import { effectAmount, type RowView } from '@/ui/shop/shop-view-model';
 
 /** The description of a room, with its seats and the amount of each effect filled in (`{seats}`, `{brewSpeed}`, …). */
 export function roomDescription(room: RoomDef): string {

@@ -1,5 +1,5 @@
-import type { TutorialProgress } from '@/core/state';
-import type { TutorialStep } from '@/data/tutorial';
+import type { TutorialStep } from '@/data/tutorial/types';
+import type { TutorialProgress } from '@/shared/state';
 
 export function firstOpenStep(steps: readonly TutorialStep[], progress: TutorialProgress): TutorialStep | null {
   if (progress.skipped) return null;

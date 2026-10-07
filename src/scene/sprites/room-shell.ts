@@ -1,6 +1,6 @@
 import { BUILDING, DOOR, FLOOR_Y, GROUND_Y } from '@/scene/layout';
 import { PALETTE } from '@/scene/palette';
-import { fillRect, type Graphics } from './draw';
+import { fillRect, type Graphics } from '@/scene/sprites/draw';
 
 const PLANK_WIDTH = 120;
 const GAME_BOTTOM = 720;

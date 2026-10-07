@@ -1,11 +1,11 @@
-import type { Rng } from '@/core/rng';
 import { SPAWNING } from '@/data/customers/spawning';
-import { freeSeats } from './floor';
-import { advanceDrinking } from './drinking';
-import { advancePatience } from './patience';
-import { trySpawn } from './spawn';
-import { nextSpawnDelayMs } from './spawn-timing';
-import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from './types';
+import type { Rng } from '@/shared/random';
+import { advanceDrinking } from '@/systems/customers/drinking';
+import { freeSeats } from '@/systems/customers/floor';
+import { advancePatience } from '@/systems/customers/patience';
+import { trySpawn } from '@/systems/customers/spawn';
+import { nextSpawnDelayMs } from '@/systems/customers/spawn-timing';
+import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';
 
 /**
  * One simulation step: drinks are finished, patience runs down, then a new customer may arrive.

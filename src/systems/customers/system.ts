@@ -1,8 +1,7 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Rng } from '@/core/rng';
-import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from './types';
-import { updateCustomers } from './update';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { Rng } from '@/shared/random';
+import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';
+import { updateCustomers } from '@/systems/customers/update';
 
 export interface CustomerSystemDeps {
   floor: CustomerFloor;

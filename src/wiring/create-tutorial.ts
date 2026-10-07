@@ -1,19 +1,22 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { recipes } from '@/data/recipes';
-import { TUTORIAL_STEPS, type TutorialEvent } from '@/data/tutorial';
-import { upgrades } from '@/data/upgrades';
-import type { BrewStation } from '@/systems/brewing';
-import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
-import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
-import { ROOMS } from '@/data/rooms';
-import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients';
-import { firstBuildableRoom } from '@/systems/rooms';
-import { followOpenTab } from './follow-open-tab';
-import { createAlreadyHolds } from './tutorial-already-holds';
-import { createTutorialMachine, type GuideContext, type ProgressStore, type TutorialMachine } from '@/systems/tutorial';
+import { recipes } from '@/data/recipes/index';
+import { ROOMS } from '@/data/rooms/index';
+import { TUTORIAL_STEPS } from '@/data/tutorial/index';
+import type { TutorialEvent } from '@/data/tutorial/types';
+import { upgrades } from '@/data/upgrades/index';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { GameState, Store } from '@/shared/state';
+import type { BrewStation } from '@/systems/brewing/types';
+import { waitingCustomers } from '@/systems/customers/floor';
+import type { CustomerFloor } from '@/systems/customers/types';
+import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients/offer';
+import { firstBuildableRoom } from '@/systems/rooms/offer';
+import type { GuideContext } from '@/systems/tutorial/guide';
+import { createTutorialMachine } from '@/systems/tutorial/machine';
+import type { ProgressStore, TutorialMachine } from '@/systems/tutorial/types';
+import { firstAffordable } from '@/systems/upgrades/affordable';
+import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
+import { followOpenTab } from '@/wiring/follow-open-tab';
+import { createAlreadyHolds } from '@/wiring/tutorial-already-holds';
 
 export interface TutorialDeps {
   store: Store<GameState>;

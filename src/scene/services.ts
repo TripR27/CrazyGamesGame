@@ -1,11 +1,10 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { TargetRegistry } from '@/core/target-registry';
-import type { PlayerActions } from '@/systems/actions';
-import type { BrewStation } from '@/systems/brewing';
-import type { CustomerFloor } from '@/systems/customers';
-import type { OneTimeOffer } from '@/systems/purchases';
-import type { DrinkSelection } from '@/systems/serving';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { TargetRegistry } from '@/shared/targets';
+import type { PlayerActions } from '@/systems/actions/player-actions';
+import type { BrewStation } from '@/systems/brewing/types';
+import type { CustomerFloor } from '@/systems/customers/types';
+import type { OneTimeOffer } from '@/systems/purchases/one-time';
+import type { DrinkSelection } from '@/systems/serving/selection';
 
 /** What the scenes may read and call. Handed in from the composition root (src/wiring). */
 export interface SceneServices {

@@ -1,9 +1,9 @@
-import { formatNumber } from '@/core/format';
-import type { RoomDef } from '@/data/rooms';
 import { REPUTATION_LEVELS } from '@/data/reputation/levels';
+import type { RoomDef } from '@/data/rooms/types';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
-import type { OneTimeOffer } from '@/systems/purchases';
+import { t } from '@/i18n/index';
+import { formatNumber } from '@/shared/numbers';
+import type { OneTimeOffer } from '@/systems/purchases/one-time';
 
 /** The sign on a boarded-up room: its name, and the level it opens at or its price. Empty once it is built. */
 export function roomSign(room: RoomDef, offer: OneTimeOffer): string {

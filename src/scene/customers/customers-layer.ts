@@ -1,13 +1,13 @@
 import type { Scene } from 'phaser';
-import { createPool, type Pool } from '@/core/pool';
-import { recipes } from '@/data/recipes';
+import { recipes } from '@/data/recipes/index';
+import { shakeNo, showDrinking } from '@/scene/customers/customer-reactions';
+import { createCustomerSprite, type CustomerSprite } from '@/scene/customers/customer-sprite';
+import { orderLabel } from '@/scene/customers/order-label';
 import { DOOR_ENTRY } from '@/scene/layout';
 import { SEAT_SLOTS } from '@/scene/layout-rooms';
 import type { SceneServices } from '@/scene/services';
-import { findCustomer, isWaiting } from '@/systems/customers';
-import { shakeNo, showDrinking } from './customer-reactions';
-import { createCustomerSprite, type CustomerSprite } from './customer-sprite';
-import { orderLabel } from './order-label';
+import { createPool, type Pool } from '@/shared/pool';
+import { findCustomer, isWaiting } from '@/systems/customers/floor';
 
 const WALK_MS = 900;
 

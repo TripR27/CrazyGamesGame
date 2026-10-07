@@ -1,10 +1,10 @@
-import type { TargetRegistry } from '@/core/target-registry';
-import { t } from '@/i18n';
-import type { BuyAmount } from '@/systems/upgrades';
+import { t } from '@/i18n/index';
+import type { TargetRegistry } from '@/shared/targets';
+import type { BuyAmount } from '@/systems/upgrades/quote';
 import { createEl } from '@/ui/dom';
 import { domBounds } from '@/ui/dom-bounds';
-import { createAmountPicker } from './amount-picker';
-import type { UpgradeRow } from './upgrade-row';
+import { createAmountPicker } from '@/ui/shop/amount-picker';
+import type { UpgradeRow } from '@/ui/shop/upgrade-row';
 
 export function buildPanel(onPick: (amount: BuyAmount) => void) {
   const panel = createEl('div', 'shop-panel');

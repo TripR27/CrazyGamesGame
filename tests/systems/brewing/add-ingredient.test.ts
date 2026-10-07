@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { addIngredient, canGrow, matchRecipe } from '@/systems/brewing';
 import { ab, cde, recipes, rng, station } from '../fixtures';
+import { addIngredient } from '@/systems/brewing/add-ingredient';
+import { canGrow, matchRecipe } from '@/systems/brewing/match';
 
 describe('matching ingredients to recipes', () => {
   it('matches the exact set in any order', () => {

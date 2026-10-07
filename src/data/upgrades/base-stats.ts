@@ -1,7 +1,7 @@
 import { BREWING } from '@/data/brewing';
 import { VIP_SPAWN } from '@/data/customers/vip';
 import { OFFLINE } from '@/data/offline';
-import type { UpgradeStat } from './types';
+import type { UpgradeStat } from '@/data/upgrades/types';
 
 /**
  * What each stat is worth before any upgrade: brew speed and sell price are factors, storage is a count,

@@ -1,7 +1,7 @@
 import type { Effect } from '@/data/common';
-import type { CustomerDef } from '@/data/customers';
+import type { CustomerDef } from '@/data/customers/types';
 import { EFFECT_POWER, LIKED_ORDER_WEIGHT } from '@/data/effects';
-import type { RecipeDef } from '@/data/recipes';
+import type { RecipeDef } from '@/data/recipes/types';
 
 /** What a served drink does for this customer. The neutral values mean "no change". */
 export interface DrinkBonus {

@@ -1,13 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { num } from '@/core/numbers';
-import { createStore } from '@/core/store';
-import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
-import {
-  buyIngredient, firstBuyableIngredient, ingredientOffer, ownedIngredients, watchIngredientShop, type IngredientShopState,
-} from '@/systems/ingredients';
+import { ingredients } from '@/data/ingredients/index';
+import { recipes } from '@/data/recipes/index';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { num } from '@/shared/numbers';
+import { createStore } from '@/shared/state';
+import { buyIngredient, firstBuyableIngredient, ingredientOffer, type IngredientShopState } from '@/systems/ingredients/offer';
+import { ownedIngredients } from '@/systems/ingredients/owned';
+import { watchIngredientShop } from '@/systems/ingredients/watch';
 
 const catalog = { ingredients, recipes };
 const pepper = ingredients.find((i) => i.id === 'fire_pepper');

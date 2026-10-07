@@ -1,5 +1,5 @@
-import { t } from '@/i18n';
-import type { BuyAmount } from '@/systems/upgrades';
+import { t } from '@/i18n/index';
+import type { BuyAmount } from '@/systems/upgrades/quote';
 import { createEl } from '@/ui/dom';
 
 const AMOUNTS: readonly BuyAmount[] = [1, 10, 'max'];

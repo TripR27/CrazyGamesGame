@@ -1,5 +1,5 @@
 import { createEl } from '@/ui/dom';
-import type { LevelUpView } from './level-up-view-model';
+import type { LevelUpView } from '@/ui/level-up/level-up-view-model';
 import './level-up.css';
 
 const SHOW_MS = 4500;

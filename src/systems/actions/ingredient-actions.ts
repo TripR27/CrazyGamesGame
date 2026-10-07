@@ -1,6 +1,5 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { buyIngredient, type IngredientCatalog, type IngredientShopStore } from '@/systems/ingredients';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { buyIngredient, type IngredientCatalog, type IngredientShopStore } from '@/systems/ingredients/offer';
 
 export interface IngredientActions {
   /** Buy an ingredient in the shop (one time); does nothing when it is locked, owned or too expensive. */

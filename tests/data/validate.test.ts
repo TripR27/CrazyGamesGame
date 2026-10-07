@@ -1,15 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { CustomerDef } from '@/data/customers';
-import { ingredients, type IngredientDef } from '@/data/ingredients';
-import type { RecipeDef } from '@/data/recipes';
-import {
-  customerTable,
-  feedbackTable,
-  ingredientTable,
-  recipeTable,
-  validateContent,
-  type ContentTable,
-} from '@/data/validate';
+import type { CustomerDef } from '@/data/customers/types';
+import { ingredients } from '@/data/ingredients/index';
+import type { IngredientDef } from '@/data/ingredients/types';
+import type { RecipeDef } from '@/data/recipes/types';
+import { validateContent } from '@/data/validate/index';
+import { ingredientTable } from '@/data/validate/ingredient-table';
+import type { ContentTable } from '@/data/validate/table';
+import { customerTable, feedbackTable, recipeTable } from '@/data/validate/tables';
 
 const allKeys = (): boolean => true;
 const noKeys = (): boolean => false;

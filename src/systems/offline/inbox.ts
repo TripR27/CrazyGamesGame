@@ -1,4 +1,4 @@
-import type { OfflineReport } from './types';
+import type { OfflineReport } from '@/systems/offline/types';
 
 /**
  * Where reports wait for the welcome-back window. A report can arrive before the window exists

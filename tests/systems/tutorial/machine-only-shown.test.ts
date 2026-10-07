@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { TutorialProgress } from '@/core/state';
-import type { TutorialStep } from '@/data/tutorial';
-import { createTutorialMachine, type AlreadyHolds } from '@/systems/tutorial';
+import type { TutorialStep } from '@/data/tutorial/types';
+import type { TutorialProgress } from '@/shared/state';
+import { createTutorialMachine } from '@/systems/tutorial/machine';
+import type { AlreadyHolds } from '@/systems/tutorial/types';
 
 /** Lesson one, then a lesson that starts later and first only asks the player to open the shop tab. */
 const steps: TutorialStep[] = [

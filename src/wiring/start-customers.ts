@@ -1,11 +1,10 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Rng } from '@/core/rng';
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { startCustomerSystem, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
-import { getMultipliers } from '@/systems/economy';
-import { openSeats, type SeatPlan } from '@/systems/rooms';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { Rng } from '@/shared/random';
+import type { GameState, Store } from '@/shared/state';
+import { startCustomerSystem } from '@/systems/customers/system';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
+import { getMultipliers } from '@/systems/economy/multipliers';
+import { openSeats, type SeatPlan } from '@/systems/rooms/seats';
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
 

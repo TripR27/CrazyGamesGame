@@ -1,14 +1,16 @@
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import type { TutorialEvent } from '@/data/tutorial';
-import { upgrades, type UpgradeDef } from '@/data/upgrades';
-import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
-import { levelFor } from '@/systems/reputation';
-import type { AlreadyHolds } from '@/systems/tutorial';
-import { ROOMS } from '@/data/rooms';
-import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients';
-import { firstBuildableRoom } from '@/systems/rooms';
-import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades';
+import { ROOMS } from '@/data/rooms/index';
+import type { TutorialEvent } from '@/data/tutorial/types';
+import { upgrades } from '@/data/upgrades/index';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import type { GameState, Store } from '@/shared/state';
+import { waitingCustomers } from '@/systems/customers/floor';
+import type { CustomerFloor } from '@/systems/customers/types';
+import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients/offer';
+import { levelFor } from '@/systems/reputation/level';
+import { firstBuildableRoom } from '@/systems/rooms/offer';
+import type { AlreadyHolds } from '@/systems/tutorial/types';
+import { firstAffordable } from '@/systems/upgrades/affordable';
+import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 
 /** What the checks may look at: the saved state, the customers, and the side-panel tab on screen. */
 interface World {

@@ -1,9 +1,8 @@
-import { formatNumber } from '@/core/format';
-import { num } from '@/core/numbers';
-import type { GameState } from '@/core/state';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
-import { levelProgress } from '@/systems/reputation';
+import { t } from '@/i18n/index';
+import { formatNumber, num } from '@/shared/numbers';
+import type { GameState } from '@/shared/state';
+import { levelProgress } from '@/systems/reputation/level';
 
 /** The slice of the state the HUD needs (interface segregation). */
 export type HudState = Pick<GameState, 'currencies' | 'reputation'>;

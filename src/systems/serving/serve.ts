@@ -1,12 +1,15 @@
-import { ONE, type Num } from '@/core/numbers';
-import type { Rng } from '@/core/rng';
 import { SERVING } from '@/data/brewing';
-import { findCustomer, isWaiting, startDrinking, type CustomerCatalog, type CustomerFloor } from '@/systems/customers';
-import type { BrewStation } from '@/systems/brewing';
-import { drinkBonus, rollTip } from '@/systems/effects';
+import { ONE, type Num } from '@/shared/numbers';
+import type { Rng } from '@/shared/random';
+import type { BrewStation } from '@/systems/brewing/types';
+import { startDrinking } from '@/systems/customers/drinking';
+import { findCustomer, isWaiting } from '@/systems/customers/floor';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
+import { drinkBonus } from '@/systems/effects/bonus';
+import { rollTip } from '@/systems/effects/tip';
 import { feedbackKey } from '@/systems/feedback';
-import { computePayout } from './payout';
-import type { EconomyStore, ServeOutcome } from './types';
+import { computePayout } from '@/systems/serving/payout';
+import type { EconomyStore, ServeOutcome } from '@/systems/serving/types';
 
 export interface ServeDeps {
   floor: CustomerFloor;

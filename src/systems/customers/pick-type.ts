@@ -1,8 +1,8 @@
-import { pickRandom, pickWeighted, type Rng } from '@/core/rng';
-import type { CustomerDef } from '@/data/customers';
+import type { CustomerDef } from '@/data/customers/types';
 import { VIP_SPAWN } from '@/data/customers/vip';
-import type { RecipeDef } from '@/data/recipes';
-import { orderWeight } from '@/systems/effects';
+import type { RecipeDef } from '@/data/recipes/types';
+import { pickRandom, pickWeighted, type Rng } from '@/shared/random';
+import { orderWeight } from '@/systems/effects/bonus';
 
 const isVip = (type: CustomerDef): boolean => type.vip === true;
 

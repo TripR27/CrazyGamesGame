@@ -1,9 +1,9 @@
 import type { GameObjects, Scene } from 'phaser';
-import type { TargetRegistry } from '@/core/target-registry';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
+import { ingredientColor } from '@/scene/brewing/ingredient-look';
 import { INGREDIENT_SLOTS, SHELF, SHELF_GAP } from '@/scene/layout';
-import { ingredientColor } from './ingredient-look';
+import type { TargetRegistry } from '@/shared/targets';
 
 const RADIUS = 22;
 const LABEL_STYLE = {

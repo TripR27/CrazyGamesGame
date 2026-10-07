@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createSeededRng } from '@/core/rng';
-import type { CustomerDef } from '@/data/customers';
-import { startDrinking, waitingCustomers } from '@/systems/customers';
 import { catalog, context, FIRST_DELAY, newFloor, run } from './helpers';
+import type { CustomerDef } from '@/data/customers/types';
+import { createSeededRng } from '@/shared/random';
+import { startDrinking } from '@/systems/customers/drinking';
+import { waitingCustomers } from '@/systems/customers/floor';
 
 function seatedAndServed(drinkMs: number) {
   const floor = newFloor(1);

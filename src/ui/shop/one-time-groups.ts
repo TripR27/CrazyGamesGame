@@ -1,14 +1,14 @@
-import type { TargetRegistry } from '@/core/target-registry';
-import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
-import { ROOMS } from '@/data/rooms';
-import type { PlayerActions } from '@/systems/actions';
-import { shopIngredients, type IngredientShopState } from '@/systems/ingredients';
-import { roomOffer, type RoomState } from '@/systems/rooms';
-import { isListed as ingredientListed, toIngredientRowView } from './ingredient-view-model';
-import { isListed } from './one-time-view-model';
-import { mountOneTimeSection } from './one-time-section';
-import { toRoomRowView } from './room-view-model';
+import { ingredients } from '@/data/ingredients/index';
+import { recipes } from '@/data/recipes/index';
+import { ROOMS } from '@/data/rooms/index';
+import type { TargetRegistry } from '@/shared/targets';
+import type { PlayerActions } from '@/systems/actions/player-actions';
+import { shopIngredients, type IngredientShopState } from '@/systems/ingredients/offer';
+import { roomOffer, type RoomState } from '@/systems/rooms/offer';
+import { isListed as ingredientListed, toIngredientRowView } from '@/ui/shop/ingredient-view-model';
+import { mountOneTimeSection } from '@/ui/shop/one-time-section';
+import { isListed } from '@/ui/shop/one-time-view-model';
+import { toRoomRowView } from '@/ui/shop/room-view-model';
 
 export type OneTimeState = IngredientShopState & RoomState;
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { computePayout, serveCustomer, type ServeDeps } from '@/systems/serving';
 import { ab, catalog, economy, floorWith, plain, rich, rng, station } from '../fixtures';
+import { num } from '@/shared/numbers';
+import { computePayout } from '@/systems/serving/payout';
+import { serveCustomer, type ServeDeps } from '@/systems/serving/serve';
 
 function deps(ready: string[], ...orders: Array<[string, string]>) {
   const s = station();

@@ -1,4 +1,4 @@
-import type { RecipeDef } from '@/data/recipes';
+import type { RecipeDef } from '@/data/recipes/types';
 
 const hasDuplicates = (ids: readonly string[]): boolean => new Set(ids).size !== ids.length;
 

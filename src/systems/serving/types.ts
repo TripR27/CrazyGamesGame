@@ -1,5 +1,5 @@
-import type { GameEvents } from '@/core/game-events';
-import type { Num } from '@/core/numbers';
+import type { GameEvents } from '@/shared/events';
+import type { Num } from '@/shared/numbers';
 
 /** The part of the game state that serving changes (interface segregation: not the whole state). */
 export interface EconomyState {

@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { createSeededRng, pickWeighted } from '@/core/rng';
 import type { Effect } from '@/data/common';
 import { EFFECT_POWER, LIKED_ORDER_WEIGHT } from '@/data/effects';
-import { drinkBonus, isLiked, orderWeight, rollTip, tipSize } from '@/systems/effects';
+import { num } from '@/shared/numbers';
+import { createSeededRng, pickWeighted } from '@/shared/random';
+import { drinkBonus, isLiked, orderWeight } from '@/systems/effects/bonus';
+import { rollTip, tipSize } from '@/systems/effects/tip';
 
 const drink = (effect: Effect) => ({ effect });
 const fan = (...likes: Effect[]) => ({ likes });

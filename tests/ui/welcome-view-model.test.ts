@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import type { OfflineReport } from '@/systems/offline';
+import { num } from '@/shared/numbers';
+import type { OfflineReport } from '@/systems/offline/types';
 import { formatDuration, toWelcomeView } from '@/ui/welcome/welcome-view-model';
 
 const report = (over: Partial<OfflineReport> = {}): OfflineReport => ({

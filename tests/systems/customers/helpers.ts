@@ -1,15 +1,10 @@
-import { createSeededRng } from '@/core/rng';
-import type { CustomerDef } from '@/data/customers';
-import type { RecipeDef } from '@/data/recipes';
 import { SPAWNING } from '@/data/customers/spawning';
-import {
-  createFloor,
-  updateCustomers,
-  type CustomerCatalog,
-  type CustomerChange,
-  type CustomerContext,
-  type CustomerFloor,
-} from '@/systems/customers';
+import type { CustomerDef } from '@/data/customers/types';
+import type { RecipeDef } from '@/data/recipes/types';
+import { createSeededRng } from '@/shared/random';
+import { createFloor } from '@/systems/customers/floor';
+import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';
+import { updateCustomers } from '@/systems/customers/update';
 
 const customer = (id: string, minLevel: number, patienceSeconds: number): CustomerDef => ({
   id, minLevel, patienceSeconds, spendMultiplier: 1, likes: [],

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInitialState } from '@/core/state';
-import { resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics } from './helpers';
+import { createInitialState } from '@/shared/state';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',

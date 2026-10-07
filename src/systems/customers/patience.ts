@@ -1,5 +1,5 @@
-import { dismiss, waitingCustomers } from './floor';
-import type { CustomerChange, CustomerFloor } from './types';
+import { dismiss, waitingCustomers } from '@/systems/customers/floor';
+import type { CustomerChange, CustomerFloor } from '@/systems/customers/types';
 
 /** Lower the patience of everyone still waiting; customers who run out leave. Drinking customers are happy. */
 export function advancePatience(floor: CustomerFloor, deltaMs: number): CustomerChange[] {

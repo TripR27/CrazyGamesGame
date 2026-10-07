@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { num } from '@/core/numbers';
-import { createInitialState } from '@/core/state';
-import { TUTORIAL_STEPS } from '@/data/tutorial';
-import { resolveTarget } from '@/systems/tutorial';
 import { newGame } from './helpers';
+import { TUTORIAL_STEPS } from '@/data/tutorial/index';
+import { num } from '@/shared/numbers';
+import { createInitialState } from '@/shared/state';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 /** Every lesson before the room lesson is done; the player has `reputation` and `gold`. */
 function game(reputation: number, gold: number, seats = 0) {

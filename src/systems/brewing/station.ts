@@ -1,4 +1,4 @@
-import type { BrewStation } from './types';
+import type { BrewStation } from '@/systems/brewing/types';
 
 export function createStation(capacity: number, speed = 1): BrewStation {
   return { contents: [], brewing: null, ready: [], capacity, speed };

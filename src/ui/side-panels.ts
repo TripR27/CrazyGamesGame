@@ -1,9 +1,9 @@
-import type { TargetRegistry } from '@/core/target-registry';
-import { t } from '@/i18n';
-import { createEl } from './dom';
-import { domBounds } from './dom-bounds';
-import { createPanelState, type PanelChange } from './side-panel-state';
-import { SHOP_PANEL_WIDTH, type SideLayout } from './side-layout';
+import { t } from '@/i18n/index';
+import type { TargetRegistry } from '@/shared/targets';
+import { createEl } from '@/ui/dom';
+import { domBounds } from '@/ui/dom-bounds';
+import { SHOP_PANEL_WIDTH, type SideLayout } from '@/ui/side-layout';
+import { createPanelState, type PanelChange } from '@/ui/side-panel-state';
 import './side-panels.css';
 
 /** One tab of the side panel (shop, recipe book, later settings and heroes). */

@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first VIP: points at them until they get their (expensive) drink. */
 export const vipLesson: readonly TutorialStep[] = [

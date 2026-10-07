@@ -1,6 +1,6 @@
-import { ZERO, type Num } from '@/core/numbers';
-import type { UpgradeDef } from '@/data/upgrades';
-import { affordableCount, packCost } from './cost';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import { ZERO, type Num } from '@/shared/numbers';
+import { affordableCount, packCost } from '@/systems/upgrades/cost';
 
 /** How many levels the player wants in one click. */
 export type BuyAmount = 1 | 10 | 'max';

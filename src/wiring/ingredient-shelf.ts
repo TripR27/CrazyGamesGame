@@ -1,9 +1,10 @@
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { ingredients } from '@/data/ingredients';
-import { recipes, type RecipeDef } from '@/data/recipes';
-import { ownedIngredients, type IngredientCatalog } from '@/systems/ingredients';
-import { discoverableRecipes } from '@/systems/recipes';
+import { ingredients } from '@/data/ingredients/index';
+import { recipes } from '@/data/recipes/index';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { GameState, Store } from '@/shared/state';
+import type { IngredientCatalog } from '@/systems/ingredients/offer';
+import { ownedIngredients } from '@/systems/ingredients/owned';
+import { discoverableRecipes } from '@/systems/recipes/discovery';
 
 export interface IngredientShelf {
   catalog: IngredientCatalog;

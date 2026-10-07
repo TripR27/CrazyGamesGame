@@ -1,6 +1,6 @@
 import { CUSTOMER_SLOTS } from '@/scene/layout';
 import { PALETTE } from '@/scene/palette';
-import type { Graphics } from './draw';
+import type { Graphics } from '@/scene/sprites/draw';
 
 const MARKER_WIDTH = 56;
 const MARKER_HEIGHT = 16;

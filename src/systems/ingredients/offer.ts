@@ -1,8 +1,8 @@
-import type { Num } from '@/core/numbers';
-import type { IngredientDef } from '@/data/ingredients';
-import type { RecipeDef } from '@/data/recipes';
-import { oneTimeOffer, type OneTimeOffer } from '@/systems/purchases';
-import { ownedIngredients, type IngredientState } from './owned';
+import type { IngredientDef } from '@/data/ingredients/types';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { Num } from '@/shared/numbers';
+import { ownedIngredients, type IngredientState } from '@/systems/ingredients/owned';
+import { oneTimeOffer, type OneTimeOffer } from '@/systems/purchases/one-time';
 
 /** The part of the state the ingredient shop reads and changes. */
 export interface IngredientShopState extends IngredientState {

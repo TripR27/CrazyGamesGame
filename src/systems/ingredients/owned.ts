@@ -1,5 +1,5 @@
-import type { IngredientDef } from '@/data/ingredients';
-import type { RecipeDef } from '@/data/recipes';
+import type { IngredientDef } from '@/data/ingredients/types';
+import type { RecipeDef } from '@/data/recipes/types';
 
 /** What owning ingredients depends on (interface segregation: not the whole state). */
 export interface IngredientState {

@@ -1,6 +1,7 @@
-import type { Rng } from '@/core/rng';
-import type { RecipeDef } from '@/data/recipes';
-import { addIngredient, type BrewEvent, type BrewStation } from '@/systems/brewing';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { Rng } from '@/shared/random';
+import { addIngredient } from '@/systems/brewing/add-ingredient';
+import type { BrewEvent, BrewStation } from '@/systems/brewing/types';
 
 /** The oldest waiting customer's drink that is not already standing on the bar. */
 function wantedRecipe(

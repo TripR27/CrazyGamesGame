@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPool } from '@/core/pool';
-import { createSeededRng, pickRandom, randomIndex } from '@/core/rng';
+import { createPool } from '@/shared/pool';
+import { createSeededRng, pickRandom, randomIndex } from '@/shared/random';
 
 describe('seeded rng', () => {
   it('repeats the same sequence for the same seed and differs between seeds', () => {

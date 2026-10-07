@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { guideRecipe, likedCustomer, nextIngredient, readyCustomerId, resolveTarget, type GuideContext } from '@/systems/tutorial';
 import { recipes } from '../fixtures';
+import { guideRecipe, likedCustomer, nextIngredient, readyCustomerId, type GuideContext } from '@/systems/tutorial/guide';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 /** A waiting customer; `liked` when they like the effect of what they ordered. */
 const w = (id: number, recipeId: string, liked = false, vip = false) => ({ id, recipeId, liked, vip });

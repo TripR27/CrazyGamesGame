@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { createStore } from '@/core/store';
-import { watchReputationLevels, type LevelState } from '@/systems/reputation';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createStore } from '@/shared/state';
+import { watchReputationLevels, type LevelState } from '@/systems/reputation/watch';
 
 function setup(reputation: number) {
   const store = createStore<LevelState>({ reputation });

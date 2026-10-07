@@ -1,6 +1,4 @@
-import type { RoomDef } from './types';
-
-export type { RoomDef } from './types';
+import type { RoomDef } from '@/data/rooms/types';
 
 /**
  * The rooms on the upper floor, left to right (the scene shows them in this order; customer seats are numbered

@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { UpgradeDef } from '@/data/upgrades';
-import { quoteFor, type UpgradeState } from './buy';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { quoteFor, type UpgradeState } from '@/systems/upgrades/buy';
 
 /** The first upgrade the player can pay for with one more level right now, or undefined. */
 export function firstAffordable(state: UpgradeState, defs: readonly UpgradeDef[]): UpgradeDef | undefined {

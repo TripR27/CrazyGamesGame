@@ -1,6 +1,6 @@
-import { num, type Num } from '@/core/numbers';
 import type { OneTimePurchase } from '@/data/common';
-import { levelFor } from '@/systems/reputation';
+import { num, type Num } from '@/shared/numbers';
+import { levelFor } from '@/systems/reputation/level';
 
 /** How a one-time purchase stands: not yet (level too low), for sale, or already owned. */
 export type OfferStatus = 'locked' | 'forSale' | 'owned';

@@ -1,4 +1,4 @@
-import type { RecipeDef } from './types';
+import type { RecipeDef } from '@/data/recipes/types';
 
 export const tier02Recipes: readonly RecipeDef[] = [
   {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { customers } from '@/data/customers';
+import { customers } from '@/data/customers/index';
 import { toLevelUpView } from '@/ui/level-up/level-up-view-model';
 
 describe('the level-up message', () => {

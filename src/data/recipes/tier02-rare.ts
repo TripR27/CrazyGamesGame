@@ -1,4 +1,4 @@
-import type { RecipeDef } from './types';
+import type { RecipeDef } from '@/data/recipes/types';
 
 /** The rarer tier-2 drinks: slower to brew, worth a lot more. */
 export const tier02RareRecipes: readonly RecipeDef[] = [

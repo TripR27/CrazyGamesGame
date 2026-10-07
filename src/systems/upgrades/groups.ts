@@ -1,4 +1,4 @@
-import type { UpgradeDef } from '@/data/upgrades';
+import type { UpgradeDef } from '@/data/upgrades/types';
 
 /**
  * Staff and seats each have their own tutorial hint; every other upgrade belongs to the first-upgrade hint.

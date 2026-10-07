@@ -1,12 +1,12 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { upgrades } from '@/data/upgrades';
-import { ROOMS } from '@/data/rooms';
-import { watchIngredientShop, type IngredientCatalog } from '@/systems/ingredients';
-import { watchRoomShop } from '@/systems/rooms';
-import { generalOnly, seatsOnly, staffOnly, watchAffordable } from '@/systems/upgrades';
+import { ROOMS } from '@/data/rooms/index';
+import { upgrades } from '@/data/upgrades/index';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { GameState, Store } from '@/shared/state';
+import type { IngredientCatalog } from '@/systems/ingredients/offer';
+import { watchIngredientShop } from '@/systems/ingredients/watch';
+import { watchRoomShop } from '@/systems/rooms/offer';
+import { watchAffordable } from '@/systems/upgrades/affordable';
+import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 
 /** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient and room become affordable. */
 export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, ingredients: IngredientCatalog): void {

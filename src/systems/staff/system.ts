@@ -1,15 +1,18 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Rng } from '@/core/rng';
-import type { RecipeDef } from '@/data/recipes';
 import { BREWING } from '@/data/brewing';
-import { emptyCauldron, publishBrewEvent, type BrewStation } from '@/systems/brewing';
-import { waitingCustomers, type CustomerFloor } from '@/systems/customers';
-import { serveAndPublish, type ServeDeps } from '@/systems/serving';
-import { startWantedBrew } from './auto-brew';
-import { readyCustomer } from './auto-serve';
-import { createCharge } from './charge';
-import { createStaleWatch } from './stale-cauldron';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { Rng } from '@/shared/random';
+import { emptyCauldron } from '@/systems/brewing/station';
+import { publishBrewEvent } from '@/systems/brewing/system';
+import type { BrewStation } from '@/systems/brewing/types';
+import { waitingCustomers } from '@/systems/customers/floor';
+import type { CustomerFloor } from '@/systems/customers/types';
+import { serveAndPublish } from '@/systems/serving/publish';
+import type { ServeDeps } from '@/systems/serving/serve';
+import { startWantedBrew } from '@/systems/staff/auto-brew';
+import { readyCustomer } from '@/systems/staff/auto-serve';
+import { createCharge } from '@/systems/staff/charge';
+import { createStaleWatch } from '@/systems/staff/stale-cauldron';
 
 export interface StaffDeps {
   bus: EventBus<GameEvents>;

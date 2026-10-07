@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { createInitialState } from '@/core/state';
+import { newGame } from './helpers';
 import { SPAWNING } from '@/data/customers/spawning';
 import { CUSTOMER_SLOTS } from '@/scene/layout';
-import { resolveTarget } from '@/systems/tutorial';
-import { newGame } from './helpers';
+import { num } from '@/shared/numbers';
+import { createInitialState } from '@/shared/state';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done'];
 

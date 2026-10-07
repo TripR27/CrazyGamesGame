@@ -1,5 +1,5 @@
-import type { TutorialProgress } from '@/core/state';
-import type { TutorialEvent, TutorialStep } from '@/data/tutorial';
+import type { TutorialEvent, TutorialStep } from '@/data/tutorial/types';
+import type { TutorialProgress } from '@/shared/state';
 
 /** Where the machine keeps its progress. In the game this is a slice of the saved state. */
 export interface ProgressStore {

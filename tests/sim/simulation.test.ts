@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatIdleShare, formatRun, runSimulation, type SimOptions } from '@/sim';
-import { clockTime } from '@/sim/report';
+import { formatIdleShare, formatRun, clockTime } from '@/sim/report';
+import { runSimulation, type SimOptions } from '@/sim/run';
 
 const short: SimOptions = { minutes: 3, seed: 1, actionMs: 700, bot: { buys: true } };
 

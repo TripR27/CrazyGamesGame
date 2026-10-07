@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
-import type { IngredientShopState } from '@/systems/ingredients';
+import { ingredients } from '@/data/ingredients/index';
+import { recipes } from '@/data/recipes/index';
+import { num } from '@/shared/numbers';
+import type { IngredientShopState } from '@/systems/ingredients/offer';
 import { toBookView } from '@/ui/recipe-book/book-view-model';
 import { isListed, toIngredientRowView } from '@/ui/shop/ingredient-view-model';
 

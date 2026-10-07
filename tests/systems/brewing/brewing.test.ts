@@ -1,14 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import {
-  addIngredient,
-  advanceBrewing,
-  brewProgress,
-  emptyCauldron,
-  startBrewSystem,
-} from '@/systems/brewing';
 import { recipes, rng, station } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { addIngredient } from '@/systems/brewing/add-ingredient';
+import { advanceBrewing, brewProgress } from '@/systems/brewing/advance';
+import { emptyCauldron } from '@/systems/brewing/station';
+import { startBrewSystem } from '@/systems/brewing/system';
 
 function brewing() {
   const s = station();

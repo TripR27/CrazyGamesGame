@@ -1,9 +1,9 @@
-import type { Rng } from '@/core/rng';
 import { BREWING } from '@/data/brewing';
-import type { RecipeDef } from '@/data/recipes';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { Rng } from '@/shared/random';
+import { canGrow, matchRecipe } from '@/systems/brewing/match';
+import type { BrewEvent, BrewStation } from '@/systems/brewing/types';
 import { feedbackKey } from '@/systems/feedback';
-import { canGrow, matchRecipe } from './match';
-import type { BrewEvent, BrewStation } from './types';
 
 const notice = (kind: 'busy' | 'full' | 'fizzle', rng: Rng): BrewEvent => ({
   kind: 'notice',

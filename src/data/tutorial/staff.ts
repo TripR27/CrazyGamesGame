@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first staff member: starts when the player can pay for one, then done. */
 export const staffLesson: readonly TutorialStep[] = [

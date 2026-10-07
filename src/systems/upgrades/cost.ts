@@ -1,5 +1,5 @@
-import { num, type Num } from '@/core/numbers';
-import type { UpgradeDef } from '@/data/upgrades';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import { num, type Num } from '@/shared/numbers';
 
 /** Cost of one level: `baseCost * growth^level`, in whole coins (at least 1). */
 export function levelCost(def: UpgradeDef, level: number): Num {

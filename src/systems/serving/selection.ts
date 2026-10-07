@@ -1,4 +1,4 @@
-import type { BrewStation } from '@/systems/brewing';
+import type { BrewStation } from '@/systems/brewing/types';
 
 /**
  * The drink the player picked up from the bar, waiting to be handed to a customer. Runtime only. A pick is a

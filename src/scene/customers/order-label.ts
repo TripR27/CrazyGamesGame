@@ -1,6 +1,6 @@
 import type { Effect } from '@/data/common';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
 import { effectIcon } from '@/scene/effects/effect-text';
 
 /**

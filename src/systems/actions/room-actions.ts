@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { RoomDef } from '@/data/rooms';
-import { buildRoom, type RoomStore } from '@/systems/rooms';
+import type { RoomDef } from '@/data/rooms/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { buildRoom, type RoomStore } from '@/systems/rooms/offer';
 
 export interface RoomActions {
   /** Build a room on the upper floor (one time); does nothing when it is locked, built or too expensive. */

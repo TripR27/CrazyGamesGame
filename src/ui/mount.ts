@@ -1,17 +1,17 @@
-import type { TargetRegistry } from '@/core/target-registry';
-import type { PlayerActions } from '@/systems/actions';
-import type { OfflineInbox } from '@/systems/offline';
-import type { Fit } from './fit-math';
-import { fitToViewport } from './fit-root';
-import type { SideLayout } from './side-layout';
-import { mountHud, type HudSource } from './hud';
-import { mountLevelUpToast } from './level-up/level-up-toast';
-import type { LevelUpView } from './level-up/level-up-view-model';
-import { mountRecipeBook, type BookSource } from './recipe-book/book-view';
-import { mountShop, type ShopSource } from './shop/shop-view';
-import { createSidePanels } from './side-panels';
-import { mountWelcomeBack } from './welcome/welcome-back';
-import { mountTutorial, type TutorialUiSource } from './tutorial/tutorial-view';
+import type { TargetRegistry } from '@/shared/targets';
+import type { PlayerActions } from '@/systems/actions/player-actions';
+import type { OfflineInbox } from '@/systems/offline/inbox';
+import type { Fit } from '@/ui/fit-math';
+import { fitToViewport } from '@/ui/fit-root';
+import { mountHud, type HudSource } from '@/ui/hud';
+import { mountLevelUpToast } from '@/ui/level-up/level-up-toast';
+import type { LevelUpView } from '@/ui/level-up/level-up-view-model';
+import { mountRecipeBook, type BookSource } from '@/ui/recipe-book/book-view';
+import { mountShop, type ShopSource } from '@/ui/shop/shop-view';
+import type { SideLayout } from '@/ui/side-layout';
+import { createSidePanels } from '@/ui/side-panels';
+import { mountTutorial, type TutorialUiSource } from '@/ui/tutorial/tutorial-view';
+import { mountWelcomeBack } from '@/ui/welcome/welcome-back';
 
 export interface UiServices {
   source: HudSource & ShopSource & BookSource;

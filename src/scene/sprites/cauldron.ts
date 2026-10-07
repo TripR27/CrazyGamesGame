@@ -1,6 +1,6 @@
 import { CAULDRON, FLOOR_Y } from '@/scene/layout';
 import { PALETTE } from '@/scene/palette';
-import type { Graphics } from './draw';
+import type { Graphics } from '@/scene/sprites/draw';
 
 const BODY_HEIGHT = 80;
 const RIM_HEIGHT = 24;

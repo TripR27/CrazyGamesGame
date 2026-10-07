@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { advanceBrewing } from './advance';
-import type { BrewEvent, BrewStation } from './types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { advanceBrewing } from '@/systems/brewing/advance';
+import type { BrewEvent, BrewStation } from '@/systems/brewing/types';
 
 export function publishBrewEvent(bus: EventBus<GameEvents>, event: BrewEvent): void {
   if (event.kind === 'discovered') bus.emit('recipe:discovered', { recipeId: event.recipeId });

@@ -1,7 +1,7 @@
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
+import { t } from '@/i18n/index';
 import { withEffectIcon } from '@/scene/effects/effect-text';
-import { guideRecipe, likedCustomer, nextIngredient, vipCustomer, type GuideContext } from '@/systems/tutorial';
+import { guideRecipe, likedCustomer, nextIngredient, vipCustomer, type GuideContext } from '@/systems/tutorial/guide';
 
 const name = (domain: 'recipes' | 'ingredients' | 'upgrades', id: string | undefined): string =>
   id === undefined ? '' : t(textKey(domain, id, 'name'));

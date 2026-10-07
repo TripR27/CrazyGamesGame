@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { nextIngredient, readyDrinkSlot, resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics, withSeats } from './helpers';
+import { nextIngredient, readyDrinkSlot } from '@/systems/tutorial/guide';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 describe('the first tutorial, played in the real game', () => {
   it('shows nothing until the first customer sits down, and then only one customer comes', () => {

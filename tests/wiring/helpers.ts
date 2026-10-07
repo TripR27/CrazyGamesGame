@@ -1,10 +1,8 @@
 import { vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { createSeededRng } from '@/core/rng';
-import { createInitialState, type GameState } from '@/core/state';
-import { createStore } from '@/core/store';
-import { nextIngredient, readyCustomerId, readyDrinkSlot } from '@/systems/tutorial';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createSeededRng } from '@/shared/random';
+import { createInitialState, type GameState, createStore } from '@/shared/state';
+import { nextIngredient, readyCustomerId, readyDrinkSlot } from '@/systems/tutorial/guide';
 import { createServices } from '@/wiring/create-services';
 
 /** A fresh state in which the player already bought the seats, so more than one customer can sit. */

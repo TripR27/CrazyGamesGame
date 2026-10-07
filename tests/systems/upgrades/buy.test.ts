@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { buyUpgrade, firstAffordable, watchAffordable } from '@/systems/upgrades';
 import { economy, priceUp, upgradeDefs } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { firstAffordable, watchAffordable } from '@/systems/upgrades/affordable';
+import { buyUpgrade } from '@/systems/upgrades/buy';
 
 describe('buying an upgrade', () => {
   it('takes the gold and raises the level', () => {

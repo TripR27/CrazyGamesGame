@@ -1,10 +1,10 @@
-import type { Num } from '@/core/numbers';
-import type { GameState } from '@/core/state';
-import { ROOMS } from '@/data/rooms';
-import { upgrades } from '@/data/upgrades';
-import { firstBuyableIngredient } from '@/systems/ingredients';
-import { firstBuildableRoom, roomOffer } from '@/systems/rooms';
-import { quoteFor } from '@/systems/upgrades';
+import { ROOMS } from '@/data/rooms/index';
+import { upgrades } from '@/data/upgrades/index';
+import type { Num } from '@/shared/numbers';
+import type { GameState } from '@/shared/state';
+import { firstBuyableIngredient } from '@/systems/ingredients/offer';
+import { firstBuildableRoom, roomOffer } from '@/systems/rooms/offer';
+import { quoteFor } from '@/systems/upgrades/buy';
 import type { GameWorld } from '@/wiring/create-services';
 import type { IngredientShelf } from '@/wiring/ingredient-shelf';
 

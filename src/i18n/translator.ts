@@ -1,4 +1,4 @@
-import { debug } from '@/core/debug';
+import { debug } from '@/shared/events';
 
 export type Messages = Readonly<Record<string, string>>;
 export type TranslateParams = Readonly<Record<string, string | number>>;

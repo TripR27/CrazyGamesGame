@@ -1,5 +1,5 @@
-import type { Num } from '@/core/numbers';
-import type { OfflineReport } from './types';
+import type { Num } from '@/shared/numbers';
+import type { OfflineReport } from '@/systems/offline/types';
 
 /** The part of the game state offline earnings change (interface segregation). */
 export interface OfflineState {

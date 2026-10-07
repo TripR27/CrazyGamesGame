@@ -1,6 +1,5 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { levelFor } from './level';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { levelFor } from '@/systems/reputation/level';
 
 /** The part of the state levels look at (interface segregation: not the whole state). */
 export interface LevelState {

@@ -1,13 +1,11 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Rng } from '@/core/rng';
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { recipes } from '@/data/recipes';
-import { getMultipliers } from '@/systems/economy';
-import type { CustomerCatalog, CustomerFloor } from '@/systems/customers';
-import type { BrewStation } from '@/systems/brewing';
-import { startStaff } from '@/systems/staff';
+import { recipes } from '@/data/recipes/index';
+import type { EventBus, GameEvents } from '@/shared/events';
+import type { Rng } from '@/shared/random';
+import type { GameState, Store } from '@/shared/state';
+import type { BrewStation } from '@/systems/brewing/types';
+import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
+import { getMultipliers } from '@/systems/economy/multipliers';
+import { startStaff } from '@/systems/staff/system';
 
 export interface StaffWiring {
   store: Store<GameState>;

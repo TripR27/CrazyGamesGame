@@ -1,9 +1,10 @@
 import type { GameObjects, Scene } from 'phaser';
-import { ROOMS, type RoomDef } from '@/data/rooms';
+import { ROOMS } from '@/data/rooms/index';
+import type { RoomDef } from '@/data/rooms/types';
 import { ROOM_SPOTS, UPPER_BEAM, type RoomSpot } from '@/scene/layout-rooms';
+import { drawBoardedRoom, drawBuiltRoom } from '@/scene/rooms/room-furniture';
+import { roomSign } from '@/scene/rooms/room-sign';
 import type { SceneServices } from '@/scene/services';
-import { drawBoardedRoom, drawBuiltRoom } from './room-furniture';
-import { roomSign } from './room-sign';
 
 const SIGN_STYLE = {
   fontFamily: 'sans-serif', fontSize: '16px', color: '#3b2410', align: 'center', backgroundColor: '#f2dfb0', padding: { x: 10, y: 6 },

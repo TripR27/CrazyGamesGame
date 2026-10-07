@@ -1,13 +1,13 @@
-import type { Clock } from '@/core/clock';
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { touchLastSeen, type GameState } from '@/core/state';
-import type { Store } from '@/core/store';
 import { OFFLINE } from '@/data/offline';
-import { recipes } from '@/data/recipes';
-import { getMultipliers } from '@/systems/economy';
-import type { CustomerCatalog } from '@/systems/customers';
-import { applyOffline, computeOffline, createOfflineInbox, type OfflineInbox } from '@/systems/offline';
+import { recipes } from '@/data/recipes/index';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { touchLastSeen, type GameState, type Store } from '@/shared/state';
+import type { Clock } from '@/shared/time';
+import type { CustomerCatalog } from '@/systems/customers/types';
+import { getMultipliers } from '@/systems/economy/multipliers';
+import { applyOffline } from '@/systems/offline/apply';
+import { computeOffline } from '@/systems/offline/compute';
+import { createOfflineInbox, type OfflineInbox } from '@/systems/offline/inbox';
 
 export interface OfflineDeps {
   store: Store<GameState>;

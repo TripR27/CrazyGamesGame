@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInitialState } from '@/core/state';
-import type { OfflineReport } from '@/systems/offline';
 import { newGame } from './helpers';
+import { createInitialState } from '@/shared/state';
+import type { OfflineReport } from '@/systems/offline/types';
 
 const HOUR = 3_600_000;
 const STAFFED = { brewer_assistant: 1, waitress: 1 };

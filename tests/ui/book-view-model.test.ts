@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { recipes } from '@/data/recipes';
+import { recipes } from '@/data/recipes/index';
 import { toBookView, type BookEntry } from '@/ui/recipe-book/book-view-model';
 
 const entry = (entries: BookEntry[], id: string): BookEntry | undefined => entries.find((e) => e.id === id);

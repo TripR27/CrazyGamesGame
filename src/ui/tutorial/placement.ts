@@ -1,4 +1,4 @@
-import type { Bounds } from '@/core/target-registry';
+import type { Bounds } from '@/shared/targets';
 
 export const SPOT_PADDING = 10;
 const ARROW_SIZE = 34;

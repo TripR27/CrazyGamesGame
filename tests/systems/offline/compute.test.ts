@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { averageReward, computeOffline, type OfflineInput } from '@/systems/offline';
 import { plain, recipes, rich } from '../fixtures';
+import { num } from '@/shared/numbers';
+import { computeOffline, type OfflineInput } from '@/systems/offline/compute';
+import { averageReward } from '@/systems/offline/earnings';
 
 const HOUR = 3_600_000;
 const input = (over: Partial<OfflineInput> = {}): OfflineInput => ({

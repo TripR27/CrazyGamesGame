@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Clock } from '@/core/clock';
-import { createTicker } from '@/core/ticker';
+import { type Clock, createTicker } from '@/shared/time';
 
 function fakeClock(start = 1000): Clock & { advanceBy(ms: number): void } {
   let time = start;

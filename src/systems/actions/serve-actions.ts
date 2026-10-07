@@ -1,6 +1,7 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { serveAndPublish, type DrinkSelection, type ServeDeps } from '@/systems/serving';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { serveAndPublish } from '@/systems/serving/publish';
+import type { DrinkSelection } from '@/systems/serving/selection';
+import type { ServeDeps } from '@/systems/serving/serve';
 
 /** Handing out drinks: pick one from the bar and click a customer, or click the customer straight away. */
 export interface ServeActions {

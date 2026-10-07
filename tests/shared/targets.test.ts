@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createTargetRegistry } from '@/core/target-registry';
+import { createTargetRegistry } from '@/shared/targets';
 
 describe('target registry', () => {
   it('returns the current bounds of a registered target', () => {

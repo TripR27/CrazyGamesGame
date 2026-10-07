@@ -1,4 +1,4 @@
-import type { BrewNotice } from '@/core/game-events';
+import type { BrewNotice } from '@/shared/events';
 
 export interface ActiveBrew {
   recipeId: string;

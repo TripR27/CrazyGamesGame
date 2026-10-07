@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { UpgradeDef } from '@/data/upgrades';
-import { getMultipliers } from '@/systems/economy';
+import type { UpgradeDef } from '@/data/upgrades/types';
+import { getMultipliers } from '@/systems/economy/multipliers';
 
 const def = (id: string, stat: UpgradeDef['effect']['stat'], mode: 'add' | 'multiply', perLevel: number, maxLevel?: number): UpgradeDef => ({
   id, kind: 'tavern', baseCost: 10, growth: 2, effect: { stat, mode, perLevel }, maxLevel,

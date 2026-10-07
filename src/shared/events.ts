@@ -1,4 +1,28 @@
-import type { Num } from '@/core/numbers';
+import type { Num } from '@/shared/numbers';
+
+type Handler<T> = (payload: T) => void;
+
+export interface EventBus<E> {
+  /** Subscribe to an event. Returns a function that removes the subscription. */
+  on<K extends keyof E>(event: K, handler: Handler<E[K]>): () => void;
+  emit<K extends keyof E>(event: K, payload: E[K]): void;
+}
+
+export function createEventBus<E extends object>(): EventBus<E> {
+  const handlers = new Map<keyof E, Set<Handler<unknown>>>();
+
+  return {
+    on(event, handler) {
+      const set = handlers.get(event) ?? new Set<Handler<unknown>>();
+      set.add(handler as Handler<unknown>);
+      handlers.set(event, set);
+      return () => set.delete(handler as Handler<unknown>);
+    },
+    emit(event, payload) {
+      for (const handler of [...(handlers.get(event) ?? [])]) handler(payload);
+    },
+  };
+}
 
 /** Why a customer left the tavern. */
 export type LeaveReason = 'impatient' | 'served';
@@ -68,4 +92,12 @@ export interface GameEvents {
   /** Same for the recipe book. */
   'book:opened': Record<string, never>;
   'book:closed': Record<string, never>;
+}
+
+/** Logs in development only; removed from production builds. */
+export function debug(...args: unknown[]): void {
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.debug('[bt]', ...args);
+  }
 }

@@ -1,5 +1,5 @@
-import { ROOMS } from '@/data/rooms';
-import { CUSTOMER_SLOTS, type Point, type Rect } from './layout';
+import { ROOMS } from '@/data/rooms/index';
+import { CUSTOMER_SLOTS, type Point, type Rect } from '@/scene/layout';
 
 /** The floor of the upper storey (where customers in a room stand) and its beam. */
 export const UPPER_FLOOR_Y = 240;

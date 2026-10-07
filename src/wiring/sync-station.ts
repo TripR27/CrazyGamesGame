@@ -1,7 +1,6 @@
-import type { GameState } from '@/core/state';
-import type { Store } from '@/core/store';
-import { getMultipliers } from '@/systems/economy';
-import type { BrewStation } from '@/systems/brewing';
+import type { GameState, Store } from '@/shared/state';
+import type { BrewStation } from '@/systems/brewing/types';
+import { getMultipliers } from '@/systems/economy/multipliers';
 
 /**
  * Keeps the cauldron and bar in step with the bought upgrades: bar size and brew speed.

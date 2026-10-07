@@ -1,9 +1,11 @@
-import type { Bounds, TargetRegistry } from '@/core/target-registry';
-import { t } from '@/i18n';
-import { resolveTarget, type GuideContext, type TutorialMachine } from '@/systems/tutorial';
+import { t } from '@/i18n/index';
+import type { Bounds, TargetRegistry } from '@/shared/targets';
+import type { GuideContext } from '@/systems/tutorial/guide';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
+import type { TutorialMachine } from '@/systems/tutorial/types';
 import { createEl } from '@/ui/dom';
-import { arrowPlacement, spotlightBounds } from './placement';
-import { speech } from './speech';
+import { arrowPlacement, spotlightBounds } from '@/ui/tutorial/placement';
+import { speech } from '@/ui/tutorial/speech';
 import './tutorial.css';
 
 export interface TutorialUiSource {

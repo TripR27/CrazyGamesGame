@@ -1,7 +1,7 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { RoomDef } from '@/data/rooms';
-import { oneTimeOffer, watchBuyable, type BuyerState, type OneTimeOffer, type WatchSource } from '@/systems/purchases';
+import type { RoomDef } from '@/data/rooms/types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { oneTimeOffer, type BuyerState, type OneTimeOffer } from '@/systems/purchases/one-time';
+import { watchBuyable, type WatchSource } from '@/systems/purchases/watch';
 
 /** The part of the state rooms read and change. */
 export interface RoomState extends BuyerState {

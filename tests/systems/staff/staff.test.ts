@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createCharge, readyCustomer, startWantedBrew } from '@/systems/staff';
 import { recipes, rng, station } from '../fixtures';
+import { startWantedBrew } from '@/systems/staff/auto-brew';
+import { readyCustomer } from '@/systems/staff/auto-serve';
+import { createCharge } from '@/systems/staff/charge';
 
 describe('a worker pace', () => {
   it('is ready after enough time for one action and spends it', () => {

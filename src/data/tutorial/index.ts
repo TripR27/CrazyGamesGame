@@ -1,15 +1,13 @@
-import { basicsLesson } from './basics';
-import { bookLesson } from './book';
-import { ingredientLesson } from './ingredient';
-import { likesLesson } from './likes';
-import { roomLesson } from './room';
-import { seatsLesson } from './seats';
-import { staffLesson } from './staff';
-import { upgradeLesson } from './upgrade';
-import { vipLesson } from './vip';
-import type { TutorialStep } from './types';
-
-export type { EventTrigger, Trigger, TutorialEvent, TutorialStep } from './types';
+import { basicsLesson } from '@/data/tutorial/basics';
+import { bookLesson } from '@/data/tutorial/book';
+import { ingredientLesson } from '@/data/tutorial/ingredient';
+import { likesLesson } from '@/data/tutorial/likes';
+import { roomLesson } from '@/data/tutorial/room';
+import { seatsLesson } from '@/data/tutorial/seats';
+import { staffLesson } from '@/data/tutorial/staff';
+import type { TutorialStep } from '@/data/tutorial/types';
+import { upgradeLesson } from '@/data/tutorial/upgrade';
+import { vipLesson } from '@/data/tutorial/vip';
 
 /** All tutorial steps in order. A new lesson is a new file plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [

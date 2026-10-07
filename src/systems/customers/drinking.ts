@@ -1,5 +1,5 @@
-import { dismiss } from './floor';
-import type { CustomerChange, CustomerFloor, CustomerInstance } from './types';
+import { dismiss } from '@/systems/customers/floor';
+import type { CustomerChange, CustomerFloor, CustomerInstance } from '@/systems/customers/types';
 
 /** A served customer stays in their seat to drink; the seat frees up once the drink is finished. */
 export function startDrinking(customer: CustomerInstance, drinkMs: number): void {

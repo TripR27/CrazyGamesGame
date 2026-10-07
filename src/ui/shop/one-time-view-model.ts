@@ -1,9 +1,9 @@
-import { formatNumber } from '@/core/format';
 import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { textKey } from '@/data/text-key';
-import { t } from '@/i18n';
-import type { OneTimeOffer } from '@/systems/purchases';
-import type { RowView } from './shop-view-model';
+import { t } from '@/i18n/index';
+import { formatNumber } from '@/shared/numbers';
+import type { OneTimeOffer } from '@/systems/purchases/one-time';
+import type { RowView } from '@/ui/shop/shop-view-model';
 
 /** What a one-time purchase (an ingredient, a room) shows in the shop besides its offer. */
 export interface OneTimeLabels {

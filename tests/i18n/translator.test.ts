@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasKey, t } from '@/i18n';
+import { hasKey, t } from '@/i18n/index';
 import { createTranslator } from '@/i18n/translator';
 
 describe('createTranslator', () => {

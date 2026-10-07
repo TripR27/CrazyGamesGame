@@ -1,4 +1,4 @@
-import type { IngredientDef } from './types';
+import type { IngredientDef } from '@/data/ingredients/types';
 
 /**
  * Each tier-2 ingredient is bought once in the shop, one per level, so a new level brings one new thing to try.

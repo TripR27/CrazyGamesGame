@@ -1,10 +1,10 @@
-import type { Num } from '@/core/numbers';
+import type { CustomerDef } from '@/data/customers/types';
 import { OFFLINE } from '@/data/offline';
-import type { CustomerDef } from '@/data/customers';
-import type { RecipeDef } from '@/data/recipes';
-import { meanSpawnIntervalMs } from '@/systems/customers';
-import { averageReward } from './earnings';
-import type { OfflineReport } from './types';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { Num } from '@/shared/numbers';
+import { meanSpawnIntervalMs } from '@/systems/customers/spawn-timing';
+import { averageReward } from '@/systems/offline/earnings';
+import type { OfflineReport } from '@/systems/offline/types';
 
 const HOUR_MS = 3_600_000;
 

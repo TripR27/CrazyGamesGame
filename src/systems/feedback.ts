@@ -1,6 +1,6 @@
-import { pickRandom, type Rng } from '@/core/rng';
 import { FEEDBACK_POOLS, type FeedbackPoolId } from '@/data/feedback';
 import { textKey } from '@/data/text-key';
+import { pickRandom, type Rng } from '@/shared/random';
 
 /** Pick a random line from a pool, as an i18n key. Systems choose (so tests can seed it); the UI translates. */
 export function feedbackKey(pool: FeedbackPoolId, rng: Rng): string {

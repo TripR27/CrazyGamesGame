@@ -1,8 +1,10 @@
-import { formatNumber } from '@/core/format';
 import { textKey } from '@/data/text-key';
-import type { UpgradeDef, UpgradeEffect } from '@/data/upgrades';
-import { t } from '@/i18n';
-import { levelOf, quoteFor, type BuyAmount, type UpgradeState } from '@/systems/upgrades';
+import type { UpgradeDef, UpgradeEffect } from '@/data/upgrades/types';
+import { t } from '@/i18n/index';
+import { formatNumber } from '@/shared/numbers';
+import { quoteFor, type UpgradeState } from '@/systems/upgrades/buy';
+import { levelOf } from '@/systems/upgrades/level';
+import type { BuyAmount } from '@/systems/upgrades/quote';
 
 /** Everything one shop row shows, as plain strings and flags (so it is easy to test). */
 export interface RowView {

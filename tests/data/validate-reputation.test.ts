@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { RecipeDef } from '@/data/recipes';
-import { customerTable, recipeTable, reputationTable, validateContent } from '@/data/validate';
+import type { RecipeDef } from '@/data/recipes/types';
+import { validateContent } from '@/data/validate/index';
+import { reputationTable } from '@/data/validate/reputation-table';
+import { customerTable, recipeTable } from '@/data/validate/tables';
 
 const allKeys = (): boolean => true;
 const recipe: RecipeDef = { id: 'r1', tier: 1, rarity: 'common', ingredients: ['a', 'b'], brewSeconds: 3, basePrice: 5, effect: 'luck' };

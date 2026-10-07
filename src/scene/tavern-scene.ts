@@ -3,8 +3,8 @@ import { createCauldronView, type CauldronView } from '@/scene/brewing/cauldron-
 import { createReadyView, type ReadyView } from '@/scene/brewing/ready-view';
 import { createShelfView, type ShelfView } from '@/scene/brewing/shelf-view';
 import { createCustomersLayer, type CustomersLayer } from '@/scene/customers/customers-layer';
-import { createRoomsView, type RoomsView } from '@/scene/rooms/rooms-view';
 import { createFeedbackLayer } from '@/scene/effects/feedback-layer';
+import { createRoomsView, type RoomsView } from '@/scene/rooms/rooms-view';
 import type { SceneServices } from '@/scene/services';
 import { drawBar } from '@/scene/sprites/bar';
 import { drawCauldron } from '@/scene/sprites/cauldron';

@@ -1,5 +1,5 @@
 import type { Scene } from 'phaser';
-import type { CustomerSprite } from './customer-sprite';
+import type { CustomerSprite } from '@/scene/customers/customer-sprite';
 
 /** Served: the order is done, the customer stays in the seat with a mug until the drink is finished. */
 export function showDrinking(sprite: CustomerSprite): void {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
-import { ROOMS } from '@/data/rooms';
-import { roomOffer } from '@/systems/rooms';
+import { ROOMS } from '@/data/rooms/index';
 import { roomSign } from '@/scene/rooms/room-sign';
+import { num } from '@/shared/numbers';
+import { roomOffer } from '@/systems/rooms/offer';
 import { roomDescription, toRoomRowView } from '@/ui/shop/room-view-model';
 
 const lab = ROOMS.find((r) => r.id === 'alchemy_lab') ?? ROOMS[0];

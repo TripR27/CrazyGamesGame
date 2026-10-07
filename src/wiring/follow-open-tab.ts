@@ -1,5 +1,4 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
+import type { EventBus, GameEvents } from '@/shared/events';
 
 /** Which open/close events belong to which side-panel tab. A new tab is one more entry. */
 const TAB_EVENTS = [

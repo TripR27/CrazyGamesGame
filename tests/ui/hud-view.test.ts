@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
+import { num } from '@/shared/numbers';
 import { toHudView } from '@/ui/hud-view';
 
 describe('toHudView', () => {

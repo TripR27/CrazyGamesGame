@@ -1,9 +1,9 @@
-import type { Listener } from '@/core/store';
-import type { TargetRegistry } from '@/core/target-registry';
-import { t } from '@/i18n';
-import { createEl } from './dom';
-import { domBounds } from './dom-bounds';
-import { toHudView, type HudState } from './hud-view';
+import { t } from '@/i18n/index';
+import type { Listener } from '@/shared/state';
+import type { TargetRegistry } from '@/shared/targets';
+import { createEl } from '@/ui/dom';
+import { domBounds } from '@/ui/dom-bounds';
+import { toHudView, type HudState } from '@/ui/hud-view';
 import './hud.css';
 
 export interface HudSource {

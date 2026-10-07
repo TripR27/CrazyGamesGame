@@ -1,7 +1,10 @@
-import { num, type Num } from '@/core/numbers';
-import type { UpgradeLevels } from '@/core/state';
-import { ROOMS, type RoomDef } from '@/data/rooms';
-import { BASE_STATS, UPGRADE_STATS, upgrades, type UpgradeDef, type UpgradeEffect, type UpgradeStat } from '@/data/upgrades';
+import { ROOMS } from '@/data/rooms/index';
+import type { RoomDef } from '@/data/rooms/types';
+import { BASE_STATS } from '@/data/upgrades/base-stats';
+import { upgrades } from '@/data/upgrades/index';
+import { UPGRADE_STATS, type UpgradeDef, type UpgradeEffect, type UpgradeStat } from '@/data/upgrades/types';
+import { num, type Num } from '@/shared/numbers';
+import type { UpgradeLevels } from '@/shared/state';
 import { levelOf } from '@/systems/upgrades/level';
 
 /** The final value of every stat: what the rest of the game reads. */

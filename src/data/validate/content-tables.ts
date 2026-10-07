@@ -1,17 +1,17 @@
-import { customers } from '@/data/customers';
+import { customers } from '@/data/customers/index';
 import { FEEDBACK_POOLS } from '@/data/feedback';
-import { ingredients } from '@/data/ingredients';
-import { recipes } from '@/data/recipes';
+import { ingredients } from '@/data/ingredients/index';
+import { recipes } from '@/data/recipes/index';
 import { REPUTATION_LEVELS } from '@/data/reputation/levels';
-import { ROOMS } from '@/data/rooms';
-import { TUTORIAL_STEPS } from '@/data/tutorial';
-import { upgrades } from '@/data/upgrades';
-import type { ContentTable } from './table';
-import { customerTable, feedbackTable, recipeTable, upgradeTable } from './tables';
-import { ingredientTable } from './ingredient-table';
-import { reputationTable } from './reputation-table';
-import { roomTable } from './room-table';
-import { tutorialTable } from './tutorial-table';
+import { ROOMS } from '@/data/rooms/index';
+import { TUTORIAL_STEPS } from '@/data/tutorial/index';
+import { upgrades } from '@/data/upgrades/index';
+import { ingredientTable } from '@/data/validate/ingredient-table';
+import { reputationTable } from '@/data/validate/reputation-table';
+import { roomTable } from '@/data/validate/room-table';
+import type { ContentTable } from '@/data/validate/table';
+import { customerTable, feedbackTable, recipeTable, upgradeTable } from '@/data/validate/tables';
+import { tutorialTable } from '@/data/validate/tutorial-table';
 
 /** Every content list the validator checks. A new domain is one more line here. */
 export const CONTENT_TABLES: readonly ContentTable[] = [

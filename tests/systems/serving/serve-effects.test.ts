@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import type { Rng } from '@/core/rng';
+import { ab, economy, floorWith, station } from '../fixtures';
 import { SERVING } from '@/data/brewing';
 import type { Effect } from '@/data/common';
-import type { CustomerDef } from '@/data/customers';
-import { serveAndPublish, serveCustomer, type ServeDeps } from '@/systems/serving';
-import { ab, economy, floorWith, station } from '../fixtures';
+import type { CustomerDef } from '@/data/customers/types';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import type { Rng } from '@/shared/random';
+import { serveAndPublish } from '@/systems/serving/publish';
+import { serveCustomer, type ServeDeps } from '@/systems/serving/serve';
 
 /** One customer of type `fan` (who likes `likes`) waits for a 10-gold drink with `effect`, which is ready. */
 function setup(effect: Effect, likes: Effect[], rng: Rng = () => 0.5) {

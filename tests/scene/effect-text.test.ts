@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { num } from '@/core/numbers';
 import { EFFECTS } from '@/data/common';
-import { hasKey } from '@/i18n';
+import { hasKey } from '@/i18n/index';
 import { orderLabel } from '@/scene/customers/order-label';
 import { bonusLines } from '@/scene/effects/bonus-lines';
+import { num } from '@/shared/numbers';
 
 const plain = { tip: num(0), extraReputation: 0, liked: false };
 const texts = (lines: { text: string }[]): string[] => lines.map((l) => l.text);

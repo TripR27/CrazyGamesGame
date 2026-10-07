@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { tutorialTable, validateContent } from '@/data/validate';
+import { validateContent } from '@/data/validate/index';
+import { tutorialTable } from '@/data/validate/tutorial-table';
 
 describe('validating tutorial steps', () => {
   it('reports tutorial steps with unknown targets, bad timers and split lessons', () => {

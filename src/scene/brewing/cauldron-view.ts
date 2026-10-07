@@ -1,8 +1,9 @@
 import type { GameObjects, Scene } from 'phaser';
-import type { TargetRegistry } from '@/core/target-registry';
+import { ingredientColor } from '@/scene/brewing/ingredient-look';
 import { CAULDRON } from '@/scene/layout';
-import { brewProgress, type BrewStation } from '@/systems/brewing';
-import { ingredientColor } from './ingredient-look';
+import type { TargetRegistry } from '@/shared/targets';
+import { brewProgress } from '@/systems/brewing/advance';
+import type { BrewStation } from '@/systems/brewing/types';
 
 const MAX_DOTS = 3;
 const DOT_RADIUS = 10;

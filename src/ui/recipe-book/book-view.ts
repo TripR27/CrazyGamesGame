@@ -1,13 +1,13 @@
-import type { Listener } from '@/core/store';
-import type { TargetRegistry } from '@/core/target-registry';
-import { recipes } from '@/data/recipes';
-import { t } from '@/i18n';
-import type { PlayerActions } from '@/systems/actions';
+import { recipes } from '@/data/recipes/index';
+import { t } from '@/i18n/index';
+import type { Listener } from '@/shared/state';
+import type { TargetRegistry } from '@/shared/targets';
+import type { PlayerActions } from '@/systems/actions/player-actions';
 import { createEl } from '@/ui/dom';
 import { domBounds } from '@/ui/dom-bounds';
+import { createBookCard } from '@/ui/recipe-book/book-card';
+import { toBookView, type BookState } from '@/ui/recipe-book/book-view-model';
 import type { SidePanels } from '@/ui/side-panels';
-import { createBookCard } from './book-card';
-import { toBookView, type BookState } from './book-view-model';
 import './book.css';
 
 export interface BookSource {

@@ -1,7 +1,6 @@
-import type { EventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { serveCustomer, type ServeDeps } from './serve';
-import type { ServeOutcome } from './types';
+import type { EventBus, GameEvents } from '@/shared/events';
+import { serveCustomer, type ServeDeps } from '@/systems/serving/serve';
+import type { ServeOutcome } from '@/systems/serving/types';
 
 /** Serves a customer and announces what happened. The player (a click) and the waitress both use this. */
 export function serveAndPublish(

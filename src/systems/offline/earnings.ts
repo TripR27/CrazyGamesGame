@@ -1,12 +1,13 @@
-import { num, ZERO, type Num } from '@/core/numbers';
 import { SERVING } from '@/data/brewing';
-import type { CustomerDef } from '@/data/customers';
+import type { CustomerDef } from '@/data/customers/types';
 import { VIP_SPAWN } from '@/data/customers/vip';
-import type { RecipeDef } from '@/data/recipes';
-import { priciestRecipe } from '@/systems/customers';
-import { drinkBonus, orderWeight, tipSize } from '@/systems/effects';
-import { levelFor } from '@/systems/reputation';
-import { computePayout } from '@/systems/serving';
+import type { RecipeDef } from '@/data/recipes/types';
+import { num, ZERO, type Num } from '@/shared/numbers';
+import { priciestRecipe } from '@/systems/customers/pick-type';
+import { drinkBonus, orderWeight } from '@/systems/effects/bonus';
+import { tipSize } from '@/systems/effects/tip';
+import { levelFor } from '@/systems/reputation/level';
+import { computePayout } from '@/systems/serving/payout';
 
 /** What one served drink brings on average: gold (tips counted by their chance) and reputation. */
 export interface Reward {

@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first ingredient from the shop: starts once one can be bought, then points at it on the shelf. */
 export const ingredientLesson: readonly TutorialStep[] = [

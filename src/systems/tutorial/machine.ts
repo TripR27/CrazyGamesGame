@@ -1,6 +1,6 @@
-import type { TutorialEvent, TutorialStep } from '@/data/tutorial';
-import { firstOpenStep, rewindForResume } from './progress';
-import type { AlreadyHolds, ProgressStore, TutorialMachine } from './types';
+import type { TutorialEvent, TutorialStep } from '@/data/tutorial/types';
+import { firstOpenStep, rewindForResume } from '@/systems/tutorial/progress';
+import type { AlreadyHolds, ProgressStore, TutorialMachine } from '@/systems/tutorial/types';
 
 interface Session {
   steps: readonly TutorialStep[];

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { upgrades } from '@/data/upgrades';
-import { effectAmount, toRowView } from '@/ui/shop/shop-view-model';
 import { economy } from '../systems/fixtures';
+import { upgrades } from '@/data/upgrades/index';
+import { effectAmount, toRowView } from '@/ui/shop/shop-view-model';
 
 const swift = upgrades.find((u) => u.id === 'swift_cauldron');
 if (swift === undefined) throw new Error('swift_cauldron missing');

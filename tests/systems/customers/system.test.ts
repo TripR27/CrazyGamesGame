@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { createSeededRng } from '@/core/rng';
-import { dismiss, publishChange, startCustomerSystem } from '@/systems/customers';
 import { catalog, context, FIRST_DELAY, newFloor } from './helpers';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createSeededRng } from '@/shared/random';
+import { dismiss } from '@/systems/customers/floor';
+import { publishChange, startCustomerSystem } from '@/systems/customers/system';
 
 function setup(getContext = () => context()) {
   const bus = createEventBus<GameEvents>();

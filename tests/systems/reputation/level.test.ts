@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReputationLevel } from '@/data/reputation/levels';
-import { levelFor, levelProgress, recipesUnlockedUpTo } from '@/systems/reputation';
+import { levelFor, levelProgress, recipesUnlockedUpTo } from '@/systems/reputation/level';
 
 const LEVELS: readonly ReputationLevel[] = [
   { id: 'one', minReputation: 0 },

@@ -1,6 +1,6 @@
 import { BAR } from '@/scene/layout';
 import { PALETTE } from '@/scene/palette';
-import { fillRect, type Graphics } from './draw';
+import { fillRect, type Graphics } from '@/scene/sprites/draw';
 
 const TOP_THICKNESS = 14;
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialState } from '@/core/state';
-import { SERVING } from '@/data/brewing';
-import { resolveTarget } from '@/systems/tutorial';
 import { newGame, playBasics } from './helpers';
+import { SERVING } from '@/data/brewing';
+import { createInitialState } from '@/shared/state';
+import { resolveTarget } from '@/systems/tutorial/resolve-target';
 
 const BASICS = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold'];
 

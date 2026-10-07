@@ -1,5 +1,5 @@
-import type { Rng } from '@/core/rng';
 import { SPAWNING } from '@/data/customers/spawning';
+import type { Rng } from '@/shared/random';
 
 /** The average time between customers at this reputation, without the random jitter. */
 export function meanSpawnIntervalMs(reputation: number): number {

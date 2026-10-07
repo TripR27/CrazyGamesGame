@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { startBrewSystem } from '@/systems/brewing';
-import { createPlayerActions } from '@/systems/actions';
 import { catalog, economy, floorWith, noUpgrades, rng, station } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createPlayerActions } from '@/systems/actions/player-actions';
+import { startBrewSystem } from '@/systems/brewing/system';
 
 function game(knownIds: string[] = ['ab', 'cde']) {
   const bus = createEventBus<GameEvents>();

@@ -1,4 +1,4 @@
-import type { BrewStation } from '@/systems/brewing';
+import type { BrewStation } from '@/systems/brewing/types';
 
 /** The oldest waiting customer whose drink is ready on the bar: who the waitress serves next. */
 export function readyCustomer(

@@ -1,6 +1,6 @@
-import { formatNumber } from '@/core/format';
-import { t } from '@/i18n';
-import type { OfflineReport } from '@/systems/offline';
+import { t } from '@/i18n/index';
+import { formatNumber } from '@/shared/numbers';
+import type { OfflineReport } from '@/systems/offline/types';
 
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;

@@ -1,6 +1,6 @@
-import type { LeaveReason } from '@/core/game-events';
-import type { CustomerDef } from '@/data/customers';
-import type { RecipeDef } from '@/data/recipes';
+import type { CustomerDef } from '@/data/customers/types';
+import type { RecipeDef } from '@/data/recipes/types';
+import type { LeaveReason } from '@/shared/events';
 
 /** A customer currently in the tavern. Not saved: the floor starts empty on every launch. */
 export interface CustomerInstance {

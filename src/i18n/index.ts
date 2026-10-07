@@ -1,8 +1,7 @@
-import { createTranslator } from './translator';
-import { en } from './en';
+import { en } from '@/i18n/en/index';
+import { createTranslator } from '@/i18n/translator';
 
 const translator = createTranslator({ messages: en });
 
 export const t = translator.t;
 export const hasKey = translator.has;
-export type { Messages, TranslateParams, Translator } from './translator';

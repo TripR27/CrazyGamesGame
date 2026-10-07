@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventBus } from '@/core/events';
-import type { GameEvents } from '@/core/game-events';
-import { createPlayerActions } from '@/systems/actions';
 import { catalog, economy, floorWith, noUpgrades, rng, station } from '../fixtures';
+import { createEventBus, type GameEvents } from '@/shared/events';
+import { createPlayerActions } from '@/systems/actions/player-actions';
 
 function game(gold: number) {
   const bus = createEventBus<GameEvents>();

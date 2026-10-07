@@ -1,4 +1,4 @@
-import type { TutorialStep } from './types';
+import type { TutorialStep } from '@/data/tutorial/types';
 
 /** The hint for the first upgrade: starts when the player can pay for one, then unfold the panel on the shop tab, buy, done. */
 export const upgradeLesson: readonly TutorialStep[] = [

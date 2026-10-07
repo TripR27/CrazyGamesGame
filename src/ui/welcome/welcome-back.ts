@@ -1,6 +1,6 @@
-import type { OfflineInbox } from '@/systems/offline';
+import type { OfflineInbox } from '@/systems/offline/inbox';
 import { createEl } from '@/ui/dom';
-import { toWelcomeView } from './welcome-view-model';
+import { toWelcomeView } from '@/ui/welcome/welcome-view-model';
 import './welcome.css';
 
 /** The "welcome back" window: shown when a report arrives (or was already waiting), closed with one button. */
