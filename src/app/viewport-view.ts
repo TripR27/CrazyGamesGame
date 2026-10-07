@@ -1,16 +1,14 @@
-import type { PlayerActions } from '@/app/actions';
-import { mountHud, type HudSource } from '@/app/hud-view';
+import type { World } from '@/app/world';
+import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
 import { computeFit, type Fit, type SideLayout } from '@/app/ui-model';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { mountShop, type ShopSource } from '@/economy/shop-view';
-import type { OfflineInbox } from '@/offline/offline';
+import { mountShop } from '@/economy/shop-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
-import { mountRecipeBook, type BookSource } from '@/recipes/recipe-book-view';
+import { mountRecipeBook } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
-import type { LevelUpView } from '@/reputation/reputation';
-import type { TargetRegistry } from '@/shared/targets';
-import { mountTutorial, type TutorialUiSource } from '@/tutorial/tutorial-view';
+import { toLevelUpView } from '@/reputation/reputation';
+import { mountTutorial } from '@/tutorial/tutorial-view';
 
 /**
  * Makes the overlay a design-space box that is scaled and centred like the canvas, so HUD elements stay
@@ -54,33 +52,15 @@ export function placeGame(container: HTMLElement, fit: Fit, refit: () => void): 
   refit();
 }
 
-export interface UiServices {
-  source: HudSource & ShopSource & BookSource;
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'buyIngredient' | 'buildRoom' | 'openShop' | 'closeShop' | 'openBook' | 'closeBook'>;
-  tutorial: TutorialUiSource;
-  targets: TargetRegistry;
-  /** How much room a side panel takes next to the game. */
-  layout: SideLayout;
-  /** Reports of what the staff earned while the player was away. */
-  welcome: OfflineInbox;
-  /** Told where the game part of the frame sits, so the canvas can follow. */
-  onFit: (fit: Fit) => void;
-  /** Subscribes to requests from the scene to open the shop (a boarded-up room was clicked). Returns an unsubscribe function. */
-  onShopRequest: (open: () => void) => () => void;
-  /** Subscribes to new reputation levels, already turned into a message. Returns an unsubscribe function. */
-  onLevelUp: (show: (view: LevelUpView) => void) => () => void;
-}
-
 /** Builds the DOM overlay on top of the canvas. */
-export function mountUi(root: HTMLElement, services: UiServices): void {
-  const { source, actions, tutorial, targets, layout, welcome, onFit, onLevelUp, onShopRequest } = services;
+export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void): void {
   fitToViewport(root, layout, onFit);
-  mountHud(root, source, targets);
-  const panels = createSidePanels(root, layout, targets);
-  mountShop({ root, panels }, source, actions, targets);
-  mountRecipeBook({ root, panels }, source, actions, targets);
-  onShopRequest(() => panels.show('shop'));
-  mountTutorial(root, tutorial, targets);
-  mountLevelUpToast(root, onLevelUp);
-  mountWelcomeBack(root, welcome);
+  mountHud(root, world.store, world.targets);
+  const panels = createSidePanels(root, layout, world.targets);
+  mountShop({ root, panels }, world);
+  mountRecipeBook({ root, panels }, world);
+  world.bus.on('shop:requested', () => panels.show('shop'));
+  mountTutorial(root, world.tutorial, world.targets);
+  mountLevelUpToast(root, (show) => world.bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, world.content.customerTypes))));
+  mountWelcomeBack(root, world.offline.inbox);
 }

@@ -1,17 +1,19 @@
-import { type GameWorld, createServices } from '@/app/world';
-import { firstBuyableIngredient, type IngredientShelf, createIngredientShelf } from '@/brewing/ingredients';
+import { type World, createWorld } from '@/app/world';
+import { clickIngredient } from '@/brewing/brewing';
+import { buyIngredientById, discoverableNow, firstBuyableIngredient } from '@/brewing/ingredients';
 import { waitingCustomers } from '@/customers/customers';
 import { upgrades } from '@/economy/upgrade-data';
-import { quoteFor, getMultipliers } from '@/economy/upgrades';
+import { buyUpgradeById, quoteFor, getMultipliers } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, levelFor } from '@/reputation/reputation';
-import { ROOMS, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
+import { ROOMS, buildRoomById, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
+import { clickCustomer } from '@/serving/serving';
 import { textKey } from '@/shared/content';
 import { type EventBus, type GameEvents, createEventBus } from '@/shared/events';
 import { num, type Num } from '@/shared/numbers';
 import { createSeededRng } from '@/shared/random';
-import { type GameState, type Store, createInitialState, createStore } from '@/shared/state';
+import { type GameState, createInitialState, createStore } from '@/shared/state';
 
 export interface TimelineEntry {
   ms: number;
@@ -86,20 +88,19 @@ function upgradeBudget(state: GameState): Num {
  * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
  * then the cheapest upgrade, but while a room is for sale it saves up for it. Returns true when it bought something.
  */
-export function shopOnce(world: GameWorld, state: GameState, shelf: IngredientShelf): boolean {
-  const { actions } = world.scene;
-  const ingredient = firstBuyableIngredient(state, shelf.catalog);
+export function shopOnce(world: World, state: GameState): boolean {
+  const ingredient = firstBuyableIngredient(state, world.content);
   if (ingredient !== undefined) {
-    actions.buyIngredient(ingredient.id);
+    buyIngredientById(world, ingredient.id);
     return true;
   }
   const room = firstBuildableRoom(state, ROOMS);
   if (room !== undefined) {
-    actions.buildRoom(room.id);
+    buildRoomById(world, room.id);
     return true;
   }
   const upgrade = cheapestUpgrade(state, upgradeBudget(state));
-  if (upgrade !== undefined) actions.buyUpgrade(upgrade, 1);
+  if (upgrade !== undefined) buyUpgradeById(world, upgrade, 1);
   return upgrade !== undefined;
 }
 
@@ -116,40 +117,40 @@ export interface Bot {
 const fits = (contents: readonly string[], r: RecipeDef): boolean => contents.every((id) => r.ingredients.includes(id));
 
 /** What to brew next: a recipe to discover first (players try new ones soon), then what a waiting customer wants. */
-function targetRecipe(world: GameWorld, state: GameState, shelf: IngredientShelf): RecipeDef | undefined {
-  const { station, floor } = world.scene;
+function targetRecipe(world: World, state: GameState): RecipeDef | undefined {
+  const { station, floor } = world;
   const known = recipes.filter((r) => state.recipesDiscovered.includes(r.id));
   const wanted = waitingCustomers(floor)
     .map((c) => known.find((r) => r.id === c.recipeId))
     .filter((r): r is RecipeDef => r !== undefined && !station.ready.includes(r.id));
-  const options = [...shelf.getDiscoverable(), ...wanted];
+  const options = [...discoverableNow(world), ...wanted];
   return options.find((r) => fits(station.contents, r));
 }
 
-function serveReady(world: GameWorld): boolean {
-  const { floor, station, actions } = world.scene;
+function serveReady(world: World): boolean {
+  const { floor, station } = world;
   const customer = waitingCustomers(floor).find((c) => station.ready.includes(c.recipeId));
   if (customer === undefined) return false;
-  actions.clickCustomer(customer.id);
+  clickCustomer(world, customer.id);
   return true;
 }
 
-function brewNext(world: GameWorld, state: GameState, shelf: IngredientShelf): boolean {
-  const { station, actions } = world.scene;
+function brewNext(world: World, state: GameState): boolean {
+  const { station } = world;
   if (station.brewing !== null || station.ready.length >= station.capacity) return false;
-  const next = targetRecipe(world, state, shelf)?.ingredients.find((id) => !station.contents.includes(id));
+  const next = targetRecipe(world, state)?.ingredients.find((id) => !station.contents.includes(id));
   if (next === undefined) return false;
-  actions.clickIngredient(next);
+  clickIngredient(world, next);
   return true;
 }
 
-export function createBot(world: GameWorld, store: Store<GameState>, options: BotOptions): Bot {
-  const shelf = createIngredientShelf(store);
+export function createBot(world: World, options: BotOptions): Bot {
+  const { store } = world;
   return {
     act() {
       const state = store.getState();
-      if (serveReady(world) || brewNext(world, state, shelf)) return;
-      if (options.buys) shopOnce(world, state, shelf);
+      if (serveReady(world) || brewNext(world, state)) return;
+      if (options.buys) shopOnce(world, state);
     },
   };
 }
@@ -208,9 +209,9 @@ export function runSimulation(options: SimOptions): SimResult {
   const store = createStore(state);
   const bus = createEventBus<GameEvents>();
   let now = 0;
-  const world = createServices({ store, bus, rng: createSeededRng(options.seed), clock: { now: () => now } });
+  const world = createWorld({ store, bus, rng: createSeededRng(options.seed), clock: { now: () => now } });
   const timeline = recordTimeline(bus, () => now);
-  const bot = createBot(world, store, options.bot);
+  const bot = createBot(world, options.bot);
   const snapshots: Snapshot[] = [];
   let nextAction = 0;
   const idleFrom = (options.idleFromMinute ?? Infinity) * MINUTE_MS;

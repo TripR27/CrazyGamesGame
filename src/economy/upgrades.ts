@@ -1,3 +1,4 @@
+import type { World } from '@/app/world';
 import { type UpgradeDef, BASE_STATS, upgrades, UPGRADE_STATS, type UpgradeEffect, type UpgradeStat } from '@/economy/upgrade-data';
 import { ROOMS, type RoomDef } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
@@ -179,4 +180,15 @@ export function getMultipliers(
   ];
   const entries = UPGRADE_STATS.map((stat) => [stat, applySources(stat, sources)] as const);
   return Object.fromEntries(entries) as Multipliers;
+}
+
+/** Buy levels of an upgrade; does nothing when it cannot be afforded. */
+export function buyUpgradeById({ bus, store, content }: Pick<World, 'bus' | 'store' | 'content'>, id: string, amount: BuyAmount): void {
+  const def = content.upgrades.find((u) => u.id === id);
+  const count = def === undefined ? 0 : buyUpgrade(store, def, amount);
+  if (def === undefined || count === 0) return;
+  bus.emit('upgrade:bought', { id: def.id, count });
+  if (def.kind === 'staff') bus.emit('staff:hired', { id: def.id });
+  if (def.effect.stat === 'seats') bus.emit('seats:bought', { id: def.id });
+  bus.emit('saveRequested', {});
 }

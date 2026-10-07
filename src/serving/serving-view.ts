@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from 'phaser';
 import { CAULDRON, SEAT_SLOTS } from '@/app/layout';
-import type { SceneServices } from '@/app/tavern-scene';
+import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { withEffectIcon } from '@/serving/effects';
@@ -105,7 +105,7 @@ const BONUS_ABOVE_SLOT = 72;
 const BONUS_LINE_PX = 20;
 
 /** Turns game events into floating "+gold" and funny lines near whoever they are about. */
-export function createFeedbackLayer(scene: Scene, { bus }: SceneServices): () => void {
+export function createFeedbackLayer(scene: Scene, { bus }: Pick<World, 'bus'>): () => void {
   const floats = createFloatingTexts(scene);
   const line = (key: string, recipeId?: string): string =>
     t(key, recipeId === undefined ? undefined : { drink: t(textKey('recipes', recipeId, 'name')) });

@@ -1,10 +1,10 @@
-import { type RecipeDef, recipes } from '@/recipes/recipe-data';
+import type { World } from '@/app/world';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { discoverableRecipes } from '@/recipes/recipes';
 import type { OneTimePurchase, Rarity } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Num } from '@/shared/numbers';
 import { oneTimeOffer, type OneTimeOffer, watchBuyable, type WatchSource } from '@/shared/purchases';
-import type { GameState, Store } from '@/shared/state';
 
 export type IngredientId = string;
 
@@ -113,43 +113,20 @@ export function watchIngredientShop(source: WatchSource<IngredientShopState>, bu
   return watchBuyable(source, bus, (state) => firstBuyableIngredient(state, catalog) !== undefined, 'ingredients:affordable');
 }
 
-export interface IngredientShelf {
-  catalog: IngredientCatalog;
-  /** Ingredient ids on the shelf: the basic ones plus what the player bought (read every frame by the scene). */
-  getShelf(): readonly string[];
-  /** Recipes the player could discover now: level reached and every ingredient on the shelf. */
-  getDiscoverable(): readonly RecipeDef[];
+/** Ingredient ids on the shelf: the basic ones plus what the player bought (read every frame by the scene). */
+export function shelfIds({ store, content }: Pick<World, 'store' | 'content'>): readonly string[] {
+  return ownedIngredients(store.getState(), content.ingredients, content.recipes).map((i) => i.id);
 }
 
-/** What the player has to brew with, read fresh from the state each time. */
-export function createIngredientShelf(store: Store<GameState>): IngredientShelf {
-  const catalog: IngredientCatalog = { ingredients, recipes };
-  const getShelf = (): readonly string[] => ownedIngredients(store.getState(), ingredients, recipes).map((i) => i.id);
-  return {
-    catalog,
-    getShelf,
-    getDiscoverable: () => discoverableRecipes(store.getState(), recipes, getShelf()),
-  };
+/** Recipes the player could discover now: level reached and every ingredient on the shelf. */
+export function discoverableNow(world: Pick<World, 'store' | 'content'>): readonly RecipeDef[] {
+  return discoverableRecipes(world.store.getState(), world.content.recipes, shelfIds(world));
 }
 
-export interface IngredientActions {
-  /** Buy an ingredient in the shop (one time); does nothing when it is locked, owned or too expensive. */
-  buyIngredient(ingredientId: string): void;
-}
-
-export interface IngredientActionDeps {
-  bus: EventBus<GameEvents>;
-  store: IngredientShopStore;
-  catalog: IngredientCatalog;
-}
-
-export function createIngredientActions({ bus, store, catalog }: IngredientActionDeps): IngredientActions {
-  return {
-    buyIngredient(ingredientId) {
-      const def = catalog.ingredients.find((i) => i.id === ingredientId);
-      if (def === undefined || !buyIngredient(store, def, catalog)) return;
-      bus.emit('ingredient:bought', { id: def.id });
-      bus.emit('saveRequested', {});
-    },
-  };
+/** Buy an ingredient in the shop (one time); does nothing when it is locked, owned or too expensive. */
+export function buyIngredientById({ bus, store, content }: Pick<World, 'bus' | 'store' | 'content'>, id: string): void {
+  const def = content.ingredients.find((i) => i.id === id);
+  if (def === undefined || !buyIngredient(store, def, content)) return;
+  bus.emit('ingredient:bought', { id: def.id });
+  bus.emit('saveRequested', {});
 }

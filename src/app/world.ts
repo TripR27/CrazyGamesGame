@@ -1,18 +1,16 @@
-import { createPlayerActions } from '@/app/actions';
 import { CUSTOMER_SLOTS } from '@/app/layout';
-import type { SceneServices } from '@/app/tavern-scene';
 import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/brewing/brewing';
-import { type IngredientCatalog, watchIngredientShop, createIngredientShelf } from '@/brewing/ingredients';
-import { customers } from '@/customers/customer-data';
+import { ingredients, watchIngredientShop, type IngredientDef } from '@/brewing/ingredients';
+import { customers, type CustomerDef } from '@/customers/customer-data';
 import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFloor } from '@/customers/customers';
-import { upgrades } from '@/economy/upgrade-data';
+import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { createOffline, type OfflineServices } from '@/offline/offline';
-import { recipes } from '@/recipes/recipe-data';
+import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
 import { watchReputationLevels } from '@/reputation/reputation';
-import { ROOMS, watchRoomShop, openSeats, type SeatPlan, roomOffer, totalSeats } from '@/rooms/rooms';
-import { createDrinkSelection } from '@/serving/serving';
+import { ROOMS, watchRoomShop, openSeats, type SeatPlan, totalSeats, type RoomDef } from '@/rooms/rooms';
+import { createDrinkSelection, type DrinkSelection } from '@/serving/serving';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';
@@ -36,12 +34,12 @@ export function syncStationStats(store: Store<GameState>, station: BrewStation):
 }
 
 /** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient and room become affordable. */
-export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, ingredients: IngredientCatalog): void {
-  watchAffordable(store, bus, generalOnly(upgrades));
-  watchAffordable(store, bus, seatsOnly(upgrades), 'seats:affordable');
-  watchAffordable(store, bus, staffOnly(upgrades), 'staff:affordable');
-  watchIngredientShop(store, bus, ingredients);
-  watchRoomShop(store, bus, ROOMS);
+export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, content: Content): void {
+  watchAffordable(store, bus, generalOnly(content.upgrades));
+  watchAffordable(store, bus, seatsOnly(content.upgrades), 'seats:affordable');
+  watchAffordable(store, bus, staffOnly(content.upgrades), 'staff:affordable');
+  watchIngredientShop(store, bus, content);
+  watchRoomShop(store, bus, content.rooms);
 }
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
@@ -104,7 +102,7 @@ export function startStaffWork({ store, bus, floor, station, rng, catalog }: Sta
       catalog,
       getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
     },
-    getKnownRecipes: () => recipes.filter((r) => store.getState().recipesDiscovered.includes(r.id)),
+    getKnownRecipes: () => catalog.recipes.filter((r) => store.getState().recipesDiscovered.includes(r.id)),
     getRates: () => {
       const stats = getMultipliers(store.getState());
       return { brew: stats.autoBrew.toNumber(), serve: stats.autoServe.toNumber() };
@@ -112,60 +110,62 @@ export function startStaffWork({ store, bus, floor, station, rng, catalog }: Sta
   });
 }
 
-export interface WiringDeps {
+/** The game's content tables. Tests pass a small catalogue of their own. */
+export interface Content {
+  customerTypes: readonly CustomerDef[];
+  recipes: readonly RecipeDef[];
+  upgrades: readonly UpgradeDef[];
+  rooms: readonly RoomDef[];
+  ingredients: readonly IngredientDef[];
+}
+
+export const content: Content = { customerTypes: customers, recipes, upgrades, rooms: ROOMS, ingredients };
+
+export interface WorldDeps {
   store: Store<GameState>;
   bus: EventBus<GameEvents>;
   rng: Rng;
   /** Used to mark when offline time has been counted. Defaults to the system clock. */
   clock?: Clock;
+  content?: Content;
 }
 
-export interface GameWorld {
-  scene: SceneServices;
-  tutorial: TutorialServices;
-  offline: OfflineServices;
+/** Everything that exists while the game runs. Features take this (or the few parts they need) and nothing else. */
+export interface World {
+  store: Store<GameState>;
+  bus: EventBus<GameEvents>;
+  rng: Rng;
+  clock: Clock;
+  content: Content;
+  /** Who is in the tavern right now. Runtime only. */
+  floor: CustomerFloor;
+  /** The cauldron and the bar. Runtime only. */
+  station: BrewStation;
+  /** The drink the player picked up from the bar. */
+  selection: DrinkSelection;
   /** Shared by the scene and the DOM overlay, so the tutorial can point at both. */
   targets: TargetRegistry;
+  tutorial: TutorialServices;
+  offline: OfflineServices;
 }
 
-/**
- * The composition root for the game world: builds the runtime objects (customer floor, cauldron and bar),
- * starts the systems that run on the tick, and returns what the scenes need.
- */
-export function createServices({ store, bus, rng, clock = systemClock }: WiringDeps): GameWorld {
-  const catalog = { customerTypes: customers, recipes };
+/** Builds the world once and starts what runs on the tick. The order of the calls below is the order things run. */
+export function createWorld({ store, bus, rng, clock = systemClock, content: c = content }: WorldDeps): World {
+  const catalog: CustomerCatalog = c;
   // Seat numbers: downstairs first, then the rooms upstairs (built or not; customers only use the open ones).
-  const seatPlan = { ground: CUSTOMER_SLOTS.length, rooms: ROOMS };
+  const seatPlan = { ground: CUSTOMER_SLOTS.length, rooms: c.rooms };
   const floor = createFloor(totalSeats(seatPlan));
   const station = createStation(BREWING.storageCapacity);
   syncStationStats(store, station);
   // Announces each new reputation level (the HUD shows a message).
   watchReputationLevels(store, bus);
   recordDiscoveries(store, bus);
-  const shelf = createIngredientShelf(store);
-  const knownIds = (): readonly string[] => store.getState().recipesDiscovered;
-  const tutorial = createTutorial({ store, bus, floor, station, ingredients: shelf.catalog });
+  const tutorial = createTutorial({ store, bus, floor, station, ingredients: c });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);
   startBrewSystem(station, bus);
-  watchShop(store, bus, shelf.catalog);
+  watchShop(store, bus, c);
   startStaffWork({ store, bus, floor, station, rng, catalog });
-  const selection = createDrinkSelection(station);
-  const actions = createPlayerActions({
-    bus, station, floor, economy: store, catalog, rng, getKnownRecipeIds: knownIds, selection,
-    upgradeStore: store,
-    upgradeDefs: upgrades,
-    getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
-    getDiscoverable: shelf.getDiscoverable,
-    ingredients: { store, catalog: shelf.catalog },
-    rooms: { store, defs: ROOMS },
-  });
-  const targets = createTargetRegistry();
   const offline = createOffline({ store, bus, clock, catalog });
-  const getRoomOffer = (roomId: string) => {
-    const room = ROOMS.find((r) => r.id === roomId);
-    return room === undefined ? undefined : roomOffer(store.getState(), room);
-  };
-  const scene = { bus, floor, station, selection, actions, getShelf: shelf.getShelf, getRoomOffer, targets };
-  return { scene, tutorial, offline, targets };
+  return { store, bus, rng, clock, content: c, floor, station, selection: createDrinkSelection(station), targets: createTargetRegistry(), tutorial, offline };
 }

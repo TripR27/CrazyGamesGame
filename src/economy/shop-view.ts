@@ -1,12 +1,12 @@
-import type { PlayerActions } from '@/app/actions';
+import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
-import { ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
+import { buyIngredientById, ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
 import { type RowView, isIngredientListed, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
-import type { BuyAmount, UpgradeState } from '@/economy/upgrades';
+import { buyUpgradeById, type BuyAmount, type UpgradeState } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
-import { ROOMS, roomOffer, type RoomState } from '@/rooms/rooms';
+import { ROOMS, buildRoomById, roomOffer, type RoomState } from '@/rooms/rooms';
 import type { Listener } from '@/shared/state';
 import type { TargetRegistry } from '@/shared/targets';
 import './shop.css';
@@ -68,15 +68,14 @@ export interface OneTimeGroupHosts {
   list: HTMLElement;
   root: HTMLElement;
   panel: HTMLElement;
-  actions: Pick<PlayerActions, 'buyIngredient' | 'buildRoom'>;
-  targets: TargetRegistry;
+  world: World;
 }
 
 /** The groups at the top of the shop: ingredients, then rooms. Returns the render function for both. */
-export function mountOneTimeGroups({ list, root, panel, actions, targets }: OneTimeGroupHosts): (state: OneTimeState) => void {
+export function mountOneTimeGroups({ list, root, panel, world }: OneTimeGroupHosts): (state: OneTimeState) => void {
   const catalog = { ingredients, recipes };
   const renderIngredients = mountOneTimeSection<OneTimeState>({
-    list, root, panel, targets,
+    list, root, panel, targets: world.targets,
     headingKey: 'shop.kind_ingredients',
     targetPrefix: 'ingredient-buy',
     entries: shopIngredients(catalog).map((def) => ({
@@ -84,10 +83,10 @@ export function mountOneTimeGroups({ list, root, panel, actions, targets }: OneT
       listed: (state) => isIngredientListed(def, state, catalog),
       view: (state) => toIngredientRowView(def, state, catalog),
     })),
-    onBuy: actions.buyIngredient,
+    onBuy: (id) => buyIngredientById(world, id),
   });
   const renderRooms = mountOneTimeSection<OneTimeState>({
-    list, root, panel, targets,
+    list, root, panel, targets: world.targets,
     headingKey: 'shop.kind_rooms',
     targetPrefix: 'room-buy',
     entries: ROOMS.map((room) => ({
@@ -95,7 +94,7 @@ export function mountOneTimeGroups({ list, root, panel, actions, targets }: OneT
       listed: (state) => isListed(roomOffer(state, room)),
       view: (state) => toRoomRowView(room, state),
     })),
-    onBuy: actions.buildRoom,
+    onBuy: (id) => buildRoomById(world, id),
   });
   return (state) => {
     renderIngredients(state);
@@ -187,20 +186,19 @@ export interface ShopHosts {
 /** The Shop tab of the side panel: ingredients and rooms for sale, then one row per upgrade. Returns an unmount function. */
 export function mountShop(
   { root, panels }: ShopHosts,
-  source: ShopSource,
-  actions: Pick<PlayerActions, 'buyUpgrade' | 'buyIngredient' | 'buildRoom' | 'openShop' | 'closeShop'>,
-  targets: TargetRegistry,
+  world: World,
 ): () => void {
+  const { store: source, targets } = world;
   let amount: BuyAmount = 1;
   const { panel, list, picker } = buildPanel((picked) => {
     amount = picked;
     render();
   });
 
-  const renderOneTime = mountOneTimeGroups({ list, root, panel, actions, targets });
+  const renderOneTime = mountOneTimeGroups({ list, root, panel, world });
   let kind = '';
   const rows = upgrades.map((def) => {
-    const row = createUpgradeRow(() => actions.buyUpgrade(def.id, amount));
+    const row = createUpgradeRow(() => buyUpgradeById(world, def.id, amount));
     // A small heading above the first upgrade of each kind (the list is ordered by kind).
     if (def.kind !== kind) list.append(createEl('h3', 'shop-kind', t(`shop.kind_${def.kind}`)));
     kind = def.kind;
@@ -214,7 +212,7 @@ export function mountShop(
     renderOneTime(source.getState());
     for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
   }
-  panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: actions.openShop, onClose: actions.closeShop });
+  panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: () => world.bus.emit('shop:opened', {}), onClose: () => world.bus.emit('shop:closed', {}) });
   const unsubscribe = source.subscribe(render);
   render();
 

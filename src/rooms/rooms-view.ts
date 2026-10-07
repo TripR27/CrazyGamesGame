@@ -1,10 +1,10 @@
 import type { GameObjects, Scene } from 'phaser';
 import type { Graphics } from '@/app/backdrop-view';
 import { type Rect, ROOM_SPOTS, UPPER_BEAM, type RoomSpot } from '@/app/layout';
-import type { SceneServices } from '@/app/tavern-scene';
+import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
-import { type RoomDef, ROOMS } from '@/rooms/rooms';
+import { type RoomDef, ROOMS, requestShop, roomOfferById } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';
 import { formatNumber } from '@/shared/numbers';
 import type { OneTimeOffer } from '@/shared/purchases';
@@ -77,19 +77,19 @@ interface Shown {
   key: string;
 }
 
-function createRoom(scene: Scene, room: RoomDef, spot: RoomSpot, services: SceneServices): Shown {
+function createRoom(scene: Scene, room: RoomDef, spot: RoomSpot, services: World): Shown {
   const { rect } = spot;
   const g = scene.add.graphics();
   const sign = scene.add.text(rect.x + rect.w / 2, rect.y + rect.h / 2, '', SIGN_STYLE).setOrigin(0.5);
   // Clicking a room that is not built yet opens the shop, where it is built.
   const zone = scene.add.zone(rect.x + rect.w / 2, rect.y + rect.h / 2, rect.w, rect.h);
-  zone.on('pointerdown', () => services.actions.requestShop());
+  zone.on('pointerdown', () => requestShop(services));
   services.targets.register(`room:${room.id}`, () => rect);
   return { room, spot, g, sign, zone, key: '' };
 }
 
 /** The rooms on the upper floor: boarded up with a sign until they are built, then furnished. */
-export function createRoomsView(scene: Scene, services: SceneServices): RoomsView {
+export function createRoomsView(scene: Scene, services: World): RoomsView {
   scene.add.graphics().fillStyle(0x5e3a18, 1).fillRect(UPPER_BEAM.x, UPPER_BEAM.y, UPPER_BEAM.w, UPPER_BEAM.h);
   const shown = ROOMS.flatMap((room) => {
     const spot = ROOM_SPOTS[room.id];
@@ -98,7 +98,7 @@ export function createRoomsView(scene: Scene, services: SceneServices): RoomsVie
   return {
     update() {
       for (const item of shown) {
-        const offer = services.getRoomOffer(item.room.id);
+        const offer = roomOfferById(services, item.room.id);
         if (offer === undefined) continue;
         const text = roomSign(item.room, offer);
         const key = `${offer.status}|${text}`;

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { buyUpgradeById } from '@/economy/upgrades';
 import { newGame, playBasics } from './helpers';
 import { SERVING } from '@/brewing/brewing';
 import { num } from '@/shared/numbers';
@@ -20,7 +21,7 @@ describe('the preference hint, played in the real game', () => {
     const game = afterBasics();
     for (let t = 0; t < 300_000 && game.shown() === null; t += 1_000) game.tick(1_000);
     expect(game.shown()).toBe('likes_spot');
-    const fan = game.world.scene.floor.customers.find((c) => c.liked);
+    const fan = game.world.floor.customers.find((c) => c.liked);
     expect(resolveTarget('guide-liked', game.guide())).toBe(`customer:${fan?.id}`);
 
     playBasics(game); // brew what they ordered and serve them
@@ -44,7 +45,7 @@ describe('the preference hint, played in the real game', () => {
     const game = afterBasics(['slime_sap']);
     game.tick(120_000);
     expect(game.shown()).toBeNull();
-    expect(game.world.scene.floor.customers.every((c) => !c.liked)).toBe(true);
+    expect(game.world.floor.customers.every((c) => !c.liked)).toBe(true);
   });
 });
 
@@ -53,10 +54,10 @@ describe('drinking in the real game', () => {
     const game = afterBasics(['slime_sap']);
     game.tick(4_000);
     playBasics(game);
-    const [drinker] = game.world.scene.floor.customers;
+    const [drinker] = game.world.floor.customers;
     expect(drinker?.drinkMsLeft).toBeGreaterThan(0);
     game.tick(SERVING.drinkMs + 100);
-    expect(game.world.scene.floor.customers.some((c) => c.id === drinker?.id)).toBe(false);
+    expect(game.world.floor.customers.some((c) => c.id === drinker?.id)).toBe(false);
   });
 });
 
@@ -78,13 +79,13 @@ describe('reputation levels in the real game', () => {
     const game = withReputation(40);
     game.tick(120_000);
     expect(game.state.recipesDiscovered).toEqual(['slime_sap', 'glowcap_stout']);
-    expect(game.world.scene.floor.customers.every((c) => game.state.recipesDiscovered.includes(c.recipeId))).toBe(true);
+    expect(game.world.floor.customers.every((c) => game.state.recipesDiscovered.includes(c.recipeId))).toBe(true);
   });
 
   it('announce a new level when serving pushes the reputation over the threshold', () => {
     const game = withReputation(9);
     const levelUps = vi.fn();
-    game.world.scene.bus.on('reputation:levelUp', levelUps);
+    game.world.bus.on('reputation:levelUp', levelUps);
     game.tick(4_000);
     playBasics(game);
     expect(levelUps).toHaveBeenCalledWith({ level: 2 });
@@ -96,7 +97,7 @@ describe('the VIP hint, played in the real game', () => {
     const game = withReputation(40);
     for (let t = 0; t < 1_200_000 && game.shown() === null; t += 1_000) game.tick(1_000);
     expect(game.shown()).toBe('vip_spot');
-    const vip = game.world.scene.floor.customers.find((c) => c.vip);
+    const vip = game.world.floor.customers.find((c) => c.vip);
     expect(vip?.recipeId).toBe('glowcap_stout');
     expect(resolveTarget('guide-vip', game.guide())).toBe(`customer:${vip?.id}`);
 
@@ -123,9 +124,9 @@ function afterLessons(gold: number, done: string[] = [...BASICS_LIKES, ...UPGRAD
 describe('staff in the real game', () => {
   it('a hired brewer and waitress earn gold while the player does nothing', () => {
     const game = afterLessons(10_000);
-    const { actions } = game.world.scene;
-    actions.buyUpgrade('brewer_assistant', 1);
-    actions.buyUpgrade('waitress', 1);
+    const w = game.world;
+    buyUpgradeById(w, 'brewer_assistant', 1);
+    buyUpgradeById(w, 'waitress', 1);
     const before = game.state.currencies.gold.toNumber();
     game.tick(300_000);
     expect(game.state.currencies.gold.toNumber()).toBeGreaterThan(before);
@@ -142,7 +143,7 @@ describe('staff in the real game', () => {
     const earned = (levels: number): number => {
       const game = afterLessons(1e9);
       for (const id of ['brewer_assistant', 'waitress']) {
-        for (let i = 0; i < levels; i++) game.world.scene.actions.buyUpgrade(id, 1);
+        for (let i = 0; i < levels; i++) buyUpgradeById(game.world, id, 1);
       }
       const start = game.state.currencies.gold.toNumber();
       game.tick(600_000);
@@ -157,7 +158,7 @@ describe('the staff hint, played in the real game', () => {
     const game = afterLessons(0);
     game.tick(60_000);
     expect(game.shown()).toBeNull();
-    expect(game.world.scene.floor.customers.length).toBeGreaterThan(1);
+    expect(game.world.floor.customers.length).toBeGreaterThan(1);
   });
 
   it('starts when the player can pay for a hire, points at the shop, then at the hire', () => {
@@ -166,13 +167,13 @@ describe('the staff hint, played in the real game', () => {
     expect(game.shown()).toBe('staff_hire');
     expect(resolveTarget('guide-staff', game.guide())).toBe('panel-button');
 
-    game.world.scene.actions.openShop();
+    game.world.bus.emit('shop:opened', {});
     expect(resolveTarget('guide-staff', game.guide())).toBe('upgrade:brewer_assistant');
-    game.world.scene.actions.closeShop();
+    game.world.bus.emit('shop:closed', {});
     expect(resolveTarget('guide-staff', game.guide())).toBe('panel-button');
 
-    game.world.scene.actions.openShop();
-    game.world.scene.actions.buyUpgrade('brewer_assistant', 1);
+    game.world.bus.emit('shop:opened', {});
+    buyUpgradeById(game.world, 'brewer_assistant', 1);
     expect(game.shown()).toBe('staff_done');
     game.tick(4_600);
     expect(game.shown()).toBeNull();

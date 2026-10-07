@@ -1,6 +1,7 @@
 import type { Scene, GameObjects } from 'phaser';
 import { DOOR_ENTRY, SEAT_SLOTS } from '@/app/layout';
-import type { SceneServices } from '@/app/tavern-scene';
+import type { World } from '@/app/world';
+import { clickCustomer } from '@/serving/serving';
 import { findCustomer, isWaiting } from '@/customers/customers';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
@@ -151,7 +152,7 @@ export interface CustomersLayer {
 
 interface LayerContext {
   scene: Scene;
-  services: SceneServices;
+  services: World;
   pool: Pool<CustomerSprite>;
   active: Map<number, CustomerSprite>;
   /** Removes the tutorial target of each customer who is seated. */
@@ -203,14 +204,14 @@ function refresh(ctx: LayerContext): void {
 }
 
 /** Shows the customers from the simulation: pooled sprites that walk in, wait and walk out. */
-export function createCustomersLayer(scene: Scene, services: SceneServices): CustomersLayer {
+export function createCustomersLayer(scene: Scene, services: World): CustomersLayer {
   const ctx: LayerContext = {
     scene,
     services,
     active: new Map(),
     unregister: new Map(),
     pool: createPool<CustomerSprite>({
-      create: () => createCustomerSprite(scene, services.actions.clickCustomer),
+      create: () => createCustomerSprite(scene, (id) => clickCustomer(services, id)),
       reset: (sprite) => sprite.container.setVisible(false),
     }),
   };

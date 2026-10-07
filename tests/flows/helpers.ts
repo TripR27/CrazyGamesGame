@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
-import { createServices } from '@/app/world';
+import { clickCustomer, clickReadyDrink } from '@/serving/serving';
+import { clickIngredient } from '@/brewing/brewing';
+import { createWorld } from '@/app/world';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { createSeededRng } from '@/shared/random';
 import { createInitialState, type GameState, createStore } from '@/shared/state';
@@ -15,7 +17,7 @@ export function withSeats(levels = 6): GameState {
 export function newGame(state: GameState = createInitialState(0)) {
   const bus = createEventBus<GameEvents>();
   const store = createStore(state);
-  const world = createServices({ store, bus, rng: createSeededRng(4) });
+  const world = createWorld({ store, bus, rng: createSeededRng(4) });
   const saves = vi.fn();
   bus.on('saveRequested', saves);
   const tick = (ms: number): void => {
@@ -28,11 +30,11 @@ export function newGame(state: GameState = createInitialState(0)) {
 
 // Plays the lesson the way the mascot asks: add what it points at, wait, pick the drink up, serve who it points at.
 export function playBasics(game: ReturnType<typeof newGame>): void {
-  const { actions } = game.world.scene;
-  for (let i = 0; i < 2; i++) actions.clickIngredient(nextIngredient(game.guide()) ?? '');
+  const w = game.world;
+  for (let i = 0; i < 2; i++) clickIngredient(w, nextIngredient(game.guide()) ?? '');
   game.tick(15_000);
-  actions.clickReadyDrink(readyDrinkSlot(game.guide()) ?? -1);
-  actions.clickCustomer(readyCustomerId(game.guide()) ?? -1);
+  clickReadyDrink(w, readyDrinkSlot(game.guide()) ?? -1);
+  clickCustomer(w, readyCustomerId(game.guide()) ?? -1);
 }
 
 // The preference lesson: wait for a customer who orders a drink they like (♥), brew it and serve them.

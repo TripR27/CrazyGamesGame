@@ -1,11 +1,10 @@
-import type { PlayerActions } from '@/app/actions';
+import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
 import { ingredientColor } from '@/brewing/brewing-view';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { type BookEntry, toBookView, type BookState } from '@/recipes/recipes';
 import type { Listener } from '@/shared/state';
-import type { TargetRegistry } from '@/shared/targets';
 import './recipe-book.css';
 
 const cssColor = (id: string): string => `#${ingredientColor(id).toString(16).padStart(6, '0')}`;
@@ -59,10 +58,9 @@ export interface BookHosts {
  */
 export function mountRecipeBook(
   { root, panels }: BookHosts,
-  source: BookSource,
-  actions: Pick<PlayerActions, 'openBook' | 'closeBook'>,
-  targets: TargetRegistry,
+  world: World,
 ): () => void {
+  const { store: source, targets } = world;
   const panel = createEl('div', 'book-panel');
   const progress = createEl('span', 'book-progress');
   const head = createEl('div', 'book-head');
@@ -80,7 +78,7 @@ export function mountRecipeBook(
     progress.textContent = view.progress;
     grid.replaceChildren(...view.entries.map(createBookCard));
   };
-  panels.add({ id: 'recipes', labelKey: 'book.tab', content: panel, onOpen: actions.openBook, onClose: actions.closeBook });
+  panels.add({ id: 'recipes', labelKey: 'book.tab', content: panel, onOpen: () => world.bus.emit('book:opened', {}), onClose: () => world.bus.emit('book:closed', {}) });
   render(source.getState());
   const unsubscribe = source.subscribe(render);
   const unregister = targets.register('book-panel', () => (panel.hidden ? null : domBounds(head, root)));

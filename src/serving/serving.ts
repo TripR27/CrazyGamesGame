@@ -1,3 +1,5 @@
+import type { World } from '@/app/world';
+import { getMultipliers } from '@/economy/upgrades';
 import { type BrewStation, SERVING } from '@/brewing/brewing';
 import type { CustomerDef } from '@/customers/customer-data';
 import { startDrinking, findCustomer, isWaiting, type CustomerCatalog, type CustomerFloor } from '@/customers/customers';
@@ -126,34 +128,30 @@ export function serveAndPublish(
   return outcome;
 }
 
-/** Handing out drinks: pick one from the bar and click a customer, or click the customer straight away. */
-export interface ServeActions {
-  /** Click a customer: they get the picked drink, or (with nothing picked) their own order if it is ready. */
-  clickCustomer(customerId: number): void;
-  /** Click the drink in this bar slot: pick it up, or put it back when it was already picked. */
-  clickReadyDrink(slot: number): void;
-  /** Put the picked drink back (a click on an empty spot). */
-  cancelSelection(): void;
+type ServeWorld = Pick<World, 'bus' | 'floor' | 'station' | 'store' | 'content' | 'rng'>;
+
+/** What serving needs from the world; the price multiplier is read at the moment of serving. */
+export function serveContext(world: ServeWorld): ServeDeps & { bus: EventBus<GameEvents> } {
+  const { bus, floor, station, store, content, rng } = world;
+  return { bus, floor, station, economy: store, catalog: content, rng, getSellMultiplier: () => getMultipliers(store.getState()).sellPrice };
 }
 
-export type ServeActionDeps = ServeDeps & { bus: EventBus<GameEvents>; selection: DrinkSelection };
+/** Click a customer: they get the picked drink, or (with nothing picked) their own order if it is ready. */
+export function clickCustomer(world: ServeWorld & Pick<World, 'selection'>, customerId: number): void {
+  const outcome = serveAndPublish(serveContext(world), customerId, world.selection.selected() ?? undefined);
+  // A refused drink stays picked, so the player can try the right customer next.
+  if (outcome.kind === 'served') world.selection.clear();
+}
 
-export function createServeActions(deps: ServeActionDeps): ServeActions {
-  const { bus, station, selection } = deps;
-  return {
-    clickCustomer(customerId) {
-      const outcome = serveAndPublish(deps, customerId, selection.selected() ?? undefined);
-      // A refused drink stays picked, so the player can try the right customer next.
-      if (outcome.kind === 'served') selection.clear();
-    },
-    clickReadyDrink(slot) {
-      const recipeId = station.ready[slot];
-      if (recipeId === undefined) return;
-      const picked = selection.toggle(recipeId);
-      if (picked !== null) bus.emit('drink:picked', { recipeId: picked });
-    },
-    cancelSelection() {
-      selection.clear();
-    },
-  };
+/** Click the drink in this bar slot: pick it up, or put it back when it was already picked. */
+export function clickReadyDrink({ bus, station, selection }: Pick<World, 'bus' | 'station' | 'selection'>, slot: number): void {
+  const recipeId = station.ready[slot];
+  if (recipeId === undefined) return;
+  const picked = selection.toggle(recipeId);
+  if (picked !== null) bus.emit('drink:picked', { recipeId: picked });
+}
+
+/** Put the picked drink back (a click on an empty spot). */
+export function cancelSelection({ selection }: Pick<World, 'selection'>): void {
+  selection.clear();
 }

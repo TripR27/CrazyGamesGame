@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { buyUpgradeById } from '@/economy/upgrades';
+import { buildRoomById, requestShop } from '@/rooms/rooms';
+import { buyIngredientById, shelfIds } from '@/brewing/ingredients';
 import { newGame, playBasics, playLikes } from './helpers';
 import { BREWING } from '@/brewing/brewing';
 import { num } from '@/shared/numbers';
@@ -32,9 +35,9 @@ describe('the ingredient hint, played in the real game', () => {
   it('points at the menu, the shop tab and the buy button, then at the new ingredient on the shelf', () => {
     const g = game(10, 40);
     expect(resolveTarget('guide-ingredient-buy', g.guide())).toBe('panel-button');
-    g.world.scene.actions.openShop();
+    g.world.bus.emit('shop:opened', {});
     expect(resolveTarget('guide-ingredient-buy', g.guide())).toBe('ingredient-buy:fire_pepper');
-    g.world.scene.actions.buyIngredient('fire_pepper');
+    buyIngredientById(g.world, 'fire_pepper');
     expect(g.shown()).toBe('ingredient_done');
     expect(resolveTarget('guide-new-ingredient', g.guide())).toBe('ingredient:fire_pepper');
     g.tick(5_600);
@@ -47,7 +50,7 @@ describe('ingredients in an older save', () => {
   it('keep a tier-2 recipe the player already knows brewable, without buying anything', () => {
     const state = createInitialState(0);
     state.recipesDiscovered = ['slime_sap', 'dragons_hiccup'];
-    expect(newGame(state).world.scene.getShelf()).toContain('fire_pepper');
+    expect(shelfIds(newGame(state).world)).toContain('fire_pepper');
   });
 });
 
@@ -65,10 +68,10 @@ function gameRooms(reputation: number, gold: number, seats = 0) {
 describe('rooms in the real gameRooms', () => {
   it('lets customers sit in a built room, upstairs, on top of the seats downstairs', () => {
     const g = gameRooms(40, 5000);
-    g.world.scene.actions.buildRoom('extension');
+    buildRoomById(g.world, 'extension');
     expect(g.state.roomsBuilt).toEqual(['extension']);
     g.tick(120_000);
-    const seats = g.world.scene.floor.customers.map((c) => c.seat);
+    const seats = g.world.floor.customers.map((c) => c.seat);
     expect(seats.length).toBeGreaterThan(1);
     expect(seats.every((s) => s === 0 || (s >= 7 && s <= 9))).toBe(true);
   });
@@ -76,8 +79,8 @@ describe('rooms in the real gameRooms', () => {
   it('asks for the shop when a boarded-up room is clicked', () => {
     const g = gameRooms(0, 0);
     const asked = vi.fn();
-    g.world.scene.bus.on('shop:requested', asked);
-    g.world.scene.actions.requestShop();
+    g.world.bus.on('shop:requested', asked);
+    requestShop(g.world);
     expect(asked).toHaveBeenCalledTimes(1);
   });
 });
@@ -89,9 +92,9 @@ describe('the room hint, played in the real gameRooms', () => {
     g.store.update((s) => void (s.currencies.gold = num(5000)));
     expect(g.shown()).toBe('room_buy');
     expect(resolveTarget('guide-room-buy', g.guide())).toBe('panel-button');
-    g.world.scene.actions.openShop();
+    g.world.bus.emit('shop:opened', {});
     expect(resolveTarget('guide-room-buy', g.guide())).toBe('room-buy:extension');
-    g.world.scene.actions.buildRoom('extension');
+    buildRoomById(g.world, 'extension');
     expect(g.shown()).toBe('room_done');
     expect(resolveTarget('guide-new-room', g.guide())).toBe('room:extension');
     g.tick(5_600);
@@ -113,7 +116,7 @@ describe('the upgrade hint, played in the real gameRooms', () => {
     const gameRooms = afterBasics(0);
     gameRooms.tick(60_000);
     expect(gameRooms.shown()).toBeNull();
-    expect(gameRooms.world.scene.floor.customers.length).toBeGreaterThan(1);
+    expect(gameRooms.world.floor.customers.length).toBeGreaterThan(1);
   });
 
   it('starts when the player earns enough, points at the shop, then at the buy button', () => {
@@ -126,13 +129,13 @@ describe('the upgrade hint, played in the real gameRooms', () => {
     expect(gameRooms.shown()).toBeNull();
     gameRooms.store.update((s) => void (s.currencies.gold = num(20)));
     expect(gameRooms.shown()).toBe('upgrade_open');
-    expect(gameRooms.world.scene.floor.customers.length).toBeLessThanOrEqual(1);
+    expect(gameRooms.world.floor.customers.length).toBeLessThanOrEqual(1);
 
-    gameRooms.world.scene.actions.openShop();
+    gameRooms.world.bus.emit('shop:opened', {});
     expect(gameRooms.shown()).toBe('upgrade_buy');
     expect(resolveTarget('guide-upgrade', gameRooms.guide())).toBe('upgrade:swift_cauldron');
 
-    gameRooms.world.scene.actions.buyUpgrade('swift_cauldron', 1);
+    buyUpgradeById(gameRooms.world, 'swift_cauldron', 1);
     expect(gameRooms.shown()).toBe('upgrade_done');
     gameRooms.tick(4_600);
     expect(gameRooms.shown()).toBeNull();
@@ -147,10 +150,10 @@ describe('the upgrade hint, played in the real gameRooms', () => {
 describe('upgrades in the real gameRooms', () => {
   it('speeds up the cauldron and grows the bar as soon as they are bought', () => {
     const gameRooms = afterBasics(10_000);
-    const { actions, station } = gameRooms.world.scene;
+    const w = gameRooms.world; const { station } = gameRooms.world;
     expect(station.capacity).toBe(BREWING.storageCapacity);
-    actions.buyUpgrade('bigger_bar', 'max');
-    for (let i = 0; i < 3; i++) actions.buyUpgrade('swift_cauldron', 1);
+    buyUpgradeById(w, 'bigger_bar', 'max');
+    for (let i = 0; i < 3; i++) buyUpgradeById(w, 'swift_cauldron', 1);
     expect(station.capacity).toBe(BREWING.storageCapacity + 2);
     expect(station.speed).toBeCloseTo(1.331);
   });
@@ -158,6 +161,6 @@ describe('upgrades in the real gameRooms', () => {
   it('applies bought levels from a loaded save', () => {
     const state = createInitialState(0);
     state.upgrades = { bigger_bar: 1 };
-    expect(newGame(state).world.scene.station.capacity).toBe(BREWING.storageCapacity + 1);
+    expect(newGame(state).world.station.capacity).toBe(BREWING.storageCapacity + 1);
   });
 });

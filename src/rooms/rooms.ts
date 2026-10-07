@@ -1,3 +1,4 @@
+import type { World } from '@/app/world';
 import type { UpgradeEffect } from '@/economy/upgrade-data';
 import type { OneTimePurchase } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
@@ -91,29 +92,21 @@ export function openSeats(plan: SeatPlan, bought: number, built: readonly string
   return [...downstairs, ...plan.rooms.filter((r) => built.includes(r.id)).flatMap((r) => roomSeatNumbers(plan, r.id))];
 }
 
-export interface RoomActions {
-  /** Build a room on the upper floor (one time); does nothing when it is locked, built or too expensive. */
-  buildRoom(roomId: string): void;
-  /** A boarded-up room was clicked: ask for the side panel on the Shop tab, where rooms are built. */
-  requestShop(): void;
+/** Build a room on the upper floor (one time); does nothing when it is locked, built or too expensive. */
+export function buildRoomById({ bus, store, content }: Pick<World, 'bus' | 'store' | 'content'>, id: string): void {
+  const def = content.rooms.find((r) => r.id === id);
+  if (def === undefined || !buildRoom(store, def)) return;
+  bus.emit('room:built', { id: def.id });
+  bus.emit('saveRequested', {});
 }
 
-export interface RoomActionDeps {
-  bus: EventBus<GameEvents>;
-  /** Left out: rooms cannot be built (tests that are not about rooms). */
-  rooms?: { store: RoomStore; defs: readonly RoomDef[] };
+/** A boarded-up room was clicked: ask for the side panel on the Shop tab, where rooms are built. */
+export function requestShop({ bus }: Pick<World, 'bus'>): void {
+  bus.emit('shop:requested', {});
 }
 
-export function createRoomActions({ bus, rooms }: RoomActionDeps): RoomActions {
-  return {
-    buildRoom(roomId) {
-      const def = rooms?.defs.find((r) => r.id === roomId);
-      if (rooms === undefined || def === undefined || !buildRoom(rooms.store, def)) return;
-      bus.emit('room:built', { id: def.id });
-      bus.emit('saveRequested', {});
-    },
-    requestShop() {
-      bus.emit('shop:requested', {});
-    },
-  };
+/** How a room stands (locked, for sale with its price, or built). Undefined for an unknown room. */
+export function roomOfferById({ store, content }: Pick<World, 'store' | 'content'>, roomId: string): OneTimeOffer | undefined {
+  const room = content.rooms.find((r) => r.id === roomId);
+  return room === undefined ? undefined : roomOffer(store.getState(), room);
 }

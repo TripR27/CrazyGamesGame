@@ -1,34 +1,14 @@
 import { Scene, AUTO, Game, Scale } from 'phaser';
-import type { PlayerActions } from '@/app/actions';
+import type { World } from '@/app/world';
 import { drawBar, drawCauldron, drawCustomerSlots, drawRoomShell, drawShelf, drawTables } from '@/app/backdrop-view';
-import type { BrewStation } from '@/brewing/brewing';
+import { clickCauldron, clickIngredient } from '@/brewing/brewing';
+import { shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import type { CustomerFloor } from '@/customers/customers';
 import { createCustomersLayer, type CustomersLayer } from '@/customers/customers-view';
 import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
-import type { DrinkSelection } from '@/serving/serving';
+import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
-import type { EventBus, GameEvents } from '@/shared/events';
-import type { OneTimeOffer } from '@/shared/purchases';
-import type { TargetRegistry } from '@/shared/targets';
-
-/** What the scenes may read and call. Handed in from the composition root (src/wiring). */
-export interface SceneServices {
-  bus: EventBus<GameEvents>;
-  floor: CustomerFloor;
-  station: BrewStation;
-  /** The drink the player picked from the bar (read only; picking goes through the actions). */
-  selection: Pick<DrinkSelection, 'selected'>;
-  /** The only way the scene changes the game: mouse clicks as actions. */
-  actions: PlayerActions;
-  /** Ingredient ids to show on the shelf; read again every frame so new ones appear. */
-  getShelf(): readonly string[];
-  /** How a room stands (locked, for sale with its price, or built); read every frame. Undefined for an unknown room. */
-  getRoomOffer(roomId: string): OneTimeOffer | undefined;
-  /** Scene objects the tutorial can point at register themselves here. */
-  targets: TargetRegistry;
-}
 
 export const BOOT_SCENE_KEY = 'boot';
 
@@ -57,12 +37,12 @@ interface Views {
 export class TavernScene extends Scene {
   private views?: Views;
 
-  constructor(private readonly services: SceneServices) {
+  constructor(private readonly world: World) {
     super(TAVERN_SCENE_KEY);
   }
 
   create(): void {
-    const { services } = this;
+    const { world } = this;
     const g = this.add.graphics();
     drawRoomShell(g);
     drawShelf(g);
@@ -71,23 +51,23 @@ export class TavernScene extends Scene {
     drawCauldron(g);
     drawCustomerSlots(g);
     // The rooms come first, so customers upstairs are drawn in front of them.
-    const rooms = createRoomsView(this, services);
+    const rooms = createRoomsView(this, world);
     this.views = {
       rooms,
-      shelf: createShelfView(this, services.getShelf, services.actions.clickIngredient, services.targets),
-      cauldron: createCauldronView(this, services.station, services.actions.clickCauldron, services.targets),
+      shelf: createShelfView(this, () => shelfIds(world), (id) => clickIngredient(world, id), world.targets),
+      cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
       ready: createReadyView(this, {
-        station: services.station,
-        selected: services.selection.selected,
-        onClick: services.actions.clickReadyDrink,
-        targets: services.targets,
+        station: world.station,
+        selected: world.selection.selected,
+        onClick: (slot) => clickReadyDrink(world, slot),
+        targets: world.targets,
       }),
-      customers: createCustomersLayer(this, services),
+      customers: createCustomersLayer(this, world),
     };
-    const stopFeedback = createFeedbackLayer(this, services);
+    const stopFeedback = createFeedbackLayer(this, world);
     // A click on an empty spot puts a picked-up drink back.
     this.input.on('pointerdown', (_pointer: unknown, over: readonly unknown[]) => {
-      if (over.length === 0) services.actions.cancelSelection();
+      if (over.length === 0) cancelSelection(world);
     });
     this.events.once('shutdown', () => {
       stopFeedback();
@@ -105,7 +85,7 @@ export class TavernScene extends Scene {
   }
 }
 
-export function createGame(parent: string, services: SceneServices): Game {
+export function createGame(parent: string, world: World): Game {
   return new Game({
     type: AUTO,
     parent,
@@ -113,6 +93,6 @@ export function createGame(parent: string, services: SceneServices): Game {
     height: GAME_HEIGHT,
     backgroundColor: BACKGROUND_COLOR,
     scale: { mode: Scale.FIT, autoCenter: Scale.CENTER_BOTH },
-    scene: [new BootScene(), new TavernScene(services)],
+    scene: [new BootScene(), new TavernScene(world)],
   });
 }

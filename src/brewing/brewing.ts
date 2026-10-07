@@ -1,3 +1,5 @@
+import type { World } from '@/app/world';
+import { discoverableNow } from '@/brewing/ingredients';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import type { BrewNotice, EventBus, GameEvents } from '@/shared/events';
 import { type Rng, feedbackKey } from '@/shared/random';
@@ -140,4 +142,17 @@ export function startBrewSystem(station: BrewStation, bus: EventBus<GameEvents>)
   return bus.on('tick', ({ deltaMs }) => {
     for (const event of advanceBrewing(station, deltaMs)) publishBrewEvent(bus, event);
   });
+}
+
+/** The player clicks an ingredient on the shelf. A finished recipe starts brewing at once. */
+export function clickIngredient(world: Pick<World, 'bus' | 'station' | 'rng' | 'store' | 'content'>, ingredientId: string): void {
+  const { bus, station, rng, store, content } = world;
+  bus.emit('ingredient:clicked', { id: ingredientId });
+  const known = content.recipes.filter((r) => store.getState().recipesDiscovered.includes(r.id));
+  for (const event of addIngredient(station, ingredientId, known, rng, discoverableNow(world))) publishBrewEvent(bus, event);
+}
+
+/** The player clicks the cauldron: throw away what is in it (not while brewing). */
+export function clickCauldron({ station }: Pick<World, 'station'>): void {
+  emptyCauldron(station);
 }

@@ -1,9 +1,7 @@
 import { createGame } from '@/app/tavern-scene';
 import { createSideLayout } from '@/app/ui-model';
 import { placeGame, mountUi } from '@/app/viewport-view';
-import { createServices } from '@/app/world';
-import { customers } from '@/customers/customer-data';
-import { toLevelUpView } from '@/reputation/reputation';
+import { createWorld } from '@/app/world';
 import { createLocalStorageAdapter, startAutosave, registerDebugCommands, startLoopDriver } from '@/shared/browser';
 import { debug, createEventBus, type GameEvents } from '@/shared/events';
 import { systemRng } from '@/shared/random';
@@ -20,7 +18,7 @@ const manager = createSaveManager<GameState>({
 const { state, status } = manager.load();
 const store = createStore(state);
 const bus = createEventBus<GameEvents>();
-const world = createServices({ store, bus, rng: systemRng, clock });
+const world = createWorld({ store, bus, rng: systemRng, clock });
 // Time the tab was throttled or the computer slept is counted with the offline formulas, not simulated.
 const ticker = createTicker({
   clock,
@@ -33,20 +31,11 @@ startLoopDriver(ticker);
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, store.getState());
 const layout = createSideLayout();
-const game = createGame('game', world.scene);
+const game = createGame('game', world);
 registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
-mountUi(document.getElementById('ui-root') as HTMLElement, {
-  source: store,
-  actions: world.scene.actions,
-  tutorial: world.tutorial,
-  targets: world.targets,
-  layout,
-  welcome: world.offline.inbox,
-  onLevelUp: (show) => bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, customers))),
-  onShopRequest: (open) => bus.on('shop:requested', open),
-  onFit: (fit) =>
-    placeGame(document.getElementById('game') as HTMLElement, fit, () => {
-      game.scale.getParentBounds();
-      game.scale.refresh();
-    }),
-});
+mountUi(document.getElementById('ui-root') as HTMLElement, world, layout, (fit) =>
+  placeGame(document.getElementById('game') as HTMLElement, fit, () => {
+    game.scale.getParentBounds();
+    game.scale.refresh();
+  }),
+);

@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { buyIngredientById, shelfIds } from '@/brewing/ingredients';
+import { buyUpgradeById } from '@/economy/upgrades';
+import { clickCauldron, clickIngredient } from '@/brewing/brewing';
 import { newGame } from './helpers';
 import { CUSTOMER_SLOTS } from '@/app/layout';
 import { SPAWNING } from '@/customers/customer-data';
@@ -24,36 +27,36 @@ describe('discovering recipes in the real game', () => {
   it('turns a new combination into a known recipe with a "Eureka!", and brews it', () => {
     const game = withReputation(10, [...EARLIER, 'book_open', 'book_read']);
     const discovered = vi.fn();
-    game.world.scene.bus.on('recipe:discovered', discovered);
-    game.world.scene.actions.clickIngredient('swamp_slime');
-    game.world.scene.actions.clickIngredient('glowcap');
+    game.world.bus.on('recipe:discovered', discovered);
+    clickIngredient(game.world, 'swamp_slime');
+    clickIngredient(game.world, 'glowcap');
     expect(discovered).toHaveBeenCalledWith({ recipeId: 'bog_lantern' });
     expect(game.state.recipesDiscovered).toContain('bog_lantern');
-    expect(game.world.scene.station.brewing?.recipeId).toBe('bog_lantern');
+    expect(game.world.station.brewing?.recipeId).toBe('bog_lantern');
   });
 
   it('puts a new ingredient on the shelf only once it is bought, and then its recipes can be discovered', () => {
     const game = withReputation(10, [...EARLIER, 'book_open', 'book_read']);
-    const { actions } = game.world.scene;
-    expect(game.world.scene.getShelf()).toEqual(['swamp_slime', 'wild_honey', 'glowcap']);
-    actions.clickIngredient('wild_honey');
-    actions.clickIngredient('fire_pepper'); // not on the shelf yet: Dragon's Hiccup cannot be discovered
+    const w = game.world;
+    expect(shelfIds(game.world)).toEqual(['swamp_slime', 'wild_honey', 'glowcap']);
+    clickIngredient(w, 'wild_honey');
+    clickIngredient(w, 'fire_pepper'); // not on the shelf yet: Dragon's Hiccup cannot be discovered
     expect(game.state.recipesDiscovered).not.toContain('dragons_hiccup');
-    actions.clickCauldron();
+    clickCauldron(w);
     game.store.update((s) => void (s.currencies.gold = num(100)));
-    actions.buyIngredient('fire_pepper');
-    expect(game.world.scene.getShelf()).toContain('fire_pepper');
+    buyIngredientById(w, 'fire_pepper');
+    expect(shelfIds(game.world)).toContain('fire_pepper');
     expect(game.state.currencies.gold.toNumber()).toBe(60);
-    actions.clickIngredient('fire_pepper');
-    actions.clickIngredient('wild_honey');
+    clickIngredient(w, 'fire_pepper');
+    clickIngredient(w, 'wild_honey');
     expect(game.state.recipesDiscovered).toContain('dragons_hiccup');
   });
 
   it('lets the same combination fizzle at the first level', () => {
     const game = withReputation(0);
-    game.world.scene.actions.clickIngredient('swamp_slime');
-    game.world.scene.actions.clickIngredient('glowcap');
-    expect(game.world.scene.station.brewing).toBeNull();
+    clickIngredient(game.world, 'swamp_slime');
+    clickIngredient(game.world, 'glowcap');
+    expect(game.world.station.brewing).toBeNull();
     expect(game.state.recipesDiscovered).not.toContain('bog_lantern');
   });
 });
@@ -65,10 +68,10 @@ describe('the recipe book hint, played in the real game', () => {
     game.store.update((s) => void (s.reputation = 10));
     expect(game.shown()).toBe('book_open');
     expect(resolveTarget('guide-book', game.guide())).toBe('panel-button');
-    game.world.scene.actions.openShop(); // the panel unfolds on the shop tab first
+    game.world.bus.emit('shop:opened', {}); // the panel unfolds on the shop tab first
     expect(resolveTarget('guide-book', game.guide())).toBe('tab:recipes');
-    game.world.scene.actions.closeShop();
-    game.world.scene.actions.openBook();
+    game.world.bus.emit('shop:closed', {});
+    game.world.bus.emit('book:opened', {});
     expect(game.shown()).toBe('book_read');
     game.tick(7_100);
     expect(game.shown()).toBeNull();
@@ -76,8 +79,8 @@ describe('the recipe book hint, played in the real game', () => {
 
   it('is not skipped, and does not skip earlier lessons, when the player opens the Recipes tab early', () => {
     const game = withReputation(0, ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold']);
-    game.world.scene.actions.openBook();
-    game.world.scene.actions.openShop();
+    game.world.bus.emit('book:opened', {});
+    game.world.bus.emit('shop:opened', {});
     expect(game.state.tutorial.completedSteps).toHaveLength(6);
   });
 
@@ -160,12 +163,12 @@ describe('seats', () => {
   it('start at one: a single customer, however long the player waits', () => {
     const game = afterLessons(0);
     game.tick(300_000);
-    expect(game.world.scene.floor.customers).toHaveLength(1);
+    expect(game.world.floor.customers).toHaveLength(1);
   });
 
   it('can be bought one by one, and every seat is one more customer at most', () => {
     const game = afterLessons(100_000);
-    const { actions, floor } = game.world.scene;
+    const w = game.world; const { floor } = game.world;
     let most = 0;
     const watch = (ms: number): number => {
       most = 0;
@@ -176,9 +179,9 @@ describe('seats', () => {
       return most;
     };
     expect(watch(300_000)).toBe(1);
-    actions.buyUpgrade('extra_seat', 1);
+    buyUpgradeById(w, 'extra_seat', 1);
     expect(watch(300_000)).toBe(2);
-    actions.buyUpgrade('extra_seat', 'max');
+    buyUpgradeById(w, 'extra_seat', 'max');
     const crowded = watch(600_000);
     expect(crowded).toBeGreaterThan(2);
     expect(crowded).toBeLessThanOrEqual(CUSTOMER_SLOTS.length);
@@ -189,14 +192,14 @@ describe('customers come gradually', () => {
   it('bring the first customer after a few seconds, not at once', () => {
     const game = afterLessons(0);
     game.tick(SPAWNING.firstDelayMs - 200);
-    expect(game.world.scene.floor.customers).toEqual([]);
+    expect(game.world.floor.customers).toEqual([]);
     game.tick(300);
-    expect(game.world.scene.floor.customers).toHaveLength(1);
+    expect(game.world.floor.customers).toHaveLength(1);
   });
 
   it('wait for the refill delay after a customer leaves, even in a tavern with a free seat', () => {
     const game = afterLessons(0);
-    const { floor } = game.world.scene;
+    const { floor } = game.world;
     game.tick(20_000); // the customer waits, so the timer sits at the refill delay
     expect(floor.customers).toHaveLength(1);
     floor.customers.length = 0; // the customer leaves
@@ -219,9 +222,9 @@ describe('the seat hint, played in the real game', () => {
     game.store.update((s) => void (s.currencies.gold = num(40)));
     expect(game.shown()).toBe('seats_buy');
     expect(resolveTarget('guide-seats', game.guide())).toBe('panel-button');
-    game.world.scene.actions.openShop();
+    game.world.bus.emit('shop:opened', {});
     expect(resolveTarget('guide-seats', game.guide())).toBe('upgrade:extra_seat');
-    game.world.scene.actions.buyUpgrade('extra_seat', 1);
+    buyUpgradeById(game.world, 'extra_seat', 1);
     expect(game.shown()).toBe('seats_done');
     game.tick(4_600);
     expect(game.shown()).toBeNull();
