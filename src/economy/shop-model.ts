@@ -1,7 +1,7 @@
 import { type DecorDef, decorOffer, type DecorState } from '@/decor/decor';
 import { type IngredientDef, ingredientOffer, type IngredientCatalog, type IngredientShopState } from '@/brewing/ingredients';
-import type { UpgradeDef, UpgradeEffect } from '@/economy/upgrade-data';
-import { quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
+import type { UpgradeDef, UpgradeEffect, UpgradeStat } from '@/economy/upgrade-data';
+import { isUnlocked, quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { type RoomDef, roomOffer, type RoomState } from '@/rooms/rooms';
@@ -19,10 +19,18 @@ export interface RowView {
   maxed: boolean;
 }
 
-/** The effect of one level as the player reads it: "+10%" for factors, "+1" for added amounts. */
+/** Stats that are a share (0 to 1): an added amount reads as a percentage too. */
+const SHARE_STATS: readonly UpgradeStat[] = ['offlineShare'];
+
+/** The effect of one level as the player reads it: "+10%" for factors and shares, "+1" for added amounts. */
 export function effectAmount(effect: UpgradeEffect): string {
-  return effect.mode === 'multiply' ? `+${Math.round(effect.perLevel * 100)}%` : `+${effect.perLevel}`;
+  const percent = effect.mode === 'multiply' || SHARE_STATS.includes(effect.stat);
+  return percent ? `+${Math.round(effect.perLevel * 100)}%` : `+${effect.perLevel}`;
 }
+
+/** An upgrade is in the shop once it is unlocked; a one-time one (max level 1) leaves it once bought. */
+export const isUpgradeListed = (def: UpgradeDef, state: UpgradeState): boolean =>
+  isUnlocked(state.upgrades, def) && !(def.maxLevel === 1 && levelOf(state.upgrades, def) >= 1);
 
 export function toRowView(def: UpgradeDef, state: UpgradeState, amount: BuyAmount): RowView {
   const level = levelOf(state.upgrades, def);

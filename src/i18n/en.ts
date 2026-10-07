@@ -198,6 +198,7 @@ export const shop: Messages = {
   'shop.kind_cauldron': 'Cauldron',
   'shop.kind_tavern': 'Tavern',
   'shop.kind_staff': 'Staff',
+  'shop.kind_night': 'Night Shift',
   'shop.level': 'Level {level}',
   'shop.level_max': 'Level {level} (max)',
   'shop.buy': 'Buy {count}x',
@@ -228,7 +229,7 @@ export const tutorial: Messages = {
   'tutorial.ingredient_buy.text': 'Fresh stock! {shopIngredient} is for sale in the Shop tab. Buy it once and it stays on the shelf for good.',
   'tutorial.ingredient_done.text': 'There it is, on the shelf. The recipe book knows what to throw in with it. I am ready. Probably.',
   'tutorial.staff_hire.text': 'Tired of doing everything yourself? Hire {staff} in the Shop tab. They work while you complain.',
-  'tutorial.staff_done.text': 'Hired! They are slower than you, but they never ask for a break. They even keep working when you close the tab.',
+  'tutorial.staff_done.text': 'Hired! Slower than you, but they never ask for a break. Buy Night Shift in the Shop tab and they even work while you are away.',
   'tutorial.vip_spot.text': 'A VIP! Royalty wants {royal}, the fanciest thing we make. Pays triple, waits for nobody.',
   'tutorial.vip_done.text': 'Ka-ching. Keep the crown happy and the crown keeps paying.',
   'tutorial.room_buy.text': 'This shack has an upstairs? Build the {room} in the Shop tab. More room, more customers, more chaos.',
@@ -252,6 +253,12 @@ export const upgrades: Messages = {
   'upgrades.waitress.name': 'Waitress',
   'upgrades.waitress.description': 'Serves ready drinks to the right customer. Each level adds {amount} serves per second. Tips not included.',
   'upgrades.bigger_bar.description': '{amount} drink fits on the bar per level. Cheers to shelf space.',
+  'upgrades.night_shift.name': 'Night Shift',
+  'upgrades.night_shift.description': 'Staff keep working while you are away, just a bit slower. Someone has to mop at 3 AM.',
+  'upgrades.night_owls.name': 'Night Owls',
+  'upgrades.night_owls.description': 'While you are away, staff work {amount} harder per level. Coffee helps.',
+  'upgrades.long_night.name': 'Long Night',
+  'upgrades.long_night.description': 'Staff keep working {amount} hour longer while you are away, per level. Sleep is overrated.',
 };
 
 export const welcome: Messages = {
@@ -260,7 +267,9 @@ export const welcome: Messages = {
   'welcome.served': 'Customers served: {served}',
   'welcome.gold': 'Gold earned: {gold}',
   'welcome.nobody':
-    'Nobody was working while you were away. Hire a brewer and a waitress and they keep the tavern running for you.',
+    'Nobody was working while you were away. Hire a brewer and a waitress, then buy Night Shift, and they keep the tavern running for you.',
+  'welcome.missed': 'Your staff went home. With Night Shift they could have earned {gold} gold.',
+  'welcome.night_shift': 'Buy Night Shift in the shop and they keep working while you are away.',
   'welcome.capped': 'Staff stop working after {limit} away.',
   'welcome.collect': 'Great!',
   'time.hours': '{n}h',

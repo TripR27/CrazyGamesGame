@@ -2,7 +2,7 @@ import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
 import { DECORATIONS, buyDecorById, decorOffer, type DecorState } from '@/decor/decor';
 import { buyIngredientById, ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
-import { type RowView, isIngredientListed, toDecorRowView, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
+import { type RowView, isIngredientListed, isUpgradeListed, toDecorRowView, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, type BuyAmount, type UpgradeState } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
@@ -181,7 +181,7 @@ export interface TargetParts {
 /** Each buy button (while the shop tab is on screen) is something the tutorial can point at. */
 export function registerTargets(targets: TargetRegistry, { root, panel, rows }: TargetParts): () => void {
   const removers = rows.map(({ def, row }) =>
-    targets.register(`upgrade:${def.id}`, () => (panel.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy)),
+    targets.register(`upgrade:${def.id}`, () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy)),
   );
   return () => removers.forEach((remove) => remove());
 }
@@ -212,21 +212,30 @@ export function mountShop(
   });
 
   const renderOneTime = mountOneTimeGroups({ list, root, panel, world });
-  let kind = '';
+  const headings = new Map<string, HTMLElement>();
   const rows = upgrades.map((def) => {
     const row = createUpgradeRow(() => buyUpgradeById(world, def.id, amount));
     // A small heading above the first upgrade of each kind (the list is ordered by kind).
-    if (def.kind !== kind) list.append(createEl('h3', 'shop-kind', t(`shop.kind_${def.kind}`)));
-    kind = def.kind;
+    if (!headings.has(def.kind)) {
+      const heading = createEl('h3', 'shop-kind', t(`shop.kind_${def.kind}`));
+      headings.set(def.kind, heading);
+      list.append(heading);
+    }
     list.append(row.el);
     return { def, row };
   });
   const unregister = registerTargets(targets, { root, panel, rows });
 
   function render(): void {
+    const state = source.getState();
     picker.select(amount);
-    renderOneTime(source.getState());
-    for (const { def, row } of rows) row.update(toRowView(def, source.getState(), amount));
+    renderOneTime(state);
+    for (const { def, row } of rows) {
+      // Locked upgrades (Night Shift before the first staff member) and bought one-time ones are not listed.
+      row.el.hidden = !isUpgradeListed(def, state);
+      if (!row.el.hidden) row.update(toRowView(def, state, amount));
+    }
+    for (const [kind, heading] of headings) heading.hidden = rows.every(({ def, row }) => def.kind !== kind || row.el.hidden);
   }
   panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: () => world.bus.emit('shop:opened', {}), onClose: () => world.bus.emit('shop:closed', {}) });
   const unsubscribe = source.subscribe(render);

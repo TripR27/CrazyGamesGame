@@ -1,5 +1,6 @@
 import { type CustomerDef, VIP_SPAWN } from '@/customers/customer-data';
 import { priciestRecipe, meanSpawnIntervalMs, type CustomerCatalog } from '@/customers/customers';
+import { NIGHT_SHIFT_SHARE } from '@/economy/upgrade-data';
 import { getMultipliers } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { type RecipeDef, recipes } from '@/recipes/recipe-data';
@@ -11,10 +12,8 @@ import { type Num, num, ZERO, formatNumber } from '@/shared/numbers';
 import { touchLastSeen, type GameState, type Store } from '@/shared/state';
 import type { Clock } from '@/shared/time';
 
-/** Placeholder numbers for progress while the player is away; tuned in step 13. */
+/** Placeholder numbers for progress while the player is away. The share of the staff's pace is the stat `offlineShare`. */
 export const OFFLINE = {
-  /** Share of the staff's normal pace that counts while away: being there should pay a little better. */
-  efficiency: 0.5,
   /** Gaps shorter than this are counted without showing the welcome-back window (a quick reload, a tab switch). */
   minWelcomeMs: 60_000,
 } as const;
@@ -33,6 +32,8 @@ export interface OfflineReport {
   served: number;
   gold: Num;
   reputation: number;
+  /** Without Night Shift: the gold a full crew could have earned with it (zero otherwise). */
+  missed: Num;
 }
 
 /** What one served drink brings on average: gold (tips counted by their chance) and reputation. */
@@ -98,6 +99,8 @@ export interface OfflineInput {
   rates: { brew: number; serve: number };
   /** How long staff keep working while away, in hours. */
   limitHours: number;
+  /** Share of the staff's pace that counts while away (`offlineShare`): 0 without Night Shift. */
+  share: number;
   reputation: number;
   knownRecipes: readonly RecipeDef[];
   customerTypes: readonly CustomerDef[];
@@ -109,7 +112,7 @@ export interface OfflineInput {
 /**
  * What the staff earned while the player was away, worked out with a formula (never by simulating ticks).
  * Drinks per second are limited by the slowest link: brewing, serving or the customers coming in.
- * Only a share of that pace counts (`OFFLINE.efficiency`), and only up to the offline limit.
+ * Only a share of that pace counts (`share`), and only up to the offline limit.
  */
 export function computeOffline(input: OfflineInput): OfflineReport {
   const awayMs = Math.max(0, input.awayMs);
@@ -119,7 +122,7 @@ export function computeOffline(input: OfflineInput): OfflineReport {
 
   const customersPerSecond = 1000 / meanSpawnIntervalMs(input.reputation);
   const drinksPerSecond = Math.min(input.rates.brew, input.rates.serve, customersPerSecond);
-  const served = hadStaff ? Math.floor((countedMs / 1000) * drinksPerSecond * OFFLINE.efficiency) : 0;
+  const served = hadStaff ? Math.floor((countedMs / 1000) * drinksPerSecond * Math.max(0, input.share)) : 0;
   const reward = averageReward(input.knownRecipes, input.customerTypes, input.reputation, input.sellMultiplier, input.vipChance);
 
   return {
@@ -131,7 +134,18 @@ export function computeOffline(input: OfflineInput): OfflineReport {
     served,
     gold: reward.gold.mul(served).round(),
     reputation: Math.floor(served * reward.reputation),
+    missed: ZERO,
   };
+}
+
+/**
+ * The offline report for this input; without Night Shift (no share) it also says what a full crew could have
+ * earned with it, so the welcome-back window can point at the shop.
+ */
+export function offlineWithMissed(input: OfflineInput): OfflineReport {
+  const report = computeOffline(input);
+  if (input.share > 0 || !report.hadStaff) return report;
+  return { ...report, missed: computeOffline({ ...input, share: NIGHT_SHIFT_SHARE }).gold };
 }
 
 /** The part of the game state offline earnings change (interface segregation). */
@@ -206,6 +220,12 @@ export interface WelcomeView {
   button: string;
 }
 
+/** Why nothing was earned: no full crew yet, or a crew without Night Shift (with what it missed). */
+function idleLines(report: OfflineReport): string[] {
+  if (!report.hadStaff) return [t('welcome.nobody')];
+  return [t('welcome.missed', { gold: formatNumber(report.missed) }), t('welcome.night_shift')];
+}
+
 /** The welcome-back window as plain strings: what was earned, or why nothing was. */
 export function toWelcomeView(report: OfflineReport): WelcomeView {
   const earned = report.served > 0;
@@ -216,8 +236,8 @@ export function toWelcomeView(report: OfflineReport): WelcomeView {
           t('welcome.served', { served: report.served }),
           t('welcome.gold', { gold: formatNumber(report.gold) }),
         ]
-      : [t('welcome.nobody')]),
-    ...(report.capped && report.hadStaff ? [t('welcome.capped', { limit: formatDuration(report.countedMs) })] : []),
+      : idleLines(report)),
+    ...(report.capped && earned ? [t('welcome.capped', { limit: formatDuration(report.countedMs) })] : []),
   ];
   return { title: t('welcome.title'), lines, button: t('welcome.collect') };
 }
@@ -244,10 +264,11 @@ export function createOffline({ store, bus, clock, catalog }: OfflineDeps): Offl
       if (awayMs <= 0) return;
       const state = store.getState();
       const stats = getMultipliers(state);
-      const report = computeOffline({
+      const report = offlineWithMissed({
         awayMs,
         rates: { brew: stats.autoBrew.toNumber(), serve: stats.autoServe.toNumber() },
         limitHours: stats.offlineHours.toNumber(),
+        share: stats.offlineShare.toNumber(),
         reputation: state.reputation,
         knownRecipes: recipes.filter((r) => state.recipesDiscovered.includes(r.id)),
         customerTypes: catalog.customerTypes,
