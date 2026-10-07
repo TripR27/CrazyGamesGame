@@ -1,6 +1,6 @@
 import { SPAWNING } from '@/data/customers/spawning';
 import type { CustomerDef } from '@/data/customers/types';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { createSeededRng } from '@/shared/random';
 import { createFloor } from '@/systems/customers/floor';
 import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';

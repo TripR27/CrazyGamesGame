@@ -1,5 +1,5 @@
 import type { Scene } from 'phaser';
-import { recipes } from '@/data/recipes/index';
+import { recipes } from '@/recipes/recipe-data';
 import { shakeNo, showDrinking } from '@/scene/customers/customer-reactions';
 import { createCustomerSprite, type CustomerSprite } from '@/scene/customers/customer-sprite';
 import { orderLabel } from '@/scene/customers/order-label';

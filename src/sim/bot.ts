@@ -1,5 +1,4 @@
-import { recipes } from '@/data/recipes/index';
-import type { RecipeDef } from '@/data/recipes/types';
+import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import type { GameState, Store } from '@/shared/state';
 import { shopOnce } from '@/sim/shopping';
 import { waitingCustomers } from '@/systems/customers/floor';

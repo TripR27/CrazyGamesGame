@@ -1,5 +1,6 @@
 import { customers } from '@/data/customers/index';
 import { createGame } from '@/game';
+import { toLevelUpView } from '@/reputation/reputation';
 import { createLocalStorageAdapter, startAutosave, registerDebugCommands, startLoopDriver } from '@/shared/browser';
 import { debug, createEventBus, type GameEvents } from '@/shared/events';
 import { systemRng } from '@/shared/random';
@@ -7,7 +8,6 @@ import { createSaveManager } from '@/shared/save';
 import { createInitialState, type GameState, createStore } from '@/shared/state';
 import { systemClock, createTicker } from '@/shared/time';
 import { placeGame } from '@/ui/game-viewport';
-import { toLevelUpView } from '@/ui/level-up/level-up-view-model';
 import { mountUi } from '@/ui/mount';
 import { createSideLayout } from '@/ui/side-layout';
 import { createServices } from '@/wiring/create-services';

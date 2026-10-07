@@ -1,4 +1,4 @@
-import type { Effect } from '@/data/common';
+import type { Effect } from '@/shared/content';
 
 export type CustomerId = string;
 

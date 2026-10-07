@@ -1,15 +1,14 @@
-import { recipes } from '@/data/recipes/index';
-import { ROOMS } from '@/data/rooms/index';
 import { TUTORIAL_STEPS } from '@/data/tutorial/index';
 import type { TutorialEvent } from '@/data/tutorial/types';
 import { upgrades } from '@/data/upgrades/index';
+import { recipes } from '@/recipes/recipe-data';
+import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { GameState, Store } from '@/shared/state';
 import type { BrewStation } from '@/systems/brewing/types';
 import { waitingCustomers } from '@/systems/customers/floor';
 import type { CustomerFloor } from '@/systems/customers/types';
 import { firstBuyableIngredient, type IngredientCatalog } from '@/systems/ingredients/offer';
-import { firstBuildableRoom } from '@/systems/rooms/offer';
 import type { GuideContext } from '@/systems/tutorial/guide';
 import { createTutorialMachine } from '@/systems/tutorial/machine';
 import type { ProgressStore, TutorialMachine } from '@/systems/tutorial/types';

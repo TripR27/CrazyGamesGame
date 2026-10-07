@@ -1,5 +1,5 @@
-import type { Effect } from '@/data/common';
 import { t } from '@/i18n/index';
+import type { Effect } from '@/shared/content';
 
 /** The icon of a drink effect (an emoji placeholder until the art pass). */
 export const effectIcon = (effect: Effect): string => t(`effects.${effect}.icon`);

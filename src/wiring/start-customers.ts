@@ -1,10 +1,10 @@
+import { openSeats, type SeatPlan } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';
 import { startCustomerSystem } from '@/systems/customers/system';
 import type { CustomerCatalog, CustomerFloor } from '@/systems/customers/types';
 import { getMultipliers } from '@/systems/economy/multipliers';
-import { openSeats, type SeatPlan } from '@/systems/rooms/seats';
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
 

@@ -1,6 +1,6 @@
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
 import { withEffectIcon } from '@/scene/effects/effect-text';
+import { textKey } from '@/shared/content';
 import { guideRecipe, likedCustomer, nextIngredient, vipCustomer, type GuideContext } from '@/systems/tutorial/guide';
 
 const name = (domain: 'recipes' | 'ingredients' | 'upgrades', id: string | undefined): string =>

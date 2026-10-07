@@ -1,5 +1,5 @@
-import type { ReputationLevel } from '@/data/reputation/levels';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import type { ReputationLevel } from '@/reputation/reputation';
 
 /** Levels need a name, must start at 0 and climb, and may only unlock recipes that exist. */
 export const reputationTable = (items: readonly ReputationLevel[]): ContentTable =>

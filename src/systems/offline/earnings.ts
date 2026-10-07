@@ -1,12 +1,12 @@
 import { SERVING } from '@/data/brewing';
 import type { CustomerDef } from '@/data/customers/types';
 import { VIP_SPAWN } from '@/data/customers/vip';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
+import { levelFor } from '@/reputation/reputation';
 import { num, ZERO, type Num } from '@/shared/numbers';
 import { priciestRecipe } from '@/systems/customers/pick-type';
 import { drinkBonus, orderWeight } from '@/systems/effects/bonus';
 import { tipSize } from '@/systems/effects/tip';
-import { levelFor } from '@/systems/reputation/level';
 import { computePayout } from '@/systems/serving/payout';
 
 /** What one served drink brings on average: gold (tips counted by their chance) and reputation. */

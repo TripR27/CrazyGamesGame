@@ -1,10 +1,9 @@
-import { ROOMS } from '@/data/rooms/index';
 import { upgrades } from '@/data/upgrades/index';
+import { ROOMS, watchRoomShop } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { GameState, Store } from '@/shared/state';
 import type { IngredientCatalog } from '@/systems/ingredients/offer';
 import { watchIngredientShop } from '@/systems/ingredients/watch';
-import { watchRoomShop } from '@/systems/rooms/offer';
 import { watchAffordable } from '@/systems/upgrades/affordable';
 import { generalOnly, seatsOnly, staffOnly } from '@/systems/upgrades/groups';
 

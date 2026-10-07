@@ -1,5 +1,5 @@
 import { OFFLINE } from '@/data/offline';
-import { recipes } from '@/data/recipes/index';
+import { recipes } from '@/recipes/recipe-data';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { touchLastSeen, type GameState, type Store } from '@/shared/state';
 import type { Clock } from '@/shared/time';

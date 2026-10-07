@@ -1,4 +1,4 @@
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import type { Rng } from '@/shared/random';
 import { addIngredient } from '@/systems/brewing/add-ingredient';
 import type { BrewEvent, BrewStation } from '@/systems/brewing/types';

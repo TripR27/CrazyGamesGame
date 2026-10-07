@@ -1,4 +1,4 @@
-import { recipes } from '@/data/recipes/index';
+import { recipes } from '@/recipes/recipe-data';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';

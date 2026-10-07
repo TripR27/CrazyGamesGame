@@ -1,11 +1,11 @@
-import { EFFECTS, RARITIES } from '@/data/common';
 import type { CustomerDef } from '@/data/customers/types';
-import type { FeedbackPool } from '@/data/feedback';
-import type { RecipeDef } from '@/data/recipes/types';
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import type { UpgradeDef } from '@/data/upgrades/types';
 import { duplicates, isTier, oneOf, positive, tierRule } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import type { RecipeDef } from '@/recipes/recipe-data';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import { EFFECTS, RARITIES } from '@/shared/content';
+import type { FeedbackPool } from '@/shared/random';
 
 const comboKey = (ids: readonly string[]): string => [...ids].sort().join('+');
 const isSubset = (small: readonly string[], big: readonly string[]): boolean =>

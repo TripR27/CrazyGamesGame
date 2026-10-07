@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ingredients } from '@/data/ingredients/index';
-import { recipes } from '@/data/recipes/index';
+import { recipes } from '@/recipes/recipe-data';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { num } from '@/shared/numbers';
 import { createStore } from '@/shared/state';

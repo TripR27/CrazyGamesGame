@@ -1,4 +1,4 @@
-import type { ContentDomain } from '@/data/text-key';
+import type { ContentDomain } from '@/shared/content';
 
 export interface CheckContext {
   /** True when `id` exists in the given content domain. */

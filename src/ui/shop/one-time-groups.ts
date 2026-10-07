@@ -1,10 +1,9 @@
 import { ingredients } from '@/data/ingredients/index';
-import { recipes } from '@/data/recipes/index';
-import { ROOMS } from '@/data/rooms/index';
+import { recipes } from '@/recipes/recipe-data';
+import { ROOMS, roomOffer, type RoomState } from '@/rooms/rooms';
 import type { TargetRegistry } from '@/shared/targets';
 import type { PlayerActions } from '@/systems/actions/player-actions';
 import { shopIngredients, type IngredientShopState } from '@/systems/ingredients/offer';
-import { roomOffer, type RoomState } from '@/systems/rooms/offer';
 import { isListed as ingredientListed, toIngredientRowView } from '@/ui/shop/ingredient-view-model';
 import { mountOneTimeSection } from '@/ui/shop/one-time-section';
 import { isListed } from '@/ui/shop/one-time-view-model';

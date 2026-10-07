@@ -1,9 +1,9 @@
 import type { EventBus, GameEvents } from '@/shared/events';
+import type { OneTimeOffer } from '@/shared/purchases';
 import type { TargetRegistry } from '@/shared/targets';
 import type { PlayerActions } from '@/systems/actions/player-actions';
 import type { BrewStation } from '@/systems/brewing/types';
 import type { CustomerFloor } from '@/systems/customers/types';
-import type { OneTimeOffer } from '@/systems/purchases/one-time';
 import type { DrinkSelection } from '@/systems/serving/selection';
 
 /** What the scenes may read and call. Handed in from the composition root (src/wiring). */

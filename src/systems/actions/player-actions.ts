@@ -1,10 +1,10 @@
-import type { RecipeDef } from '@/data/recipes/types';
 import type { UpgradeDef } from '@/data/upgrades/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
+import { createRoomActions, type RoomActionDeps, type RoomActions } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Num } from '@/shared/numbers';
 import type { Rng } from '@/shared/random';
 import { createIngredientActions, type IngredientActionDeps, type IngredientActions } from '@/systems/actions/ingredient-actions';
-import { createRoomActions, type RoomActionDeps, type RoomActions } from '@/systems/actions/room-actions';
 import { createServeActions, type ServeActions } from '@/systems/actions/serve-actions';
 import { addIngredient } from '@/systems/brewing/add-ingredient';
 import { emptyCauldron } from '@/systems/brewing/station';

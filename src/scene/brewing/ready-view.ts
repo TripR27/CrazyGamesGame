@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from 'phaser';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
 import { READY_SLOTS } from '@/scene/layout';
+import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
 import type { BrewStation } from '@/systems/brewing/types';
 

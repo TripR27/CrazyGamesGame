@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { RoomDef } from '@/data/rooms/types';
 import { validateContent } from '@/data/validate/index';
 import { roomTable } from '@/data/validate/room-table';
+import type { RoomDef } from '@/rooms/rooms';
 
 const room = (over: Partial<RoomDef> = {}): RoomDef => ({ id: 'r', buy: { level: 2, cost: 10 }, seats: 1, effects: [], ...over });
 const problems = (r: RoomDef): string[] => validateContent(() => true, [roomTable([r])]);

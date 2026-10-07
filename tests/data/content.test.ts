@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { EFFECTS } from '@/data/common';
 import { customers } from '@/data/customers/index';
 import { ingredients } from '@/data/ingredients/index';
-import { recipes } from '@/data/recipes/index';
-import { STARTER_RECIPE_IDS } from '@/data/recipes/starters';
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { validateContent } from '@/data/validate/index';
 import { hasKey } from '@/i18n/index';
+import { recipes, STARTER_RECIPE_IDS } from '@/recipes/recipe-data';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import { EFFECTS } from '@/shared/content';
 
 describe('game content', () => {
   it('passes validation with the English translations', () => {

@@ -1,8 +1,8 @@
-import { RARITIES } from '@/data/common';
 import type { IngredientDef } from '@/data/ingredients/types';
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
 import { isTier, oneOf, positive, tierRule } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import { RARITIES } from '@/shared/content';
 
 const SOURCE_PATTERN = /^(shop|dungeon:[a-z][a-z0-9_]*)$/;
 

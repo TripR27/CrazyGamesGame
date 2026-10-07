@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Effect } from '@/data/common';
 import { EFFECT_POWER, LIKED_ORDER_WEIGHT } from '@/data/effects';
+import type { Effect } from '@/shared/content';
 import { num } from '@/shared/numbers';
 import { createSeededRng, pickWeighted } from '@/shared/random';
 import { drinkBonus, isLiked, orderWeight } from '@/systems/effects/bonus';

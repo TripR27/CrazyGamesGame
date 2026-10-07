@@ -1,4 +1,4 @@
-import { STARTER_RECIPE_IDS } from '@/data/recipes/starters';
+import { STARTER_RECIPE_IDS } from '@/recipes/recipe-data';
 import { num, type Num } from '@/shared/numbers';
 
 export interface MetaState {

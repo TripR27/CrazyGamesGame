@@ -1,8 +1,8 @@
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
-import type { RoomDef } from '@/data/rooms/types';
 import { UPGRADE_STATS } from '@/data/upgrades/types';
 import { isTier, oneOf, positive } from '@/data/validate/rules';
 import { defineTable, type ContentTable } from '@/data/validate/table';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import type { RoomDef } from '@/rooms/rooms';
 
 /** Rooms open at a level after the first, cost gold, have a whole number of seats and bonuses on known stats. */
 export const roomTable = (items: readonly RoomDef[]): ContentTable =>

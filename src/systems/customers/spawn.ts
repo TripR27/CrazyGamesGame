@@ -1,9 +1,9 @@
+import { levelFor } from '@/reputation/reputation';
 import { pickRandom, type Rng } from '@/shared/random';
 import { freeSeats } from '@/systems/customers/floor';
 import { pickCustomerType, pickOrder } from '@/systems/customers/pick-type';
 import type { CustomerCatalog, CustomerChange, CustomerContext, CustomerFloor } from '@/systems/customers/types';
 import { isLiked } from '@/systems/effects/bonus';
-import { levelFor } from '@/systems/reputation/level';
 
 /**
  * Seat one new customer if there is a free seat, a customer type the reputation level allows,

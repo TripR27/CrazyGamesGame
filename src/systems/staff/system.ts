@@ -1,5 +1,5 @@
 import { BREWING } from '@/data/brewing';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import { emptyCauldron } from '@/systems/brewing/station';

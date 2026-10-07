@@ -1,6 +1,6 @@
-import type { Effect } from '@/data/common';
 import { t } from '@/i18n/index';
 import { withEffectIcon } from '@/scene/effects/effect-text';
+import type { Effect } from '@/shared/content';
 import { formatNumber, type Num } from '@/shared/numbers';
 
 export const GOLD_COLOR = '#f5c542';

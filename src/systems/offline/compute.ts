@@ -1,6 +1,6 @@
 import type { CustomerDef } from '@/data/customers/types';
 import { OFFLINE } from '@/data/offline';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import type { Num } from '@/shared/numbers';
 import { meanSpawnIntervalMs } from '@/systems/customers/spawn-timing';
 import { averageReward } from '@/systems/offline/earnings';

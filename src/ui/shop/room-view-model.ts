@@ -1,7 +1,6 @@
-import type { RoomDef } from '@/data/rooms/types';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
-import { roomOffer, type RoomState } from '@/systems/rooms/offer';
+import { type RoomDef, roomOffer, type RoomState } from '@/rooms/rooms';
+import { textKey } from '@/shared/content';
 import { toOneTimeRowView } from '@/ui/shop/one-time-view-model';
 import { effectAmount, type RowView } from '@/ui/shop/shop-view-model';
 

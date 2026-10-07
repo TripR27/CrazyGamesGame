@@ -1,5 +1,5 @@
 import type { CustomerDef } from '@/data/customers/types';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { num, ONE, type Num } from '@/shared/numbers';
 import { drinkBonus } from '@/systems/effects/bonus';
 

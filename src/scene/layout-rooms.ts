@@ -1,4 +1,4 @@
-import { ROOMS } from '@/data/rooms/index';
+import { ROOMS } from '@/rooms/rooms';
 import { CUSTOMER_SLOTS, type Point, type Rect } from '@/scene/layout';
 
 /** The floor of the upper storey (where customers in a room stand) and its beam. */

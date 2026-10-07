@@ -1,10 +1,9 @@
 import { ingredients } from '@/data/ingredients/index';
-import { recipes } from '@/data/recipes/index';
-import type { RecipeDef } from '@/data/recipes/types';
+import { recipes, type RecipeDef } from '@/recipes/recipe-data';
+import { discoverableRecipes } from '@/recipes/recipes';
 import type { GameState, Store } from '@/shared/state';
 import type { IngredientCatalog } from '@/systems/ingredients/offer';
 import { ownedIngredients } from '@/systems/ingredients/owned';
-import { discoverableRecipes } from '@/systems/recipes/discovery';
 
 export interface IngredientShelf {
   catalog: IngredientCatalog;

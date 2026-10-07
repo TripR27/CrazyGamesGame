@@ -1,6 +1,6 @@
 import type { CustomerDef } from '@/data/customers/types';
-import type { RecipeDef } from '@/data/recipes/types';
 import type { UpgradeDef } from '@/data/upgrades/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { num, ONE } from '@/shared/numbers';
 import { createSeededRng } from '@/shared/random';
 import { createStore } from '@/shared/state';

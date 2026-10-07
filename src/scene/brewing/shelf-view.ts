@@ -1,8 +1,8 @@
 import type { GameObjects, Scene } from 'phaser';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
 import { ingredientColor } from '@/scene/brewing/ingredient-look';
 import { INGREDIENT_SLOTS, SHELF, SHELF_GAP } from '@/scene/layout';
+import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
 
 const RADIUS = 22;

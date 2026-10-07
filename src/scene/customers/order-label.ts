@@ -1,7 +1,6 @@
-import type { Effect } from '@/data/common';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
 import { effectIcon } from '@/scene/effects/effect-text';
+import { type Effect, textKey } from '@/shared/content';
 
 /**
  * The text in a customer's order bubble: the drink with the icon of its effect, a ♥ when they like that effect

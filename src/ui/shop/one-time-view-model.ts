@@ -1,8 +1,8 @@
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import { textKey } from '@/shared/content';
 import { formatNumber } from '@/shared/numbers';
-import type { OneTimeOffer } from '@/systems/purchases/one-time';
+import type { OneTimeOffer } from '@/shared/purchases';
 import type { RowView } from '@/ui/shop/shop-view-model';
 
 /** What a one-time purchase (an ingredient, a room) shows in the shop besides its offer. */

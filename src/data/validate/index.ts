@@ -1,7 +1,7 @@
-import { textKey } from '@/data/text-key';
 import { CONTENT_TABLES } from '@/data/validate/content-tables';
 import { duplicates, isValidId } from '@/data/validate/rules';
 import type { CheckContext, ContentTable } from '@/data/validate/table';
+import { textKey } from '@/shared/content';
 
 export { CONTENT_TABLES };
 

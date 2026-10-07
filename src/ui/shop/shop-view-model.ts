@@ -1,6 +1,6 @@
-import { textKey } from '@/data/text-key';
 import type { UpgradeDef, UpgradeEffect } from '@/data/upgrades/types';
 import { t } from '@/i18n/index';
+import { textKey } from '@/shared/content';
 import { formatNumber } from '@/shared/numbers';
 import { quoteFor, type UpgradeState } from '@/systems/upgrades/buy';
 import { levelOf } from '@/systems/upgrades/level';

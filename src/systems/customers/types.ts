@@ -1,5 +1,5 @@
 import type { CustomerDef } from '@/data/customers/types';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import type { LeaveReason } from '@/shared/events';
 
 /** A customer currently in the tavern. Not saved: the floor starts empty on every launch. */

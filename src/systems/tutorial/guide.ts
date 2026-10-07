@@ -1,4 +1,4 @@
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 
 /** What the guide needs to know about the game right now (interface segregation: no full state). */
 export interface GuideContext {

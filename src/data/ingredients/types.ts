@@ -1,4 +1,4 @@
-import type { OneTimePurchase, Rarity } from '@/data/common';
+import type { OneTimePurchase, Rarity } from '@/shared/content';
 
 export type IngredientId = string;
 

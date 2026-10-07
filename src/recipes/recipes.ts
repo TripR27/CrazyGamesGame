@@ -1,14 +1,48 @@
 import { ingredients as allIngredients } from '@/data/ingredients/index';
 import type { IngredientDef } from '@/data/ingredients/types';
-import type { RecipeDef } from '@/data/recipes/types';
-import { REPUTATION_LEVELS, type ReputationLevel } from '@/data/reputation/levels';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
+import type { RecipeDef } from '@/recipes/recipe-data';
+import { levelFor, recipesUnlockedUpTo, REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
 import { effectName } from '@/scene/effects/effect-text';
+import { textKey } from '@/shared/content';
+import type { EventBus, GameEvents } from '@/shared/events';
 import { formatNumber, num } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
 import { ownedIngredients } from '@/systems/ingredients/owned';
-import { levelFor } from '@/systems/reputation/level';
+
+/** The part of the state discovery looks at and changes (interface segregation: not the whole state). */
+export interface DiscoveryState {
+  reputation: number;
+  recipesDiscovered: string[];
+}
+
+export interface DiscoveryStore {
+  getState(): DiscoveryState;
+  update(mutator: (state: DiscoveryState) => void): void;
+}
+
+/** Recipes unlocked by the reputation level that the player does not know yet (whatever ingredients they have). */
+export function unlockedUnknownRecipes(state: DiscoveryState, recipes: readonly RecipeDef[]): RecipeDef[] {
+  const unlocked = recipesUnlockedUpTo(levelFor(state.reputation));
+  return recipes.filter((r) => unlocked.includes(r.id) && !state.recipesDiscovered.includes(r.id));
+}
+
+/**
+ * Recipes the player can discover right now: unlocked by their level, not known yet, and every ingredient on the
+ * shelf (`owned`: the ingredient ids the player has).
+ */
+export function discoverableRecipes(state: DiscoveryState, recipes: readonly RecipeDef[], owned: readonly string[]): RecipeDef[] {
+  return unlockedUnknownRecipes(state, recipes).filter((r) => r.ingredients.every((id) => owned.includes(id)));
+}
+
+/** Writes every discovery into the state (and asks for a save), so customers can order it from now on. */
+export function recordDiscoveries(store: DiscoveryStore, bus: EventBus<GameEvents>): () => void {
+  return bus.on('recipe:discovered', ({ recipeId }) => {
+    if (store.getState().recipesDiscovered.includes(recipeId)) return;
+    store.update((state) => void state.recipesDiscovered.push(recipeId));
+    bus.emit('saveRequested', {});
+  });
+}
 
 /** What the book needs from the state (interface segregation). */
 export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation' | 'ingredientsBought'>;

@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ROOMS } from '@/data/rooms/index';
 import { upgrades } from '@/data/upgrades/index';
+import { ROOMS, totalSeats } from '@/rooms/rooms';
 import { BUILDING, CUSTOMER_SLOTS, HUD_HEIGHT, READY_SLOTS, SHELF, type Rect } from '@/scene/layout';
 import { ROOM_SPOTS, SEAT_SLOTS, UPPER_FLOOR_Y } from '@/scene/layout-rooms';
 import { getMultipliers } from '@/systems/economy/multipliers';
-import { totalSeats } from '@/systems/rooms/seats';
 
 const inside = (inner: Rect, outer: Rect): boolean =>
   inner.x >= outer.x && inner.y >= outer.y && inner.x + inner.w <= outer.x + outer.w && inner.y + inner.h <= outer.y + outer.h;

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ab, economy, floorWith, station } from '../fixtures';
 import { SERVING } from '@/data/brewing';
-import type { Effect } from '@/data/common';
 import type { CustomerDef } from '@/data/customers/types';
+import type { Effect } from '@/shared/content';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import type { Rng } from '@/shared/random';
 import { serveAndPublish } from '@/systems/serving/publish';

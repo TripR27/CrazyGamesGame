@@ -1,6 +1,6 @@
-import { REPUTATION_LEVELS } from '@/data/reputation/levels';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
+import { REPUTATION_LEVELS } from '@/reputation/reputation';
+import { textKey } from '@/shared/content';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { num, type Num } from '@/shared/numbers';
 

@@ -1,12 +1,12 @@
+import { mountRecipeBook, type BookSource } from '@/recipes/recipe-book-view';
+import { mountLevelUpToast } from '@/reputation/level-up-view';
+import type { LevelUpView } from '@/reputation/reputation';
 import type { TargetRegistry } from '@/shared/targets';
 import type { PlayerActions } from '@/systems/actions/player-actions';
 import type { OfflineInbox } from '@/systems/offline/inbox';
 import type { Fit } from '@/ui/fit-math';
 import { fitToViewport } from '@/ui/fit-root';
 import { mountHud, type HudSource } from '@/ui/hud';
-import { mountLevelUpToast } from '@/ui/level-up/level-up-toast';
-import type { LevelUpView } from '@/ui/level-up/level-up-view-model';
-import { mountRecipeBook, type BookSource } from '@/ui/recipe-book/book-view';
 import { mountShop, type ShopSource } from '@/ui/shop/shop-view';
 import type { SideLayout } from '@/ui/side-layout';
 import { createSidePanels } from '@/ui/side-panels';

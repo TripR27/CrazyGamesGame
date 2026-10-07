@@ -1,6 +1,6 @@
 import type { IngredientDef } from '@/data/ingredients/types';
-import { textKey } from '@/data/text-key';
 import { t } from '@/i18n/index';
+import { textKey } from '@/shared/content';
 import { ingredientOffer, type IngredientCatalog, type IngredientShopState } from '@/systems/ingredients/offer';
 import { isListed as listedOffer, toOneTimeRowView } from '@/ui/shop/one-time-view-model';
 import type { RowView } from '@/ui/shop/shop-view-model';

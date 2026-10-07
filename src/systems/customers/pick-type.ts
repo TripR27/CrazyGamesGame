@@ -1,6 +1,6 @@
 import type { CustomerDef } from '@/data/customers/types';
 import { VIP_SPAWN } from '@/data/customers/vip';
-import type { RecipeDef } from '@/data/recipes/types';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { pickRandom, pickWeighted, type Rng } from '@/shared/random';
 import { orderWeight } from '@/systems/effects/bonus';
 

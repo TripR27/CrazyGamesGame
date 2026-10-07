@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ROOMS } from '@/data/rooms/index';
+import { ROOMS, buildRoom, firstBuildableRoom, roomOffer, type RoomState, openSeats, roomSeatNumbers, totalSeats } from '@/rooms/rooms';
 import { num } from '@/shared/numbers';
 import { createStore } from '@/shared/state';
 import { getMultipliers } from '@/systems/economy/multipliers';
-import { buildRoom, firstBuildableRoom, roomOffer, type RoomState } from '@/systems/rooms/offer';
-import { openSeats, roomSeatNumbers, totalSeats } from '@/systems/rooms/seats';
 
 const room = (id: string) => {
   const def = ROOMS.find((r) => r.id === id);
