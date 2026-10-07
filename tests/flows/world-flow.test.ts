@@ -90,7 +90,8 @@ describe('the recipe book hint, played in the real game', () => {
 });
 
 const HOUR = 3_600_000;
-const STAFFED = { brewer_assistant: 1, waitress: 1 };
+/** A full crew with Night Shift bought, so being away earns something. */
+const STAFFED = { brewer_assistant: 1, waitress: 1, night_shift: 1 };
 
 function away(hours: number, upgrades: Record<string, number> = STAFFED) {
   const state = createInitialState(0);
@@ -118,9 +119,19 @@ describe('coming back after being away', () => {
     expect(reports[0]).toMatchObject({ served: 0, hadStaff: false });
   });
 
-  it('stops counting at the two hour limit', () => {
+  it('earns nothing without Night Shift, but tells the player what the crew missed', () => {
+    const { state, reports } = away(1, { brewer_assistant: 1, waitress: 1 });
+    expect(state.currencies.gold.toNumber()).toBe(0);
+    expect(reports[0]).toMatchObject({ served: 0, hadStaff: true });
+    expect(reports[0]?.missed.gt(0)).toBe(true);
+  });
+
+  it('stops counting at the two hour limit, and Long Night and Night Owls count more', () => {
     const two = away(2).state.currencies.gold;
+    expect(two.gt(0)).toBe(true);
     expect(away(24).state.currencies.gold.eq(two)).toBe(true);
+    expect(away(24, { ...STAFFED, long_night: 1 }).state.currencies.gold.gt(two)).toBe(true);
+    expect(away(2, { ...STAFFED, night_owls: 2 }).state.currencies.gold.gt(two)).toBe(true);
   });
 
   it('counts a short gap silently: gold, but no welcome window', () => {

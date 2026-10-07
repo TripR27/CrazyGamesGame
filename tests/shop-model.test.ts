@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { economy } from './fixtures';
 import { ingredients, type IngredientShopState } from '@/brewing/ingredients';
-import { effectAmount, toRowView, isIngredientListed, toIngredientRowView, roomDescription, toRoomRowView } from '@/economy/shop-model';
+import { effectAmount, isUpgradeListed, toRowView, isIngredientListed, toIngredientRowView, roomDescription, toRoomRowView } from '@/economy/shop-model';
 import { upgrades } from '@/economy/upgrade-data';
+import { firstAffordable, quoteFor } from '@/economy/upgrades';
 import { recipes } from '@/recipes/recipe-data';
 import { toBookView } from '@/recipes/recipes';
 import { ROOMS, roomOffer } from '@/rooms/rooms';
@@ -16,6 +17,7 @@ describe('shop row view', () => {
   it('reads an effect as a percentage for factors and a plain number for added amounts', () => {
     expect(effectAmount({ stat: 'brewSpeed', mode: 'multiply', perLevel: 0.15 })).toBe('+15%');
     expect(effectAmount({ stat: 'storage', mode: 'add', perLevel: 1 })).toBe('+1');
+    expect(effectAmount({ stat: 'offlineShare', mode: 'add', perLevel: 0.05 })).toBe('+5%');
   });
 
   it('shows name, level and the price of the next level, and disables buying when poor', () => {
@@ -97,5 +99,32 @@ describe('a room in the shop and on the upper floor', () => {
     expect(roomSign(lab, roomOffer(roomState(0, 0), lab))).toBe('Alchemy Lab\nUnlocks at Popular Pub');
     expect(roomSign(lab, roomOffer(roomState(120, 0), lab))).toMatch(/^Alchemy Lab\nBuild in the shop: /);
     expect(roomSign(lab, roomOffer(roomState(120, 0, ['alchemy_lab']), lab))).toBe('');
+  });
+});
+
+const night = (id: string) => {
+  const def = upgrades.find((u) => u.id === id);
+  if (def === undefined) throw new Error(`no upgrade ${id}`);
+  return def;
+};
+const levels = (owned: Record<string, number>) => ({ currencies: { gold: num(1e9) }, upgrades: owned });
+
+describe('Night Shift in the shop', () => {
+  it('is for sale only after the first staff member, and leaves the shop once bought', () => {
+    const shift = night('night_shift');
+    expect(isUpgradeListed(shift, levels({}))).toBe(false);
+    expect(quoteFor(levels({}), shift, 1).affordable).toBe(false);
+    expect(isUpgradeListed(shift, levels({ waitress: 1 }))).toBe(true);
+    expect(quoteFor(levels({ waitress: 1 }), shift, 1).affordable).toBe(true);
+    expect(isUpgradeListed(shift, levels({ waitress: 1, night_shift: 1 }))).toBe(false);
+  });
+
+  it('opens the share and hours upgrades only once Night Shift is bought, so nothing can buy them earlier', () => {
+    const owls = night('night_owls');
+    const nights = upgrades.filter((u) => u.kind === 'night' && u.id !== 'night_shift');
+    expect(isUpgradeListed(owls, levels({ brewer_assistant: 1 }))).toBe(false);
+    expect(firstAffordable(levels({ brewer_assistant: 1 }), nights)).toBeUndefined();
+    expect(isUpgradeListed(owls, levels({ brewer_assistant: 1, night_shift: 1 }))).toBe(true);
+    expect(toRowView(owls, levels({ night_shift: 1 }), 1).description).toMatch(/\+5% harder/);
   });
 });

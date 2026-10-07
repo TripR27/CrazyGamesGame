@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (stap 14c staat op `step-14c-effect-legend` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14c (Legenda in het receptenboek). **Volgende stap:** 14d (Night Shift: offline verdienen kopen).
+**Nu bezig:** niets (stap 14d staat op `step-14d-night-shift` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14d (Night Shift: offline verdienen kopen). **Volgende stap:** 15 (Helden, gildekamer en uitrusting); eerst de open vragen uit IDEAS.md punt 4 met de eigenaar beslissen.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -36,7 +36,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 14a | Kamers (bovenverdieping) | ✅ | `step-14a-rooms` |
 | 14b | Decoraties (goud-sink) | ✅ | `step-14b-decorations` |
 | 14c | Legenda van effecten in het receptenboek | ✅ | `step-14c-effect-legend` |
-| 14d | Night Shift: offline verdienen kopen | ⬜ | |
+| 14d | Night Shift: offline verdienen kopen | ✅ | `step-14d-night-shift` |
 | 15 | Helden, gildekamer en uitrusting | ⬜ | |
 | 16 | Expedities met keuzes en drankjes | ⬜ | |
 | 16b | Baasgevecht (timing-minigame) | ⬜ | |
@@ -185,7 +185,7 @@ Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root
 
 - Vaste simulatiestap van **100 ms**, losgekoppeld van framerate.
 - Tijd wordt altijd gemeten met `Date.now()`-verschil (accumulator), niet met "aantal ticks", omdat achtergrondtabs door de browser worden afgeknepen.
-- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `offline/` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `offline/offline.ts`.
+- Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `offline/` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Sinds stap 14d telt afwezigheid alleen met Night Shift (stat `offlineShare`, zie Besluiten uit de ideeënronde). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `offline/offline.ts`.
 - Expedities slaan een absolute `endsAt` op en worden bij laden direct afgehandeld.
 
 ### Save
@@ -322,6 +322,13 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Legenda van effecten (stap 14c):** bovenaan het receptenboek een legenda met de vier effecten (icoon, naam en wat het doet). Bij elk recept staat dan alleen nog het icoon, niet meer de tekst "Speed: drinks faster". Klantkaartje bij hover en uitleg bij de eerste keer zijn niet gekozen.
   *Gebouwd in stap 14c:* een vak "What drinks do" tussen de kop van het boek en de kaartjes, met per effect het icoon, de naam en wat het doet ("⚡ Speed: they drink faster and free the seat sooner"; de bestaande i18n-sleutels `effects.<id>.icon`, `.name` en `.does`), en een regel over de ♥ (telt dubbel). Een receptkaartje toont nu "4s brew · 8 gold · 💖". De legenda komt uit `effectLegend()` in `serving/effects.ts` en wordt één keer gebouwd (`recipes/recipe-book-view.ts`); `effects.<id>.name` is nu alleen de naam ("Speed"), de oude `effectName` is weg.
 - **Night Shift, offline verdienen kopen (stap 14d):** offline verdienen gebeurt niet meer vanzelf. Zodra de speler een eerste medewerker heeft, staat "Night Shift" (werknaam) in de winkel als eenmalige aankoop; daarna komen upgrades voor het offline-aandeel (nu vast 50%, wordt een stat) en de duur (stat `offlineHours`). Zonder aankoop telt afwezig niets, maar het welkom-venster toont wat het personeel had kunnen verdienen ("Your staff could have earned 1.2K…") met een verwijzing naar de winkel. Prijs met de simulator afstellen. Later kan een rewarded ad (stap 20) de opbrengst verdubbelen.
+  *Gebouwd in stap 14d (prijzen gekozen door Claude, op verzoek van de eigenaar):*
+  - **Nieuwe stat `offlineShare`** (basis 0): het deel van het tempo van het personeel dat telt terwijl de speler weg is. Was een vaste 50% (`OFFLINE.efficiency`); zonder aankoop is het nu 0, dus afwezig levert niets op.
+  - **Drie upgrades in een eigen groep "Night Shift"** (`nightShiftUpgrades` in `economy/upgrade-data.ts`): **Night Shift** (150 goud, eenmalig: `offlineShare` +50%), **Night Owls** (500, groei 1,8, max 6: +5% per niveau, tot 80%) en **Long Night** (800, groei 2, max 6: `offlineHours` +1 per niveau, tot 8 uur).
+  - **Vrijgeven:** een upgrade kan `unlockedBy` hebben (ids): pas te koop als de speler een niveau van een daarvan heeft. Night Shift na de brouwer of de serveerster, Night Owls en Long Night na Night Shift. `quoteFor` geeft voor een vergrendelde upgrade niets te kopen, dus ook de tutorial en de simulator kopen hem niet te vroeg. De winkel toont een vergrendelde upgrade niet, en een upgrade met `maxLevel: 1` verdwijnt na de aankoop (zoals ingrediënten, kamers en decoraties); een kop zonder zichtbare rijen verdwijnt ook.
+  - **Welkom-venster:** met personeel maar zonder Night Shift: "Your staff went home. With Night Shift they could have earned 1.2K gold." en "Buy Night Shift in the shop…" (`offlineWithMissed` in `offline/offline.ts` rekent het bedrag uit met het aandeel van Night Shift). Zonder volledige bezetting blijft de oude zin, nu met Night Shift erbij.
+  - **Tutorial-hint:** de afsluitzin van de personeelsles noemt Night Shift ("Buy Night Shift in the Shop tab and they even work while you are away"); de oude zin beloofde dat het personeel altijd doorwerkt.
+  - **Weergave:** een stat die een aandeel is (`offlineShare`) toont een toegevoegd bedrag als percentage ("+5%").
 - **Helden (stap 15, 16, 16b), zie ook Helden hieronder.**
 - **Achievements (stap 18):** zoals gepland.
 - **Niet in het plan:** het weekly leaderboard (pas als CrazyGames ons uitnodigt, zie IDEAS.md punt 1), de punten over de schermindeling (checklist voor stap 21 en 22, IDEAS.md punt 2), en de poster (vervallen).
@@ -536,7 +543,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 14b: Decoraties.** Decoraties (fakkels, tapijten, trofeeën) als goud-sink met kleine bonussen, zichtbaar in de scene. Tutorial-hint: eerste decoratie. Zie hoofdstuk 4, Decoraties.
 - [x] **Stap 14c: Legenda van effecten in het receptenboek.** Bovenaan het receptenboek een legenda met de vier effecten (icoon, naam, wat het doet); bij elk recept alleen nog het icoon in plaats van de tekst. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
-- [ ] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
+- [x] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* zonder Night Shift levert afwezig zijn niets op en toont het welkom-venster het gemiste bedrag, met Night Shift werkt offline zoals nu, upgrades verhogen aandeel en duur, tests slagen.
 - [ ] **Stap 15: Helden, gildekamer en uitrusting.** Een gildekamer op de bovenverdieping (te bouwen zoals de andere kamers) waar de helden wonen; inhuren, 2 klassen om mee te beginnen, levelen, uitrusting zelf kiezen (zwaard, schild, helm, amulet), Heroes-tabblad in het zijpaneel. Tutorial-hint: eerste held. Zie hoofdstuk 4, Helden.
 - [ ] **Stap 16: Expedities met keuzes en drankjes.** Held + kerker (1 om mee te beginnen) + zelf gebrouwen meegegeven drankjes → timer (absoluut) → opbrengst (ingrediënten/XP); onderweg keuzekaartjes (pad, vechten of sluipen, drankje drinken) met invloed op buit en duur; idle kan met standaardkeuzes, actief meespelen levert duidelijk meer op; offline afhandelen; gewonde-cooldown. Receptencontent naar ~30. Tutorial-hint: eerste expeditie.
@@ -584,6 +591,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 14d: Night Shift, offline verdienen kopen (2026-10-07, `step-14d-night-shift`)
+- **Gedaan:** (code in `src/economy/upgrade-data.ts`, `src/economy/upgrades.ts`, `src/economy/shop-model.ts`, `src/economy/shop-view.ts`, `src/offline/offline.ts`, `src/i18n/en.ts`; tests in `tests/offline.test.ts`, `tests/shop-model.test.ts`, `tests/flows/world-flow.test.ts`, `tests/content/validate-core.ts`)
+  - **Night Shift:** zie hoofdstuk 4, Besluiten uit de ideeënronde ("Gebouwd in stap 14d").
+  - **Validator:** `unlockedBy` mag alleen bestaande upgrades noemen.
+  - 7 tests erbij (427 totaal); de offline-tests rekenen nu met een aandeel (Night Shift gekocht), de wereldtests met een bemanning met Night Shift.
+- **Waarom (keuzes):** de eigenaar liet de prijzen aan Claude over. Night Shift als upgrade van één niveau met een eigen stat, zodat `getMultipliers`, de winkelrij, de koopknoppen en de simulator hergebruikt worden; de nieuwe regel is alleen `unlockedBy` (vrijgeven na een andere aankoop in plaats van na een niveau). Night Shift kost 150: met 300 kocht de bot hem pas na de Extension (rond minuut 9-10), omdat hij vanaf niveau 3 voor die kamer spaart; met 150 komt hij kort na de serveerster en schuift de Extension nauwelijks op. Night Owls en Long Night zijn een goud-sink voor later (samen ongeveer 70K) zonder de actieve speler te verzwakken: ze helpen alleen offline. Geen eigen tutorial-les: de personeelsles is het natuurlijke moment en Night Shift is direct daarna te koop.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels (`i18n/en.ts` staat nu op 297, `offline/offline.ts` op 285). Simulator 60 minuten (seeds 1/2/3): eerste serveerster 5:58 / 5:33 / 5:57, Night Shift 6:55 / 7:27 / 7:36, Night Owls 9:57 / 10:24 / 10:46, Long Night 10:55 / 11:21 / 12:05; Extension 8:43 / 9:10 / 9:15 (was 8:40 / 9:03 / 9:06), VIP Lounge 23:23 / 24:03 / 24:32 (was 20:41 / 22:23 / 22:44); goud op minuut 60 lager door de nieuwe sink (79K / 96K / 35K, was 338K / 287K / 293K). Aankopen in de eerste 5 minuten 16 / 17 / 16, idle 35% / 38% / 37% (doel 30-40%). In de browser (testsaves): een uur weg met brouwer en serveerster zonder Night Shift gaf "Your staff went home. With Night Shift they could have earned 1.64K gold." en het goud bleef gelijk; de winkel toonde de groep Night Shift met "Buy 1x · 150"; na het kopen verdween hij en stonden Night Owls (500) en Long Night (800) er; weer een uur weg leverde 108 klanten en 1.64K goud op. Geen consolefouten. `vite build` slaagt (391 kB gzip).
+- **Afwijkingen van het plan:** geen. Opgemerkt: `i18n/en.ts` zit bijna op 300 regels; bij de volgende stap met veel tekst splitsen per domein (bijv. `i18n/en-shop.ts`).
+- **Nu te proberen:** huur de brouwer en de serveerster, koop Night Shift in de winkel, sluit het tabblad en kom later terug. Of kom terug zonder Night Shift en lees wat je gemist hebt.
+- **Nog te doen / volgende stap:** stap 15, Helden, gildekamer en uitrusting. Eerst met de eigenaar de open vragen uit IDEAS.md punt 4 beslissen (welke 2 klassen, keuzekaartjes en drankeffecten van de eerste kerker). Later (IDEAS.md punt 3): een rewarded ad die de offline-opbrengst verdubbelt (stap 20) en een prestige-tak voor offline (stap 17).
 
 ### Stap 14c: Legenda van effecten in het receptenboek (2026-10-07, `step-14c-effect-legend`)
 - **Gedaan:** (code in `src/serving/effects.ts` (`effectLegend`), `src/recipes/recipes.ts`, `src/recipes/recipe-book-view.ts`, `src/recipes/recipe-book.css`, `src/i18n/en.ts`; test in `tests/recipes.test.ts`)

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { plain, recipes, rich } from './fixtures';
-import { computeOffline, type OfflineInput, averageReward, applyOffline, type OfflineState, createOfflineInbox, type OfflineReport, formatDuration, toWelcomeView } from '@/offline/offline';
+import { computeOffline, offlineWithMissed, type OfflineInput, averageReward, applyOffline, type OfflineState, createOfflineInbox, type OfflineReport, formatDuration, toWelcomeView } from '@/offline/offline';
 import { num } from '@/shared/numbers';
 import { createStore } from '@/shared/state';
 
@@ -9,6 +9,7 @@ const input = (over: Partial<OfflineInput> = {}): OfflineInput => ({
   awayMs: HOUR,
   rates: { brew: 0.05, serve: 0.08 },
   limitHours: 2,
+  share: 0.5, // Night Shift bought
   reputation: 0,
   knownRecipes: recipes,
   customerTypes: [plain],
@@ -94,6 +95,19 @@ describe('offline earnings', () => {
     expect(computeOffline(input({ awayMs: -5000 }))).toMatchObject({ served: 0, awayMs: 0 });
   });
 
+  it('count only the bought share of the pace: nothing without Night Shift, more with Night Owls', () => {
+    expect(computeOffline(input({ share: 0 }))).toMatchObject({ served: 0, hadStaff: true });
+    expect(computeOffline(input({ share: 0.8 })).served).toBe(144); // 3600 s x 0.05 x 0.8
+  });
+
+  it('say what a crew without Night Shift missed, and nothing when there was no crew or it was bought', () => {
+    const missed = offlineWithMissed(input({ share: 0 }));
+    expect(missed.served).toBe(0);
+    expect(missed.missed.toNumber()).toBe(1800); // what Night Shift (half the pace) would have earned
+    expect(offlineWithMissed(input()).missed.toNumber()).toBe(0);
+    expect(offlineWithMissed(input({ share: 0, rates: { brew: 0.1, serve: 0 } })).missed.toNumber()).toBe(0);
+  });
+
   it('pay more with a higher sell multiplier, and stay sound for huge numbers', () => {
     expect(computeOffline(input({ sellMultiplier: num(2) })).gold.toNumber()).toBe(3600);
     expect(computeOffline(input({ sellMultiplier: num('1e200') })).gold.gt('1e200')).toBe(true);
@@ -101,7 +115,7 @@ describe('offline earnings', () => {
 });
 
 const report = (over: Partial<OfflineReport> = {}): OfflineReport => ({
-  awayMs: 1000, countedMs: 1000, capped: false, limitHours: 2, hadStaff: true, served: 4, gold: num(80), reputation: 4, ...over,
+  awayMs: 1000, countedMs: 1000, capped: false, limitHours: 2, hadStaff: true, served: 4, gold: num(80), reputation: 4, missed: num(0), ...over,
 });
 
 describe('paying out offline earnings', () => {
@@ -142,7 +156,7 @@ describe('the offline inbox', () => {
 });
 
 const welcomeReport = (over: Partial<OfflineReport> = {}): OfflineReport => ({
-  awayMs: 3_600_000, countedMs: 3_600_000, capped: false, limitHours: 2, hadStaff: true, served: 90, gold: num(1800), reputation: 90, ...over,
+  awayMs: 3_600_000, countedMs: 3_600_000, capped: false, limitHours: 2, hadStaff: true, served: 90, gold: num(1800), reputation: 90, missed: num(0), ...over,
 });
 
 describe('formatDuration', () => {
@@ -164,6 +178,15 @@ describe('welcome-back window', () => {
   it('tells a player without a full crew what to do', () => {
     const view = toWelcomeView(welcomeReport({ served: 0, hadStaff: false, gold: num(0) }));
     expect(view.lines[1]).toMatch(/Hire a brewer and a waitress/);
+  });
+
+  it('tells a crew without Night Shift what it missed and where to buy it', () => {
+    const view = toWelcomeView(welcomeReport({ served: 0, gold: num(0), missed: num(1200), capped: true }));
+    expect(view.lines).toEqual([
+      'You were away for 1h.',
+      'Your staff went home. With Night Shift they could have earned 1.2K gold.',
+      'Buy Night Shift in the shop and they keep working while you are away.',
+    ]);
   });
 
   it('says when the staff stopped working before the player came back', () => {

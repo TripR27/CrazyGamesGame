@@ -132,6 +132,8 @@ export const upgradeTable = (items: readonly UpgradeDef[]): ContentTable =>
       ...(u.growth > 1 ? [] : [`growth must be > 1, got ${u.growth}`]),
       ...(u.maxLevel === undefined || isTier(u.maxLevel) ? [] : ['maxLevel must be a whole number >= 1']),
     ],
+    checkSet: (all) =>
+      all.flatMap((u) => (u.unlockedBy ?? []).filter((id) => !all.some((o) => o.id === id)).map((id) => `upgrade ${u.id} is unlocked by unknown upgrade "${id}"`)),
   });
 
 export const feedbackTable = (items: readonly FeedbackPool[]): ContentTable =>

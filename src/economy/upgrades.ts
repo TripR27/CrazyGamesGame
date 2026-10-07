@@ -12,6 +12,10 @@ export function levelOf(levels: UpgradeLevels, def: UpgradeDef): number {
   return def.maxLevel === undefined ? owned : Math.min(owned, def.maxLevel);
 }
 
+/** Whether an upgrade is for sale yet: it has no `unlockedBy`, or the player owns a level of one of those. */
+export const isUnlocked = (levels: UpgradeLevels, def: UpgradeDef): boolean =>
+  def.unlockedBy === undefined || def.unlockedBy.some((id) => (levels[id] ?? 0) > 0);
+
 /** Levels still to buy: Infinity when there is no cap. */
 export function levelsLeft(levels: UpgradeLevels, def: UpgradeDef): number {
   return def.maxLevel === undefined ? Infinity : def.maxLevel - levelOf(levels, def);
@@ -82,9 +86,10 @@ export interface UpgradeStore {
   update(mutator: (state: UpgradeState) => void): void;
 }
 
-/** Quote for an upgrade against the current state. */
+/** Quote for an upgrade against the current state. An upgrade that is not unlocked yet has nothing to buy. */
 export function quoteFor(state: UpgradeState, def: UpgradeDef, amount: BuyAmount): Quote {
-  return quote(def, levelOf(state.upgrades, def), state.currencies.gold, amount, levelsLeft(state.upgrades, def));
+  const left = isUnlocked(state.upgrades, def) ? levelsLeft(state.upgrades, def) : 0;
+  return quote(def, levelOf(state.upgrades, def), state.currencies.gold, amount, left);
 }
 
 /** Buys what `quoteFor` promised. Returns the number of levels bought (0 when it cannot be afforded). */

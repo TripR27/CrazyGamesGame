@@ -4,10 +4,10 @@ import { VIP_SPAWN } from '@/customers/customer-data';
 export type UpgradeId = string;
 
 /** Shop grouping. Add a kind here when a new upgrade category appears. */
-export type UpgradeKind = 'cauldron' | 'tavern' | 'staff';
+export type UpgradeKind = 'cauldron' | 'tavern' | 'staff' | 'night';
 
 /** The stats an upgrade or a room can change; `getMultipliers` reads these. Add a stat here and in `BASE_STATS`. */
-export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe', 'offlineHours', 'seats', 'vipChance'] as const;
+export const UPGRADE_STATS = ['brewSpeed', 'sellPrice', 'storage', 'autoBrew', 'autoServe', 'offlineHours', 'offlineShare', 'seats', 'vipChance'] as const;
 export type UpgradeStat = (typeof UPGRADE_STATS)[number];
 
 export interface UpgradeEffect {
@@ -16,7 +16,10 @@ export interface UpgradeEffect {
   perLevel: number;
 }
 
-/** Cost of level n is `baseCost * growth^n`. Texts: `upgrades.<id>.name` and `.description`. */
+/**
+ * Cost of level n is `baseCost * growth^n`. Texts: `upgrades.<id>.name` and `.description`. An upgrade with
+ * `maxLevel: 1` is a one-time purchase: it leaves the shop once bought.
+ */
 export interface UpgradeDef {
   id: UpgradeId;
   kind: UpgradeKind;
@@ -24,12 +27,15 @@ export interface UpgradeDef {
   growth: number;
   effect: UpgradeEffect;
   maxLevel?: number;
+  /** For sale only once the player owns a level of one of these (Night Shift after the first staff member). */
+  unlockedBy?: readonly UpgradeId[];
 }
 
 /**
  * What each stat is worth before any upgrade: brew speed and sell price are factors, storage is a count,
  * the staff stats are actions per second (0 until someone is hired) and offlineHours is how long staff
- * keep working while the player is away. Seats is how many customers may sit downstairs (rooms add their own
+ * keep working while the player is away, and offlineShare is the share of their pace that counts then (0 until
+ * Night Shift is bought, so being away earns nothing without it). Seats is how many customers may sit downstairs (rooms add their own
  * seats upstairs). vipChance is the chance that a new customer is a VIP, once one is open.
  */
 export const BASE_STATS: Readonly<Record<UpgradeStat, number>> = {
@@ -40,6 +46,7 @@ export const BASE_STATS: Readonly<Record<UpgradeStat, number>> = {
   autoServe: 0,
   /** How long staff keep working while away; upgrades (later: prestige) raise it. */
   offlineHours: 2,
+  offlineShare: 0,
   seats: 1,
   vipChance: VIP_SPAWN.chance,
 };
@@ -103,5 +110,42 @@ export const staffUpgrades: readonly UpgradeDef[] = [
   },
 ];
 
+/** The share of the staff's pace that counts while away once Night Shift is bought: being there pays better. */
+export const NIGHT_SHIFT_SHARE = 0.5;
+
+/**
+ * Offline earnings are bought (step 14d): Night Shift once, after the first staff member; then a bigger share
+ * (Night Owls, up to 80%) and longer hours (Long Night, up to 8 hours). Placeholder prices, checked with the simulator.
+ */
+export const nightShiftUpgrades: readonly UpgradeDef[] = [
+  {
+    id: 'night_shift',
+    kind: 'night',
+    baseCost: 150,
+    growth: 2,
+    effect: { stat: 'offlineShare', mode: 'add', perLevel: NIGHT_SHIFT_SHARE },
+    maxLevel: 1,
+    unlockedBy: ['brewer_assistant', 'waitress'],
+  },
+  {
+    id: 'night_owls',
+    kind: 'night',
+    baseCost: 500,
+    growth: 1.8,
+    effect: { stat: 'offlineShare', mode: 'add', perLevel: 0.05 },
+    maxLevel: 6,
+    unlockedBy: ['night_shift'],
+  },
+  {
+    id: 'long_night',
+    kind: 'night',
+    baseCost: 800,
+    growth: 2,
+    effect: { stat: 'offlineHours', mode: 'add', perLevel: 1 },
+    maxLevel: 6,
+    unlockedBy: ['night_shift'],
+  },
+];
+
 /** All upgrades in shop order. A new batch is a new file plus one spread here. */
-export const upgrades: readonly UpgradeDef[] = [...tier01Upgrades, ...staffUpgrades];
+export const upgrades: readonly UpgradeDef[] = [...tier01Upgrades, ...staffUpgrades, ...nightShiftUpgrades];
