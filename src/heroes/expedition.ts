@@ -1,6 +1,7 @@
 import type { World } from '@/app/world';
 import { type GearDrop, gearPower, unfoundDrops } from '@/heroes/gear';
 import { completeHeroes, gainXp, HEROES, HERO_CLASSES, heroStatus, injuryChance, newHero, recruitGuildHeroes } from '@/heroes/heroes';
+import { addMods, cardMods, decideCard, defaultOption, drinkMods, drinkPower, scheduleCards, TRIP_CARDS } from '@/heroes/trip-cards';
 import { GUILD_ROOM_ID } from '@/rooms/rooms';
 import { pickWeighted, type Rng } from '@/shared/random';
 import type { Expedition, GameState, HeroState } from '@/shared/state';
@@ -69,37 +70,52 @@ export function rollLoot(dungeon: DungeonDef, rng: Rng, sword = 0): Record<strin
   return loot;
 }
 
-/** Send a hero at home and fit to a dungeon; the trip ends at an absolute time, so it also runs while the game is closed. */
-export function sendHero({ store, bus, clock }: Pick<World, 'store' | 'bus' | 'clock'>, heroId: string, dungeonId = DUNGEONS[0]?.id ?? ''): void {
+type TripWorld = Pick<World, 'store' | 'bus' | 'rng' | 'clock' | 'content'>;
+
+/**
+ * Send a hero at home and fit to a dungeon. The drinks in their bag go along (a speed drink makes the trip shorter at
+ * once) and two choice cards are planned on the way. The trip ends at an absolute time, so it also runs while the game
+ * is closed.
+ */
+export function sendHero({ store, bus, rng, clock, content }: TripWorld, heroId: string, dungeonId = DUNGEONS[0]?.id ?? ''): void {
   const hero = store.getState().heroes[heroId];
   const dungeon = DUNGEONS.find((d) => d.id === dungeonId);
   if (hero === undefined || dungeon === undefined || heroStatus(hero, clock.now()) !== 'home') return;
-  const endsAt = clock.now() + tripMs(dungeon, hero);
+  const drinks = [...hero.bag];
+  const ms = Math.round(tripMs(dungeon, hero) * drinkMods(content.recipes, drinks, drinkPower(heroId, hero)).duration);
+  const start = clock.now();
+  const cards = scheduleCards(start, ms, rng);
   store.update((s) => {
     const h = s.heroes[heroId];
-    if (h !== undefined) h.expedition = { dungeon: dungeon.id, endsAt };
+    if (h === undefined) return;
+    h.bag = [];
+    h.expedition = { dungeon: dungeon.id, endsAt: start + ms, drinks, cards };
   });
   bus.emit('hero:departed', { id: heroId, dungeon: dungeon.id });
   bus.emit('saveRequested', {});
 }
 
-/** Maybe a piece of gear from the dungeon that the player does not own yet. */
-function rollGear(state: Pick<GameState, 'gearOwned'>, dungeon: DungeonDef, rng: Rng): string | null {
-  if (rng() >= dungeon.gearChance) return null;
+/** Maybe a piece of gear from the dungeon that the player does not own yet; `bonus` adds to the chance. */
+function rollGear(state: Pick<GameState, 'gearOwned'>, dungeon: DungeonDef, rng: Rng, bonus = 0): string | null {
+  if (rng() >= dungeon.gearChance + bonus) return null;
   return pickWeighted(rng, unfoundDrops(state, dungeon.gearDrops), (d) => d.weight)?.gear ?? null;
 }
 
 /**
- * A trip is over: loot into the stock (more with a sword), XP (and levels), maybe a piece of gear, and maybe an injury
- * (less likely with a shield) that rests from the moment they were back.
+ * A trip is over: loot into the stock (more with a sword, luck drinks and bold choices), XP (and levels), maybe a piece
+ * of gear, and maybe an injury (less likely with a shield or strength, more after risky choices) that rests from the
+ * moment they were back.
  */
-function returnHero({ store, bus, rng }: Pick<World, 'store' | 'bus' | 'rng'>, heroId: string, trip: Expedition): void {
+function returnHero({ store, bus, rng, content }: Pick<World, 'store' | 'bus' | 'rng' | 'content'>, heroId: string, trip: Expedition): void {
   const dungeon = DUNGEONS.find((d) => d.id === trip.dungeon);
   const hero = store.getState().heroes[heroId] ?? newHero();
   const level = hero.level;
-  const loot = dungeon === undefined ? {} : rollLoot(dungeon, rng, gearPower(hero, 'sword'));
-  const injured = rng() < injuryChance(level, gearPower(hero, 'shield'));
-  const gear = dungeon === undefined ? null : rollGear(store.getState(), dungeon, rng);
+  const power = drinkPower(heroId, hero);
+  const mods = addMods(drinkMods(content.recipes, trip.drinks, power), cardMods(content.recipes, trip, power));
+  const loot = dungeon === undefined ? {} : rollLoot(dungeon, rng, gearPower(hero, 'sword') + mods.loot);
+  for (const [id, n] of Object.entries(mods.extra)) loot[id] = (loot[id] ?? 0) + n;
+  const injured = rng() < Math.min(1, Math.max(0, injuryChance(level, gearPower(hero, 'shield')) + mods.injury));
+  const gear = dungeon === undefined ? null : rollGear(store.getState(), dungeon, rng, mods.gearChance);
   const xp = dungeon?.xp ?? 0;
   let gained = 0;
   store.update((s) => {
@@ -116,8 +132,29 @@ function returnHero({ store, bus, rng }: Pick<World, 'store' | 'bus' | 'rng'>, h
   bus.emit('saveRequested', {});
 }
 
+/**
+ * The cards of every trip: a card announces itself when its time comes, and the safe default is taken once the player
+ * let it wait too long (or the trip is over: while away the default always counts). `announced` remembers what was shown.
+ */
+function runCards(world: TripWorld, announced: Set<object>): void {
+  const now = world.clock.now();
+  for (const def of HERO_CLASSES) {
+    const trip = world.store.getState().heroes[def.id]?.expedition;
+    if (trip == null) continue;
+    for (const card of trip.cards) {
+      if (card.choice !== null || card.at > now) continue;
+      if (now >= card.at + TRIP_CARDS.timeoutMs || now >= trip.endsAt) {
+        decideCard(world, def.id, defaultOption(card.id), false);
+      } else if (!announced.has(card)) {
+        announced.add(card);
+        world.bus.emit('card:opened', { heroId: def.id, cardId: card.id });
+      }
+    }
+  }
+}
+
 /** Brings back every hero whose trip has ended (also after a reload or a long absence: the end time is absolute). */
-export function returnHeroes(world: Pick<World, 'store' | 'bus' | 'rng' | 'clock'>): void {
+export function returnHeroes(world: TripWorld): void {
   const now = world.clock.now();
   for (const def of HERO_CLASSES) {
     const trip = world.store.getState().heroes[def.id]?.expedition;
@@ -125,12 +162,16 @@ export function returnHeroes(world: Pick<World, 'store' | 'bus' | 'rng' | 'clock
   }
 }
 
-/** Runs the heroes: the warrior moves in with the guild hall, and trips end on the tick once their time has come. */
-export function startHeroes(world: Pick<World, 'store' | 'bus' | 'rng' | 'clock'>): void {
+/** Runs the heroes: the warrior moves in with the guild hall, cards open and close, and trips end once their time has come. */
+export function startHeroes(world: TripWorld): void {
   completeHeroes(world.store);
   recruitGuildHeroes(world);
   world.bus.on('room:built', ({ id }) => {
     if (id === GUILD_ROOM_ID) recruitGuildHeroes(world);
   });
-  world.bus.on('tick', () => returnHeroes(world));
+  const announced = new Set<object>();
+  world.bus.on('tick', () => {
+    runCards(world, announced);
+    returnHeroes(world);
+  });
 }

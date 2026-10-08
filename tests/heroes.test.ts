@@ -54,7 +54,7 @@ describe('expeditions', () => {
 
   it('knows whether a hero is home, away or resting, and how long it takes', () => {
     expect(heroStatus(hero(), 1000)).toBe('home');
-    const away = hero({ expedition: { dungeon: 'swamp', endsAt: 5000 } });
+    const away = hero({ expedition: { dungeon: 'swamp', endsAt: 5000, drinks: [], cards: [] } });
     expect(heroStatus(away, 1000)).toBe('away');
     expect(heroWaitMs(away, 1000)).toBe(4000);
     expect(heroStatus(hero({ injuredUntil: 3000 }), 1000)).toBe('injured');
@@ -116,7 +116,7 @@ describe('the Heroes tab', () => {
     expect(warrior).toMatchObject({ title: 'Brakka · Warrior', level: 'Level 1', xp: '30/100 XP', action: { kind: 'send', label: 'Send to the Swamp', enabled: true } });
     expect(warrior?.xpFraction).toBeCloseTo(0.3);
     expect(mage).toMatchObject({ level: '', action: { kind: 'hire', label: 'Hire · 8K', enabled: false } });
-    state.heroes.warrior = hero({ expedition: { dungeon: 'swamp', endsAt: 90_000 } });
+    state.heroes.warrior = hero({ expedition: { dungeon: 'swamp', endsAt: 90_000, drinks: [], cards: [] } });
     expect(toHeroesView(state, 0).cards[0]).toMatchObject({ status: 'In the Swamp, back in 1:30.', action: { kind: 'none', enabled: false } });
     state.heroes.warrior = hero({ injuredUntil: 30_000 });
     expect(toHeroesView(state, 0).cards[0]?.status).toContain('resting for 0:30');

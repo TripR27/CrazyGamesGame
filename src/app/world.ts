@@ -8,6 +8,7 @@ import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { watchGearShop } from '@/heroes/gear';
 import { startHeroes } from '@/heroes/expedition';
+import { createGuildCauldron, type GuildCauldron, startGuildCauldron } from '@/heroes/hero-brewing';
 import { createOffline, type OfflineServices } from '@/offline/offline';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
@@ -151,6 +152,8 @@ export interface World {
   station: BrewStation;
   /** The drink the player picked up from the bar. */
   selection: DrinkSelection;
+  /** The hero cauldron in the guild hall. Runtime only. */
+  guild: GuildCauldron;
   /** Shared by the scene and the DOM overlay, so the tutorial can point at both. */
   targets: TargetRegistry;
   tutorial: TutorialServices;
@@ -170,14 +173,17 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   recordDiscoveries(store, bus);
   // Every drink that starts brewing uses up its dungeon ingredients.
   watchStockUse({ store, bus, content: c });
-  const tutorial = createTutorial({ store, bus, floor, station, clock, ingredients: c });
+  const guild = createGuildCauldron();
+  const tutorial = createTutorial({ store, bus, floor, station, clock, ingredients: c, guild });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);
   startBrewSystem(station, bus);
   watchShop(store, bus, c);
   startStaffWork({ store, bus, floor, station, rng, catalog });
   // Heroes come back when their trip's (absolute) end time has passed, also right after loading.
-  startHeroes({ store, bus, rng, clock });
+  startHeroes({ store, bus, rng, clock, content: c });
+  startGuildCauldron({ store, bus, clock, station, guild });
   const offline = createOffline({ store, bus, clock, catalog });
-  return { store, bus, rng, clock, content: c, floor, station, selection: createDrinkSelection(station), targets: createTargetRegistry(), tutorial, offline };
+  const selection = createDrinkSelection(station);
+  return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };
 }

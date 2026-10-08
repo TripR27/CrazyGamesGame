@@ -115,6 +115,9 @@ export const ROOM_SPOTS: Readonly<Record<string, RoomSpot>> = {
   guild_hall: { rect: GUILD, seats: [] },
 };
 
+/** The hero cauldron in the guild hall (bottom centre), between the two heroes. */
+export const HERO_CAULDRON: Point = { x: GUILD.x + 145, y: UPPER_FLOOR_Y - 2 };
+
 /** Where each hero stands in the guild hall while at home (feet), one per hero class in heroes/heroes.ts. */
 export const HERO_SPOTS: Readonly<Record<string, Point>> = {
   warrior: { x: GUILD.x + 90, y: UPPER_FLOOR_Y - 2 },

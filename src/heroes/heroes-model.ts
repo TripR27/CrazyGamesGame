@@ -37,6 +37,8 @@ export interface HeroCardView {
   xpFraction: number;
   status: string;
   action: HeroAction;
+  /** The drinks in the bag, or taken along on the trip; empty for a hero who is not hired yet. */
+  bag: string;
   /** The four gear slots; empty for a hero who is not hired yet. */
   slots: SlotView[];
 }
@@ -55,6 +57,8 @@ export interface HeroesView {
   /** Without the guild hall there are no heroes yet: just this line. */
   noGuild: string | null;
   stockTitle: string;
+  /** What drinks taken along do; empty without the guild hall. */
+  drinksHelp: string;
   /** One line per dungeon ingredient held, or the line that there is nothing yet; empty without the guild hall. */
   stock: string[];
   /** Gear for sale (not owned yet); empty without the guild hall. */
@@ -62,7 +66,7 @@ export interface HeroesView {
   cards: HeroCardView[];
 }
 
-const name = (domain: 'heroes' | 'dungeons' | 'ingredients', id: string): string => t(textKey(domain, id, 'name'));
+const name = (domain: 'heroes' | 'dungeons' | 'ingredients' | 'recipes', id: string): string => t(textKey(domain, id, 'name'));
 const firstDungeon = DUNGEONS[0];
 
 function statusLine(def: HeroClassDef, state: HeroesState, now: number): { status: string; action: HeroAction } {
@@ -109,7 +113,16 @@ function slotViews(heroId: string, state: HeroesState): SlotView[] {
   });
 }
 
-/** One hero's card: name and class, level and XP, where they are, their gear, and what the player can do. */
+/** The bag line on a hero's card: what waits in the bag, or what went along on the trip. */
+function bagLine(state: HeroesState, heroId: string): string {
+  const hero = state.heroes[heroId];
+  if (hero === undefined) return '';
+  const names = (ids: readonly string[]): string => ids.map((id) => name('recipes', id)).join(', ');
+  if (hero.expedition !== null) return hero.expedition.drinks.length === 0 ? t('heroes.took_nothing') : t('heroes.took', { drinks: names(hero.expedition.drinks) });
+  return hero.bag.length === 0 ? t('heroes.bag_empty') : t('heroes.bag', { drinks: names(hero.bag) });
+}
+
+/** One hero's card: name and class, level and XP, where they are, their bag and gear, and what the player can do. */
 export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): HeroCardView {
   const hero = state.heroes[def.id];
   const top = hero !== undefined && hero.level >= HEROES.maxLevel;
@@ -122,6 +135,7 @@ export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): 
     xp: hero === undefined || top ? '' : t('heroes.xp', { xp: hero.xp, next }),
     xpFraction: hero === undefined ? 0 : top ? 1 : hero.xp / next,
     ...statusLine(def, state, now),
+    bag: bagLine(state, def.id),
     slots: slotViews(def.id, state),
   };
 }
@@ -154,6 +168,7 @@ export function toHeroesView(state: HeroesState, now: number): HeroesView {
   return {
     noGuild: built ? null : t('heroes.no_guild', { level: levelName }),
     stockTitle: t('heroes.stock_title'),
+    drinksHelp: built ? t('heroes.drinks_help') : '',
     stock: built ? stockLines(state) : [],
     gearShop: gearShop(state),
     cards: built ? HERO_CLASSES.map((def) => toHeroCard(def, state, now)) : [],

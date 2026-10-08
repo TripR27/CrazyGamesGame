@@ -141,10 +141,11 @@ export function startBrewSystem(station: BrewStation, bus: EventBus<GameEvents>)
 
 /**
  * The player clicks an ingredient on the shelf. A finished recipe starts brewing at once. A dungeon ingredient that ran
- * out stays on the shelf (greyed out) but does nothing except a grumble.
+ * out stays on the shelf (greyed out) but does nothing except a grumble. `station`: the tavern cauldron, or the hero
+ * cauldron in the guild hall.
  */
-export function clickIngredient(world: Pick<World, 'bus' | 'station' | 'rng' | 'store' | 'content'>, ingredientId: string): void {
-  const { bus, station, rng, store, content } = world;
+export function clickIngredient(world: Pick<World, 'bus' | 'station' | 'rng' | 'store' | 'content'>, ingredientId: string, station = world.station): void {
+  const { bus, rng, store, content } = world;
   if (isStocked(content.ingredients, ingredientId) && stockOf(store.getState(), ingredientId) <= 0) {
     publishBrewEvent(bus, notice('empty', rng));
     return;

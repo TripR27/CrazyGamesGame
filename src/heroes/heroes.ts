@@ -10,12 +10,15 @@ import type { GameState, HeroState } from '@/shared/state';
 export interface HeroClassDef {
   id: string;
   hire: { cost: number } | 'withGuildRoom';
+  /** How strongly drinks taken along work for this class (1 is normal). */
+  potionPower: number;
 }
 
 /** Placeholder prices, tuned with `npm run simulate`. A new class is data here, a spot in app/layout.ts and its texts. */
 export const HERO_CLASSES: readonly HeroClassDef[] = [
-  { id: 'warrior', hire: 'withGuildRoom' },
-  { id: 'mage', hire: { cost: 8000 } },
+  { id: 'warrior', hire: 'withGuildRoom', potionPower: 1 },
+  // The mage gets more out of every drink taken along.
+  { id: 'mage', hire: { cost: 8000 }, potionPower: 1.5 },
 ];
 
 /** Placeholder numbers for growth and injuries. */
@@ -30,9 +33,11 @@ export const HEROES = {
   minInjuryChance: 0.05,
   /** How long an injured hero rests after coming back (a drink heals at once). */
   restMs: 90_000,
+  /** Drinks a hero can carry on a trip. */
+  bagSize: 2,
 } as const;
 
-export const newHero = (): HeroState => ({ level: 1, xp: 0, injuredUntil: 0, expedition: null, gear: {} });
+export const newHero = (): HeroState => ({ level: 1, xp: 0, injuredUntil: 0, expedition: null, gear: {}, bag: [] });
 
 /** XP needed to go from `level` to the next one. */
 export const xpToNext = (level: number): number => Math.round(HEROES.firstLevelXp * HEROES.xpGrowth ** (level - 1));
@@ -118,11 +123,19 @@ export function hireHeroById({ store, bus }: Pick<World, 'store' | 'bus'>, id: s
   bus.emit('saveRequested', {});
 }
 
-/** Heroes saved before a field existed get its default (the save keeps the heroes map as it is). */
+/**
+ * Heroes (and a trip under way) saved before a field existed get its default; the save keeps the heroes map as it is,
+ * so this fills the gaps once at the start.
+ */
 export function completeHeroes(store: World['store']): void {
-  const state = store.getState();
-  if (Object.values(state.heroes).every((h) => typeof h.gear === 'object' && h.gear !== null)) return;
+  const fields = Object.keys(newHero());
+  const tripComplete = (h: HeroState): boolean => h.expedition === null || (Array.isArray(h.expedition.drinks) && Array.isArray(h.expedition.cards));
+  if (Object.values(store.getState().heroes).every((h) => fields.every((f) => f in h) && tripComplete(h))) return;
   store.update((s) => {
-    for (const id in s.heroes) s.heroes[id] = { ...newHero(), ...s.heroes[id] };
+    for (const id in s.heroes) {
+      const h = { ...newHero(), ...s.heroes[id] };
+      if (h.expedition !== null) h.expedition = { ...h.expedition, drinks: h.expedition.drinks ?? [], cards: h.expedition.cards ?? [] };
+      s.heroes[id] = h;
+    }
   });
 }

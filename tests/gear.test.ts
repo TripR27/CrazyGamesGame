@@ -65,7 +65,7 @@ describe('wearing gear', () => {
   it('never changes the gear of a hero on a trip, and never takes a piece off them', () => {
     const state = guild();
     state.gearOwned = ['rusty_sword', 'wooden_shield'];
-    state.heroes.warrior = hero({ gear: { sword: 'rusty_sword' }, expedition: { dungeon: 'swamp', endsAt: 9e12 } });
+    state.heroes.warrior = hero({ gear: { sword: 'rusty_sword' }, expedition: { dungeon: 'swamp', endsAt: 9e12, drinks: [], cards: [] } });
     const g = newGame(state);
     equipGear(g.world, 'warrior', 'shield', 'wooden_shield');
     equipGear(g.world, 'mage', 'sword', 'rusty_sword');
@@ -83,12 +83,14 @@ describe('wearing gear', () => {
     expect(gearToWear(state)).toBeNull();
   });
 
-  it('fills in the gear of a hero saved before gear existed', () => {
+  it('fills in the gear and bag of a hero saved before they existed, and the drinks and cards of their trip', () => {
     const state = guild();
     state.heroes.warrior = { level: 3, xp: 5, injuredUntil: 0, expedition: null } as unknown as HeroState;
+    state.heroes.mage = { ...newHero(), expedition: { dungeon: 'swamp', endsAt: 5 } } as unknown as HeroState;
     const store = createStore(state);
     completeHeroes(store);
-    expect(store.getState().heroes.warrior).toEqual({ level: 3, xp: 5, injuredUntil: 0, expedition: null, gear: {} });
+    expect(store.getState().heroes.warrior).toEqual({ level: 3, xp: 5, injuredUntil: 0, expedition: null, gear: {}, bag: [] });
+    expect(store.getState().heroes.mage?.expedition).toEqual({ dungeon: 'swamp', endsAt: 5, drinks: [], cards: [] });
   });
 });
 
@@ -121,7 +123,7 @@ describe('gear as loot', () => {
   it('can come back from the swamp: a piece the player does not own yet', () => {
     let now = 0;
     const state = guild();
-    state.heroes.warrior = hero({ expedition: { dungeon: 'swamp', endsAt: 10 } });
+    state.heroes.warrior = hero({ expedition: { dungeon: 'swamp', endsAt: 10, drinks: [], cards: [] } });
     const store = createStore(state);
     const bus = createEventBus<GameEvents>();
     const returned = vi.fn();
@@ -139,7 +141,7 @@ describe('gear in the Heroes tab', () => {
   it('lists the pieces for sale and, per hero, what fits each slot', () => {
     const state = guild(5000);
     state.gearOwned = ['rusty_sword', 'swamp_cleaver'];
-    state.heroes.warrior = hero({ gear: { sword: 'swamp_cleaver' }, expedition: { dungeon: 'swamp', endsAt: 9e12 } });
+    state.heroes.warrior = hero({ gear: { sword: 'swamp_cleaver' }, expedition: { dungeon: 'swamp', endsAt: 9e12, drinks: [], cards: [] } });
     const view = toHeroesView(state, 0);
     expect(view.gearShop.map((g) => g.id)).toEqual(['wooden_shield', 'leather_cap', 'lucky_charm']);
     expect(view.gearShop[0]?.row).toMatchObject({ name: 'Wooden Shield', description: '🛡 Shield: 30% less chance of injury', canBuy: true });

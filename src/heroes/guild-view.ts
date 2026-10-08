@@ -1,8 +1,10 @@
 import type { GameObjects, Scene } from 'phaser';
-import { HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
+import { HERO_CAULDRON, HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
 import type { World } from '@/app/world';
-import { clickHero } from '@/heroes/hero-brewing';
-import { HERO_CLASSES, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
+import { brewProgress } from '@/brewing/brewing';
+import { ingredientColor } from '@/brewing/brewing-view';
+import { aimHeroCauldron, clickHero } from '@/heroes/hero-brewing';
+import { guildBuilt, HERO_CLASSES, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
 import { clockText } from '@/heroes/heroes-model';
 import { t } from '@/i18n/translator';
 import { createFloatingTexts, GOLD_COLOR } from '@/serving/serving-view';
@@ -89,6 +91,54 @@ export interface GuildView {
   update(): void;
 }
 
+const POT = { w: 44, h: 26, glow: 0xfff36b, body: 0x2b2b33, rim: 0x45454f, brew: 0x7be05a } as const;
+const BAR_W = 48;
+
+/**
+ * The hero cauldron between the heroes: shown once the guild hall stands. Click it to send the next ingredients there; it
+ * glows while it is picked, shows what is in it and how far the brew is. Tutorial target `hero-cauldron`.
+ */
+function createHeroCauldron(scene: Scene, world: World): GuildView {
+  const { x, y } = HERO_CAULDRON;
+  const glow = scene.add.ellipse(x, y - 13, POT.w + 16, POT.h + 16, POT.glow, 0.7);
+  const pot = scene.add.ellipse(x, y - 13, POT.w, POT.h, POT.body).setStrokeStyle(2, POT.rim);
+  const brew = scene.add.ellipse(x, y - 24, POT.w - 10, 7, POT.brew);
+  const track = scene.add.rectangle(x, y - 40, BAR_W, 6, 0x2a1a0c);
+  const fill = scene.add.rectangle(x - BAR_W / 2, y - 40, 0, 6, POT.brew).setOrigin(0, 0.5);
+  const dots = [-1, 0, 1].map((i) => scene.add.circle(x + i * 14, y - 36, 5, 0xffffff).setStrokeStyle(1, 0x2a1a0c));
+  const zone = scene.add.zone(x, y - 14, POT.w + 12, POT.h + 18);
+  zone.on('pointerdown', () => aimHeroCauldron(world));
+  const parts = [glow, pot, brew, track, fill, ...dots];
+  parts.forEach((p) => p.setVisible(false));
+  let built = false;
+  world.targets.register('hero-cauldron', () => (built ? { x: x - 30, y: y - 42, w: 60, h: 42 } : null));
+  return {
+    update() {
+      const now = guildBuilt(world.store.getState());
+      if (now !== built) {
+        built = now;
+        pot.setVisible(built);
+        brew.setVisible(built);
+        if (built) zone.setInteractive({ useHandCursor: true });
+        else zone.disableInteractive();
+      }
+      if (!built) return;
+      const { station, aimed } = world.guild;
+      glow.setVisible(aimed);
+      const brewing = station.brewing !== null;
+      track.setVisible(brewing);
+      fill.setVisible(brewing).setSize(BAR_W * brewProgress(station), 6);
+      for (let i = 0; i < dots.length; i++) {
+        const id = station.contents[i];
+        const dot = dots[i];
+        if (dot === undefined) continue;
+        dot.setVisible(id !== undefined && !brewing);
+        if (id !== undefined) dot.setFillStyle(ingredientColor(id));
+      }
+    },
+  };
+}
+
 /** What floats up when a hero is back: the loot, the XP, a new level and an injury. */
 function returnLines(event: GameEvents['hero:returned']): { text: string; color: string }[] {
   const lines = Object.entries(event.loot).map(([id, n]) => ({ text: t('heroes.loot', { n, name: t(textKey('ingredients', id, 'name')) }), color: LOOT_COLOR }));
@@ -125,9 +175,19 @@ export function createGuildView(scene: Scene, world: World): GuildView {
     const item = find(id);
     if (item !== undefined) floats.show(item.spot.x, item.spot.y - LABEL_ABOVE, t('heroes.healed'), { color: GOLD_COLOR });
   });
+  world.bus.on('hero:drink', ({ id, recipeId }) => {
+    const item = find(id);
+    const drink = t(textKey('recipes', recipeId, 'name'));
+    if (item !== undefined) floats.show(item.spot.x, item.spot.y - LABEL_ABOVE, t('heroes.in_bag', { drink }), { color: LOOT_COLOR, size: 16 });
+  });
+  world.bus.on('guild:aimed', ({ aimed }) => {
+    floats.show(HERO_CAULDRON.x, HERO_CAULDRON.y - 50, t(aimed ? 'heroes.cauldron_aimed' : 'heroes.cauldron_tavern'), { color: GOLD_COLOR, size: 15 });
+  });
+  const cauldron = createHeroCauldron(scene, world);
 
   return {
     update() {
+      cauldron.update();
       const state = world.store.getState();
       const now = world.clock.now();
       const picked = world.selection.selected() !== null;

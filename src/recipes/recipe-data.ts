@@ -157,6 +157,10 @@ export const tier03DungeonRecipes: readonly RecipeDef[] = [
   { id: 'pearl_mead', tier: 3, rarity: 'epic', ingredients: ['bog_pearl', 'wild_honey'], brewSeconds: 14, basePrice: 150, effect: 'luck' },
   { id: 'witchs_kiss', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'moon_grape'], brewSeconds: 15, basePrice: 170, effect: 'charm' },
   { id: 'mossy_grog', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'troll_sweat'], brewSeconds: 15, basePrice: 200, effect: 'strength' },
+  { id: 'frog_fizz', tier: 3, rarity: 'epic', ingredients: ['bog_pearl', 'swamp_slime'], brewSeconds: 13, basePrice: 140, effect: 'speed' },
+  { id: 'hex_glow', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'glowcap'], brewSeconds: 14, basePrice: 160, effect: 'luck' },
+  { id: 'pearly_moon', tier: 3, rarity: 'epic', ingredients: ['bog_pearl', 'moon_grape'], brewSeconds: 15, basePrice: 190, effect: 'charm' },
+  { id: 'witch_honey', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'wild_honey'], brewSeconds: 15, basePrice: 180, effect: 'strength' },
   {
     id: 'bog_royale',
     tier: 3,

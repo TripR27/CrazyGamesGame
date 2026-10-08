@@ -58,7 +58,8 @@ describe('an expedition to the swamp', () => {
     const returned = vi.fn();
     g.world.bus.on('hero:returned', returned);
     sendHero(g.world, 'warrior');
-    expect(g.state.heroes.warrior?.expedition).toEqual({ dungeon: 'swamp', endsAt: clock.now() + TRIP_MS });
+    expect(g.state.heroes.warrior?.expedition).toMatchObject({ dungeon: 'swamp', endsAt: clock.now() + TRIP_MS, drinks: [] });
+    expect(g.state.heroes.warrior?.expedition?.cards).toHaveLength(2);
     sendHero(g.world, 'warrior');
     clock.advance(TRIP_MS - 1);
     g.tick(100);
@@ -105,15 +106,18 @@ describe('an injured hero', () => {
     expect(g.state.heroes.warrior?.expedition).not.toBeNull();
   });
 
-  it('opens the Heroes tab when clicked with nothing picked up; a healthy hero leaves a picked drink alone', () => {
+  it('opens the Heroes tab when clicked with nothing picked up; a healthy hero puts a picked drink in the bag while there is room', () => {
     const g = newGame(famous(true));
     const requested = vi.fn();
     g.world.bus.on('heroes:requested', requested);
     clickHero(g.world, 'warrior');
     expect(requested).toHaveBeenCalledTimes(1);
-    g.world.station.ready.push('slime_sap');
-    clickReadyDrink(g.world, 0);
-    clickHero(g.world, 'warrior');
+    g.world.station.ready.push('slime_sap', 'glowcap_stout', 'slime_sap');
+    for (let i = 0; i < 3; i++) {
+      clickReadyDrink(g.world, 0);
+      clickHero(g.world, 'warrior');
+    }
+    expect(g.state.heroes.warrior?.bag).toEqual(['slime_sap', 'glowcap_stout']);
     expect(g.world.station.ready).toEqual(['slime_sap']);
     expect(requested).toHaveBeenCalledTimes(1);
   });

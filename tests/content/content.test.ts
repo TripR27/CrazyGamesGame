@@ -16,10 +16,10 @@ describe('game content', () => {
     expect(validateContent(hasKey)).toEqual([]);
   });
 
-  it('has the content of step 15b: 8 ingredients (2 from the swamp), 17 recipes, 3 customer types and a VIP', () => {
+  it('has the content of step 16: 8 ingredients (2 from the swamp), 21 recipes, 3 customer types and a VIP', () => {
     expect(ingredients).toHaveLength(8);
     expect(ingredients.filter((i) => i.source === 'dungeon:swamp')).toHaveLength(2);
-    expect(recipes).toHaveLength(17);
+    expect(recipes).toHaveLength(21);
     expect(customers.filter((c) => c.vip !== true)).toHaveLength(3);
     expect(customers.filter((c) => c.vip === true)).toHaveLength(1);
   });

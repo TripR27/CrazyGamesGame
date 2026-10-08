@@ -36,6 +36,10 @@ export interface GuideContext {
   affordableGearId: string | null;
   /** An owned piece nobody wears, and the hero at home who could put it on (in its slot). */
   gearToWear: { heroId: string; slot: string; gearId: string } | null;
+  /** The next shelf ingredient for a drink in the hero cauldron (fitting what is in it already). */
+  heroDrinkIngredient: string | null;
+  /** The choice card open right now: whose trip, and its bold option. */
+  card: { heroId: string; boldOptionId: string } | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -127,6 +131,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-hero-send': (ctx) => toTab(ctx, 'heroes') ?? (ctx.readyHeroId === null ? null : `hero-send:${ctx.readyHeroId}`),
   'guide-loot': (ctx) => (ctx.lootId === null ? null : `ingredient:${ctx.lootId}`),
   'guide-gear-buy': (ctx) => toTab(ctx, 'heroes') ?? (ctx.affordableGearId === null ? null : `gear-buy:${ctx.affordableGearId}`),
+  'guide-hero-drink': (ctx) => (ctx.heroDrinkIngredient === null ? null : `ingredient:${ctx.heroDrinkIngredient}`),
+  'guide-card': (ctx) => (ctx.card === null ? null : `card-option:${ctx.card.boldOptionId}`),
   'guide-gear-equip': (ctx) => {
     const wear = ctx.gearToWear;
     return toTab(ctx, 'heroes') ?? (wear === null ? null : `gear-slot:${wear.heroId}:${wear.slot}`);
@@ -184,7 +190,7 @@ function likedEffect(ctx: GuideContext): { effect: string; does: string } {
 export function speech(stepId: string, ctx: GuideContext): string {
   return t(textKey('tutorial', stepId, 'text'), {
     drink: name('recipes', guideRecipe(ctx)?.id),
-    ingredient: name('ingredients', nextIngredient(ctx)),
+    ingredient: name('ingredients', ctx.heroDrinkIngredient ?? nextIngredient(ctx)),
     upgrade: upgradeName(ctx.affordableUpgradeId),
     staff: upgradeName(ctx.affordableStaffId),
     liked: name('recipes', likedCustomer(ctx)?.recipeId),
@@ -194,6 +200,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
     hero: ctx.readyHeroId === null ? '' : t(textKey('heroes', ctx.readyHeroId, 'name')),
     loot: name('ingredients', ctx.lootId ?? undefined),
+    cardHero: ctx.card === null ? '' : t(textKey('heroes', ctx.card.heroId, 'name')),
     gear: ctx.affordableGearId === null ? '' : t(textKey('gear', ctx.affordableGearId, 'name')),
     slot: ctx.gearToWear === null ? '' : t(`gear.slot_${ctx.gearToWear.slot}`),
     wearer: ctx.gearToWear === null ? '' : t(textKey('heroes', ctx.gearToWear.heroId, 'name')),

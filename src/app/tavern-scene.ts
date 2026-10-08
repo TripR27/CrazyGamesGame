@@ -1,13 +1,14 @@
 import { Scene, AUTO, Game, Scale } from 'phaser';
 import type { World } from '@/app/world';
 import { drawBar, drawCauldron, drawCustomerSlots, drawRoomShell, drawShelf, drawTables } from '@/app/backdrop-view';
-import { clickCauldron, clickIngredient } from '@/brewing/brewing';
+import { clickCauldron } from '@/brewing/brewing';
 import { shelfCount, shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { createCustomersLayer, type CustomersLayer } from '@/customers/customers-view';
 import { createDecorView, type DecorView } from '@/decor/decor-view';
 import { createGuildView, type GuildView } from '@/heroes/guild-view';
+import { clickShelf } from '@/heroes/hero-brewing';
 import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
 import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
@@ -66,7 +67,8 @@ export class TavernScene extends Scene {
       shelf: createShelfView(this, {
         getShelf: () => shelfIds(world),
         getCount: (id) => shelfCount(world, id),
-        onClick: (id) => clickIngredient(world, id),
+        // Into the tavern cauldron, or into the hero cauldron while that one is picked.
+        onClick: (id) => clickShelf(world, id),
         targets: world.targets,
       }),
       cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
