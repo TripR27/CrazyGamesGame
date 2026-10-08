@@ -30,6 +30,8 @@ export interface GuideContext {
   newestDecorId: string | null;
   /** The first hero at home and fit, who can be sent on a trip. */
   readyHeroId: string | null;
+  /** The first dungeon ingredient the heroes found (it stands on the shelf). */
+  lootId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -119,6 +121,7 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-new-decor': (ctx) => (ctx.newestDecorId === null ? null : `decor:${ctx.newestDecorId}`),
   // The way to the Heroes tab first, then the send button of a hero who is ready.
   'guide-hero-send': (ctx) => toTab(ctx, 'heroes') ?? (ctx.readyHeroId === null ? null : `hero-send:${ctx.readyHeroId}`),
+  'guide-loot': (ctx) => (ctx.lootId === null ? null : `ingredient:${ctx.lootId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */
@@ -181,6 +184,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     decor: ctx.affordableDecorId === null ? '' : t(textKey('decor', ctx.affordableDecorId, 'name')),
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
     hero: ctx.readyHeroId === null ? '' : t(textKey('heroes', ctx.readyHeroId, 'name')),
+    loot: name('ingredients', ctx.lootId ?? undefined),
     ...likedEffect(ctx),
   });
 }

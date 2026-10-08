@@ -149,5 +149,24 @@ export const tier02RareRecipes: readonly RecipeDef[] = [
   },
 ];
 
+/**
+ * Drinks with a dungeon ingredient (heroes bring them back from the swamp): pricey, and each one brewed uses up one of
+ * that ingredient, so customers only order them while there is stock. Placeholder prices, tuned with the simulator.
+ */
+export const tier03DungeonRecipes: readonly RecipeDef[] = [
+  { id: 'pearl_mead', tier: 3, rarity: 'epic', ingredients: ['bog_pearl', 'wild_honey'], brewSeconds: 14, basePrice: 150, effect: 'luck' },
+  { id: 'witchs_kiss', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'moon_grape'], brewSeconds: 15, basePrice: 170, effect: 'charm' },
+  { id: 'mossy_grog', tier: 3, rarity: 'epic', ingredients: ['witch_moss', 'troll_sweat'], brewSeconds: 15, basePrice: 200, effect: 'strength' },
+  {
+    id: 'bog_royale',
+    tier: 3,
+    rarity: 'legendary',
+    ingredients: ['bog_pearl', 'witch_moss', 'fire_pepper'],
+    brewSeconds: 18,
+    basePrice: 260,
+    effect: 'speed',
+  },
+];
+
 /** New tier = new file + one spread here. */
-export const recipes: readonly RecipeDef[] = [...tier01Recipes, ...tier02Recipes, ...tier02RareRecipes];
+export const recipes: readonly RecipeDef[] = [...tier01Recipes, ...tier02Recipes, ...tier02RareRecipes, ...tier03DungeonRecipes];

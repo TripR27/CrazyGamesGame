@@ -37,6 +37,7 @@ export const heroes: Messages = {
   'dungeons.swamp.name': 'the Swamp',
   'dungeons.swamp.description': 'Frogs, mud and a grumpy witch. Heroes bring back Bog Pearl and Witch Moss.',
   'tutorial.hero_send.text': 'Heroes upstairs! Open the Heroes tab and send {hero} to the Swamp. Mud, frogs, free ingredients.',
+  'tutorial.loot_shelf.text': 'Loot! {loot} is on the shelf now. The number is how many you have: every drink with it uses one. The recipe book knows what to make.',
   'tutorial.hero_done.text':
     'Off they go. They come back on their own, even when the game is closed. Injured? Hand them a drink from the bar.',
 };

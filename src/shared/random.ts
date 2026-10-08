@@ -41,7 +41,7 @@ export function pickWeighted<T>(rng: Rng, items: readonly T[], weight: (item: T)
  * Pools of funny one-liners. A pool `served` with 4 lines means the i18n keys
  * `feedback.served.1` to `feedback.served.4` must exist (the content test checks this).
  */
-export type FeedbackPoolId = 'served' | 'wrong' | 'nothing' | 'fizzle' | 'full' | 'busy';
+export type FeedbackPoolId = 'served' | 'wrong' | 'nothing' | 'fizzle' | 'full' | 'busy' | 'empty';
 
 export interface FeedbackPool {
   id: FeedbackPoolId;
@@ -55,6 +55,7 @@ export const FEEDBACK_POOLS: readonly FeedbackPool[] = [
   { id: 'fizzle', lines: 3 },
   { id: 'full', lines: 2 },
   { id: 'busy', lines: 2 },
+  { id: 'empty', lines: 2 },
 ];
 
 /** Pick a random line from a pool, as an i18n key. Systems choose (so tests can seed it); the UI translates. */

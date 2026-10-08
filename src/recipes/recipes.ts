@@ -1,4 +1,4 @@
-import { shelfIds, ingredients as allIngredients, type IngredientDef, ownedIngredients } from '@/brewing/ingredients';
+import { usableIngredientIds, ingredients as allIngredients, type IngredientDef, isDungeon, ownedIngredients } from '@/brewing/ingredients';
 import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
@@ -44,7 +44,7 @@ export function recordDiscoveries(store: DiscoveryStore, bus: EventBus<GameEvent
 }
 
 /** What the book needs from the state (interface segregation). */
-export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation' | 'ingredientsBought'>;
+export type BookState = Pick<GameState, 'recipesDiscovered' | 'reputation' | 'ingredientsBought' | 'ingredientStock'>;
 
 /** A known recipe shows how to make it; a discoverable one a silhouette with a hint; a locked one its level. */
 export type BookEntry =
@@ -56,7 +56,7 @@ export type BookEntry =
       details: string[];
       rarity: string;
     }
-  /** `needs`: the shop ingredients still to buy before it can be discovered, or undefined when none are missing. */
+  /** `needs`: the ingredients still to buy or find before it can be discovered, or undefined when none are missing. */
   | { kind: 'hidden'; id: string; hint: string; rarity: string; needs?: string }
   | { kind: 'locked'; id: string; unlock: string };
 
@@ -84,10 +84,20 @@ function knownEntry(r: RecipeDef): BookEntry {
   };
 }
 
-/** "Needs Fire Pepper from the shop" for a recipe whose ingredients are not all on the shelf yet. */
-function needsLine(r: RecipeDef, owned: readonly string[]): string | undefined {
-  const missing = r.ingredients.filter((id) => !owned.includes(id)).map((id) => text('ingredients', id, 'name'));
-  return missing.length === 0 ? undefined : t('book.needs', { ingredients: missing.join(', ') });
+/**
+ * "Needs Fire Pepper from the shop" for a recipe whose ingredients are not all on the shelf yet, and "Needs ? from a
+ * dungeon" for a dungeon ingredient the player never found (its name stays a secret until then).
+ */
+function needsLine(r: RecipeDef, owned: readonly string[], ingredients: readonly IngredientDef[]): string | undefined {
+  const missing = r.ingredients.filter((id) => !owned.includes(id));
+  const fromDungeon = (id: string): boolean => ingredients.some((i) => i.id === id && isDungeon(i));
+  const shop = missing.filter((id) => !fromDungeon(id)).map((id) => text('ingredients', id, 'name'));
+  const dungeon = missing.filter(fromDungeon).map(() => t('book.unknown_ingredient'));
+  const lines = [
+    ...(shop.length === 0 ? [] : [t('book.needs', { ingredients: shop.join(', ') })]),
+    ...(dungeon.length === 0 ? [] : [t('book.needs_dungeon', { ingredients: dungeon.join(', ') })]),
+  ];
+  return lines.length === 0 ? undefined : lines.join(' · ');
 }
 
 /** Every recipe as the book shows it, in content order, with the X/N progress on top. */
@@ -104,7 +114,7 @@ export function toBookView(
     if (state.recipesDiscovered.includes(r.id)) return knownEntry(r);
     const at = unlockIndex(r.id);
     if (at !== -1 && at < level) {
-      const needs = needsLine(r, owned);
+      const needs = needsLine(r, owned, ingredients);
       return { kind: 'hidden', id: r.id, hint: text('recipes', r.id, 'hint'), rarity: r.rarity, ...(needs === undefined ? {} : { needs }) };
     }
     const name = at === -1 ? t('book.unknown') : text('reputation', levels[at]?.id ?? '', 'name');
@@ -114,7 +124,7 @@ export function toBookView(
   return { progress: t('book.progress', { found, total: recipes.length }), entries };
 }
 
-/** Recipes the player could discover now: level reached and every ingredient on the shelf. */
+/** Recipes the player could discover now: level reached and every ingredient on the shelf (dungeon ones in stock). */
 export function discoverableNow(world: Pick<World, 'store' | 'content'>): readonly RecipeDef[] {
-  return discoverableRecipes(world.store.getState(), world.content.recipes, shelfIds(world));
+  return discoverableRecipes(world.store.getState(), world.content.recipes, usableIngredientIds(world));
 }

@@ -51,11 +51,11 @@ export const DOOR_ENTRY: Point = { x: 115, y: FLOOR_Y + 20 };
 export const BAR: Rect = { x: 860, y: 470, w: 380, h: FLOOR_Y - 470 };
 export const CAULDRON: Rect = { x: 700, y: 440, w: 120, h: FLOOR_Y - 440 };
 
-/** Wall shelf with the ingredients; each slot is where an ingredient sits (centre). */
-export const SHELF: Rect = { x: 300, y: 300, w: 440, h: 10 };
-const SHELF_FIRST_X = 340;
-export const SHELF_GAP = 72;
-const SHELF_SLOTS = 6;
+/** Wall shelf with the ingredients; each slot is where an ingredient sits (centre). Six from the shop, two from the swamp. */
+export const SHELF: Rect = { x: 236, y: 300, w: 544, h: 10 };
+const SHELF_FIRST_X = 270;
+export const SHELF_GAP = 68;
+const SHELF_SLOTS = 8;
 export const INGREDIENT_SLOTS: readonly Point[] = Array.from({ length: SHELF_SLOTS }, (_, i) => ({
   x: SHELF_FIRST_X + i * SHELF_GAP,
   y: SHELF.y - 22,

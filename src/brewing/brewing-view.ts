@@ -13,7 +13,13 @@ const COLORS: Readonly<Record<string, number>> = {
   fire_pepper: 0xe2563b,
   moon_grape: 0x7a5fd1,
   troll_sweat: 0x9aa86a,
+  bog_pearl: 0xe8e4f0,
+  witch_moss: 0x3f7a4a,
 };
+
+/** A dungeon ingredient that ran out stays on the shelf, greyed out. */
+const EMPTY_COLOR = 0x6b6b6b;
+const COUNT_STYLE = { fontFamily: 'sans-serif', fontSize: '12px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 3, y: 1 } };
 
 const FALLBACK = 0xcccccc;
 
@@ -79,8 +85,16 @@ const LABEL_STYLE = {
 };
 
 export interface ShelfView {
-  /** Rebuilds the shelf when the set of ingredients changed. Call every frame. */
+  /** Rebuilds the shelf when the set of ingredients changed, and keeps the stock counts up to date. Call every frame. */
   update(): void;
+}
+
+/** A dungeon ingredient's stock on the shelf: a small count on the jar, and grey when it ran out. */
+interface Counter {
+  id: string;
+  dot: GameObjects.Arc;
+  text: GameObjects.Text;
+  shown: number;
 }
 
 function createItem(scene: Scene, id: string, slot: { x: number; y: number }, onClick: (id: string) => void) {
@@ -95,22 +109,39 @@ function createItem(scene: Scene, id: string, slot: { x: number; y: number }, on
     onClick(id);
     scene.tweens.add({ targets: dot, scale: { from: 1.3, to: 1.12 }, duration: 120 });
   });
-  return [dot, label];
+  return { dot, label };
 }
 
-/** The clickable ingredients on the wall shelf. */
-export function createShelfView(
-  scene: Scene,
-  getShelf: () => readonly string[],
-  onClick: (ingredientId: string) => void,
-  targets: TargetRegistry,
-): ShelfView {
+function createCounter(scene: Scene, id: string, dot: GameObjects.Arc): Counter {
+  const text = scene.add.text(dot.x + RADIUS - 4, dot.y - RADIUS + 2, '', COUNT_STYLE).setOrigin(0.5);
+  return { id, dot, text, shown: -1 };
+}
+
+function showCount(counter: Counter, n: number): void {
+  if (n === counter.shown) return;
+  counter.shown = n;
+  counter.text.setText(t('shelf.count', { n }));
+  counter.dot.setFillStyle(n > 0 ? ingredientColor(counter.id) : EMPTY_COLOR).setAlpha(n > 0 ? 1 : 0.6);
+}
+
+export interface ShelfDeps {
+  getShelf(): readonly string[];
+  /** The stock of a dungeon ingredient, or null for one that never runs out. */
+  getCount(ingredientId: string): number | null;
+  onClick(ingredientId: string): void;
+  targets: TargetRegistry;
+}
+
+/** The clickable ingredients on the wall shelf; dungeon ingredients show how many are left. */
+export function createShelfView(scene: Scene, { getShelf, getCount, onClick, targets }: ShelfDeps): ShelfView {
   let shown = '';
   let objects: GameObjects.GameObject[] = [];
   let unregister: Array<() => void> = [];
+  let counters: Counter[] = [];
 
   return {
     update() {
+      for (const counter of counters) showCount(counter, getCount(counter.id) ?? 0);
       const ids = getShelf().slice(0, INGREDIENT_SLOTS.length);
       const key = ids.join(',');
       if (key === shown) return;
@@ -122,10 +153,13 @@ export function createShelfView(
         const bounds = slot && { x: slot.x - RADIUS, y: slot.y - RADIUS, w: RADIUS * 2, h: RADIUS * 2 };
         return bounds ? [targets.register(`ingredient:${id}`, () => bounds)] : [];
       });
-      objects = ids.flatMap((id, i) => {
+      const items = ids.flatMap((id, i) => {
         const slot = INGREDIENT_SLOTS[i];
-        return slot === undefined ? [] : createItem(scene, id, slot, onClick);
+        return slot === undefined ? [] : [{ id, ...createItem(scene, id, slot, onClick) }];
       });
+      counters = items.filter(({ id }) => getCount(id) !== null).map(({ id, dot }) => createCounter(scene, id, dot));
+      objects = [...items.flatMap(({ dot, label }) => [dot, label]), ...counters.map((c) => c.text)];
+      for (const counter of counters) showCount(counter, getCount(counter.id) ?? 0);
     },
   };
 }

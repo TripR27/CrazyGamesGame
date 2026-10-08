@@ -1,13 +1,14 @@
 import { type World, createWorld } from '@/app/world';
 import { clickIngredient } from '@/brewing/brewing';
-import { buyIngredientById, firstBuyableIngredient } from '@/brewing/ingredients';
+import { brewableRecipes, buyIngredientById, firstBuyableIngredient } from '@/brewing/ingredients';
 import { discoverableNow } from '@/recipes/recipes';
 import { waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor, getMultipliers } from '@/economy/upgrades';
+import { HERO_CLASSES, hireHeroById, hireOffer, readyHeroId, sendHero } from '@/heroes/heroes';
 import { t } from '@/i18n/translator';
-import { recipes, type RecipeDef } from '@/recipes/recipe-data';
+import type { RecipeDef } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, levelFor } from '@/reputation/reputation';
 import { ROOMS, buildRoomById, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
 import { clickCustomer } from '@/serving/serving';
@@ -68,6 +69,7 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     once(`decor:${id}`, `bought ${name('decor', id)}`);
   });
   bus.on('hero:recruited', ({ id }) => once(`hero:${id}`, `hero ${name('heroes', id)} joined`));
+  bus.on('hero:returned', ({ id }) => once(`returned:${id}`, `${name('heroes', id)} back from the swamp`));
   return timeline;
 }
 
@@ -93,8 +95,8 @@ function upgradeBudget(state: GameState): Num {
 
 /**
  * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
- * then a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up for it (it only buys
- * what costs a small share of the room). Returns true when it bought something.
+ * then a hero to hire, a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up for
+ * it (it only buys what costs a small share of the room). Returns true when it bought something.
  */
 export function shopOnce(world: World, state: GameState): boolean {
   const ingredient = firstBuyableIngredient(state, world.content);
@@ -108,6 +110,14 @@ export function shopOnce(world: World, state: GameState): boolean {
     return true;
   }
   const budget = upgradeBudget(state);
+  const hero = HERO_CLASSES.find((def) => {
+    const offer = hireOffer(state, def);
+    return offer.affordable && offer.cost.lte(budget);
+  });
+  if (hero !== undefined) {
+    hireHeroById(world, hero.id);
+    return true;
+  }
   const decor = firstBuyableDecor(state, DECORATIONS);
   if (decor !== undefined && num(decor.buy.cost).lte(budget)) {
     buyDecorById(world, decor.id);
@@ -133,12 +143,21 @@ const fits = (contents: readonly string[], r: RecipeDef): boolean => contents.ev
 /** What to brew next: a recipe to discover first (players try new ones soon), then what a waiting customer wants. */
 function targetRecipe(world: World, state: GameState): RecipeDef | undefined {
   const { station, floor } = world;
-  const known = recipes.filter((r) => state.recipesDiscovered.includes(r.id));
+  // Drinks with a dungeon ingredient only while it is in stock.
+  const known = brewableRecipes(state, world.content);
   const wanted = waitingCustomers(floor)
     .map((c) => known.find((r) => r.id === c.recipeId))
     .filter((r): r is RecipeDef => r !== undefined && !station.ready.includes(r.id));
   const options = [...discoverableNow(world), ...wanted];
   return options.find((r) => fits(station.contents, r));
+}
+
+/** Sends a hero who is home and fit to the swamp (one click). */
+function sendReadyHero(world: World, state: GameState): boolean {
+  const id = readyHeroId(state, world.clock.now());
+  if (id === undefined) return false;
+  sendHero(world, id);
+  return true;
 }
 
 function serveReady(world: World): boolean {
@@ -163,7 +182,7 @@ export function createBot(world: World, options: BotOptions): Bot {
   return {
     act() {
       const state = store.getState();
-      if (serveReady(world) || brewNext(world, state)) return;
+      if (serveReady(world) || brewNext(world, state) || sendReadyHero(world, state)) return;
       if (options.buys) shopOnce(world, state);
     },
   };

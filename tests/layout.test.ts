@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BAR, BUILDING, CAULDRON, CUSTOMER_SLOTS, DECOR_SPOTS, DOOR, FLOOR_Y, GROUND_Y, HUD_HEIGHT, INGREDIENT_SLOTS, READY_SLOTS, SHELF, TABLES, type Rect, ROOM_SPOTS, SEAT_SLOTS, UPPER_FLOOR_Y } from '@/app/layout';
+import { ingredients } from '@/brewing/ingredients';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { upgrades } from '@/economy/upgrade-data';
 import { getMultipliers } from '@/economy/upgrades';
@@ -49,8 +50,8 @@ describe('tavern layout', () => {
     );
   });
 
-  it('has room on the shelf for six ingredients, all resting on the shelf plank', () => {
-    expect(INGREDIENT_SLOTS).toHaveLength(6);
+  it('has room on the shelf for every ingredient, all resting on the shelf plank', () => {
+    expect(INGREDIENT_SLOTS.length).toBeGreaterThanOrEqual(ingredients.length);
     for (const slot of INGREDIENT_SLOTS) {
       expect(slot.x - 22).toBeGreaterThanOrEqual(SHELF.x);
       expect(slot.x + 22).toBeLessThanOrEqual(SHELF.x + SHELF.w);

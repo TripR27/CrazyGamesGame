@@ -5,10 +5,11 @@ import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
 import type { DecorDef } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
+import { GUILD_ROOM_ID } from '@/heroes/heroes';
 import { hasKey } from '@/i18n/translator';
 import { recipes, STARTER_RECIPE_IDS, type RecipeDef } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
-import type { RoomDef } from '@/rooms/rooms';
+import { ROOMS, type RoomDef } from '@/rooms/rooms';
 import { EFFECTS } from '@/shared/content';
 
 describe('game content', () => {
@@ -16,9 +17,10 @@ describe('game content', () => {
     expect(validateContent(hasKey)).toEqual([]);
   });
 
-  it('has the content of step 12: 6 ingredients, 13 recipes, 3 customer types and a VIP', () => {
-    expect(ingredients).toHaveLength(6);
-    expect(recipes).toHaveLength(13);
+  it('has the content of step 15b: 8 ingredients (2 from the swamp), 17 recipes, 3 customer types and a VIP', () => {
+    expect(ingredients).toHaveLength(8);
+    expect(ingredients.filter((i) => i.source === 'dungeon:swamp')).toHaveLength(2);
+    expect(recipes).toHaveLength(17);
     expect(customers.filter((c) => c.vip !== true)).toHaveLength(3);
     expect(customers.filter((c) => c.vip === true)).toHaveLength(1);
   });
@@ -44,10 +46,13 @@ describe('game content', () => {
     expect([...covered].sort()).toEqual([...EFFECTS].sort());
   });
 
-  it('only unlocks recipes whose shop ingredients can be bought by that level', () => {
+  it('only unlocks recipes whose ingredients can be had by that level: bought in the shop, or found by heroes', () => {
+    // Heroes move in with the guild hall, so dungeon ingredients can be found from its level on.
+    const heroLevel = ROOMS.find((room) => room.id === GUILD_ROOM_ID)?.buy.level ?? Infinity;
     const available = (id: string, level: number): boolean => {
       const def = ingredients.find((i) => i.id === id);
-      return def !== undefined && def.source === 'shop' && (def.buy?.level ?? 1) <= level;
+      if (def === undefined) return false;
+      return def.source === 'shop' ? (def.buy?.level ?? 1) <= level : heroLevel <= level;
     };
     const tooEarly = REPUTATION_LEVELS.flatMap((l, i) =>
       (l.unlocks ?? []).filter((id) => !(recipes.find((r) => r.id === id)?.ingredients ?? []).every((ing) => available(ing, i + 1))),

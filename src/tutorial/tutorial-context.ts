@@ -72,6 +72,8 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'hero:recruited': ({ store }) => Object.keys(store.getState().heroes).length > 0,
   // A hero who travelled before the hint's turn: the hint shows and is done at once (see heroLesson).
   'hero:departed': ({ store }) => anyHeroTravelled(store.getState()),
+  // Loot found before (this session or an earlier one): the dungeon ingredient is on the shelf already.
+  'hero:returned': ({ store }) => Object.keys(store.getState().ingredientStock).length > 0,
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -133,6 +135,7 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients 
     affordableDecorId: firstBuyableDecor(store.getState(), DECORATIONS)?.id ?? null,
     newestDecorId: store.getState().decorBought.at(-1) ?? null,
     readyHeroId: readyHeroId(store.getState(), clock.now()) ?? null,
+    lootId: Object.keys(store.getState().ingredientStock)[0] ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

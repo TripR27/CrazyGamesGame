@@ -161,7 +161,7 @@ describe('adding an ingredient', () => {
 const catalog = { ingredients, recipes: allRecipes };
 const pepper = ingredients.find((i) => i.id === 'fire_pepper');
 const state = (over: Partial<IngredientShopState> = {}): IngredientShopState => ({
-  reputation: 0, currencies: { gold: num(0) }, ingredientsBought: [], recipesDiscovered: ['slime_sap', 'glowcap_stout'], ...over,
+  reputation: 0, currencies: { gold: num(0) }, ingredientsBought: [], recipesDiscovered: ['slime_sap', 'glowcap_stout'], ingredientStock: {}, ...over,
 });
 const owned = (s: IngredientShopState): string[] => ownedIngredients(s, ingredients, allRecipes).map((i) => i.id);
 
