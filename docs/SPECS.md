@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** stap 15c en 16 (de eigenaar vroeg door te werken tot en met stap 16; 15b staat op `step-15b-dungeon-ingredients`, nog niet gemerged). **Laatst afgerond stap:** 15b (Kerker-ingrediënten als voorraad en nieuwe recepten). **Volgende stap:** 15c (Uitrusting). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** stap 16 (de eigenaar vroeg door te werken tot en met stap 16; 15b en 15c staan op `step-15b-dungeon-ingredients` en `step-15c-gear`, op elkaar gebouwd en nog niet gemerged). **Laatst afgerond stap:** 15c (Uitrusting). **Volgende stap:** 16 (Heldenketel, drankjes meegeven en keuzekaartjes). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -39,7 +39,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 14d | Night Shift: offline verdienen kopen | ✅ | `step-14d-night-shift` |
 | 15a | Gildekamer, helden en eerste expeditie | ✅ | `step-15a-guild-heroes` |
 | 15b | Kerker-ingrediënten als voorraad en nieuwe recepten | ✅ | `step-15b-dungeon-ingredients` |
-| 15c | Uitrusting | ⬜ | |
+| 15c | Uitrusting | ✅ | `step-15c-gear` |
 | 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ⬜ | |
 | 16b | Baasgevecht (timing-minigame) | ⬜ | |
 | 16c | Quartermaster: helden op auto en offline | ⬜ | |
@@ -220,7 +220,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -416,6 +416,16 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Tutorial-hint** (les `loot`, na de heldenles): zodra een held voor het eerst buit thuisbrengt (`hero:returned`, of meteen als er al buit is), wijst de ketel het ingrediënt op het schap aan en legt de teller en het verbruik uit, met een verwijzing naar het boek (alias `guide-loot`, 8 s).
 - **Simulator:** de bot stuurt een held die thuis en fit is op pad (één klik), huurt de magiër zodra die binnen zijn budget past, en brouwt een kerkerdrankje alleen met voorraad. De tijdlijn toont "Brakka back from the swamp".
 
+**Gebouwd in stap 15c (Uitrusting; getallen gekozen door Claude):**
+- **Code:** `heroes/gear.ts` (data, regels en acties), de effecten in `heroes/heroes.ts`, de vakken en de winkel in het tabblad (`heroes-model.ts`, `heroes-view.ts`). `GUILD_ROOM_ID` staat nu in `rooms/rooms.ts` (zo importeren helden en uitrusting hem zonder kring).
+- **Vier vakken, elk met een rol** (`gearPower`): **zwaard** = meer buit (het aantal trekkingen ×(1 + kracht); het deel van een trekking dat overblijft is de kans op nog één), **schild** = minder kans op gewond (×(1 − kracht)), **helm** = kortere tocht (×(1 − kracht)), **amulet** = meegegeven drankjes werken sterker (werkt vanaf stap 16, als er drankjes meegaan).
+- **Stukken** (`GEAR`): te koop voor 4.000 elk zodra de gildekamer staat: Rusty Sword (+25% buit), Wooden Shield (30% minder kans op gewond), Leather Cap (tocht 15% korter), Lucky Charm (drankjes 25% sterker). Alleen als buit: Swamp Cleaver (+60%), Frog-Skin Shield (60%), Mudwalker Helm (30%), Witch's Eye (60%). Elk stuk één keer; een gekocht stuk verdwijnt uit de winkel.
+- **Buit:** het Moeras geeft per tocht 6% kans op een stuk dat de speler nog niet heeft (`gearChance`, `gearDrops` met gewichten). In de scene zweeft "Found: Swamp Cleaver!".
+- **Dragen:** per held per vak een keuzelijst in het tabblad (`equipGear`). Een stuk draagt één held; kies je het voor een andere held die thuis is, dan schuift het over. Een held op tocht houdt zijn uitrusting, en zijn stukken worden de anderen niet aangeboden. Wisselen kan alleen thuis (ook gewond).
+- **State:** `gearOwned` (lijst) en per held `gear` (vak → stuk). Een held uit een oudere save krijgt de ontbrekende velden bij het starten (`completeHeroes`), omdat `reconcile` een open map zoals `heroes` ongemoeid laat.
+- **Tutorial-hint** (les `gear`, na de buitles): start zodra een stuk te koop én betaalbaar is; wijst Menu, het tabblad Heroes en de koopknop aan, daarna de keuzelijst van het vak bij een held thuis (aliassen `guide-gear-buy` en `guide-gear-equip`). Beide stappen tellen alleen in beeld (uitrusting is te koop voordat de les aan de beurt is); wie al iets kocht of droeg, is meteen klaar.
+- **Simulator:** de bot koopt een stuk als het binnen zijn budget past (na de kamers en het huren) en trekt een stuk aan als een held thuis een leeg of zwakker vak heeft (`gearToWear`: nooit heen en weer wisselen). De tijdlijn toont "bought Rusty Sword" en "found Swamp Cleaver".
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -470,10 +480,10 @@ Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
 Decor      { id, buy: { level, cost }, effects: UpgradeEffect[] }          // stap 14b; tekst decor.<id>.name/.description
 HeroClass  { id, hire: { cost } | 'withGuildRoom' }   // stap 15a (bossPower en potionPower komen in 16 en 16b); tekst heroes.<id>.name/.class/.tagline
-Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15c; zonder buy: alleen buit
-Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearDrops, cards: Card[], boss }   // 15a (tot en met drops), 15c en 16
+Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15c (gebouwd); zonder buy: alleen buit; tekst gear.<id>.name
+Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearChance, gearDrops: { gear, weight }[], cards: Card[], boss }   // 15a, 15c (gearChance, gearDrops) en 16
 Card       { id, options: { id, default?, outcome }[] }   // stap 16; outcome: duur, buit, kans gewond
-// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt } | null } (gebouwd in 15a; later gear per vak, bag, auto, choices),
+// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt } | null, gear: { [vak]: gear id } } (15a, gear in 15c; later bag, auto, choices),
 // ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
 ```
 
@@ -627,7 +637,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* de gildekamer is te bouwen en toont de helden, een held gaat op expeditie en komt (ook na herladen of offline) terug met ingrediënten en XP, de simulator haalt nog de tempodoelen, tests slagen.
 - [x] **Stap 15b: Kerker-ingrediënten als voorraad en nieuwe recepten.** Bog Pearl en Witch Moss in de ingrediëntentabel; het schap toont een kerker-ingrediënt met het aantal (grijs bij 0), brouwen verbruikt er een, klanten bestellen zo'n recept alleen bij voorraad, de brouwer gebruikt ze alleen voor zo'n bestelling, offline telt ze niet mee, en in het boek staat een nooit gevonden ingrediënt als "?". 3-4 nieuwe dure recepten op niveau 5 en 6. Daarna `npm run simulate` (eventueel met een bot die helden stuurt). Tutorial-hint: eerste recept met een kerker-ingrediënt.
   *Klaar wanneer:* een recept met een kerker-ingrediënt verbruikt voorraad en wordt zonder voorraad niet besteld, het schap toont het aantal, de simulator haalt nog de tempodoelen, tests slagen.
-- [ ] **Stap 15c: Uitrusting.** Vier vakken (zwaard, schild, helm, amulet), elk met een eigen rol. Simpele stukken te koop in het tabblad Heroes; betere stukken als buit uit het Moeras. Aan- en uittrekken als de held thuis is. Tutorial-hint: eerste uitrusting.
+- [x] **Stap 15c: Uitrusting.** Vier vakken (zwaard, schild, helm, amulet), elk met een eigen rol. Simpele stukken te koop in het tabblad Heroes; betere stukken als buit uit het Moeras. Aan- en uittrekken als de held thuis is. Tutorial-hint: eerste uitrusting.
   *Klaar wanneer:* elk vak merkbaar zijn rol doet, gekochte en gevonden stukken te dragen zijn, tests slagen.
 - [ ] **Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes.** De tweede ketel in de gildekamer (ketel aanklikken, dan ingrediënten; het schap springt daarna terug). Drankjes gaan in de rugzak (max 2), of van de bar naar de held. De vier drankeffecten krijgen elk een rol op expeditie; de magiër haalt er meer uit. 2 keuzekaartjes per expeditie met een standaardkeuze na ~10 s. Receptencontent naar ~20 tot 30. Tutorial-hint: eerste heldendrankje en eerste kaartje.
   *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
@@ -676,6 +686,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 15c: Uitrusting (2026-10-08, `step-15c-gear`)
+- **Gedaan:** (code in `src/heroes/gear.ts` (nieuw), `heroes.ts`, `heroes-model.ts`, `heroes-view.ts`, `heroes.css`, `guild-view.ts`, `src/rooms/rooms.ts` (`GUILD_ROOM_ID`), `src/shared/` (state, events, purchases, content), `src/tutorial/`, `src/i18n/en-heroes.ts`, `src/app/world.ts` en `src/dev/simulator.ts`; tests in `tests/gear.test.ts` (nieuw) en de validator in `tests/content/validate-content.ts`)
+  - **Vakken, stukken, buit, dragen, state, tutorial-hint en simulator:** zie hoofdstuk 4, Helden ("Gebouwd in stap 15c").
+  - **Validator:** een gear-tabel (bestaand vak, kracht positief, bij schild en helm onder 1, prijs positief) en bij een kerker een kans van 0 tot 1 en `gearDrops` die alleen naar buit-stukken wijzen.
+  - 10 tests erbij (468 totaal): kopen (niet zonder gildekamer, buit-stukken nooit), dragen, overschuiven en afdoen, niets wijzigen bij een held op tocht, het voorstel voor de bot, oudere helden aanvullen, wat elk vak doet (zwaard, schild, helm), een gevonden stuk, het tabblad (winkel en keuzelijsten) en de les.
+- **Waarom (keuzes):** de eigenaar liet de getallen aan Claude. Simpele stukken kosten 4.000: met 2.500 kocht de bot alle vier binnen twee minuten na de gildekamer (onder 10% van de VIP Lounge, waarvoor hij spaart); nu komen ze kort na de lounge. Een vindkans van 15% gaf alle vier de buit-stukken vóór minuut 40; met 6% vindt een run van een uur er meestal één. Het amulet hoort bij drankjes, die pas in stap 16 meegaan; het stuk is er nu al zodat de vier vakken compleet zijn. Een keuzelijst per vak is de eenvoudigste bediening voor twee helden en acht stukken.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels (`heroes/heroes.ts` 284). Simulator 60 minuten (seeds 1/2/3): eerste 20 minuten ongewijzigd; VIP Lounge 25:28 / 25:47 / 26:36; de vier simpele stukken gekocht tussen 26:31 en 29:40; Mildred 30:38 / 30:46 / 31:23; gevonden: Mudwalker Helm 42:02, Swamp Cleaver 53:22, Witch's Eye 40:58; goud op minuut 60 283K / 338K / 105K. Idle over seeds 1 t/m 9: 28 / 30 / 28 / 38 / 37 / 30 / 24 / 30 / 31%, gemiddeld 30,7% (15b: 31,6%), dus nog binnen het doel maar aan de onderkant: met uitrusting brengt actief spelen meer kerkerdrankjes. In de browser (testsave met gildekamer, twee helden en een Swamp Cleaver; oorspronkelijke save daarna teruggezet): het tabblad toont per held de vier vakken en onder de helden "Gear for sale" met vier stukken; Rusty Sword kopen (20K naar 16K) haalde hem uit de winkel; de Swamp Cleaver in de lijst van Mildred kiezen schoof hem van Brakka naar Mildred, en de lijsten tonen "(on Mildred)" en "(on Brakka)". Geen nieuwe consolefouten.
+- **Afwijkingen van het plan:** het amulet doet pas iets vanaf stap 16 (drankjes meegeven). "Per kerker is iets anders handig" komt met meer kerkers; met alleen het Moeras helpt elk vak. Verder geen.
+- **Nu te proberen:** bouw de gildekamer, koop in het tabblad Heroes een Rusty Sword en kies hem in de lijst Sword van Brakka. Stuur hem op pad en tel de buit.
+- **Nog te doen / volgende stap:** stap 16, Heldenketel, drankjes meegeven en keuzekaartjes (daar gaat het amulet werken). Idle zit aan de onderkant van het doel; bij 16c (Quartermaster) meenemen.
 
 ### Stap 15b: Kerker-ingrediënten als voorraad en nieuwe recepten (2026-10-08, `step-15b-dungeon-ingredients`)
 - **Gedaan:** (code in `src/brewing/ingredients.ts`, `brewing.ts`, `brewing-view.ts`, `src/recipes/` (data en boek), `src/reputation/reputation.ts`, `src/app/` (world, layout, tavern-scene), `src/offline/offline.ts`, `src/tutorial/` (nieuw: `tutorial-later-steps.ts`), `src/shared/` (events, random), `src/i18n/` en `src/dev/simulator.ts`; tests in `tests/flows/stock-flow.test.ts` (nieuw) en aangepaste tests voor content, layout, boek en winkel)
