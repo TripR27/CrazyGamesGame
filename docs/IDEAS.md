@@ -44,7 +44,7 @@ Night Shift zelf (kopen en upgraden) is gebouwd in stap 14d (SPECS.md, hoofdstuk
 
 ## 4. Helden: nog open
 
-De heldenlaag is uitgewerkt met de eigenaar (SPECS.md, hoofdstuk 4, Helden, en stap 15a t/m 16c). Nog open:
+De heldenlaag is uitgewerkt met de eigenaar (SPECS.md, hoofdstuk 4, Helden, en stap 15a t/m 16c; 15a is gebouwd). Nog open:
 - Hoe een held er in pixel art uitziet (stap 21).
 - Later: de boogschutter en de schurk als extra klassen, en diepere kerkers (Grot, Vulkaan, Sterrentoren, Drakenhol uit GAME_ANALYSE 5.5).
 
