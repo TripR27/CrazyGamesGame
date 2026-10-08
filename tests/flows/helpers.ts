@@ -5,6 +5,7 @@ import { createWorld } from '@/app/world';
 import { createEventBus, type GameEvents } from '@/shared/events';
 import { createSeededRng } from '@/shared/random';
 import { createInitialState, type GameState, createStore } from '@/shared/state';
+import type { Clock } from '@/shared/time';
 import { nextIngredient, readyCustomerId, readyDrinkSlot } from '@/tutorial/tutorial-guide';
 
 /** A fresh state in which the player already bought the seats, so more than one customer can sit. */
@@ -14,10 +15,11 @@ export function withSeats(levels = 6): GameState {
   return state;
 }
 
-export function newGame(state: GameState = createInitialState(0)) {
+/** A real world; pass a clock to control wall-clock time (hero trips end at an absolute time). */
+export function newGame(state: GameState = createInitialState(0), clock?: Clock) {
   const bus = createEventBus<GameEvents>();
   const store = createStore(state);
-  const world = createWorld({ store, bus, rng: createSeededRng(4) });
+  const world = createWorld({ store, bus, rng: createSeededRng(4), clock });
   const saves = vi.fn();
   bus.on('saveRequested', saves);
   const tick = (ms: number): void => {

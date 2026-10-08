@@ -1,0 +1,35 @@
+/* The Heroes tab of the side panel. Sizes are design pixels; placeholder styling until the art pass. */
+.heroes-panel { overflow-y: auto; }
+.heroes-title { margin: 0 0 8px; font-size: 20px; }
+.heroes-no-guild { margin: 0 0 8px; font-size: 14px; line-height: 1.3; }
+.heroes-no-guild[hidden] { display: none; }
+.heroes-stock-title[hidden] { display: none; }
+.heroes-stock-title { margin: 6px 0 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.heroes-stock { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
+.heroes-stock-item { padding: 3px 8px; border: 2px solid #d8c18a; border-radius: 8px; background: #fffdf3; font-size: 13px; }
+
+.heroes-list { display: flex; flex-direction: column; gap: 8px; }
+.hero-card { padding: 8px 10px; border: 2px solid #d8c18a; border-radius: 10px; background: #fffdf3; }
+.hero-card[hidden] { display: none; }
+.hero-head { display: flex; justify-content: space-between; gap: 8px; font-size: 16px; }
+.hero-level { font-size: 13px; opacity: 0.75; }
+.hero-tagline { margin: 2px 0 6px; font-size: 13px; font-style: italic; line-height: 1.25; }
+.hero-xp-bar { position: relative; height: 16px; border: 2px solid #5e3a18; border-radius: 6px; background: #e6dcc0; overflow: hidden; }
+.hero-xp-bar[hidden] { display: none; }
+.hero-xp-fill { height: 100%; background: #b36bff; }
+.hero-xp { position: absolute; inset: 0; font-size: 11px; line-height: 16px; text-align: center; }
+.hero-status { margin: 6px 0; font-size: 13px; line-height: 1.25; }
+
+.hero-button {
+  width: 100%;
+  padding: 8px 6px;
+  border: 2px solid #3d6b22;
+  border-radius: 10px;
+  background: #8fd45f;
+  color: #1f3a10;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.hero-button:hover:not(:disabled) { background: #a6e676; }
+.hero-button:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }

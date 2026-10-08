@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets (stap 14d staat op `step-14d-night-shift` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 14d (Night Shift: offline verdienen kopen). **Volgende stap:** 15a (Gildekamer, helden en eerste expeditie). De heldenlaag is uitgewerkt met de eigenaar (hoofdstuk 4, Helden; chore `chore-heroes-design`).
+**Nu bezig:** niets (stap 15a staat op `step-15a-guild-heroes` klaar om te mergen na akkoord van de eigenaar). **Laatst afgerond stap:** 15a (Gildekamer, helden en eerste expeditie). **Volgende stap:** 15b (Kerker-ingrediënten als voorraad en nieuwe recepten). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -37,8 +37,9 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 14b | Decoraties (goud-sink) | ✅ | `step-14b-decorations` |
 | 14c | Legenda van effecten in het receptenboek | ✅ | `step-14c-effect-legend` |
 | 14d | Night Shift: offline verdienen kopen | ✅ | `step-14d-night-shift` |
-| 15a | Gildekamer, helden en eerste expeditie | ⬜ | |
-| 15b | Uitrusting | ⬜ | |
+| 15a | Gildekamer, helden en eerste expeditie | ✅ | `step-15a-guild-heroes` |
+| 15b | Kerker-ingrediënten als voorraad en nieuwe recepten | ⬜ | |
+| 15c | Uitrusting | ⬜ | |
 | 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ⬜ | |
 | 16b | Baasgevecht (timing-minigame) | ⬜ | |
 | 16c | Quartermaster: helden op auto en offline | ⬜ | |
@@ -132,7 +133,7 @@ main.ts
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
-                  reputation/ offline/ tutorial/   (later heroes/ prestige/ achievements/ audio/ platform/)
+                  reputation/ offline/ tutorial/ heroes/   (later prestige/ achievements/ audio/ platform/)
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
@@ -157,11 +158,11 @@ crazyGamesGame/
                             browser.ts (loop-driver, autosave, localStorage; de enige browser-koppeling)
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
-    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/
+    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
-    i18n/                   translator.ts, en.ts (later nl.ts)
+    i18n/                   translator.ts, en.ts (met en-shop.ts en en-heroes.ts per gebied; later nl.ts)
     dev/                    simulator.ts, simulator-report.ts
   tests/                    één bestand per feature (spiegelt de featuremappen); flows/ (spelen in de echte `World`), content/ (validatie van de data-tabellen), fixtures.ts
 ```
@@ -172,7 +173,7 @@ Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: 
 
 `createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, decoraties, ingrediënten) en is in tests te vervangen door een kleine catalogus. Spelersacties en dingen die de views nodig hebben zijn gewone functies per feature die `world` krijgen (of met `Pick<World, ...>` alleen de delen die ze gebruiken, zodat tests geen volledige wereld hoeven te bouwen): `clickIngredient`, `buyUpgradeById`, `clickCustomer`, `shelfIds`, `roomOfferById`. Rekenfuncties (prijs, kosten, niveau, `matchRecipe`) blijven puur en nemen waarden.
 
-**Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel. De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
+**Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel, helden (sinds stap 15a). De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
 
 Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root, world, ...)`). De views lezen de echte `content`-tabellen uit de feature-bestanden; `world.content` is bedoeld voor logica en tests.
 
@@ -181,14 +182,14 @@ Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root
 - **Eén** `GameState`-object, volledig JSON-serialiseerbaar (Decimal als string bij opslaan).
 - Wijzigingen alleen via acties in de features (`(world, params) => void`). Na wijziging roept de store `notify()` aan; UI abonneert zich.
 - **Niet in de state:** wie er op dit moment in de taverne zit (`CustomerFloor` in `customers/`) is runtime en wordt niet opgeslagen; de taverne begint bij elk laden leeg.
-- State bevat o.a.: `meta` (versie, laatst-gezien-tijd), `currencies`, `reputation`, `recipesDiscovered`, `ingredients`, `upgrades`, `staff`, `rooms`, `heroes`, `expeditions` (met absolute eindtijd), `prestige`, `achievements`, `settings`, `stats`.
+- State bevat o.a.: `meta` (versie, laatst-gezien-tijd), `currencies`, `reputation`, `recipesDiscovered`, `ingredients`, `upgrades`, `staff`, `rooms`, `heroes` (per klasse, met de lopende expeditie en haar absolute eindtijd; sinds stap 15a), `ingredientStock` (kerker-ingrediënten; sinds stap 15a), `prestige`, `achievements`, `settings`, `stats`.
 
 ### Tijd en tick
 
 - Vaste simulatiestap van **100 ms**, losgekoppeld van framerate.
 - Tijd wordt altijd gemeten met `Date.now()`-verschil (accumulator), niet met "aantal ticks", omdat achtergrondtabs door de browser worden afgeknepen.
 - Bij terugkeren (visibilitychange of laden) wordt het gemiste tijdsverschil verwerkt door `offline/` met **formules** (niet door alle ticks te simuleren). Bovengrens = offline-limiet (basis 2 uur, uitbreidbaar via de stat `offlineHours`). Sinds stap 14d telt afwezigheid alleen met Night Shift (stat `offlineShare`, zie Besluiten uit de ideeënronde). Gebouwd in stap 10b: een gat in dezelfde sessie (de ticker meldt het via `onGap`) en de tijd sinds de laatste save lopen door dezelfde functie, `handleAway` in `offline/offline.ts`.
-- Expedities slaan een absolute `endsAt` op en worden bij laden direct afgehandeld.
+- Expedities slaan een absolute `endsAt` op en worden bij laden direct afgehandeld (sinds stap 15a: bij de eerste tick na het laden, `returnHeroes` in `heroes/heroes.ts`).
 
 ### Save
 
@@ -219,7 +220,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -285,11 +286,12 @@ Ter verduidelijking (al zo gebouwd): klanten bestellen alleen recepten die de sp
 
 ### Kamers (besluit eigenaar, 2026-10-06; gebouwd in stap 14a)
 
-- **Bovenverdieping:** boven de taverne staan drie kamervakken naast elkaar (`app/layout.ts`). Niet gebouwd: dichtgetimmerd met een bordje ("Unlocks at <niveau>" of "Build in the shop: <prijs>"); klikken opent het zijpaneel op Shop (event `shop:requested`). Gebouwd: ingericht met placeholder-meubels (`rooms/rooms-view.ts`, één tekenfunctie per kamer), en klanten zitten er. Klanten lopen voorlopig in een rechte lijn naar boven (echte animaties in stap 21).
+- **Bovenverdieping:** boven de taverne staan vier kamervakken naast elkaar (`app/layout.ts`; drie tot stap 15a, de gildekamer is de vierde). Niet gebouwd: dichtgetimmerd met een bordje ("Unlocks at <niveau>" of "Build in the shop: <prijs>"); klikken opent het zijpaneel op Shop (event `shop:requested`). Gebouwd: ingericht met placeholder-meubels (`rooms/rooms-view.ts`, één tekenfunctie per kamer), en klanten zitten er. Klanten lopen voorlopig in een rechte lijn naar boven (echte animaties in stap 21).
 - **De kamers** (`rooms/rooms.ts`, placeholder-prijzen afgesteld met de simulator):
   - **Extension** (niveau 3, 1.500): +3 plekken boven.
   - **Alchemy Lab** (niveau 4, 8.000): ketel 25% sneller, +1 drankje op de bar (de bar heeft nu 6 plekken in de scene).
   - **VIP Lounge** (niveau 5, 30.000): VIP-kans ×2 (nieuwe stat `vipChance`, basis 10%), +2 plekken boven.
+  - **Guild Hall** (niveau 5, 15.000; stap 15a): geen plekken of bonus, maar de helden (zie Helden).
 - **Plekken:** stoelnummers zijn eerst de 7 beneden, dan per kamer (`rooms/rooms.ts`). Open zijn de gekochte plekken beneden (Extra Seat) plus alle plekken van gebouwde kamers; klanten kiezen alleen open plekken (`openSeats` in de klantcontext).
 - **Bonussen:** kamers gebruiken dezelfde effecten als upgrades en tellen mee in `getMultipliers` (één keer per gebouwde kamer). Offline telt de VIP-kans mee.
 - **Kopen:** groep "Rooms" in het Shop-tabblad; een gebouwde kamer verdwijnt eruit. Ingrediënten en kamers delen één module voor eenmalige aankopen (`shared/purchases.ts`) en één winkelonderdeel (`economy/shop-view.ts`).
@@ -335,12 +337,12 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Achievements (stap 18):** zoals gepland.
 - **Niet in het plan:** het weekly leaderboard (pas als CrazyGames ons uitnodigt, zie IDEAS.md punt 1), de punten over de schermindeling (checklist voor stap 21 en 22, IDEAS.md punt 2), en de poster (vervallen).
 
-### Helden (besluit eigenaar, 2026-10-06; uitgewerkt 2026-10-07; stap 15a, 15b, 16, 16b en 16c)
+### Helden (besluit eigenaar, 2026-10-06; uitgewerkt 2026-10-07; stap 15a, 15b, 15c, 16, 16b en 16c)
 
 - **Niet alleen idle:** de eigenaar wil bij de helden echte gameplay. Actief meespelen levert duidelijk meer op; idle blijft mogelijk (standaardkeuzes, ook offline) en levert minder, net als bij brouwen (idle ongeveer 30-40% van actief).
 - **Zichtbaar:** de helden wonen in een **gildekamer** op de bovenverdieping (een vierde kamer, te bouwen zoals de andere; de indeling van de bovenverdieping moet daarvoor opnieuw verdeeld worden). Je ziet ze vertrekken en terugkomen.
 - **Actieve onderdelen (alle vier gekozen):**
-  1. **Uitrusting zelf kiezen** (zwaard, schild, helm, amulet), met keuzes per kerker (stap 15b).
+  1. **Uitrusting zelf kiezen** (zwaard, schild, helm, amulet), met keuzes per kerker (stap 15c).
   2. **Drankjes meegeven als keuze:** de speler brouwt zelf wat de held meeneemt; het effect (kracht, snelheid, geluk, charme) helpt in bepaalde kerkers (stap 16).
   3. **Keuzes onderweg:** tijdens een expeditie korte keuzekaartjes (pad links of rechts, vechten of sluipen, welk drankje nu drinken) met invloed op buit en duur (stap 16).
   4. **Baasgevecht:** een korte **timing-klik**-minigame aan het eind van een kerker (stap 16b).
@@ -387,6 +389,21 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
   - Zet je Auto uit, dan maakt de held de lopende expeditie af en wacht daarna op jou.
   - Doel, zoals bij brouwen: idle levert ongeveer 30-40% van actief spelen.
 
+**Gebouwd in stap 15a (Gildekamer, helden en eerste expeditie; de getallen zijn placeholders, gekozen door Claude):**
+- **Opsplitsing (keuze eigenaar, 2026-10-08):** de oude stap 15a was te groot (twee losse lussen). 15a werd de gildekamer, de helden en de expeditie; de voorraad kerker-ingrediënten op het schap, het verbruik bij brouwen en de nieuwe recepten zijn stap 15b. De uitrusting heet nu stap 15c.
+- **Feature-map `heroes/`:** `heroes.ts` (data, rekenregels, acties en het tick-systeem `startHeroes`, één regel in `createWorld` na het personeel), `heroes-model.ts` (pure view-models voor het tabblad), `heroes-view.ts` (tabblad Heroes, DOM), `guild-view.ts` (de helden in de gildekamer, Phaser) en `heroes.css`.
+- **Gildekamer:** vierde kamer `guild_hall` in `rooms/rooms.ts` (niveau 5, 15.000, geen plekken of bonus; de validator staat dat alleen voor de gildekamer toe). De bovenverdieping is verdeeld in vier vakken van 284 ontwerp-pixels (`app/layout.ts`); de stoelen van de uitbouw en de lounge en de meubels van het lab zijn opgeschoven. De gildekamer heeft een banier, een wapenrek en een stapelbed, en per held een plek (`HERO_SPOTS`).
+- **Helden:** `HERO_CLASSES` met `hire`: de krijger (Brakka) komt mee met de kamer (`recruitGuildHeroes`, bij `room:built` en bij het laden), de magiër (Mildred) huur je in het tabblad voor 8.000 zodra de gildekamer staat (`hireHeroById`). In 15a verschillen de klassen alleen in hoe je ze krijgt; kracht tegen de baas en meer uit drankjes komen in 16 en 16b.
+- **State:** `heroes` (open map per klasse: `{ level, xp, injuredUntil, expedition: { dungeon, endsAt } | null }`) en `ingredientStock` (open map ingrediënt → aantal). Oude saves krijgen via `reconcile` lege maps.
+- **Expeditie naar het Moeras** (`DUNGEONS`): 120 s, 40 XP, 3 trekkingen buit (Bog Pearl gewicht 3, Witch Moss gewicht 2, elk 1 stuk). `sendHero` zet een absolute eindtijd (de klok uit `world.clock`); `returnHeroes` op de tick brengt elke held terug van wie de tijd om is, dus ook na herladen of een lange afwezigheid. Buit gaat in `ingredientStock`, XP in levels.
+- **Levels:** XP van niveau 1 naar 2 is 100, daarna steeds ×1,5; maximaal niveau 10. Een hoger niveau maakt de kans op gewond kleiner: 30% op niveau 1, 2,5 procentpunt minder per niveau, nooit onder 5%.
+- **Gewond:** een gewonde held rust 90 s, gerekend vanaf het moment dat hij terug was (wie lang weg was, vindt hem al uitgerust). Gewond kost geen buit en geen XP. Pak een drankje van de bar en klik de held: hij drinkt het en is meteen fit (`clickHero`, event `hero:healed`). Zonder drankje opent een klik op een held het tabblad Heroes (`heroes:requested`).
+- **Tabblad Heroes** (derde tabblad): zonder gildekamer één zin waar je hem bouwt; daarna de buit ("Bog Pearl ×2") en per held een kaartje met naam en klasse, level met XP-balk, waar hij is ("In the Swamp, back in 1:30.") en een knop (Send to the Swamp, Hire · 8K, of uitgegrijsd tijdens een tocht of rust). De afteltijd loopt mee zolang het tabblad open is.
+- **In de scene:** een held staat thuis in de gildekamer, loopt bij vertrek naar links weg en komt bij terugkeer weer binnen, met zwevende tekst voor de buit, de XP, een nieuw level en een verwonding. Tijdens een tocht staat er een bordje met de afteltijd (🗺 1:23), een gewonde held is grijs met 🤕 en zijn rusttijd; met een drankje in de hand krijgt hij een groen ▼.
+- **Kerker-ingrediënten in 15a:** alleen buit-id's in de kerkerdata met een naam in i18n (`ingredients.bog_pearl.name`); ze staan nog niet in de ingrediëntentabel en niet op het schap (dat is stap 15b).
+- **Tutorial-hint** (les `hero`, na de decoratieles): start zodra de krijger intrekt (`hero:recruited`), wijst Menu, het tabblad Heroes en de knop Send to the Swamp aan (alias `guide-hero-send`), en daarna de gildekamer met de afsluitzin. Versturen telt alleen als de hint in beeld is (`onlyWhenShown`), zodat een vroege tocht geen eerdere lessen afvinkt; wie al een held op pad stuurde, krijgt alleen de afsluitzin.
+- **Simulator:** de bot bouwt de gildekamer zoals de andere kamers, maar stuurt geen helden (de buit levert in 15a nog niets op); de tijdlijn toont "hero Brakka joined".
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -408,7 +425,7 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
-- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft nu 3 kamervakken (stap 14a); de gildekamer (stap 15a) wordt de vierde.
+- Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft 4 kamervakken (3 in stap 14a; de gildekamer kwam er in stap 15a bij).
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `app/ui-model.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
 - Doel: 60 FPS op gemiddelde laptop, speelbaar op Chromebook (4 GB).
@@ -425,6 +442,7 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 
 - `t('sleutel')` met sleutels per domein (`recipes.slime_sap.name`). Basis: **Engels**. Nederlands later als vertaalbestand + taalknop in Settings.
 - Spelers-zichtbare getallen/tekst nooit samenstellen met losse string-plakkerij; gebruik parameters (`t('toast.gold', { n })`).
+- **Bestanden:** `i18n/en.ts` voegt alle domeinen samen (één spread per domein). Sinds stap 15a staan de winkel, upgrades, kamers en decoraties in `i18n/en-shop.ts` en de helden en kerkers in `i18n/en-heroes.ts` (`en.ts` zat op 297 regels). Een nieuw gebied met veel tekst krijgt een eigen `en-<gebied>.ts`.
 
 ---
 
@@ -439,12 +457,12 @@ ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
 Decor      { id, buy: { level, cost }, effects: UpgradeEffect[] }          // stap 14b; tekst decor.<id>.name/.description
-HeroClass  { id, bossPower, potionPower, hire: { cost } | 'withGuildRoom' }   // stap 15a; tekst heroes.<id>.name
-Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15b; zonder buy: alleen buit
-Dungeon    { id, recommendedLevel, durationSeconds, drops: { ingredient, weight, amount }[], gearDrops, cards: Card[], boss }   // 15a en 16
+HeroClass  { id, hire: { cost } | 'withGuildRoom' }   // stap 15a (bossPower en potionPower komen in 16 en 16b); tekst heroes.<id>.name/.class/.tagline
+Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15c; zonder buy: alleen buit
+Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearDrops, cards: Card[], boss }   // 15a (tot en met drops), 15c en 16
 Card       { id, options: { id, default?, outcome }[] }   // stap 16; outcome: duur, buit, kans gewond
-// State (schets): heroes per klasse { level, xp, gear per vak, bag: recipe id[], auto, injuredUntil, expedition?: { dungeon, endsAt, choices } },
-// gearOwned: id[], ingredientStock: { [kerker-ingrediënt]: aantal }
+// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt } | null } (gebouwd in 15a; later gear per vak, bag, auto, choices),
+// ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -592,10 +610,12 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* de legenda staat bovenaan het boek, recepten tonen alleen het effect-icoon, tests slagen.
 - [x] **Stap 14d: Night Shift (offline verdienen kopen).** Offline verdienen is niet meer automatisch: na de eerste medewerker staat "Night Shift" in de winkel (eenmalig), daarna upgrades voor het aandeel en de duur. Zonder aankoop laat het welkom-venster zien wat de speler gemist heeft. Tutorial-hint: de personeelsles of een eigen hint noemt Night Shift. Daarna `npm run simulate`. Zie hoofdstuk 4, Besluiten uit de ideeënronde.
   *Klaar wanneer:* zonder Night Shift levert afwezig zijn niets op en toont het welkom-venster het gemiste bedrag, met Night Shift werkt offline zoals nu, upgrades verhogen aandeel en duur, tests slagen.
-*Stap 15 en 16 zijn op 2026-10-07 opgesplitst in 15a, 15b, 16, 16b en 16c (keuze eigenaar). De uitwerking staat in hoofdstuk 4, Helden.*
-- [ ] **Stap 15a: Gildekamer, helden en eerste expeditie.** De gildekamer als vierde kamer (niveau 5); de bovenverdieping wordt verdeeld in vier vakken. De krijger komt mee met de kamer, de magiër is te huren. Tabblad Heroes in het zijpaneel. Eenvoudige expeditie naar het Moeras: vertrekken, een timer met absolute eindtijd (ook offline), terugkomen met kerker-ingrediënten en XP. Levels, en gewond met korte rust (een drankje van de bar geneest). Kerker-ingrediënten als voorraad: het schap toont het aantal, brouwen verbruikt er een, klanten bestellen zo'n recept alleen bij voorraad, en 3-4 nieuwe recepten. Tutorial-hint: eerste held op pad sturen.
-  *Klaar wanneer:* de gildekamer is te bouwen en toont de helden, een held gaat op expeditie en komt (ook na herladen of offline) terug met ingrediënten en XP, een recept met een kerker-ingrediënt verbruikt voorraad en wordt zonder voorraad niet besteld, de simulator haalt nog de tempodoelen, tests slagen.
-- [ ] **Stap 15b: Uitrusting.** Vier vakken (zwaard, schild, helm, amulet), elk met een eigen rol. Simpele stukken te koop in het tabblad Heroes; betere stukken als buit uit het Moeras. Aan- en uittrekken als de held thuis is. Tutorial-hint: eerste uitrusting.
+*Stap 15 en 16 zijn op 2026-10-07 opgesplitst in 15a, 15b, 16, 16b en 16c (keuze eigenaar). Op 2026-10-08 is 15a nog eens gesplitst in 15a en 15b; de uitrusting werd 15c (keuze eigenaar). De uitwerking staat in hoofdstuk 4, Helden.*
+- [x] **Stap 15a: Gildekamer, helden en eerste expeditie.** De gildekamer als vierde kamer (niveau 5); de bovenverdieping wordt verdeeld in vier vakken. De krijger komt mee met de kamer, de magiër is te huren. Tabblad Heroes in het zijpaneel. Eenvoudige expeditie naar het Moeras: vertrekken, een timer met absolute eindtijd (ook offline), terugkomen met kerker-ingrediënten (als voorraad) en XP. Levels, en gewond met korte rust (een drankje van de bar geneest). Tutorial-hint: eerste held op pad sturen.
+  *Klaar wanneer:* de gildekamer is te bouwen en toont de helden, een held gaat op expeditie en komt (ook na herladen of offline) terug met ingrediënten en XP, de simulator haalt nog de tempodoelen, tests slagen.
+- [ ] **Stap 15b: Kerker-ingrediënten als voorraad en nieuwe recepten.** Bog Pearl en Witch Moss in de ingrediëntentabel; het schap toont een kerker-ingrediënt met het aantal (grijs bij 0), brouwen verbruikt er een, klanten bestellen zo'n recept alleen bij voorraad, de brouwer gebruikt ze alleen voor zo'n bestelling, offline telt ze niet mee, en in het boek staat een nooit gevonden ingrediënt als "?". 3-4 nieuwe dure recepten op niveau 5 en 6. Daarna `npm run simulate` (eventueel met een bot die helden stuurt). Tutorial-hint: eerste recept met een kerker-ingrediënt.
+  *Klaar wanneer:* een recept met een kerker-ingrediënt verbruikt voorraad en wordt zonder voorraad niet besteld, het schap toont het aantal, de simulator haalt nog de tempodoelen, tests slagen.
+- [ ] **Stap 15c: Uitrusting.** Vier vakken (zwaard, schild, helm, amulet), elk met een eigen rol. Simpele stukken te koop in het tabblad Heroes; betere stukken als buit uit het Moeras. Aan- en uittrekken als de held thuis is. Tutorial-hint: eerste uitrusting.
   *Klaar wanneer:* elk vak merkbaar zijn rol doet, gekochte en gevonden stukken te dragen zijn, tests slagen.
 - [ ] **Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes.** De tweede ketel in de gildekamer (ketel aanklikken, dan ingrediënten; het schap springt daarna terug). Drankjes gaan in de rugzak (max 2), of van de bar naar de held. De vier drankeffecten krijgen elk een rol op expeditie; de magiër haalt er meer uit. 2 keuzekaartjes per expeditie met een standaardkeuze na ~10 s. Receptencontent naar ~20 tot 30. Tutorial-hint: eerste heldendrankje en eerste kaartje.
   *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
@@ -644,6 +664,19 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 15a: Gildekamer, helden en eerste expeditie (2026-10-08, `step-15a-guild-heroes`)
+- **Gedaan:** (code in `src/heroes/` (nieuw: `heroes.ts`, `heroes-model.ts`, `heroes-view.ts`, `guild-view.ts`, `heroes.css`), `src/i18n/en-shop.ts` en `en-heroes.ts` (nieuw), en kleine aanvullingen in `app/` (world, layout, tavern-scene, viewport-view), `rooms/`, `shared/` (state, events, content), `tutorial/` en `dev/simulator.ts`; tests in `tests/heroes.test.ts`, `tests/flows/heroes-flow.test.ts`, `tests/content/validate-content.ts`, `tests/flows/helpers.ts` (een klok meegeven) en `tests/tutorial-guide.test.ts`)
+  - **Opsplitsing:** voor het bouwen voorgesteld en door de eigenaar goedgekeurd: 15a (deze stap), 15b (kerker-ingrediënten als voorraad en nieuwe recepten), 15c (uitrusting, was 15b).
+  - **i18n gesplitst** (eerste commit, alleen verplaatsen): winkel, upgrades, kamers en decoraties naar `i18n/en-shop.ts`; de heldenteksten staan in `i18n/en-heroes.ts`. `en.ts` gaat van 297 naar 227 regels.
+  - **Gildekamer, helden, expeditie, levels, gewond, tabblad Heroes, scene en tutorial-hint:** zie hoofdstuk 4, Helden ("Gebouwd in stap 15a").
+  - **Validator:** nieuwe tabellen voor heldenklassen (tekst `name`, `class`, `tagline`; huurprijs positief) en kerkers (tekst `name`, `description`; 60 tot 180 s, XP, trekkingen en buit met positieve gewichten). Een kamer zonder plekken of bonus mag alleen als het de gildekamer is.
+  - 20 tests erbij (447 totaal): groei (XP, meerdere levels, plafond), kans op gewond, buit, status en wachttijd, huren, het tabblad (aftellen, zonder gildekamer, kaartjes), de plekken in de gildekamer, en in het echte spel: de krijger bij het bouwen en de magiër huren, een tocht op de wandklok, terugkomen na het laden van een save, genezen met een drankje van de bar, en de les (de weg naar het tabblad en de knop; een vroege tocht slaat geen eerdere les over).
+- **Waarom (keuzes):** de eigenaar liet de getallen aan Claude (de placeholders uit hoofdstuk 4 aangehouden: 15.000, 8.000, 90 s rust, max level 10; een tocht van 2 minuten, het midden van 1 tot 3). De terugkeer zit op de tick en vergelijkt met de absolute eindtijd: één weg voor spelen, herladen en offline, zonder iets in de offline-formule. Het systeem staat als laatste in de tick-volgorde en gebruikt de RNG alleen bij een terugkeer, zodat bestaande runs niet verschuiven. De rust telt vanaf het moment van terugkomen, zodat een speler die lang weg was geen gewonde held aantreft. Een drankje van de bar geneest met hetzelfde gebaar als serveren (oppakken, dan klikken), zoals hoofdstuk 4 voor stap 16 al beschrijft. De kerker-ingrediënten staan nog niet in de ingrediëntentabel: dan zouden ze op het schap of in de validator ("elk ingrediënt in een recept") horen, en dat is 15b. Het tabblad Heroes is er altijd, met vóór de gildekamer één zin waar je hem bouwt.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels (`tutorial/tutorial-steps.ts` 293, `heroes/heroes.ts` 241). Simulator 60 minuten (seeds 1/2/3): tot de gildekamer gelijk aan `main` (de eerste 20 minuten veranderen niet); gildekamer gebouwd op 20:51 / 21:00 / 21:56, VIP Lounge 25:30 / 26:07 / 26:22 (was 23:23 / 24:03 / 24:32), Golden Tankard 44:02 / 42:42 / 43:15 (was 40:36 / 40:10 / 40:52). Aankopen in de eerste 5 minuten, eerste medewerker en eerste ontdekking ongewijzigd (16, 4:26, 1:20 bij seed 1). Idle 36% / 35% / 47%; omdat seed 3 hoog was ook seeds 4 t/m 9 gemeten, op de branch en op `main`: branch 35 / 37 / 37 / 37 / 31 / 34%, `main` 39 / 30 / 35 / 40 / 31 / 33%. Gemiddeld over negen seeds 36,6% (`main` 35,3%), binnen het doel; seed 3 is ruis van het korte meetvenster (zie stap 13c en 14b). `vite build` slaagt (395 kB gzip, was 391). In de browser (testsave op Famous Tavern, oorspronkelijke save daarna teruggezet): vier kamervakken; klikken op de gildekamer opende de winkel, bouwen (40K naar 25K) zette de krijger in de kamer met banier en wapenrek, en de les wees het tabblad Heroes aan, dan "Send to the Swamp", daarna de gildekamer met de afsluitzin en het bordje "🗺 1:59". Na herladen met een verstreken eindtijd was de held terug (2 Bog Pearl, 1 Witch Moss, 40 XP in de save). Een terugkeer tijdens het spelen: binnenlopen met "+40 XP", "+1 Witch Moss", "+2 Bog Pearl". Een gewonde magiër (grijs, "🤕 1:25") was na een Slime Sap van de bar meteen fit ("Good as new!", drankje weg van de bar). De magiër huren: 25K naar 17K, kaartje met XP-balk. Zonder gildekamer toont het tabblad alleen waar je hem bouwt. Geen consolefouten. (Het browservenster tekende tijdens de test geen frames, waardoor tweens alleen bij een screenshot verder liepen; dat ligt niet aan de code.)
+- **Afwijkingen van het plan:** de stap is gesplitst (zie boven). In het datamodel heeft `HeroClass` nog geen `bossPower` en `potionPower` (geen abstractie voor later; ze komen in 16 en 16b). `Dungeon` kreeg `xp` en `lootRolls`. De state kent geen apart `expeditions`: de lopende tocht staat bij de held.
+- **Nu te proberen:** speel tot Famous Tavern en bouw de Guild Hall (15.000): Brakka trekt in en de ketel wijst het tabblad Heroes aan. Stuur hem naar het Moeras, sluit het spel en kom na twee minuten terug. Komt hij gewond terug, pak dan een drankje van de bar en klik hem aan. Huur Mildred voor 8.000.
+- **Nog te doen / volgende stap:** stap 15b, Kerker-ingrediënten als voorraad en nieuwe recepten (de buit krijgt dan een nut; daarna de simulator met een bot die helden stuurt). Open punten: de klassen verschillen nog niet in spel (komt in 16 en 16b); het welkom-venster noemt teruggekeerde helden nog niet (16c).
 
 ### Chore: uitwerking van de helden (2026-10-07, `chore-heroes-design`)
 - **Gedaan:** met de eigenaar de open vragen over de helden doorgenomen (vijf vragenrondes) en vastgelegd in hoofdstuk 4, Helden ("Uitwerking"), het datamodel (hoofdstuk 5) en het stappenplan. Stap 15 en 16 zijn opgesplitst in 15a, 15b, 16, 16b en 16c. Daarnaast IDEAS.md (punt 4 bijgewerkt) en GAME_ANALYSE.md 5.5 (verwijzing). Geen code.

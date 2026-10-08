@@ -6,6 +6,7 @@ import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFl
 import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { startHeroes } from '@/heroes/heroes';
 import { createOffline, type OfflineServices } from '@/offline/offline';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
@@ -163,12 +164,14 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   // Announces each new reputation level (the HUD shows a message).
   watchReputationLevels(store, bus);
   recordDiscoveries(store, bus);
-  const tutorial = createTutorial({ store, bus, floor, station, ingredients: c });
+  const tutorial = createTutorial({ store, bus, floor, station, clock, ingredients: c });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);
   startBrewSystem(station, bus);
   watchShop(store, bus, c);
   startStaffWork({ store, bus, floor, station, rng, catalog });
+  // Heroes come back when their trip's (absolute) end time has passed, also right after loading.
+  startHeroes({ store, bus, rng, clock });
   const offline = createOffline({ store, bus, clock, catalog });
   return { store, bus, rng, clock, content: c, floor, station, selection: createDrinkSelection(station), targets: createTargetRegistry(), tutorial, offline };
 }

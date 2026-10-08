@@ -4,11 +4,13 @@ import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { anyHeroTravelled, readyHeroId } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
 import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import type { GameState, Store } from '@/shared/state';
+import type { Clock } from '@/shared/time';
 import { type AlreadyHolds, createTutorialMachine, type ProgressStore, type TutorialMachine } from '@/tutorial/tutorial';
 import type { GuideContext } from '@/tutorial/tutorial-guide';
 import { type TutorialEvent, TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
@@ -17,6 +19,7 @@ import { type TutorialEvent, TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
 const TAB_EVENTS = [
   { tab: 'shop', opened: 'shop:opened', closed: 'shop:closed' },
   { tab: 'recipes', opened: 'book:opened', closed: 'book:closed' },
+  { tab: 'heroes', opened: 'heroes:opened', closed: 'heroes:closed' },
 ] as const;
 
 /**
@@ -66,6 +69,9 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'likes:ordered': ({ floor }) => waitingCustomers(floor).some((c) => c.liked),
   'vip:arrived': ({ floor }) => waitingCustomers(floor).some((c) => c.vip),
   'reputation:levelUp': ({ store }) => levelFor(store.getState().reputation) > 1,
+  'hero:recruited': ({ store }) => Object.keys(store.getState().heroes).length > 0,
+  // A hero who travelled before the hint's turn: the hint shows and is done at once (see heroLesson).
+  'hero:departed': ({ store }) => anyHeroTravelled(store.getState()),
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -79,6 +85,7 @@ export interface TutorialDeps {
   bus: EventBus<GameEvents>;
   floor: CustomerFloor;
   station: BrewStation;
+  clock: Clock;
   ingredients: IngredientCatalog;
 }
 
@@ -94,7 +101,7 @@ function listenedEvents(): TutorialEvent[] {
 }
 
 /** Connects the tutorial machine to the saved state and the game bus. */
-export function createTutorial({ store, bus, floor, station, ingredients }: TutorialDeps): TutorialServices {
+export function createTutorial({ store, bus, floor, station, clock, ingredients }: TutorialDeps): TutorialServices {
   const progress: ProgressStore = {
     get: () => store.getState().tutorial,
     update: (mutator) => store.update((state) => mutator(state.tutorial)),
@@ -125,6 +132,7 @@ export function createTutorial({ store, bus, floor, station, ingredients }: Tuto
     newestRoomId: store.getState().roomsBuilt.at(-1) ?? null,
     affordableDecorId: firstBuyableDecor(store.getState(), DECORATIONS)?.id ?? null,
     newestDecorId: store.getState().decorBought.at(-1) ?? null,
+    readyHeroId: readyHeroId(store.getState(), clock.now()) ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

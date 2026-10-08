@@ -35,11 +35,11 @@ export interface TutorialStep {
 export const GUIDE_TARGETS = [
   'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
-  'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor',
+  'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor', 'guide-hero-send',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
-export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel'] as const;
+export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'room:guild_hall'] as const;
 
 export const KNOWN_TARGETS: readonly string[] = [...GUIDE_TARGETS, ...FIXED_TARGETS];
 
@@ -255,6 +255,28 @@ export const decorLesson: readonly TutorialStep[] = [
   },
 ];
 
+/**
+ * The hint for the first hero: starts when the warrior moves into the guild hall, points the way to the Heroes tab
+ * and the send button, then at the guild hall. Sending only counts while the hint is on screen, so a trip made while
+ * an earlier lesson waits never skips that lesson; a player whose heroes travelled already gets just the closing line.
+ */
+export const heroLesson: readonly TutorialStep[] = [
+  {
+    id: 'hero_send',
+    lesson: 'hero',
+    startWhen: { kind: 'event', event: 'hero:recruited' },
+    target: 'guide-hero-send',
+    completeOn: { kind: 'event', event: 'hero:departed' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'hero_done',
+    lesson: 'hero',
+    target: 'room:guild_hall',
+    completeOn: { kind: 'after', ms: 6500 },
+  },
+];
+
 /** All tutorial steps in order. A new lesson is a new file plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...basicsLesson,
@@ -267,4 +289,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...vipLesson,
   ...roomLesson,
   ...decorLesson,
+  ...heroLesson,
 ];

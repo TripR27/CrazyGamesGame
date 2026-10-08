@@ -7,6 +7,7 @@ import { createCauldronView, type CauldronView, createReadyView, type ReadyView,
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { createCustomersLayer, type CustomersLayer } from '@/customers/customers-view';
 import { createDecorView, type DecorView } from '@/decor/decor-view';
+import { createGuildView, type GuildView } from '@/heroes/guild-view';
 import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
 import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
@@ -32,6 +33,7 @@ interface Views {
   cauldron: CauldronView;
   ready: ReadyView;
   rooms: RoomsView;
+  guild: GuildView;
   decor: DecorView;
 }
 
@@ -56,8 +58,10 @@ export class TavernScene extends Scene {
     drawCustomerSlots(this.add.graphics());
     // The rooms come first, so customers upstairs are drawn in front of them.
     const rooms = createRoomsView(this, world);
+    const guild = createGuildView(this, world);
     this.views = {
       rooms,
+      guild,
       decor,
       shelf: createShelfView(this, () => shelfIds(world), (id) => clickIngredient(world, id), world.targets),
       cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
@@ -86,6 +90,7 @@ export class TavernScene extends Scene {
     this.views.cauldron.update();
     this.views.ready.update();
     this.views.rooms.update();
+    this.views.guild.update();
     this.views.decor.update();
     this.views.customers.update();
   }

@@ -99,14 +99,26 @@ export interface RoomSpot {
 }
 
 const ROOM_TOP = 96;
-const roomRect = (index: number): Rect => ({ x: 56 + index * 392, y: ROOM_TOP, w: 380, h: UPPER_FLOOR_Y - ROOM_TOP });
+/** Four rooms side by side on the upper floor. */
+const ROOM_LEFT = 56;
+const ROOM_WIDTH = 284;
+const ROOM_GAP = 10;
+const roomRect = (index: number): Rect => ({ x: ROOM_LEFT + index * (ROOM_WIDTH + ROOM_GAP), y: ROOM_TOP, w: ROOM_WIDTH, h: UPPER_FLOOR_Y - ROOM_TOP });
 const seat = (x: number): Point => ({ x, y: UPPER_FLOOR_Y - 2 });
+const GUILD = roomRect(3);
 
-/** One entry per room in data/rooms, left to right. */
+/** One entry per room in rooms/rooms.ts, left to right. */
 export const ROOM_SPOTS: Readonly<Record<string, RoomSpot>> = {
-  extension: { rect: roomRect(0), seats: [seat(130), seat(246), seat(362)] },
+  extension: { rect: roomRect(0), seats: [seat(110), seat(198), seat(286)] },
   alchemy_lab: { rect: roomRect(1), seats: [] },
-  vip_lounge: { rect: roomRect(2), seats: [seat(950), seat(1110)] },
+  vip_lounge: { rect: roomRect(2), seats: [seat(700), seat(870)] },
+  guild_hall: { rect: GUILD, seats: [] },
+};
+
+/** Where each hero stands in the guild hall while at home (feet), one per hero class in heroes/heroes.ts. */
+export const HERO_SPOTS: Readonly<Record<string, Point>> = {
+  warrior: { x: GUILD.x + 90, y: UPPER_FLOOR_Y - 2 },
+  mage: { x: GUILD.x + 200, y: UPPER_FLOOR_Y - 2 },
 };
 
 /** Every customer seat: downstairs first, then each room's seats in room order (the seat numbers of the game). */

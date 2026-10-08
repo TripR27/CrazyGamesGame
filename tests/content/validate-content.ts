@@ -3,6 +3,7 @@ import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers } from '@/customers/customer-data';
 import { DECORATIONS, type DecorDef } from '@/decor/decor';
 import { upgrades, UPGRADE_STATS, type UpgradeEffect } from '@/economy/upgrade-data';
+import { DUNGEONS, type DungeonDef, GUILD_ROOM_ID, HERO_CLASSES, type HeroClassDef } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
 import { ROOMS, type RoomDef } from '@/rooms/rooms';
@@ -67,7 +68,8 @@ export const roomTable = (items: readonly RoomDef[]): ContentTable =>
     check: (room) => [
       ...oneTimeRule(room.buy),
       ...(Number.isInteger(room.seats) && room.seats >= 0 ? [] : ['seats must be a whole number >= 0']),
-      ...(room.seats > 0 || room.effects.length > 0 ? [] : ['a room must add seats or an effect']),
+      // The guild hall's use is its heroes.
+      ...(room.seats > 0 || room.effects.length > 0 || room.id === GUILD_ROOM_ID ? [] : ['a room must add seats or an effect']),
       ...room.effects.flatMap(effectRule),
     ],
   });
@@ -107,6 +109,30 @@ export const tutorialTable = (items: readonly TutorialStep[]): ContentTable =>
     checkSet: (all) => splitLessons(all).map((lesson) => `lesson ${lesson} has steps that are not next to each other`),
   });
 
+/** A hero class is hired for gold, or comes with the guild hall. */
+export const heroClassTable = (items: readonly HeroClassDef[]): ContentTable =>
+  defineTable({
+    domain: 'heroes',
+    items,
+    textFields: ['name', 'class', 'tagline'],
+    check: (hero) => (hero.hire === 'withGuildRoom' ? [] : positive(hero.hire.cost, 'hire.cost')),
+  });
+
+/** A trip takes 1 to 3 minutes, gives XP and rolls loot from drops with positive weights and whole amounts. */
+export const dungeonTable = (items: readonly DungeonDef[]): ContentTable =>
+  defineTable({
+    domain: 'dungeons',
+    items,
+    textFields: ['name', 'description'],
+    check: (d) => [
+      ...(d.durationSeconds >= 60 && d.durationSeconds <= 180 ? [] : ['durationSeconds must be from 60 to 180']),
+      ...positive(d.xp, 'xp'),
+      ...(Number.isInteger(d.lootRolls) && d.lootRolls >= 1 ? [] : ['lootRolls must be a whole number >= 1']),
+      ...(d.drops.length > 0 ? [] : ['needs at least one drop']),
+      ...d.drops.flatMap((drop) => [...positive(drop.weight, 'drop weight'), ...(Number.isInteger(drop.amount) && drop.amount >= 1 ? [] : ['drop amount must be a whole number >= 1'])]),
+    ],
+  });
+
 /** Every content list the validator checks. A new domain is one more line here. */
 export const CONTENT_TABLES: readonly ContentTable[] = [
   ingredientTable(ingredients),
@@ -118,4 +144,6 @@ export const CONTENT_TABLES: readonly ContentTable[] = [
   reputationTable(REPUTATION_LEVELS),
   roomTable(ROOMS),
   decorTable(DECORATIONS),
+  heroClassTable(HERO_CLASSES),
+  dungeonTable(DUNGEONS),
 ];

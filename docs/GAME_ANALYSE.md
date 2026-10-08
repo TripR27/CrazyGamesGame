@@ -287,8 +287,8 @@ src/
   shared/      state, events, time (ticker), numbers, random, pool, targets, save, storage, debug
   app/         world.ts (bouwt alles, bepaalt de tick-volgorde), Phaser-scene en DOM-schil
   customers/  brewing/  recipes/  serving/  staff/  economy/
-  rooms/  decor/  reputation/  offline/  tutorial/    (toekomst: heroes/, prestige/, achievements/, audio/, platform/)
-  i18n/        translator.ts, en.ts
+  rooms/  decor/  reputation/  offline/  tutorial/  heroes/    (toekomst: prestige/, achievements/, audio/, platform/)
+  i18n/        translator.ts, en.ts (met en-shop.ts en en-heroes.ts per gebied)
   dev/         balans-simulator
 ```
 
@@ -303,7 +303,7 @@ flowchart TB
     direction LR
     customers["customers"] ~~~ brewing["brewing"] ~~~ recipes["recipes"] ~~~ serving["serving"]
     staff["staff"] ~~~ economy["economy"] ~~~ rooms["rooms"] ~~~ reputation["reputation"]
-    decor["decor"] ~~~ offline["offline"] ~~~ tutorial["tutorial"]
+    decor["decor"] ~~~ offline["offline"] ~~~ tutorial["tutorial"] ~~~ heroes["heroes"]
   end
 
   subgraph shared["shared/"]
@@ -326,7 +326,7 @@ sequenceDiagram
   View->>F: serveCustomer(world, id)
   F->>W: store.update + bus.emit('customer:served')
   W-->>View: event: sprite en tekst reageren
-  Note over W,F: elke 100 ms: tick, vaste volgorde van de start-aanroepen<br/>in createWorld: tutorial, customers, brewing, staff
+  Note over W,F: elke 100 ms: tick, vaste volgorde van de start-aanroepen<br/>in createWorld: tutorial, customers, brewing, staff, heroes
 ```
 
 - **World:** één object `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. Spelersacties zijn gewone functies per feature die `world` (of een `Pick<World, ...>`) krijgen; rekenfuncties (prijs, kosten, niveau) blijven puur. Tijd, willekeur en opslag worden ingespoten, dus tests en de simulator zijn deterministisch.
