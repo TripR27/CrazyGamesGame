@@ -7,7 +7,7 @@ import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { watchGearShop } from '@/heroes/gear';
-import { startHeroes } from '@/heroes/heroes';
+import { startHeroes } from '@/heroes/expedition';
 import { createOffline, type OfflineServices } from '@/offline/offline';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';

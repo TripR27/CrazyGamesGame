@@ -1,6 +1,7 @@
 import type { RowView } from '@/economy/shop-model';
 import { GEAR, GEAR_SLOTS, type GearDef, type GearSlot, gearOffer, wearer } from '@/heroes/gear';
-import { DUNGEONS, HERO_CLASSES, HEROES, type HeroClassDef, guildBuilt, heroStatus, heroWaitMs, hireOffer, xpToNext } from '@/heroes/heroes';
+import { DUNGEONS } from '@/heroes/expedition';
+import { HERO_CLASSES, HEROES, type HeroClassDef, guildBuilt, heroStatus, heroWaitMs, hireOffer, xpToNext } from '@/heroes/heroes';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { GUILD_ROOM_ID, ROOMS } from '@/rooms/rooms';

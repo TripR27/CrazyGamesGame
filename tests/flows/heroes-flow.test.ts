@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { newGame } from './helpers';
-import { DUNGEONS, HEROES, clickHero, hireHeroById, newHero, sendHero } from '@/heroes/heroes';
+import { clickHero } from '@/heroes/hero-brewing';
+import { DUNGEONS, sendHero } from '@/heroes/expedition';
+import { HEROES, hireHeroById, newHero } from '@/heroes/heroes';
 import { GUILD_ROOM_ID, buildRoomById } from '@/rooms/rooms';
 import { clickReadyDrink } from '@/serving/serving';
 import { num } from '@/shared/numbers';

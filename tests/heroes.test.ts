@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { HERO_SPOTS, ROOM_SPOTS } from '@/app/layout';
-import { DUNGEONS, HERO_CLASSES, HEROES, gainXp, heroStatus, heroWaitMs, hireOffer, injuryChance, newHero, readyHeroId, rollLoot, xpToNext } from '@/heroes/heroes';
+import { DUNGEONS, rollLoot } from '@/heroes/expedition';
+import { HERO_CLASSES, HEROES, gainXp, heroStatus, heroWaitMs, hireOffer, injuryChance, newHero, readyHeroId, xpToNext } from '@/heroes/heroes';
 import { clockText, type HeroesState, toHeroesView } from '@/heroes/heroes-model';
 import { hasKey } from '@/i18n/translator';
 import { GUILD_ROOM_ID, ROOMS } from '@/rooms/rooms';

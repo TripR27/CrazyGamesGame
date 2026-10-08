@@ -1,7 +1,8 @@
 import type { GameObjects, Scene } from 'phaser';
 import { HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
 import type { World } from '@/app/world';
-import { HERO_CLASSES, clickHero, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
+import { clickHero } from '@/heroes/hero-brewing';
+import { HERO_CLASSES, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
 import { clockText } from '@/heroes/heroes-model';
 import { t } from '@/i18n/translator';
 import { createFloatingTexts, GOLD_COLOR } from '@/serving/serving-view';
