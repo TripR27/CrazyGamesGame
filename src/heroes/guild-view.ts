@@ -1,10 +1,11 @@
 import type { GameObjects, Scene } from 'phaser';
 import { HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
 import type { World } from '@/app/world';
-import { GUILD_ROOM_ID, HERO_CLASSES, clickHero, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
+import { HERO_CLASSES, clickHero, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
 import { clockText } from '@/heroes/heroes-model';
 import { t } from '@/i18n/translator';
 import { createFloatingTexts, GOLD_COLOR } from '@/serving/serving-view';
+import { GUILD_ROOM_ID } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';
 import type { GameEvents } from '@/shared/events';
 
@@ -91,6 +92,7 @@ export interface GuildView {
 function returnLines(event: GameEvents['hero:returned']): { text: string; color: string }[] {
   const lines = Object.entries(event.loot).map(([id, n]) => ({ text: t('heroes.loot', { n, name: t(textKey('ingredients', id, 'name')) }), color: LOOT_COLOR }));
   lines.push({ text: t('heroes.xp_gained', { xp: event.xp }), color: GOLD_COLOR });
+  if (event.gear !== null) lines.push({ text: t('gear.found', { name: t(textKey('gear', event.gear, 'name')) }), color: GOLD_COLOR });
   if (event.levelUp) lines.push({ text: t('heroes.level_up', { level: event.level }), color: GOLD_COLOR });
   if (event.injured) lines.push({ text: t('heroes.injured'), color: BAD_COLOR });
   return lines;

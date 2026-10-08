@@ -6,6 +6,7 @@ import { waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor, getMultipliers } from '@/economy/upgrades';
+import { buyGearById, equipGear, firstBuyableGear, gearToWear } from '@/heroes/gear';
 import { HERO_CLASSES, hireHeroById, hireOffer, readyHeroId, sendHero } from '@/heroes/heroes';
 import { t } from '@/i18n/translator';
 import type { RecipeDef } from '@/recipes/recipe-data';
@@ -32,7 +33,8 @@ export interface Timeline {
   earned: { ms: number; gold: Num }[];
 }
 
-const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor' | 'heroes', id: string): string => t(textKey(domain, id, 'name'));
+const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor' | 'heroes' | 'gear', id: string): string =>
+  t(textKey(domain, id, 'name'));
 
 /** Starts recording; `now` gives the simulated time. Only firsts are written to the timeline, to keep it short. */
 export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Timeline {
@@ -69,7 +71,14 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     once(`decor:${id}`, `bought ${name('decor', id)}`);
   });
   bus.on('hero:recruited', ({ id }) => once(`hero:${id}`, `hero ${name('heroes', id)} joined`));
-  bus.on('hero:returned', ({ id }) => once(`returned:${id}`, `${name('heroes', id)} back from the swamp`));
+  bus.on('hero:returned', ({ id, gear }) => {
+    once(`returned:${id}`, `${name('heroes', id)} back from the swamp`);
+    if (gear !== null) once(`found:${gear}`, `found ${name('gear', gear)}`);
+  });
+  bus.on('gear:bought', ({ id }) => {
+    timeline.purchases.push(now());
+    once(`gear:${id}`, `bought ${name('gear', id)}`);
+  });
   return timeline;
 }
 
@@ -95,8 +104,8 @@ function upgradeBudget(state: GameState): Num {
 
 /**
  * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
- * then a hero to hire, a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up for
- * it (it only buys what costs a small share of the room). Returns true when it bought something.
+ * then a hero to hire, gear, a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up
+ * for it (it only buys what costs a small share of the room). Returns true when it bought something.
  */
 export function shopOnce(world: World, state: GameState): boolean {
   const ingredient = firstBuyableIngredient(state, world.content);
@@ -116,6 +125,11 @@ export function shopOnce(world: World, state: GameState): boolean {
   });
   if (hero !== undefined) {
     hireHeroById(world, hero.id);
+    return true;
+  }
+  const gear = firstBuyableGear(state);
+  if (gear !== undefined && num(gear.buy?.cost ?? 0).lte(budget)) {
+    buyGearById(world, gear.id);
     return true;
   }
   const decor = firstBuyableDecor(state, DECORATIONS);
@@ -152,8 +166,13 @@ function targetRecipe(world: World, state: GameState): RecipeDef | undefined {
   return options.find((r) => fits(station.contents, r));
 }
 
-/** Sends a hero who is home and fit to the swamp (one click). */
+/** Puts on a piece nobody wears, or sends a hero who is home and fit to the swamp (one click). */
 function sendReadyHero(world: World, state: GameState): boolean {
+  const wear = gearToWear(state);
+  if (wear !== null) {
+    equipGear(world, wear.heroId, wear.slot, wear.gearId);
+    return true;
+  }
   const id = readyHeroId(state, world.clock.now());
   if (id === undefined) return false;
   sendHero(world, id);

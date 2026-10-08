@@ -1,5 +1,5 @@
 import type { GameEvents } from '@/shared/events';
-import { decorLesson, heroLesson, lootLesson, roomLesson } from '@/tutorial/tutorial-later-steps';
+import { decorLesson, gearLesson, heroLesson, lootLesson, roomLesson } from '@/tutorial/tutorial-later-steps';
 
 export type TutorialEvent = keyof GameEvents;
 
@@ -36,7 +36,7 @@ export interface TutorialStep {
 export const GUIDE_TARGETS = [
   'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
-  'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor', 'guide-hero-send', 'guide-loot',
+  'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor', 'guide-hero-send', 'guide-loot', 'guide-gear-buy', 'guide-gear-equip',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
@@ -231,4 +231,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...decorLesson,
   ...heroLesson,
   ...lootLesson,
+  ...gearLesson,
 ];

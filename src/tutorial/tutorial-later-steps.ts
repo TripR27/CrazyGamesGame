@@ -64,6 +64,29 @@ export const heroLesson: readonly TutorialStep[] = [
 ];
 
 /**
+ * The hint for the first gear: once a piece can be bought (the guild hall stands), the way to the Heroes tab and its buy
+ * button, then the gear list of a hero at home. Gear is for sale before this lesson's turn, so both steps only count
+ * while on screen; a player who already bought or wears gear gets the remaining steps done at once.
+ */
+export const gearLesson: readonly TutorialStep[] = [
+  {
+    id: 'gear_buy',
+    lesson: 'gear',
+    startWhen: { kind: 'event', event: 'gear:affordable' },
+    target: 'guide-gear-buy',
+    completeOn: { kind: 'event', event: 'gear:bought' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'gear_equip',
+    lesson: 'gear',
+    target: 'guide-gear-equip',
+    completeOn: { kind: 'event', event: 'gear:equipped' },
+    onlyWhenShown: true,
+  },
+];
+
+/**
  * The hint for the first loot: when a hero first brings dungeon ingredients home, points at one on the shelf. It
  * explains the count (every drink with it uses one) and sends the player to the recipe book for what to make.
  */

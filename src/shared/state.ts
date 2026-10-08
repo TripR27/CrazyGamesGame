@@ -25,12 +25,16 @@ export interface Expedition {
   endsAt: number;
 }
 
-/** One hero (keyed by hero class id). `injuredUntil` is a wall-clock time; 0 or past means fit. */
+/**
+ * One hero (keyed by hero class id). `injuredUntil` is a wall-clock time; 0 or past means fit. `gear`: the piece worn
+ * per slot (sword, shield, helmet, amulet), an empty slot has no entry.
+ */
 export interface HeroState {
   level: number;
   xp: number;
   injuredUntil: number;
   expedition: Expedition | null;
+  gear: Record<string, string>;
 }
 
 export interface GameState {
@@ -50,6 +54,8 @@ export interface GameState {
   heroes: Record<string, HeroState>;
   /** How many of each dungeon ingredient the player holds; heroes bring them, brewing will use them up. */
   ingredientStock: Record<string, number>;
+  /** Gear ids the player owns (bought or found); each piece is worn by at most one hero. */
+  gearOwned: string[];
   tutorial: TutorialProgress;
 }
 
@@ -65,6 +71,7 @@ export function createInitialState(now: number): GameState {
     upgrades: {},
     heroes: {},
     ingredientStock: {},
+    gearOwned: [],
     tutorial: { completedSteps: [], skipped: false },
   };
 }

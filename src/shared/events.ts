@@ -91,7 +91,21 @@ export interface GameEvents {
   'hero:recruited': { id: string };
   /** A hero left for a dungeon, and came back with loot and XP (`level` is their level now; `injured`: they rest first). */
   'hero:departed': { id: string; dungeon: string };
-  'hero:returned': { id: string; dungeon: string; loot: Readonly<Record<string, number>>; xp: number; level: number; levelUp: boolean; injured: boolean };
+  'hero:returned': {
+    id: string;
+    dungeon: string;
+    loot: Readonly<Record<string, number>>;
+    /** A piece of gear found on the way, or null. */
+    gear: string | null;
+    xp: number;
+    level: number;
+    levelUp: boolean;
+    injured: boolean;
+  };
+  /** Gear in the Heroes tab: a piece can be bought (after not being able to), was bought, or was put on a hero. */
+  'gear:affordable': Record<string, never>;
+  'gear:bought': { id: string };
+  'gear:equipped': { heroId: string; id: string };
   /** An injured hero drank a drink from the bar and is fit again. */
   'hero:healed': { id: string; recipeId: string };
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */

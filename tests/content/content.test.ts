@@ -5,11 +5,10 @@ import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
 import type { DecorDef } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
-import { GUILD_ROOM_ID } from '@/heroes/heroes';
 import { hasKey } from '@/i18n/translator';
 import { recipes, STARTER_RECIPE_IDS, type RecipeDef } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
-import { ROOMS, type RoomDef } from '@/rooms/rooms';
+import { GUILD_ROOM_ID, ROOMS, type RoomDef } from '@/rooms/rooms';
 import { EFFECTS } from '@/shared/content';
 
 describe('game content', () => {

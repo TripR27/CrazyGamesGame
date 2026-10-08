@@ -4,6 +4,7 @@ import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { firstBuyableGear, gearToWear } from '@/heroes/gear';
 import { anyHeroTravelled, readyHeroId } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
@@ -74,6 +75,10 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'hero:departed': ({ store }) => anyHeroTravelled(store.getState()),
   // Loot found before (this session or an earlier one): the dungeon ingredient is on the shelf already.
   'hero:returned': ({ store }) => Object.keys(store.getState().ingredientStock).length > 0,
+  // Owned gear counts too: the gear lesson then shows and its steps are done at once (see gearLesson).
+  'gear:affordable': ({ store }) => store.getState().gearOwned.length > 0 || firstBuyableGear(store.getState()) !== undefined,
+  'gear:bought': ({ store }) => store.getState().gearOwned.length > 0,
+  'gear:equipped': ({ store }) => Object.values(store.getState().heroes).some((h) => Object.keys(h.gear).length > 0),
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -136,6 +141,8 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients 
     newestDecorId: store.getState().decorBought.at(-1) ?? null,
     readyHeroId: readyHeroId(store.getState(), clock.now()) ?? null,
     lootId: Object.keys(store.getState().ingredientStock)[0] ?? null,
+    affordableGearId: firstBuyableGear(store.getState())?.id ?? null,
+    gearToWear: gearToWear(store.getState()),
     openTab: openTab(),
   });
   return { machine, getGuideContext };

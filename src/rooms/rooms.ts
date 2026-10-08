@@ -37,6 +37,9 @@ export const ROOMS: readonly RoomDef[] = [
   { id: 'guild_hall', buy: { level: 5, cost: 15_000 }, seats: 0, effects: [] },
 ];
 
+/** The room on the upper floor where the heroes live; heroes and their gear are only there once it is built. */
+export const GUILD_ROOM_ID = 'guild_hall';
+
 /** The part of the state rooms read and change. */
 export interface RoomState extends BuyerState {
   roomsBuilt: string[];

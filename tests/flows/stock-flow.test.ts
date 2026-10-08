@@ -4,9 +4,10 @@ import { clickIngredient } from '@/brewing/brewing';
 import {
   brewableRecipes, ingredients, orderableRecipeIds, ownedIngredients, shelfCount, shelfIds, usableIngredientIds, usesStock,
 } from '@/brewing/ingredients';
-import { GUILD_ROOM_ID, newHero } from '@/heroes/heroes';
+import { newHero } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { toBookView } from '@/recipes/recipes';
+import { GUILD_ROOM_ID } from '@/rooms/rooms';
 import { num } from '@/shared/numbers';
 import { createInitialState, type GameState } from '@/shared/state';
 import { TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
@@ -136,7 +137,7 @@ describe('the loot lesson', () => {
     const g = newGame(state);
     expect(g.shown()).toBeNull();
     g.world.store.update((s) => void (s.ingredientStock.witch_moss = 2));
-    g.world.bus.emit('hero:returned', { id: 'warrior', dungeon: 'swamp', loot: { witch_moss: 2 }, xp: 40, level: 1, levelUp: false, injured: false });
+    g.world.bus.emit('hero:returned', { id: 'warrior', dungeon: 'swamp', loot: { witch_moss: 2 }, gear: null, xp: 40, level: 1, levelUp: false, injured: false });
     expect(g.shown()).toBe('loot_shelf');
     expect(g.guide().lootId).toBe('witch_moss');
     g.tick(8_100);
