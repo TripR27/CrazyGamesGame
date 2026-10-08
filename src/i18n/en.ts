@@ -1,3 +1,4 @@
+import { heroes } from '@/i18n/en-heroes';
 import { decor, rooms, shop, upgrades } from '@/i18n/en-shop';
 import type { Messages } from '@/i18n/translator';
 
@@ -105,6 +106,8 @@ export const ingredients: Messages = {
   'ingredients.fire_pepper.name': 'Fire Pepper',
   'ingredients.moon_grape.name': 'Moon Grape',
   'ingredients.troll_sweat.name': 'Troll Sweat',
+  'ingredients.bog_pearl.name': 'Bog Pearl',
+  'ingredients.witch_moss.name': 'Witch Moss',
 };
 
 /** The one button that unfolds the side panel (with its tabs) and folds it away again. */
@@ -220,4 +223,5 @@ export const en: Messages = {
   ...panel,
   ...rooms,
   ...decor,
+  ...heroes,
 };

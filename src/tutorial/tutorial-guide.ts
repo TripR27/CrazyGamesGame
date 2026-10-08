@@ -28,7 +28,9 @@ export interface GuideContext {
   /** The first decoration the player can buy right now, and the one bought last, if any. */
   affordableDecorId: string | null;
   newestDecorId: string | null;
-  /** The side-panel tab on screen ('shop', 'recipes'), or null while the panel is folded away. */
+  /** The first hero at home and fit, who can be sent on a trip. */
+  readyHeroId: string | null;
+  /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
 
@@ -115,6 +117,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-new-room': (ctx) => (ctx.newestRoomId === null ? null : `room:${ctx.newestRoomId}`),
   'guide-decor-buy': (ctx) => inShop(ctx, 'decor-buy', ctx.affordableDecorId),
   'guide-new-decor': (ctx) => (ctx.newestDecorId === null ? null : `decor:${ctx.newestDecorId}`),
+  // The way to the Heroes tab first, then the send button of a hero who is ready.
+  'guide-hero-send': (ctx) => toTab(ctx, 'heroes') ?? (ctx.readyHeroId === null ? null : `hero-send:${ctx.readyHeroId}`),
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */
@@ -176,6 +180,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     room: ctx.affordableRoomId === null ? '' : t(textKey('rooms', ctx.affordableRoomId, 'name')),
     decor: ctx.affordableDecorId === null ? '' : t(textKey('decor', ctx.affordableDecorId, 'name')),
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
+    hero: ctx.readyHeroId === null ? '' : t(textKey('heroes', ctx.readyHeroId, 'name')),
     ...likedEffect(ctx),
   });
 }

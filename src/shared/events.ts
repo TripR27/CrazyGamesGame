@@ -87,6 +87,18 @@ export interface GameEvents {
   'decor:bought': { id: string };
   /** Something in the scene (a boarded-up room) asks the side panel to open on the Shop tab. */
   'shop:requested': Record<string, never>;
+  /** A hero joined: the warrior when the guild hall is built, others when hired. */
+  'hero:recruited': { id: string };
+  /** A hero left for a dungeon, and came back with loot and XP (`level` is their level now; `injured`: they rest first). */
+  'hero:departed': { id: string; dungeon: string };
+  'hero:returned': { id: string; dungeon: string; loot: Readonly<Record<string, number>>; xp: number; level: number; levelUp: boolean; injured: boolean };
+  /** An injured hero drank a drink from the bar and is fit again. */
+  'hero:healed': { id: string; recipeId: string };
+  /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
+  'heroes:requested': Record<string, never>;
+  /** The Heroes tab came on screen or went off it. */
+  'heroes:opened': Record<string, never>;
+  'heroes:closed': Record<string, never>;
   /** A staff upgrade was bought (a hire or a training level). */
   'staff:hired': { id: string };
   /** The shop panel was opened or closed (the tutorial follows this). */

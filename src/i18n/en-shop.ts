@@ -8,6 +8,8 @@ export const rooms: Messages = {
   'rooms.alchemy_lab.description': 'The cauldron brews {brewSpeed} faster and the bar holds {storage} drink. Mind the purple smoke.',
   'rooms.vip_lounge.name': 'VIP Lounge',
   'rooms.vip_lounge.description': '{vipChance} VIPs, and +{seats} seats on a velvet sofa. Royalty loves velvet.',
+  'rooms.guild_hall.name': 'Guild Hall',
+  'rooms.guild_hall.description': 'Heroes move in upstairs. A warrior comes along; send them to dungeons for rare ingredients.',
   'rooms.sign_locked': '{name}\nUnlocks at {level}',
   'rooms.sign_for_sale': '{name}\nBuild in the shop: {cost}',
 };

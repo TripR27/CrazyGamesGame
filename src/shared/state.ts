@@ -19,6 +19,20 @@ export interface TutorialProgress {
 /** Purchased level per upgrade id. An open map: new upgrades need no change here. */
 export type UpgradeLevels = Record<string, number>;
 
+/** A hero on a trip: which dungeon, and the wall-clock time they are back (absolute, so it also runs while the game is closed). */
+export interface Expedition {
+  dungeon: string;
+  endsAt: number;
+}
+
+/** One hero (keyed by hero class id). `injuredUntil` is a wall-clock time; 0 or past means fit. */
+export interface HeroState {
+  level: number;
+  xp: number;
+  injuredUntil: number;
+  expedition: Expedition | null;
+}
+
 export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
@@ -32,6 +46,10 @@ export interface GameState {
   /** Decoration ids bought for downstairs (one-time purchases). */
   decorBought: string[];
   upgrades: UpgradeLevels;
+  /** The heroes the player has, by hero class id (an open map: the guild hall brings the first). */
+  heroes: Record<string, HeroState>;
+  /** How many of each dungeon ingredient the player holds; heroes bring them, brewing will use them up. */
+  ingredientStock: Record<string, number>;
   tutorial: TutorialProgress;
 }
 
@@ -45,6 +63,8 @@ export function createInitialState(now: number): GameState {
     roomsBuilt: [],
     decorBought: [],
     upgrades: {},
+    heroes: {},
+    ingredientStock: {},
     tutorial: { completedSteps: [], skipped: false },
   };
 }

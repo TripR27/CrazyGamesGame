@@ -31,7 +31,7 @@ export interface Timeline {
   earned: { ms: number; gold: Num }[];
 }
 
-const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor', id: string): string => t(textKey(domain, id, 'name'));
+const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor' | 'heroes', id: string): string => t(textKey(domain, id, 'name'));
 
 /** Starts recording; `now` gives the simulated time. Only firsts are written to the timeline, to keep it short. */
 export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Timeline {
@@ -67,6 +67,7 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     timeline.purchases.push(now());
     once(`decor:${id}`, `bought ${name('decor', id)}`);
   });
+  bus.on('hero:recruited', ({ id }) => once(`hero:${id}`, `hero ${name('heroes', id)} joined`));
   return timeline;
 }
 
