@@ -84,7 +84,7 @@ export const heroes: Messages = {
   'tutorial.gear_equip.text':
     'Now put it on: pick it in the {slot} list of {wearer}. Swords bring loot, shields prevent ouch, helmets save time, amulets boost drinks.',
   'tutorial.hero_brew_aim.text': 'Heroes travel better with a drink. Click the little cauldron in the guild hall: the next ingredients go in there.',
-  'tutorial.hero_brew_fill.text': 'Now brew, like for a customer. {ingredient} is a start. The drink goes straight into a bag, never on the bar.',
+  'tutorial.hero_brew_fill.text': 'Now brew, like for a customer. {heroIngredient} is a start. The drink goes straight into a bag, never on the bar.',
   'tutorial.card_pick.text': 'A choice on the way! Bold choices bring more, safe ones bring {cardHero} home in one piece. Ten seconds.',
   'tutorial.card_done.text': 'No time to choose? Then they play it safe, also while you are away. Choosing yourself pays more.',
   'tutorial.hero_done.text':

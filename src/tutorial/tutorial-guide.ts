@@ -190,7 +190,8 @@ function likedEffect(ctx: GuideContext): { effect: string; does: string } {
 export function speech(stepId: string, ctx: GuideContext): string {
   return t(textKey('tutorial', stepId, 'text'), {
     drink: name('recipes', guideRecipe(ctx)?.id),
-    ingredient: name('ingredients', ctx.heroDrinkIngredient ?? nextIngredient(ctx)),
+    ingredient: name('ingredients', nextIngredient(ctx)),
+    heroIngredient: name('ingredients', ctx.heroDrinkIngredient ?? undefined),
     upgrade: upgradeName(ctx.affordableUpgradeId),
     staff: upgradeName(ctx.affordableStaffId),
     liked: name('recipes', likedCustomer(ctx)?.recipeId),
