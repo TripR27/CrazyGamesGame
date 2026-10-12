@@ -64,7 +64,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
 8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
 9. **Na elke stap wordt SPECS.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
-10. **Git:** één branch per stap, een paar logische commits (ongeveer 2 tot 3), mergen naar `main` pas na jouw akkoord, nooit pushen tenzij gevraagd (hoofdstuk 11).
+10. **Git:** één branch per stap, een paar logische commits (ongeveer 2 tot 3), mergen naar `main` pas na jouw akkoord; de eigen branch committen en pushen mag zonder te vragen (besluit 2026-10-12, hoofdstuk 11).
 
 ### Hoe dwing je dit af (voor jou)
 - **`CLAUDE.md`** in de projectroot (wordt in stap 1 gemaakt, en ik maak hem nu al aan) wordt automatisch bij elke sessie geladen en verwijst hiernaar. Dat is de betrouwbaarste manier.
@@ -588,7 +588,7 @@ Jij maakt de repository en de GitHub-koppeling zelf aan. Daarna werkt het zo:
 2. **Een paar logische commits per stap (ongeveer 2 tot 3)**, niet overdrijven (bij een grote refactor één commit per fase, elk een groen terugvalpunt). Bijvoorbeeld: één commit voor de code met bijbehorende tests, één voor de SPEC-update, en alleen extra commits als de stap echt uit losse delen bestaat. Berichten in het Engels, korte imperatieve zin.
 3. **Laatste commit van de stap** is de SPECS.md-update (hoofdstuk 10, punt 6).
 4. **Terug mergen naar `main`:** alleen nadat jij het resultaat hebt bekeken en zegt dat het mag ("merge stap N"). Standaard `--no-ff`, zodat elke stap als blok in de geschiedenis zichtbaar blijft.
-5. **Pushen doe ik nooit** tenzij jij dat expliciet vraagt. Besluit 2026-10-06: mergen en pushen alleen als jij het **per stap** zegt; een eerdere toestemming geldt niet automatisch voor de volgende stap. Geen force-push, geen herschrijven van geschiedenis op `main`.
+5. **Pushen en mergen:** de eigen branch (`step-…` of `chore-…`) committen en pushen mag zonder te vragen (besluit 2026-10-12; daarvoor: nooit pushen tenzij gevraagd). Mergen naar `main` alleen als jij het **per stap** zegt; een eerdere toestemming geldt niet automatisch voor de volgende stap. Na een afgeronde stap of een merge stop ik tot jij zegt verder te gaan, en ik begin geen nieuwe stap zonder jouw woord. Geen force-push, geen herschrijven van geschiedenis op `main`.
 6. **Auteur:** commits gebruiken de `user.name` en `user.email` uit jouw git-configuratie, dus jij staat als auteur. **Besluit: geen enkele vermelding van Claude of AI in git of GitHub.** Dus geen `Co-Authored-By`-regel, geen "Generated with Claude Code" in commitberichten, PR-beschrijvingen of branchnamen, en geen `--author`-override. Alleen jouw naam staat erin. Gebruik `git config` nooit aanpassen om een andere identiteit in te stellen.
 7. Geen commit zonder dat `npm run check` slaagt (behalve een expliciete "work in progress"-commit die ik als zodanig benoem).
 
@@ -698,6 +698,12 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Chore: werkregel van de eigenaar (2026-10-12, `chore-work-rule`)
+- **Gedaan:** de werkregel van de eigenaar vastgelegd bovenaan CLAUDE.md en in hoofdstuk 1 (regel 10) en 11 (Git-werkwijze, punt 5).
+- **Waarom (keuzes):** besluit eigenaar: stap per stap werken, de eigen branch committen en pushen mag zonder te vragen, mergen naar `main` alleen na uitdrukkelijke toestemming per keer, en daarna stoppen tot de eigenaar zegt verder te gaan.
+- **Afwijkingen van het plan:** geen; alleen docs, geen code.
+- **Nog te doen / volgende stap:** ongewijzigd: mergen van 15b, 15c en 16 na akkoord, daarna stap 16b.
 
 ### Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes (2026-10-08, `step-16-hero-cauldron-cards`)
 - **Gedaan:** (code in `src/heroes/` (nieuw: `expedition.ts`, `hero-brewing.ts`, `trip-cards.ts`, `cards-view.ts`), `src/brewing/brewing.ts` (`clickIngredient` met een ketel naar keuze), `src/app/` (world, layout, tavern-scene, viewport-view), `src/shared/` (state, events, random, content), `src/tutorial/`, `src/recipes/`, `src/reputation/`, `src/i18n/` en `src/dev/` (nieuw: `bot.ts`); tests in `tests/trip.test.ts` (nieuw), aangepaste hero-, gear-, stock- en content-tests, en een kaartjes-tabel in de validator)
