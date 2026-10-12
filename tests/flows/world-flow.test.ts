@@ -25,7 +25,7 @@ function withReputation(reputation: number, done: string[] = EARLIER) {
 
 describe('discovering recipes in the real game', () => {
   it('turns a new combination into a known recipe with a "Eureka!", and brews it', () => {
-    const game = withReputation(10, [...EARLIER, 'book_open', 'book_read']);
+    const game = withReputation(10, [...EARLIER, 'book_open', 'book_read', 'slop_tip']);
     const discovered = vi.fn();
     game.world.bus.on('recipe:discovered', discovered);
     clickIngredient(game.world, 'swamp_slime');
@@ -36,7 +36,7 @@ describe('discovering recipes in the real game', () => {
   });
 
   it('puts a new ingredient on the shelf only once it is bought, and then its recipes can be discovered', () => {
-    const game = withReputation(10, [...EARLIER, 'book_open', 'book_read']);
+    const game = withReputation(10, [...EARLIER, 'book_open', 'book_read', 'slop_tip']);
     const w = game.world;
     expect(shelfIds(game.world)).toEqual(['swamp_slime', 'wild_honey', 'glowcap']);
     clickIngredient(w, 'wild_honey');
@@ -73,6 +73,10 @@ describe('the recipe book hint, played in the real game', () => {
     game.world.bus.emit('shop:closed', {});
     game.world.bus.emit('book:opened', {});
     expect(game.shown()).toBe('book_read');
+    game.tick(7_100);
+    // Trying recipes can fill the bar with drinks nobody ordered: the kettle shows the slop bucket next.
+    expect(game.shown()).toBe('slop_tip');
+    expect(resolveTarget('bucket', game.guide())).toBe('bucket');
     game.tick(7_100);
     expect(game.shown()).toBeNull();
   });

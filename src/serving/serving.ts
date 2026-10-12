@@ -151,6 +151,15 @@ export function clickReadyDrink({ bus, station, selection }: Pick<World, 'bus' |
   if (picked !== null) bus.emit('drink:picked', { recipeId: picked });
 }
 
+/** Tip the picked drink into the slop bucket: it is gone, with no gold back. Makes room on a bar full of drinks nobody wants. */
+export function discardPicked({ bus, station, selection, rng }: Pick<World, 'bus' | 'station' | 'selection' | 'rng'>): void {
+  const picked = selection.selected();
+  if (picked === null) return;
+  station.ready.splice(station.ready.indexOf(picked), 1);
+  selection.clear();
+  bus.emit('drink:discarded', { recipeId: picked, by: 'player', messageKey: feedbackKey('slop', rng) });
+}
+
 /** Put the picked drink back (a click on an empty spot). */
 export function cancelSelection({ selection }: Pick<World, 'selection'>): void {
   selection.clear();

@@ -25,7 +25,7 @@ import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';
 import { createTargetRegistry, type TargetRegistry } from '@/shared/targets';
 import { systemClock, type Clock } from '@/shared/time';
-import { startStaff } from '@/staff/staff';
+import { type BrewerKettle, createKettle, startStaff } from '@/staff/staff';
 import { createTutorial, type TutorialServices } from '@/tutorial/tutorial-context';
 
 /**
@@ -99,16 +99,18 @@ export interface StaffWiring {
   bus: EventBus<GameEvents>;
   floor: CustomerFloor;
   station: BrewStation;
+  kettle: BrewerKettle;
   rng: Rng;
   catalog: CustomerCatalog & { ingredients: readonly IngredientDef[] };
 }
 
 /** Puts the hired staff to work: their pace comes from the bought upgrades, and they use the same serving rules as a click. */
-export function startStaffWork({ store, bus, floor, station, rng, catalog }: StaffWiring): () => void {
+export function startStaffWork({ store, bus, floor, station, kettle, rng, catalog }: StaffWiring): () => void {
   return startStaff({
     bus,
     floor,
     station,
+    kettle,
     rng,
     serve: {
       economy: store,
@@ -156,6 +158,8 @@ export interface World {
   floor: CustomerFloor;
   /** The cauldron and the bar. Runtime only. */
   station: BrewStation;
+  /** The brewer's own kettle behind the bar. Runtime only. */
+  kettle: BrewerKettle;
   /** The drink the player picked up from the bar. */
   selection: DrinkSelection;
   /** The hero cauldron in the guild hall. Runtime only. */
@@ -187,7 +191,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   watchShop(store, bus, c);
   // The shop lists an offer once it comes in sight (its level, and half its price), and says what is new.
   startShopSight({ store, content: c });
-  startStaffWork({ store, bus, floor, station, rng, catalog });
+  const kettle = createKettle();
+  startStaffWork({ store, bus, floor, station, kettle, rng, catalog });
   // Heroes come back when their trip's (absolute) end time has passed, also right after loading.
   startHeroes({ store, bus, rng, clock, content: c });
   // Heroes on Auto set out again once they are home and fit.
@@ -201,5 +206,5 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startDaily({ store, bus, clock });
   const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
-  return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };
+  return { store, bus, rng, clock, content: c, floor, station, kettle, selection, guild, targets: createTargetRegistry(), tutorial, offline };
 }

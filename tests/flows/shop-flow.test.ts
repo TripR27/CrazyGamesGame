@@ -13,7 +13,7 @@ import { TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
 
 const BEFORE = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'shop_new_spot', 'seats_buy', 'seats_done', 'book_open', 'book_read',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'shop_new_spot', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'slop_tip',
 ];
 
 /** The lessons before the ingredient lesson are done; the player has `reputation` and `gold`. */

@@ -11,8 +11,6 @@ export const BREWING = {
   maxIngredients: 3,
   /** Finished drinks that can wait on the bar. Storage upgrades raise this in step 9. */
   storageCapacity: 3,
-  /** Unfinished ingredients the player left for this long may be cleared by the brewer, so it is never stuck. */
-  staleCauldronMs: 15_000,
 } as const;
 
 export interface ActiveBrew {
@@ -21,7 +19,7 @@ export interface ActiveBrew {
   totalMs: number;
 }
 
-/** The cauldron and the bar. Runtime only, not saved: a new session starts with an empty cauldron. */
+/** The cauldron (the player's alone; the brewer has their own kettle) and the bar. Runtime only, not saved: a new session starts with an empty cauldron. */
 export interface BrewStation {
   /** Ingredient ids currently in the cauldron, in the order they were added. */
   contents: string[];

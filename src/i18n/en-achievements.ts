@@ -48,6 +48,7 @@ export const achievements: Messages = {
   'daily.thanks': 'Come back tomorrow for day {next}!',
   'tutorial.daily_claim.text': 'A gift for showing up! Claim your daily bonus.',
   'tutorial.daily_done.text': 'Come back every day: the bonus grows for 7 days in a row. Miss a day and it starts over.',
+  'tutorial.slop_tip.text': 'A drink nobody wants clogging the bar? Pick it up and tip it in the slop bucket. Your staff do it too if the bar stays full.',
   'tutorial.shop_new_spot.text': 'Something new in the shop! A red dot on Menu means fresh stock. The shop grows as your purse does.',
   'settings.title': 'Settings',
   'settings.volume': 'Volume',
