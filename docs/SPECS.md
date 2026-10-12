@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** stap 21 (Art-pass in pixel art), op 2026-10-12 door Claude gesplitst in 21a t/m 21d (zie hoofdstuk 12). 16b t/m 20 en 19b zijn op 2026-10-12 naar `main` gemerged (de eigenaar zei: "push, merge en ga verder"). De merge van 21a naar `main` werd door de veiligheidscontrole van Claude Code geblokkeerd; 21a, 21b, … staan daarom op elkaar gebouwd op hun eigen branches en wachten op een merge door de eigenaar (in die volgorde). **Laatst afgerond stap:** 21e (panelen in hout en pixel-iconen). Stap 21 is daarmee rond; 21a t/m 21e wachten op een merge naar `main` door de eigenaar (in die volgorde). **Volgende stap:** 22 (Performance, QA en indienklaar maken), of eerst feedback van de eigenaar op de art. Idle zit binnen het doel (gemiddeld 34,7%).
+**Nu bezig:** niets. Alles tot en met stap 21e staat op `main` (de eigenaar mergede 21a t/m 21e zelf op 2026-10-12 en vond de art "top"). **Laatst afgerond stap:** 21e (panelen in hout en pixel-iconen). **Volgende stap:** 22a (winkel geleidelijk en uitverkocht weg). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22d. Idle zit nu op gemiddeld 34,7%; het doel gaat in 22c omhoog (zie hoofdstuk 4).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -55,7 +55,10 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 21c | Pixel-art: ingrediënten, helden, kamers en decoraties | ✅ | `step-21c-items-heroes-rooms` |
 | 21d | Pixel-art: effecten, lettertype, wolkjes en mascotte | ✅ | `step-21d-effects-style` |
 | 21e | Panelen restylen en pixel-iconen in plaats van emoji | ✅ | `step-21e-panels-icons` |
-| 22 | Performance, QA, indienklaar | ⬜ | |
+| 22a | Winkel geleidelijk en uitverkocht weg | ⬜ | |
+| 22b | Eigen ketel voor de brouwer en drankjes weggooien | ⬜ | |
+| 22c | Sneller personeel (balans) | ⬜ | |
+| 22d | Performance, QA, indienklaar (was 22) | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
 
 ---
@@ -83,7 +86,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ## 2. Geverifieerde CrazyGames-eisen
 
-Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw checken vlak voor indienen (stap 22).
+Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw checken vlak voor indienen (stap 22d).
 
 | Eis | Waarde | Gevolg voor ons |
 |---|---|---|
@@ -106,7 +109,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Gebruiker | `user.getUser()`, `isUserAccountAvailable`, `showAuthPrompt()` | Gebruikersnaam kleine HUD-weergave; geen eigen login |
 | Privacy | melding nodig als we extra persoonsdata verzamelen | We verzamelen niets extra |
 
-**Nog niet gecontroleerd (doen in stap 22):** exacte thumbnail-formaten, de CrazyGames QA/preview-tool, beoordelingscriteria voor Basic → Full Launch, en of een externe analytics-oplossing is toegestaan (standaard: **geen analytics**).
+**Nog niet gecontroleerd (doen in stap 22d):** exacte thumbnail-formaten, de CrazyGames QA/preview-tool, beoordelingscriteria voor Basic → Full Launch, en of een externe analytics-oplossing is toegestaan (standaard: **geen analytics**).
 
 ---
 
@@ -572,6 +575,43 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 
 - **Balans-simulator** (gebouwd in stap 13): `npm run simulate [-- minuten [seed]]` (standaard 60 minuten, seed 1). `scripts/simulate.mjs` laat de bestaande Vite de TypeScript-code laden (`ssrLoadModule`, geen nieuwe dependency); de logica staat in `src/dev/`: een speler-bot (`bot.ts`, sinds stap 16 weer een eigen bestand: serveert klaarstaande drankjes, probeert eerst nieuwe recepten, brouwt dan bestellingen, speelt de helden (kaartjes, heldendrankjes, tochten) en winkelt; één klik per 0,7 s), de tijdlijn en de runner (`simulator.ts`: het echte spel via `createWorld`, vaste seed, gesimuleerde klok, tutorial overgeslagen) en het rapport (`simulator-report.ts`). Het rapport toont de eerste keer van elke mijlpaal, een tabel per minuut en de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6. **Idle versus actief:** dezelfde run (zelfde seed) waarin de speler de laatste 10 minuten niets doet; doel 30-40%. Doel later: eerste prestige na ~1 tot 2 uur (prestige komt in stap 17).
 
+### Gameplay-ronde na de art-pass (wensen eigenaar, 2026-10-12; uitwerking Claude, stap 22a, 22b en 22c)
+
+De eigenaar speelde de game na stap 21 en gaf zes punten. De wens zelf is van de eigenaar; de uitwerking en de getallen gemarkeerd met *(voorstel)* zijn van Claude en worden in de stap zelf nagemeten of aan de eigenaar voorgelegd.
+
+**1. De winkel toont geleidelijk, niet alles in één keer (stap 22a).** Nu staan vanaf de start alle upgrades in de winkel, plus alle ingrediënten, kamers en decoraties met "Unlocks at …". Dat is overweldigend en verraadt alles.
+- **In zicht komen:** een aanbod (upgrade, ingrediënt, kamer, decoratie; in het tabblad Heroes de uitrusting; in de Legacy de bonussen) komt in de lijst zodra (a) het reputatieniveau ervan bereikt is en (b) de speler in deze taverne ooit minstens **de helft** van de prijs van het eerste niveau tegelijk had *(voorstel: 50%)*. Uitzondering: Swift Cauldron staat er vanaf de start, zodat de winkel nooit leeg is.
+- **Blijft staan:** wat eenmaal getoond is, blijft staan (ook als het goud weer zakt), tot het uitverkocht is. De state onthoudt dat (`shopSeen`: ids per soort, of één lijst met voorvoegsel); bij het verkopen van de taverne gaat die terug naar leeg (de Legacy-lijst niet, die hoort bij de blijvende voortgang).
+- **Teaser:** per groep (Cauldron, Tavern, Staff, Night, Ingredients, Rooms, Decorations, Gear) staat hoogstens **één** item dat nog niet in zicht is, grijs, met naam en "Unlocks at <niveau>" of "Save up to see it" *(voorstel)*, zodat de speler weet dat er meer komt. Een groep zonder zichtbaar of teaser-item heeft geen kopje.
+- **Nieuw:** een item dat net in zicht kwam, krijgt een label "New!" tot het tabblad open is geweest; de Menu-knop en het tabblad krijgen een bolletje zolang er iets nieuws is.
+- **Tutorial:** de bestaande lessen starten pas als iets betaalbaar is, en dan staat het al in de winkel (50% < 100%), dus ze blijven kloppen. Nieuwe hint: de eerste keer dat er iets nieuws is terwijl het menu dicht is, wijst de ketel het bolletje aan ("Something new in the shop.").
+
+**2. Uitverkocht verdwijnt uit de winkel (stap 22a).** Wat de speler niet meer kan kopen, staat niet meer in de lijst: upgrades op hun hoogste niveau (nu nog met "Maxed"), Legacy-bonussen op hun hoogste niveau, gekochte uitrusting. (Gekochte ingrediënten, kamers en decoraties en eenmalige upgrades verdwijnen al.) Upgrades zonder maximum blijven altijd staan.
+
+**3. Zelf blijven brouwen terwijl de brouwer werkt: een eigen ketel voor de brouwer (stap 22b).** Nu gebruikt de brouwer-assistent dezelfde ketel als de speler: zolang hij brouwt, kan de speler niets ("busy"), ook geen nieuwe recepten proberen. Gekozen oplossing *(voorstel; het patroon bestaat al bij de heldenketel)*:
+- De brouwer-assistent krijgt een **eigen ketel** met een pixel-art figuur (de brouwer) ernaast. Plek *(voorstel)*: achter of naast de bar, zodat zijn drankjes zichtbaar naar de bar gaan; de precieze plek bepaalt de stap in `layout.ts` (de plekken op de bar mogen daarvoor schuiven).
+- De taverneketel is dan **alleen van de speler**: de brouwer raakt hem nooit aan. De regel dat de brouwer na 15 s een half gevulde ketel van de speler leeggooit (`staleCauldronMs`, `createStaleWatch`) vervalt.
+- De brouwerketel brouwt de bestelling van de oudste wachtende klant die nog niet op de bar staat (zoals nu), met de normale brouwtijd (Swift Cauldron telt mee). Het drankje komt op dezelfde bar; staat die vol, dan wacht de brouwer. Kerker-ingrediënten worden net zo verbruikt als nu.
+- Wat de speler ziet: de brouwer roert, zijn ketel pruttelt en kookt (dezelfde animaties als de grote ketel, kleiner), en een drankje vliegt naar de bar.
+- Tutorial: de personeelsles noemt de eigen ketel ("Your brewer has their own kettle, so yours stays free for new recipes.").
+
+**4. Drankjes weggooien, zodat de bar nooit vastloopt (stap 22b).** Nu kan een volle bar met drankjes die niemand bestelt (bijvoorbeeld na het uitproberen van recepten) de speler en de brouwer blokkeren: nieuwe drankjes kunnen er niet bij ("full"), en klanten vertrekken.
+- **Slopemmer:** naast de bar staat een emmer (pixel art). Pak een drankje op (klikken, zoals nu) en klik op de emmer: het drankje is weg (een plons-effect en een grappige regel). Geen geld terug. Een opgepakt drankje terugzetten blijft zoals nu (op een lege plek klikken).
+- **Personeel ruimt op:** staat de bar vol en wil geen enkele wachtende klant een van de drankjes, dan gooit de serveerster na een tijdje *(voorstel: 20 s)* het oudste drankje dat niemand wil weg. Zo loopt idle nooit vast.
+- **Tutorial-hint** (nieuwe les `slop`, onlyWhenShown): de eerste keer dat de bar vol staat met een drankje dat niemand wil, wijst de ketel eerst het drankje en dan de emmer aan: "Nobody wants that one. Pick it up and tip it in the bucket." Klaar bij het eerste weggegooide drankje.
+- Event `drink:discarded` (voor de les, het geluid en het effect); een geluid kan een bestaand effect zijn (`buzz`) of later een eigen bestand.
+
+**5. Automatisering sneller, zodat de speler eerder andere dingen doet (stap 22c).** Nu start een brouwer op niveau 1 een drankje elke ~33 s (0,03 per s) en serveert een serveerster op niveau 1 elke 25 s (0,04 per s); dat voelt te traag.
+- **Begin** *(voorstel)*: niveau 1 ongeveer 2,5 keer zo snel: de brouwer elke ~12 s (0,08 per s), de serveerster elke ~10 s (0,1 per s). De prijzen van het personeel mogen omhoog als dat nodig is voor de balans.
+
+**6. Automatisering op het einde snel genoeg dat niemand meer zonder drankje vertrekt (stap 22c).**
+- **Volledig getraind** (niveau 7) houdt het personeel de drukste instroom bij (alle plekken, inclusief de kamers, en de kortste wachttijd tussen klanten). Om dat te halen brouwt de brouwerketel op hogere niveaus **meerdere drankjes tegelijk** *(voorstel: 2 vanaf niveau 4, 3 op niveau 7)*, en het tempo per niveau groeit sneller dan nu.
+- **Nieuwe meetdoelen** *(voorstel, de eigenaar bevestigt bij stap 22c)*, met `npm run simulate` over seeds 1 t/m 9:
+  - idle (de laatste 10 minuten niets doen, met het personeel dat de bot dan heeft) levert **50 tot 70%** van actief spelen (was 30 tot 40%: de eigenaar wil dat de automatisering meer doet; actief spelen blijft het meest opleveren);
+  - met volledig getraind personeel vertrekt **hoogstens 5%** van de klanten zonder drankje (het rapport krijgt daarvoor een regel);
+  - de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6 (eerste personeel, eerste kamer, eerste prestige) blijven gelden.
+- De offline-formules volgen vanzelf (ze rekenen met het tempo van het personeel); de Night Shift-getallen worden nagemeten.
+
 ### Rendering
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
@@ -812,7 +852,14 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 21e: Panelen en iconen (wens eigenaar, 2026-10-12).** De DOM-panelen in dezelfde stijl: winkel, receptenboek, helden, Legacy, Trophies, instellingen, menu, HUD en de vensters (welkom, dagbonus, niveau, baas, kaartjes), met de pixelkaders (`--frame-…`) en het lettertype. De emoji in de speltekst worden eigen pixel-iconen (in de DOM als plaatje in de tekst, in de bestelwolkjes in het canvas naast de tekst getekend).
 - (oorspronkelijk) **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
-- [ ] **Stap 22: Performance, QA en indienklaar maken.** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
+*Na de art-pass gaf de eigenaar op 2026-10-12 gameplay-feedback; Claude verdeelde die over 22a, 22b en 22c. De oude stap 22 heet nu 22d. Uitwerking: hoofdstuk 4, "Gameplay-ronde na de art-pass".*
+- [ ] **Stap 22a: Winkel geleidelijk en uitverkocht weg.** De winkel (en het gear-deel van het tabblad Heroes en de Legacy) toont niet meer alles in één keer: een aanbod verschijnt pas als het in zicht komt, met per groep hoogstens één vergrendelde teaser; wat nieuw is krijgt een "New!"-label en een bolletje op de Menu-knop; wat uitverkocht of op het hoogste niveau is, verdwijnt. Tutorial-hint: de upgrade-les blijft werken (die start pas als iets betaalbaar is, en dan is het al zichtbaar); de eerste keer dat er iets nieuws is, wijst de ketel het bolletje aan.
+  *Klaar wanneer:* bij de start staat alleen wat in zicht is in de winkel, items verschijnen één voor één tijdens het spelen, niets dat vol of gekocht is staat er nog, verkopen van de taverne zet het terug, tests voor de zichtbaarheidsregels slagen, de simulator blijft byte-identiek (de winkel is weergave; de bot koopt via de logica).
+- [ ] **Stap 22b: Eigen ketel voor de brouwer en drankjes weggooien.** De brouwer-assistent krijgt een eigen ketel (met een pixel-art figuur ernaast), zodat de taverneketel alleen van de speler is en de speler altijd zelf kan brouwen en ontdekken. Een slopemmer naast de bar: een opgepakt drankje erin gooien maakt plek op de bar. Het personeel gooit een drankje dat niemand wil zelf weg als de bar vol staat, zodat idle nooit vastloopt. Tutorial-hint: een les "weggooien" de eerste keer dat de bar vol staat met een drankje dat niemand wil.
+  *Klaar wanneer:* de brouwer brouwt in zijn eigen ketel terwijl de speler in de taverneketel brouwt, de speler kan de bar altijd leegmaken, een volle bar met ongewilde drankjes lost zichzelf op met personeel, de oude "stale cauldron"-regel is weg, tests slagen; de simulator verandert (bewust) en wordt opnieuw gemeten (seeds 1 t/m 9).
+- [ ] **Stap 22c: Sneller personeel (balans).** Het personeel werkt vanaf het eerste niveau merkbaar sneller, zodat de speler eerder andere dingen kan doen, en volledig getraind zo snel dat (bijna) niemand meer zonder drankje vertrekt. De brouwerketel brouwt op hogere niveaus meerdere drankjes tegelijk. Afstellen met de simulator op de nieuwe doelen uit hoofdstuk 4. Geen nieuwe speler-functie, dus geen nieuwe hint (de personeelsles blijft kloppen).
+  *Klaar wanneer:* de nieuwe doelen (hoofdstuk 4) zijn gehaald over seeds 1 t/m 9, de prijzen van het personeel zijn erop aangepast, tests slagen, SPECS en GAME_ANALYSE hebben de gemeten getallen.
+- [ ] **Stap 22d: Performance, QA en indienklaar maken (was stap 22).** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
 
 ---
@@ -847,6 +894,12 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Chore: gameplay-feedback na de art-pass (2026-10-12, `chore-gameplay-feedback`)
+- **Gedaan:** de wensen van de eigenaar na het spelen uitgewerkt in hoofdstuk 4 ("Gameplay-ronde na de art-pass") en GAME_ANALYSE.md (hoofdstuk 4 en 5.4): de winkel toont geleidelijk, uitverkocht verdwijnt, de brouwer krijgt een eigen ketel zodat de speler altijd zelf kan brouwen, drankjes weggooien in een slopemmer (en het personeel ruimt een volle bar op), sneller personeel vanaf het begin en volledig getraind snel genoeg dat (bijna) niemand zonder drankje vertrekt. Hoofdstuk 12: nieuwe stappen 22a, 22b en 22c; de oude stap 22 heet nu 22d. Geen code veranderd.
+- **Waarom (keuzes):** een eigen ketel voor de brouwer (zoals de heldenketel) lost het blokkeren in één keer op en maakt de regel over de half gevulde ketel overbodig. Een slopemmer is één duidelijke handeling die bij het oppakken van drankjes past; het personeel ruimt zelf op zodat idle nooit vastloopt. Het idle-doel gaat omhoog omdat de eigenaar meer automatisering wil; actief spelen moet wel het meest blijven opleveren.
+- **Afwijkingen van het plan:** het idle-doel van 30 tot 40% uit GAME_ANALYSE.md hoofdstuk 4 wordt (voorstel) 50 tot 70%; de eigenaar bevestigt dat bij stap 22c.
+- **Nog te doen / volgende stap:** stap 22a. Open voor de eigenaar: de 50%-regel voor "in zicht", de 20 s voor het opruimen door het personeel, de nieuwe idle-doelen en de plek van de brouwerketel.
 
 ### Stap 21e: Panelen in hout en pixel-iconen (2026-10-12, `step-21e-panels-icons`)
 - **Gedaan:** (code in `src/app/icon-art.ts` en `src/app/icon-text-view.ts` (nieuw), `src/app/ui-art.ts` (kaderstijlen, paneelkader, perkament- en houttegel), `src/app/pixel-dom-view.ts` (iconen in de DOM, `--wood`, `--paper`), `src/app/viewport-view.ts`, `src/customers/customers-view.ts`, `src/serving/serving-view.ts`, `src/heroes/guild-view.ts`, `src/dev/art-preview.ts` en alle CSS-bestanden van de panelen en vensters; tests in `tests/pixels.test.ts`)

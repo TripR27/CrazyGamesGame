@@ -18,9 +18,9 @@
 
 ---
 
-## 2. Winkel-layout en schermindeling: checklist voor stap 21 en 22
+## 2. Winkel-layout en schermindeling: checklist voor stap 21 en 22d
 
-**Besluit:** nu niets veranderen; deze lijst is een checklist voor de art-pass (stap 21) en de QA-stap (stap 22).
+**Besluit:** nu niets veranderen; deze lijst is een checklist voor de art-pass (stap 21) en de QA-stap (stap 22d; was 22).
 
 **Wat er nu is:** één knop "☰ Menu" rechtsboven in het spel klapt een zijpaneel uit met tabbladen (Shop, Recipes). Spel en paneel passen samen als één kader in het venster; het spel wordt kleiner zodra het paneel opent, zodat je kunt blijven serveren. Zie `ui/side-panels.ts`, `ui/side-layout.ts`, `ui/fit-root.ts` en `ui/shop/`.
 
@@ -36,8 +36,7 @@
 
 ## 4. Helden: nog open
 
-De heldenlaag is uitgewerkt met de eigenaar (SPECS.md, hoofdstuk 4, Helden, en stap 15a t/m 16c; 15a is gebouwd). Nog open:
-- Hoe een held er in pixel art uitziet (stap 21).
+De heldenlaag is uitgewerkt met de eigenaar en gebouwd (SPECS.md, hoofdstuk 4, Helden, stap 15a t/m 16c; de pixel art in stap 21c). Nog open:
 - Later: de boogschutter en de schurk als extra klassen, en diepere kerkers (Grot, Vulkaan, Sterrentoren, Drakenhol uit GAME_ANALYSE 5.5).
 
 ---
