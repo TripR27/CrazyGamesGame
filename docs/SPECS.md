@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`) en 16c (`step-16c-quartermaster`, gebouwd op 16b) zijn klaar; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus beide wachten nog op een merge naar `main`. **Laatst afgerond stap:** 16c (Quartermaster). **Volgende stap:** 17 (Prestige). Idle zit na 16c weer binnen het doel (gemiddeld 34,2%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`) en 17 (`step-17-prestige`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus alle drie wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 17 (Prestige). **Volgende stap:** 18 (Achievements, dagelijkse bonus, instellingen). Idle zit sinds 16c binnen het doel (gemiddeld 34,2%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -43,7 +43,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ✅ | `step-16-hero-cauldron-cards` |
 | 16b | Baasgevecht (timing-minigame) | ✅ | `step-16b-boss-fight` |
 | 16c | Quartermaster: helden op auto en offline | ✅ | `step-16c-quartermaster` |
-| 17 | Prestige | ⬜ | |
+| 17 | Prestige | ✅ | `step-17-prestige` |
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
 | 20 | CrazyGames SDK | ⬜ | |
@@ -133,7 +133,7 @@ main.ts
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
-                  reputation/ offline/ tutorial/ heroes/   (later prestige/ achievements/ audio/ platform/)
+                  reputation/ offline/ tutorial/ heroes/ prestige/   (later achievements/ audio/ platform/)
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
@@ -158,7 +158,7 @@ crazyGamesGame/
                             browser.ts (loop-driver, autosave, localStorage; de enige browser-koppeling)
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
-    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/
+    customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/  prestige/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
@@ -220,7 +220,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -460,6 +460,28 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Tutorial-hint** (les `auto`, na de baasles): start zodra de Quartermaster te koop én betaalbaar is; wijst Menu, het tabblad Heroes en de koopknop aan (alias `guide-quartermaster-buy`), daarna de Auto-knop van de eerste held die nog niet op Auto staat (`guide-hero-auto`), en sluit af bij de gildekamer: "On Auto they take the safe choices. Pick a card or fight the boss yourself and your choice counts." Beide acties tellen alleen in beeld.
 - **Simulator:** de bot koopt de Quartermaster als die in zijn budget past (na huren, vóór uitrusting) en zet daarna elke held op Auto. De tijdlijn toont "bought the Quartermaster" en "Brakka on Auto". In het idle-deel (de laatste 10 minuten niets doen) blijven de helden op Auto dus op tocht gaan.
 
+### Prestige: de taverne verkopen (gebouwd in stap 17; uitwerking door Claude op basis van GAME_ANALYSE hoofdstuk 7)
+
+De eigenaar liet de uitwerking aan Claude ("ga maar gewoon verder"). Alle getallen zijn placeholders, afgesteld met de simulator; de keuzes zijn hieronder en in het logboek te herzien.
+
+- **Code:** `prestige/prestige.ts` (getallen, de Legacy, `canSell`, `sellTavern`, `buyLegacy`, het tellen van het verdiende goud in `startPrestige`, één regel in `createWorld`, en het view-model `toLegacyView`) en `prestige/prestige-view.ts` met `prestige.css` (het tabblad Legacy). De bonussen tellen mee in `getMultipliers` (`prestigeBonuses`), dus ook offline.
+- **Golden Hop** (🌼): verkopen geeft `floor(√(goud verdiend in deze taverne / 250.000))`. Verdiend telt alles wat klanten betalen (prijs en fooi, ook via het personeel) en het offline-loon (event `offline:paid`); uitgeven telt niet af.
+- **Wanneer:** vanaf **Legendary Hall** (niveau 6) en met minstens **4 Golden Hop** (4M goud verdiend). Verkopen voor minder is nooit de moeite van een nieuwe start; de les zou anders al rond minuut 35 aandringen. Event `prestige:available` zodra het kan.
+- **Wat het oplevert:** elke Golden Hop die je ooit verdiende maakt drankjes **+10%** duurder, voor altijd (`totalHops`, telt op bij de basisprijs). Daarnaast besteed je ze in de **Brewery Legacy**: blijvende bonussen met niveaus, niveau n+1 kost basisprijs × (n+1):
+
+| Bonus | Prijs (🌼) | Max | Wat |
+|---|---|---|---|
+| Grandma's Copper Kettle | 1, 2, 3… | 5 | ketel +10% sneller per niveau |
+| Seed Money | 1, 2, 3… | 5 | elke nieuwe taverne start met +1.000 goud per niveau |
+| Staff Handbook | 2, 4, 6… | 5 | personeel brouwt en serveert +15% sneller per niveau |
+| Night Watch | 2, 4, 6… | 4 | offline-limiet +1 uur per niveau (personeel én helden op Auto) |
+
+- **Wat blijft:** de ontdekte recepten (en dus het receptenboek), de tutorial, de Golden Hop en de Legacy, en de begindatum. **Wat opnieuw begint:** goud (op de Seed Money na), reputatie, upgrades en personeel, Night Shift, kamers, decoraties, gekochte ingrediënten, helden (ook hun levels), uitrusting, kerkervoorraad en de Quartermaster. Omdat de recepten blijven, staan hun ingrediënten meteen op het schap en bestellen klanten ook de dure drankjes al vanaf het begin; dat maakt elke volgende taverne sneller.
+- **Tabblad Legacy** (vierde tabblad): het aantal Golden Hop, de prijsbonus tot nu toe, wat verkopen nu oplevert of nog nodig heeft, de knop "Sell the tavern · 🌼 4" (**twee klikken**: de eerste vraagt "Sure? Click again to sell", 4 s geldig) en de vier bonussen. Na het verkopen laadt de pagina opnieuw, zodat de scène en alles wat niet opgeslagen is ook vers begint.
+- **State:** `prestige: { hops, totalHops, runs, runEarned, legacy }` (oude saves krijgen via `reconcile` de default). De reputatiebewaker zakt mee na een verkoop, zodat de niveaus in de nieuwe taverne weer gemeld worden.
+- **Tutorial-hint** (les `prestige`, na de Auto-les): zodra verkopen kan, wijst de ketel Menu, het tabblad Legacy en de verkoopknop aan (alias `guide-prestige-sell`); na de verkoop (en het herladen) een bonus om de Golden Hop aan uit te geven (`guide-legacy-buy`). Beide stappen tellen alleen in beeld.
+- **Simulator:** de bot verkoopt zodra het kan en koopt dan de eerste betaalbare bonus. Na een verkoop begint de tijdlijn opnieuw met "eerste keer" (zo zie je de mijlpalen van de nieuwe taverne). Met `npm run simulate -- 240 1` zie je meerdere cycli.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -520,6 +542,8 @@ Boss       { id, hp, loot: TripMods }   // stap 16b, in BOSSES per kerker-id; te
 Card       { id, options: { id, default?, needsDrink?, mods, boost?: { effect, mods(p) } }[] }   // stap 16 (gebouwd); mods: duur, buit, kans gewond, kans op gear, extra buit
 // State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt, drinks, cards: { id, at, choice, drink? }[], boss?: { hits, lastAt } } | null, gear, bag, auto } (15a, gear 15c, bag/drinks/cards 16, boss 16b, auto 16c), quartermaster: boolean (16c),
 // ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
+LegacyDef  { id, baseCost, maxLevel, effects: UpgradeEffect[], startGold? }   // stap 17; tekst legacy.<id>.name/.description
+// State: prestige: { hops, totalHops, runs, runEarned (Decimal), legacy: { [id]: niveau } } (17)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -678,7 +702,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
 - [x] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een timing-balk met 3 slagen tegen de moerasheks (muis en touch); kracht-drankjes maken het groene vak groter. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
 - [x] **Stap 16c: Quartermaster, helden op auto en offline.** Een aankoop geeft elke held een knop Auto (aan/uit, op elk moment). Op Auto vertrekt hij vanzelf opnieuw met standaardkeuzes, ook offline binnen de offline-limiet; zelf kiezen telt altijd. Het offline-rapport noemt de expedities. Daarna `npm run simulate` met helden (idle 30-40% van actief). Tutorial-hint: Auto-knop.
-- [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
+- [x] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
 ### Fase D: Afwerking
 - [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
@@ -721,6 +745,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 17: Prestige (2026-10-12, `step-17-prestige`)
+- **Gedaan:** (code in `src/prestige/` (nieuw: `prestige.ts`, `prestige-view.ts`, `prestige.css`), `src/economy/upgrades.ts` (`prestigeBonuses` in `getMultipliers`), `src/reputation/reputation.ts` (bewaker zakt mee), `src/offline/offline.ts` (event `offline:paid`), `src/app/` (world, viewport-view), `src/shared/` (state, events, purchases, content), `src/tutorial/`, `src/i18n/en-shop.ts` en `src/dev/` (bot en tijdlijn); tests in `tests/prestige.test.ts` (nieuw) en de gids-test)
+  - **Golden Hop, voorwaarden, Legacy, wat blijft en wat reset, tabblad, state, tutorial-hint en simulator:** zie hoofdstuk 4, "Prestige: de taverne verkopen".
+  - Gebouwd op `step-16c-quartermaster` (16b en 16c staan nog niet op `main`).
+  - 11 tests erbij (512 totaal): de formule, de voorwaarden (niveau en minimum), de prijsbonus en de Legacy in `getMultipliers`, verkopen (wat reset, wat blijft, start-goud, niet twee keer), niveaumeldingen opnieuw na een verkoop, het tellen van verdiend goud (serveren en offline), `prestige:available`, bonussen kopen (duurder per niveau, maximum, start-goud), het view-model, teksten per bonus, en de les.
+- **Waarom (keuzes):** de eigenaar zei door te gaan zonder te stoppen, dus Claude koos de uitwerking binnen GAME_ANALYSE hoofdstuk 7. **+10% per Golden Hop in plaats van +2%:** met een wortelformule krijgt een eerste verkoop maar 4 Hop, en +8% zou niet voelen als een beloning. **Minimum 4 Hop:** anders kon (en zou de les aanraden) al rond minuut 35 verkocht worden voor 1 Hop. **Vier bonussen in een lijst** in plaats van een vertakte boom: eenvoudig, uit te breiden met data; een boom met voorwaarden kan later. Night Watch werkt het idee uit IDEAS.md punt 3 uit (prestige-tak voor offline). **Uitrusting en de Quartermaster resetten mee**, omdat ze bij de helden en de gildekamer horen (GAME_ANALYSE noemde ze niet). **Herladen na verkopen** houdt het simpel: geen code om elke view terug te zetten.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. `npm run simulate -- 60 1` byte-identiek met stap 16c (verkopen kan pas later). Simulator 240 minuten (seeds 1/2/3): eerste verkoop op 84:37 / 90:13 / 86:04 (doel 1 tot 2 uur), daarna elke ~60, ~50 en ~42 minuten een volgende (de cycli worden korter, zoals GAME_ANALYSE wil); de bot verkoopt telkens bij het minimum van 4 Hop. Verdiend goud in de eerste taverne: ±1,7M op minuut 60, ±4,5M op minuut 90. In de browser (testsave op Legendary Hall met 4,5M verdiend; daarna de oorspronkelijke save teruggezet): de les wees Menu, Legacy en de verkoopknop aan; vier tabbladen passen; de eerste klik gaf "Sure? Click again to sell", de tweede verkocht voor 4 Golden Hop, de pagina laadde opnieuw met 0 goud, Shabby Shack, lege kamers en de recepten nog bekend; de les wees een bonus aan en Seed Money kopen (4 naar 3 Hop, 1/5) rondde haar af; het tabblad toont "Now: +40%". Geen consolefouten.
+- **Afwijkingen van het plan:** een lijst van bonussen in plaats van een vertakte boom (zie boven). De dagelijkse/achievement-kant van prestige (bijv. `happytime()` bij de eerste verkoop) komt in stap 18 en 20.
+- **Nu te proberen:** speel tot Legendary Hall en 4M verdiend (of gebruik een testsave), open het tabblad Legacy en verkoop de taverne. Koop daarna Seed Money en kijk hoe snel de tweede taverne gaat.
+- **Nog te doen / volgende stap:** stap 18, Achievements, dagelijkse bonus, statistieken en instellingen. **Te bekijken door de eigenaar:** de prestige-getallen en -keuzes hierboven (vooral +10% per Hop, het minimum van 4 en wat er reset). Mergen van 16b, 16c en 17 naar `main` wacht op de eigenaar.
 
 ### Stap 16c: Quartermaster, helden op auto en offline (2026-10-12, `step-16c-quartermaster`)
 - **Gedaan:** (code in `src/heroes/` (nieuw: `auto.ts`; aangepast: `expedition.ts`, `heroes.ts`, `heroes-model.ts`, `heroes-view.ts`, `heroes.css`), `src/offline/offline.ts`, `src/app/world.ts`, `src/shared/` (state, events, purchases), `src/tutorial/`, `src/i18n/` en `src/dev/` (bot en tijdlijn); tests in `tests/auto.test.ts` (nieuw) en kleine aanpassingen in de offline-, gear-, heroes- en gids-tests)
