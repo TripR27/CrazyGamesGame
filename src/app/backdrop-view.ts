@@ -1,9 +1,7 @@
-import type { GameObjects, Scene } from 'phaser';
+import type { Scene } from 'phaser';
 import { drawBackdropArt } from '@/app/backdrop-art';
 import { addImageTexture } from '@/app/textures-view';
 import { PIXEL } from '@/shared/pixels';
-
-export type Graphics = GameObjects.Graphics;
 
 const BACKDROP_KEY = 'backdrop';
 

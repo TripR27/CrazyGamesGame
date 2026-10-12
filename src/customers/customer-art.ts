@@ -9,7 +9,8 @@ type Palette = Readonly<Record<string, number>>;
 
 const SHARED: Palette = { k: 0x1a1a22, e: 0x1a1a22, m: 0x8a4a2a, u: 0xd9a441, f: 0xfff2cc, s: 0xf2c9a0, q: 0xf08a7a };
 
-interface Look {
+/** A figure: its colours, its head (10 rows) and its body (7 rows), each as left halves of 7 characters. */
+export interface Look {
   palette: Palette;
   head: readonly string[];
   body: readonly string[];
@@ -74,7 +75,11 @@ export const CUSTOMER_FRAME = { stand: 0, blink: 1, walkA: 2, walkB: 3, sit: 4, 
 /** All frames of one customer type, in the order of `CUSTOMER_FRAME`. */
 export function customerFrames(typeId: string): Sprite[] {
   const look = LOOKS[typeId] ?? LOOKS.knight;
-  if (look === undefined) return [];
+  return look === undefined ? [] : figureFrames(look);
+}
+
+/** All frames of a figure, in the order of `CUSTOMER_FRAME` (the heroes use the same figures and poses). */
+export function figureFrames(look: Look): Sprite[] {
   const stand = figure(look, LEGS.stand);
   const walk = figure(look, LEGS.walk);
   const sit = figure(look, LEGS.sit);

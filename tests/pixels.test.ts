@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { BACKDROP_HEIGHT, BACKDROP_WIDTH, drawBackdropArt } from '@/app/backdrop-art';
 import { CUSTOMER_FRAME, CUSTOMER_LOOKS, customerFrames } from '@/customers/customer-art';
 import { customers } from '@/customers/customer-data';
+import { INGREDIENT_ART } from '@/brewing/ingredient-art';
+import { ingredients } from '@/brewing/ingredients';
+import { DECORATIONS } from '@/decor/decor';
+import { rugImage, TORCHES, TROPHIES } from '@/decor/decor-art';
 import { ART } from '@/dev/art-preview';
+import { heroFrames } from '@/heroes/hero-art';
+import { HERO_CLASSES } from '@/heroes/heroes';
+import { ROOMS } from '@/rooms/rooms';
+import { builtRoomImage } from '@/rooms/rooms-art';
 import { mirrored, raised, spriteProblems, stripImage, swapChars, withPixels } from '@/shared/pixels';
 
 describe('pixel art', () => {
@@ -36,6 +44,17 @@ describe('pixel art', () => {
       expect(CUSTOMER_LOOKS, id).toContain(id);
       expect(customerFrames(id)).toHaveLength(Object.keys(CUSTOMER_FRAME).length);
     }
+  });
+
+  it('gives every ingredient, hero, decoration and room its own art', () => {
+    for (const { id } of ingredients) expect(INGREDIENT_ART[id], id).toBeDefined();
+    for (const { id } of HERO_CLASSES) expect(heroFrames(id).length, id).toBe(4);
+    for (const { id } of DECORATIONS) {
+      const art = TORCHES[id] ?? TROPHIES[id] ?? rugImage(id, 20, 6);
+      expect(art, id).toBeTruthy();
+    }
+    const plain = builtRoomImage('no_such_room').data.join();
+    for (const { id } of ROOMS) expect(builtRoomImage(id).data.join() === plain, id).toBe(false);
   });
 
   it('reports a row of the wrong width and an unknown colour', () => {

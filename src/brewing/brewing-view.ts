@@ -3,11 +3,13 @@ import { CAULDRON, FLOOR_Y, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } fr
 import { addAnimation, addPixelSprite, addStripTexture, designSize } from '@/app/textures-view';
 import { brewProgress, type BrewStation } from '@/brewing/brewing';
 import { CAULDRON_BOIL, CAULDRON_FRAMES, CAULDRON_SIMMER, FIRE_FRAMES, MUG as MUG_ART } from '@/brewing/brewing-art';
+import { ingredientArt } from '@/brewing/ingredient-art';
+import { PIXEL } from '@/shared/pixels';
 import { t } from '@/i18n/translator';
 import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
 
-/** Placeholder look per ingredient: just a colour. The art pass replaces this with sprites. */
+/** The main colour of each ingredient, for the recipe book (DOM) and anything else that needs a colour, not the art. */
 const COLORS: Readonly<Record<string, number>> = {
   swamp_slime: 0x7be05a,
   wild_honey: 0xf5c542,
@@ -20,15 +22,39 @@ const COLORS: Readonly<Record<string, number>> = {
 };
 
 /** A dungeon ingredient that ran out stays on the shelf, greyed out. */
-const EMPTY_COLOR = 0x6b6b6b;
+const EMPTY_TINT = 0x6b6b6b;
 const COUNT_STYLE = { fontFamily: 'sans-serif', fontSize: '12px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 3, y: 1 } };
 
 const FALLBACK = 0xcccccc;
 
 export const ingredientColor = (id: string): number => COLORS[id] ?? FALLBACK;
 
+/** The texture of an ingredient's pixel art (made the first time it is asked for). */
+export function ingredientTexture(scene: Scene, id: string): string {
+  const key = `ingredient_${id}`;
+  addStripTexture(scene, key, [ingredientArt(id)]);
+  return key;
+}
+
+/** Ingredients in a cauldron are shown at half the size of the ones on the shelf. */
+export const IN_POT_SCALE = PIXEL / 2;
+
+/** A small ingredient picture that shows what is in a cauldron; `show` only changes the texture when the ingredient changes. */
+export function createPotItem(scene: Scene, x: number, y: number): { image: GameObjects.Image; show(id: string | undefined): void } {
+  const image = scene.add.image(x, y, '__DEFAULT').setScale(IN_POT_SCALE).setVisible(false);
+  let shown: string | undefined;
+  return {
+    image,
+    show(id) {
+      image.setVisible(id !== undefined);
+      if (id === undefined || id === shown) return;
+      shown = id;
+      image.setTexture(ingredientTexture(scene, id));
+    },
+  };
+}
+
 const MAX_DOTS = 3;
-const DOT_RADIUS = 10;
 const DOT_Y = CAULDRON.y - 25;
 const BAR_WIDTH = 100;
 const BAR_Y = CAULDRON.y - 48;
@@ -71,22 +97,13 @@ export function createCauldronView(
     .setInteractive({ useHandCursor: true })
     .on('pointerdown', onClick);
 
-  const dots: GameObjects.Arc[] = Array.from({ length: MAX_DOTS }, (_, i) =>
-    scene.add
-      .circle(CENTER_X + (i - 1) * 30, DOT_Y, DOT_RADIUS, 0xffffff)
-      .setStrokeStyle(2, 0x2a1a0c)
-      .setVisible(false),
-  );
+  const dots = Array.from({ length: MAX_DOTS }, (_, i) => createPotItem(scene, CENTER_X + (i - 1) * 30, DOT_Y));
   const track = scene.add.rectangle(CENTER_X, BAR_Y, BAR_WIDTH, 8, 0x2a1a0c).setVisible(false);
   const fill = scene.add.rectangle(CENTER_X - BAR_WIDTH / 2, BAR_Y, 0, 8, 0x7be05a).setOrigin(0, 0.5).setVisible(false);
 
   return {
     update() {
-      dots.forEach((dot, i) => {
-        const id = station.contents[i];
-        dot.setVisible(id !== undefined);
-        if (id !== undefined) dot.setFillStyle(ingredientColor(id));
-      });
+      for (let i = 0; i < dots.length; i++) dots[i]?.show(station.contents[i]);
       const brewing = station.brewing !== null;
       setBoiling(brewing);
       track.setVisible(brewing);
@@ -96,6 +113,7 @@ export function createCauldronView(
 }
 
 const RADIUS = 22;
+const HOVER_SCALE = PIXEL * 1.12;
 const LABEL_STYLE = {
   fontFamily: 'sans-serif',
   fontSize: '13px',
@@ -115,28 +133,28 @@ export interface ShelfView {
 /** A dungeon ingredient's stock on the shelf: a small count on the jar, and grey when it ran out. */
 interface Counter {
   id: string;
-  dot: GameObjects.Arc;
+  dot: GameObjects.Sprite;
   text: GameObjects.Text;
   shown: number;
 }
 
 function createItem(scene: Scene, id: string, slot: { x: number; y: number }, onClick: (id: string) => void) {
-  const dot = scene.add.circle(slot.x, slot.y, RADIUS, ingredientColor(id)).setStrokeStyle(3, 0x2a1a0c);
+  const dot = addPixelSprite(scene, slot.x, SHELF.y, ingredientTexture(scene, id));
   const label = scene.add
     .text(slot.x, SHELF.y + SHELF.h + 10, t(textKey('ingredients', id, 'name')), LABEL_STYLE)
     .setOrigin(0.5, 0);
   dot.setInteractive({ useHandCursor: true });
-  dot.on('pointerover', () => dot.setScale(1.12));
-  dot.on('pointerout', () => dot.setScale(1));
+  dot.on('pointerover', () => dot.setScale(HOVER_SCALE));
+  dot.on('pointerout', () => dot.setScale(PIXEL));
   dot.on('pointerdown', () => {
     onClick(id);
-    scene.tweens.add({ targets: dot, scale: { from: 1.3, to: 1.12 }, duration: 120 });
+    scene.tweens.add({ targets: dot, scale: { from: PIXEL * 1.3, to: HOVER_SCALE }, duration: 120 });
   });
   return { dot, label };
 }
 
-function createCounter(scene: Scene, id: string, dot: GameObjects.Arc): Counter {
-  const text = scene.add.text(dot.x + RADIUS - 4, dot.y - RADIUS + 2, '', COUNT_STYLE).setOrigin(0.5);
+function createCounter(scene: Scene, id: string, dot: GameObjects.Sprite): Counter {
+  const text = scene.add.text(dot.x + RADIUS - 2, dot.y - 2 * RADIUS + 2, '', COUNT_STYLE).setOrigin(0.5);
   return { id, dot, text, shown: -1 };
 }
 
@@ -144,7 +162,8 @@ function showCount(counter: Counter, n: number): void {
   if (n === counter.shown) return;
   counter.shown = n;
   counter.text.setText(t('shelf.count', { n }));
-  counter.dot.setFillStyle(n > 0 ? ingredientColor(counter.id) : EMPTY_COLOR).setAlpha(n > 0 ? 1 : 0.6);
+  if (n > 0) counter.dot.clearTint().setAlpha(1);
+  else counter.dot.setTint(EMPTY_TINT).setAlpha(0.6);
 }
 
 export interface ShelfDeps {
