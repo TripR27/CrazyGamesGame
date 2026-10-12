@@ -4,10 +4,11 @@ import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { quartermasterOffer } from '@/heroes/auto';
 import { currentBoss } from '@/heroes/boss-fight';
 import { firstBuyableGear, gearToWear } from '@/heroes/gear';
 import type { GuildCauldron } from '@/heroes/hero-brewing';
-import { anyHeroTravelled, readyHeroId } from '@/heroes/heroes';
+import { anyHeroTravelled, HERO_CLASSES, readyHeroId } from '@/heroes/heroes';
 import { boldOption, currentCard } from '@/heroes/trip-cards';
 import { recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
@@ -89,6 +90,10 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'hero:drink': ({ store }) => Object.values(store.getState().heroes).some((h) => h.bag.length > 0 || (h.expedition?.drinks.length ?? 0) > 0),
   'card:opened': ({ store, clock }) => currentCard(store.getState(), clock.now()) !== undefined,
   'boss:opened': ({ store, clock }) => currentBoss(store.getState(), clock.now()) !== undefined,
+  // Bought before the lesson's turn, or a hero on Auto already: the lesson shows and its steps are done at once.
+  'quartermaster:affordable': ({ store }) => store.getState().quartermaster || quartermasterOffer(store.getState()).affordable,
+  'quartermaster:bought': ({ store }) => store.getState().quartermaster,
+  'hero:auto': ({ store }) => Object.values(store.getState().heroes).some((h) => h.auto),
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -172,6 +177,7 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients,
     heroDrinkIngredient: heroDrinkIngredient(store.getState(), ingredients, guild),
     card: openCardHint(store.getState(), clock.now()),
     bossHeroId: currentBoss(store.getState(), clock.now())?.heroId ?? null,
+    autoHeroId: HERO_CLASSES.find((def) => store.getState().heroes[def.id]?.auto === false)?.id ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

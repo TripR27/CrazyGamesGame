@@ -6,6 +6,7 @@ import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFl
 import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { startAuto, watchQuartermaster } from '@/heroes/auto';
 import { watchGearShop } from '@/heroes/gear';
 import { startHeroes } from '@/heroes/expedition';
 import { createGuildCauldron, type GuildCauldron, startGuildCauldron } from '@/heroes/hero-brewing';
@@ -37,7 +38,7 @@ export function syncStationStats(store: Store<GameState>, station: BrewStation):
   return store.subscribe(apply);
 }
 
-/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient, room, decoration and gear become affordable. */
+/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient, room, decoration, gear and Quartermaster become affordable. */
 export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, content: Content): void {
   watchAffordable(store, bus, generalOnly(content.upgrades));
   watchAffordable(store, bus, seatsOnly(content.upgrades), 'seats:affordable');
@@ -46,6 +47,7 @@ export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, co
   watchRoomShop(store, bus, content.rooms);
   watchDecorShop(store, bus, content.decor);
   watchGearShop(store, bus);
+  watchQuartermaster(store, bus);
 }
 
 const TUTORIAL_MAX_CUSTOMERS = 1;
@@ -182,8 +184,10 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startStaffWork({ store, bus, floor, station, rng, catalog });
   // Heroes come back when their trip's (absolute) end time has passed, also right after loading.
   startHeroes({ store, bus, rng, clock, content: c });
+  // Heroes on Auto set out again once they are home and fit.
+  startAuto({ store, bus, rng, clock, content: c });
   startGuildCauldron({ store, bus, clock, station, guild });
-  const offline = createOffline({ store, bus, clock, catalog });
+  const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
   return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };
 }

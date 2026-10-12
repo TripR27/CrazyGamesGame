@@ -5,6 +5,7 @@ import { waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor } from '@/economy/upgrades';
+import { buyQuartermaster, quartermasterOffer, setHeroAuto } from '@/heroes/auto';
 import { bossBar, currentBoss, inZone, strikeBoss } from '@/heroes/boss-fight';
 import { sendHero } from '@/heroes/expedition';
 import { buyGearById, equipGear, firstBuyableGear, gearToWear } from '@/heroes/gear';
@@ -42,8 +43,8 @@ function upgradeBudget(state: GameState): Num {
 
 /**
  * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
- * then a hero to hire, gear, a decoration and otherwise the cheapest upgrade, but while a room is for sale it saves up
- * for it (it only buys what costs a small share of the room). Returns true when it bought something.
+ * then a hero to hire, the Quartermaster, gear, a decoration and otherwise the cheapest upgrade, but while a room is
+ * for sale it saves up for it (it only buys what costs a small share of the room). Returns true when it bought something.
  */
 export function shopOnce(world: World, state: GameState): boolean {
   const ingredient = firstBuyableIngredient(state, world.content);
@@ -63,6 +64,11 @@ export function shopOnce(world: World, state: GameState): boolean {
   });
   if (hero !== undefined) {
     hireHeroById(world, hero.id);
+    return true;
+  }
+  const quartermaster = quartermasterOffer(state);
+  if (quartermaster.affordable && quartermaster.cost.lte(budget)) {
+    buyQuartermaster(world);
     return true;
   }
   const gear = firstBuyableGear(state);
@@ -147,8 +153,16 @@ function playHeroes(world: World, state: GameState): boolean {
   return next !== undefined;
 }
 
-/** Puts on a piece nobody wears, or sends a hero who is home, fit and has a full bag to the swamp (one click). */
+/**
+ * Switches Auto on for a hero (with the Quartermaster), puts on a piece nobody wears, or sends a hero who is home, fit
+ * and has a full bag to the swamp (one click).
+ */
 function sendReadyHero(world: World, state: GameState): boolean {
+  const manual = state.quartermaster ? HERO_CLASSES.find((def) => state.heroes[def.id]?.auto === false) : undefined;
+  if (manual !== undefined) {
+    setHeroAuto(world, manual.id, true);
+    return true;
+  }
   const wear = gearToWear(state);
   if (wear !== null) {
     equipGear(world, wear.heroId, wear.slot, wear.gearId);

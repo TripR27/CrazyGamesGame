@@ -38,6 +38,10 @@ export const heroes: Messages = {
   'heroes.boss_won': '👑 Beat the {boss}!',
   'heroes.boss_lost': 'The {boss} got away',
   'heroes.in_bag': '+{drink} in the bag',
+  'heroes.quartermaster.name': 'Quartermaster',
+  'heroes.quartermaster.description': 'Every hero gets an Auto button: on Auto they set out again by themselves, also while you are away.',
+  'heroes.auto_on': '🔁 Auto: on',
+  'heroes.auto_off': 'Auto: off',
   'heroes.cauldron_aimed': 'Next ingredients go into the hero cauldron',
   'heroes.cauldron_tavern': 'Back to the tavern cauldron',
   'heroes.loot': '+{n} {name}',
@@ -98,6 +102,9 @@ export const heroes: Messages = {
   'tutorial.card_done.text': 'No time to choose? Then they play it safe, also while you are away. Choosing yourself pays more.',
   'tutorial.boss_fight.text': 'The boss! Hit Strike when the pointer is in the green. Win and {bossHero} brings home her treasure.',
   'tutorial.boss_done.text': 'Not here to fight? Then the boss just leaves them alone. Strength drinks make the green zone wider.',
+  'tutorial.auto_buy.text': 'Tired of sending heroes yourself? The Quartermaster sends them for you, even while you are away.',
+  'tutorial.auto_on.text': 'Switch Auto on for {autoHero}. They set out again by themselves once they are home and fit.',
+  'tutorial.auto_done.text': 'On Auto they take the safe choices. Pick a card or fight the boss yourself and your choice counts.',
   'tutorial.hero_done.text':
     'Off they go. They come back on their own, even when the game is closed. Injured? Hand them a drink from the bar.',
 };

@@ -127,6 +127,10 @@ export interface GameEvents {
   'boss:opened': { heroId: string; dungeon: string };
   'boss:struck': { heroId: string; hit: boolean };
   'boss:resolved': { heroId: string; result: 'won' | 'lost' | null };
+  /** The Quartermaster in the Heroes tab can be bought (after not being able to), was bought, and a hero's Auto was switched. */
+  'quartermaster:affordable': Record<string, never>;
+  'quartermaster:bought': Record<string, never>;
+  'hero:auto': { heroId: string; on: boolean };
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

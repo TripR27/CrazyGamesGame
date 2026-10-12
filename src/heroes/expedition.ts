@@ -74,17 +74,16 @@ export function rollLoot(dungeon: DungeonDef, rng: Rng, sword = 0): Record<strin
 type TripWorld = Pick<World, 'store' | 'bus' | 'rng' | 'clock' | 'content'>;
 
 /**
- * Send a hero at home and fit to a dungeon. The drinks in their bag go along (a speed drink makes the trip shorter at
- * once) and two choice cards are planned on the way. The trip ends at an absolute time, so it also runs while the game
- * is closed.
+ * A hero at home and fit at `start` sets out for a dungeon then (without announcing it). The drinks in their bag go
+ * along (a speed drink makes the trip shorter at once) and two choice cards are planned on the way. Returns false when
+ * the hero cannot go.
  */
-export function sendHero({ store, bus, rng, clock, content }: TripWorld, heroId: string, dungeonId = DUNGEONS[0]?.id ?? ''): void {
+export function startTrip({ store, rng, content }: Pick<World, 'store' | 'rng' | 'content'>, heroId: string, dungeonId: string, start: number): boolean {
   const hero = store.getState().heroes[heroId];
   const dungeon = DUNGEONS.find((d) => d.id === dungeonId);
-  if (hero === undefined || dungeon === undefined || heroStatus(hero, clock.now()) !== 'home') return;
+  if (hero === undefined || dungeon === undefined || heroStatus(hero, start) !== 'home') return false;
   const drinks = [...hero.bag];
   const ms = Math.round(tripMs(dungeon, hero) * drinkMods(content.recipes, drinks, drinkPower(heroId, hero)).duration);
-  const start = clock.now();
   const cards = scheduleCards(start, ms, rng);
   store.update((s) => {
     const h = s.heroes[heroId];
@@ -92,8 +91,14 @@ export function sendHero({ store, bus, rng, clock, content }: TripWorld, heroId:
     h.bag = [];
     h.expedition = { dungeon: dungeon.id, endsAt: start + ms, drinks, cards };
   });
-  bus.emit('hero:departed', { id: heroId, dungeon: dungeon.id });
-  bus.emit('saveRequested', {});
+  return true;
+}
+
+/** Send a hero at home and fit to a dungeon now. The trip ends at an absolute time, so it also runs while the game is closed. */
+export function sendHero(world: TripWorld, heroId: string, dungeonId = DUNGEONS[0]?.id ?? ''): void {
+  if (!startTrip(world, heroId, dungeonId, world.clock.now())) return;
+  world.bus.emit('hero:departed', { id: heroId, dungeon: dungeonId });
+  world.bus.emit('saveRequested', {});
 }
 
 /** Maybe a piece of gear from the dungeon that the player does not own yet; `bonus` adds to the chance. */
@@ -103,11 +108,16 @@ function rollGear(state: Pick<GameState, 'gearOwned'>, dungeon: DungeonDef, rng:
 }
 
 /**
- * A trip is over: loot into the stock (more with a sword, luck drinks, bold choices and a won boss fight), XP (and levels), maybe a piece
- * of gear, and maybe an injury (less likely with a shield or strength, more after risky choices) that rests from the
- * moment they were back.
+ * A trip is over: loot into the stock (more with a sword, luck drinks, bold choices and a won boss fight), XP (and
+ * levels), maybe a piece of gear, and maybe an injury (less likely with a shield or strength, more after risky choices)
+ * that rests from the moment they were back. Returns the loot; `announce` false keeps it quiet (time away).
  */
-function returnHero({ store, bus, rng, content }: Pick<World, 'store' | 'bus' | 'rng' | 'content'>, heroId: string, trip: Expedition): void {
+export function returnHero(
+  { store, bus, rng, content }: Pick<World, 'store' | 'bus' | 'rng' | 'content'>,
+  heroId: string,
+  trip: Expedition,
+  announce = true,
+): Record<string, number> {
   const dungeon = DUNGEONS.find((d) => d.id === trip.dungeon);
   const hero = store.getState().heroes[heroId] ?? newHero();
   const level = hero.level;
@@ -129,11 +139,14 @@ function returnHero({ store, bus, rng, content }: Pick<World, 'store' | 'bus' | 
     for (const [id, n] of Object.entries(loot)) s.ingredientStock[id] = (s.ingredientStock[id] ?? 0) + n;
     if (gear !== null) s.gearOwned.push(gear);
   });
+  // While catching up on time away nothing is announced: the welcome-back window sums the trips up.
+  if (!announce) return loot;
   const now = store.getState().heroes[heroId]?.level ?? level;
   // A fight that was cut short (or never fought) ends here; a finished one was announced at its last strike.
   if ((trip.boss?.hits.length ?? 0) < STRIKES) bus.emit('boss:resolved', { heroId, result: boss });
   bus.emit('hero:returned', { id: heroId, dungeon: trip.dungeon, loot, gear, xp, level: now, levelUp: gained > 0, injured, boss });
   bus.emit('saveRequested', {});
+  return loot;
 }
 
 /**

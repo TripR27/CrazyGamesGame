@@ -89,7 +89,7 @@ describe('wearing gear', () => {
     state.heroes.mage = { ...newHero(), expedition: { dungeon: 'swamp', endsAt: 5 } } as unknown as HeroState;
     const store = createStore(state);
     completeHeroes(store);
-    expect(store.getState().heroes.warrior).toEqual({ level: 3, xp: 5, injuredUntil: 0, expedition: null, gear: {}, bag: [] });
+    expect(store.getState().heroes.warrior).toEqual({ level: 3, xp: 5, injuredUntil: 0, expedition: null, gear: {}, bag: [], auto: false });
     expect(store.getState().heroes.mage?.expedition).toEqual({ dungeon: 'swamp', endsAt: 5, drinks: [], cards: [] });
   });
 });

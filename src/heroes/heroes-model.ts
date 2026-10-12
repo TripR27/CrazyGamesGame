@@ -1,4 +1,5 @@
 import type { RowView } from '@/economy/shop-model';
+import { quartermasterOffer } from '@/heroes/auto';
 import { GEAR, GEAR_SLOTS, type GearDef, type GearSlot, gearOffer, wearer } from '@/heroes/gear';
 import { DUNGEONS } from '@/heroes/expedition';
 import { HERO_CLASSES, HEROES, type HeroClassDef, guildBuilt, heroStatus, heroWaitMs, hireOffer, xpToNext } from '@/heroes/heroes';
@@ -10,7 +11,7 @@ import { formatNumber } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
 
 /** What the Heroes tab and the guild hall read. */
-export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock' | 'gearOwned'>;
+export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock' | 'gearOwned' | 'quartermaster'>;
 
 /** A countdown as "1:05" (rounded up, so it never shows 0:00 while time is left). */
 export function clockText(ms: number): string {
@@ -41,6 +42,8 @@ export interface HeroCardView {
   bag: string;
   /** The four gear slots; empty for a hero who is not hired yet. */
   slots: SlotView[];
+  /** The Auto switch (with the Quartermaster, for a hired hero), or null. */
+  auto: { label: string; on: boolean } | null;
 }
 
 /** One gear slot on a hero's card: what can go in it, what is in it, and whether it can change now (only at home). */
@@ -63,6 +66,8 @@ export interface HeroesView {
   stock: string[];
   /** Gear for sale (not owned yet); empty without the guild hall. */
   gearShop: { id: string; row: RowView }[];
+  /** The Quartermaster while it is for sale, otherwise null. */
+  quartermaster: RowView | null;
   cards: HeroCardView[];
 }
 
@@ -137,6 +142,7 @@ export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): 
     ...statusLine(def, state, now),
     bag: bagLine(state, def.id),
     slots: slotViews(def.id, state),
+    auto: hero === undefined || !state.quartermaster ? null : { label: t(hero.auto ? 'heroes.auto_on' : 'heroes.auto_off'), on: hero.auto },
   };
 }
 
@@ -149,6 +155,14 @@ function gearShop(state: HeroesState): { id: string; row: RowView }[] {
     const row = { name: gearName(def.id), description, level: '', buyLabel: t('shop.buy_once', { cost: formatNumber(offer.cost) }), canBuy: offer.affordable, maxed: false };
     return [{ id: def.id, row }];
   });
+}
+
+/** The Quartermaster as a shop row while it is for sale. */
+function quartermasterRow(state: HeroesState): RowView | null {
+  const offer = quartermasterOffer(state);
+  if (offer.status !== 'forSale') return null;
+  const buyLabel = t('shop.buy_once', { cost: formatNumber(offer.cost) });
+  return { name: t('heroes.quartermaster.name'), description: t('heroes.quartermaster.description'), level: '', buyLabel, canBuy: offer.affordable, maxed: false };
 }
 
 /** The dungeon ingredients held, in the order the dungeons drop them. */
@@ -171,6 +185,7 @@ export function toHeroesView(state: HeroesState, now: number): HeroesView {
     drinksHelp: built ? t('heroes.drinks_help') : '',
     stock: built ? stockLines(state) : [],
     gearShop: gearShop(state),
+    quartermaster: quartermasterRow(state),
     cards: built ? HERO_CLASSES.map((def) => toHeroCard(def, state, now)) : [],
   };
 }
