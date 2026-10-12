@@ -1,9 +1,11 @@
 import type { GameObjects, Scene } from 'phaser';
 import { HERO_CAULDRON, HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
+import { addAnimation, addPixelSprite, addStripTexture } from '@/app/textures-view';
 import type { World } from '@/app/world';
 import { brewProgress } from '@/brewing/brewing';
 import { BOSSES } from '@/heroes/boss-fight';
-import { ingredientColor } from '@/brewing/brewing-view';
+import { createPotItem } from '@/brewing/brewing-view';
+import { HERO_FRAME as H, HERO_POT_FRAMES, heroFrames } from '@/heroes/hero-art';
 import { aimHeroCauldron, clickHero } from '@/heroes/hero-brewing';
 import { guildBuilt, HERO_CLASSES, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
 import { clockText } from '@/heroes/heroes-model';
@@ -13,12 +15,6 @@ import { GUILD_ROOM_ID } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';
 import type { GameEvents } from '@/shared/events';
 
-/** Placeholder looks per hero class (the art pass replaces them): a body colour and what they carry. */
-const LOOKS: Readonly<Record<string, { body: number; gear: number }>> = {
-  warrior: { body: 0xb03a2e, gear: 0xb8c2cc },
-  mage: { body: 0x3b5bb5, gear: 0x7a3fb0 },
-};
-const SKIN = 0xf2c9a0;
 const RESTING_TINT = 0x8a8a8a;
 const WALK_MS = 700;
 const LABEL_ABOVE = 92;
@@ -33,7 +29,7 @@ interface Shown {
   id: string;
   spot: Point;
   container: GameObjects.Container;
-  body: GameObjects.Rectangle;
+  figure: GameObjects.Sprite;
   hit: GameObjects.Rectangle;
   label: GameObjects.Text;
   mark: GameObjects.Text;
@@ -43,27 +39,35 @@ interface Shown {
   walking: boolean;
 }
 
-/** A placeholder hero: body, head and gear (a sword for the warrior, a pointy hat for the mage). */
+/** The textures and animations of a hero: standing with a blink now and then, and walking. */
+function addHeroArt(scene: Scene, id: string): string {
+  const key = `hero_${id}`;
+  addStripTexture(scene, key, heroFrames(id));
+  addAnimation(scene, `${key}-idle`, key, [H.stand, H.stand, H.stand, H.stand, H.stand, H.blink], 4);
+  addAnimation(scene, `${key}-walk`, key, [H.walkA, H.stand, H.walkB, H.stand], 8);
+  return key;
+}
+
+/** A hero in pixel art (the warrior with a sword, the mage with a staff). */
 function createHero(scene: Scene, id: string, spot: Point, world: World): Shown {
-  const look = LOOKS[id] ?? { body: 0x888888, gear: 0x444444 };
-  const hit = scene.add.rectangle(0, -40, 50, 90, 0xffffff, 0.001);
-  const body = scene.add.rectangle(0, -20, 28, 40, look.body);
-  const head = scene.add.circle(0, -50, 12, SKIN);
-  const gear = id === 'mage' ? scene.add.triangle(0, -66, -14, 6, 14, 6, 0, -18, look.gear) : scene.add.rectangle(20, -30, 6, 40, look.gear);
+  const key = addHeroArt(scene, id);
+  const hit = scene.add.rectangle(0, -44, 56, 92, 0xffffff, 0.001);
+  const figure = addPixelSprite(scene, 0, 0, key).play(`${key}-idle`);
   // Above the countdown label, so it is seen while the player holds a drink for a resting hero.
   const mark = scene.add.text(0, -LABEL_ABOVE - 26, '▼', { fontFamily: 'sans-serif', fontSize: '18px', color: '#3fbf3f' }).setOrigin(0.5, 1).setVisible(false);
-  const container = scene.add.container(spot.x, spot.y, [hit, body, head, gear, mark]).setVisible(false);
+  const container = scene.add.container(spot.x, spot.y, [hit, figure, mark]).setVisible(false);
   const label = scene.add
     .text(spot.x, spot.y - LABEL_ABOVE, '', { fontFamily: 'sans-serif', fontSize: '15px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 6, y: 3 } })
     .setOrigin(0.5, 1)
     .setVisible(false);
   hit.on('pointerdown', () => clickHero(world, id));
   world.targets.register(`hero:${id}`, () => (container.visible ? { x: spot.x - 25, y: spot.y - 85, w: 50, h: 85 } : null));
-  return { id, spot, container, body, hit, label, mark, status: 'none', seconds: -1, walking: false };
+  return { id, spot, container, figure, hit, label, mark, status: 'none', seconds: -1, walking: false };
 }
 
 function walk(scene: Scene, item: Shown, toX: number, toAlpha: number, done: () => void): void {
   item.walking = true;
+  item.figure.play(`hero_${item.id}-walk`);
   scene.tweens.add({
     targets: item.container,
     x: toX,
@@ -71,6 +75,7 @@ function walk(scene: Scene, item: Shown, toX: number, toAlpha: number, done: () 
     duration: WALK_MS,
     onComplete: () => {
       item.walking = false;
+      item.figure.play(`hero_${item.id}-idle`);
       done();
     },
   });
@@ -82,7 +87,8 @@ function applyStatus(item: Shown, status: HeroStatus | 'none'): void {
   item.seconds = -1;
   const home = status === 'home' || status === 'injured';
   if (!item.walking) item.container.setVisible(home).setPosition(item.spot.x, item.spot.y).setAlpha(1);
-  item.body.setFillStyle(status === 'injured' ? RESTING_TINT : (LOOKS[item.id]?.body ?? 0x888888));
+  if (status === 'injured') item.figure.setTint(RESTING_TINT);
+  else item.figure.clearTint();
   if (home) item.hit.setInteractive({ useHandCursor: true });
   else item.hit.disableInteractive();
   item.label.setVisible(status === 'away' || status === 'injured');
@@ -92,7 +98,8 @@ export interface GuildView {
   update(): void;
 }
 
-const POT = { w: 44, h: 26, glow: 0xfff36b, body: 0x2b2b33, rim: 0x45454f, brew: 0x7be05a } as const;
+const POT = { w: 64, h: 44, glow: 0xfff36b, brew: 0x7be05a } as const;
+const POT_ANIM = { simmer: 'hero-pot-simmer', boil: 'hero-pot-boil' } as const;
 const BAR_W = 48;
 
 /**
@@ -101,25 +108,28 @@ const BAR_W = 48;
  */
 function createHeroCauldron(scene: Scene, world: World): GuildView {
   const { x, y } = HERO_CAULDRON;
-  const glow = scene.add.ellipse(x, y - 13, POT.w + 16, POT.h + 16, POT.glow, 0.7);
-  const pot = scene.add.ellipse(x, y - 13, POT.w, POT.h, POT.body).setStrokeStyle(2, POT.rim);
-  const brew = scene.add.ellipse(x, y - 24, POT.w - 10, 7, POT.brew);
-  const track = scene.add.rectangle(x, y - 40, BAR_W, 6, 0x2a1a0c);
-  const fill = scene.add.rectangle(x - BAR_W / 2, y - 40, 0, 6, POT.brew).setOrigin(0, 0.5);
-  const dots = [-1, 0, 1].map((i) => scene.add.circle(x + i * 14, y - 36, 5, 0xffffff).setStrokeStyle(1, 0x2a1a0c));
-  const zone = scene.add.zone(x, y - 14, POT.w + 12, POT.h + 18);
+  addStripTexture(scene, 'hero-pot', HERO_POT_FRAMES);
+  addAnimation(scene, POT_ANIM.simmer, 'hero-pot', [0, 1], 3);
+  addAnimation(scene, POT_ANIM.boil, 'hero-pot', [2, 3], 8);
+  // A soft glow behind the pot while it is picked.
+  const glow = scene.add.ellipse(x, y - 18, POT.w + 12, POT.h, POT.glow, 0.5);
+  const pot = addPixelSprite(scene, x, y, 'hero-pot').play(POT_ANIM.simmer);
+  const track = scene.add.rectangle(x, y - 52, BAR_W, 6, 0x2a1a0c);
+  const fill = scene.add.rectangle(x - BAR_W / 2, y - 52, 0, 6, POT.brew).setOrigin(0, 0.5);
+  const dots = [-1, 0, 1].map((i) => createPotItem(scene, x + i * 20, y - 58));
+  const zone = scene.add.zone(x, y - 18, POT.w + 8, POT.h + 8);
   zone.on('pointerdown', () => aimHeroCauldron(world));
-  const parts = [glow, pot, brew, track, fill, ...dots];
+  const parts = [glow, pot, track, fill];
   parts.forEach((p) => p.setVisible(false));
+  let boiling = false;
   let built = false;
-  world.targets.register('hero-cauldron', () => (built ? { x: x - 30, y: y - 42, w: 60, h: 42 } : null));
+  world.targets.register('hero-cauldron', () => (built ? { x: x - POT.w / 2, y: y - POT.h, w: POT.w, h: POT.h } : null));
   return {
     update() {
       const now = guildBuilt(world.store.getState());
       if (now !== built) {
         built = now;
         pot.setVisible(built);
-        brew.setVisible(built);
         if (built) zone.setInteractive({ useHandCursor: true });
         else zone.disableInteractive();
       }
@@ -127,15 +137,13 @@ function createHeroCauldron(scene: Scene, world: World): GuildView {
       const { station, aimed } = world.guild;
       glow.setVisible(aimed);
       const brewing = station.brewing !== null;
+      if (brewing !== boiling) {
+        boiling = brewing;
+        pot.play(brewing ? POT_ANIM.boil : POT_ANIM.simmer);
+      }
       track.setVisible(brewing);
       fill.setVisible(brewing).setSize(BAR_W * brewProgress(station), 6);
-      for (let i = 0; i < dots.length; i++) {
-        const id = station.contents[i];
-        const dot = dots[i];
-        if (dot === undefined) continue;
-        dot.setVisible(id !== undefined && !brewing);
-        if (id !== undefined) dot.setFillStyle(ingredientColor(id));
-      }
+      for (let i = 0; i < dots.length; i++) dots[i]?.show(brewing ? undefined : station.contents[i]);
     },
   };
 }
