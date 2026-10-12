@@ -1,6 +1,6 @@
 import type { Messages } from '@/i18n/translator';
 
-/** Achievements, the Trophies tab, the lifetime statistics and the daily bonus. */
+/** Achievements, the Trophies tab, the lifetime statistics, the daily bonus and the settings. */
 export const achievements: Messages = {
   'trophies.tab': 'Trophies',
   'trophies.title': 'Trophies',
@@ -48,6 +48,23 @@ export const achievements: Messages = {
   'daily.thanks': 'Come back tomorrow for day {next}!',
   'tutorial.daily_claim.text': 'A gift for showing up! Claim your daily bonus.',
   'tutorial.daily_done.text': 'Come back every day: the bonus grows for 7 days in a row. Miss a day and it starts over.',
+  'settings.title': 'Settings',
+  'settings.volume': 'Volume',
+  'settings.volume_note': 'Sound arrives in a later update.',
+  'settings.language': 'Language',
+  'settings.lang_en': 'English',
+  'settings.tutorial_label': 'Tutorial',
+  'settings.tutorial': 'Play it again',
+  'settings.save_label': 'Your save',
+  'settings.export': 'Export',
+  'settings.import': 'Import',
+  'settings.code_hint': 'Export puts your save here as text. Paste a save here and press Import to load it.',
+  'settings.exported': 'Copy this text and keep it somewhere safe.',
+  'settings.import_failed': 'That is not a save this game can read.',
+  'settings.reset_label': 'Start over',
+  'settings.reset': 'Delete everything',
+  'settings.reset_confirm': 'Sure? Click again to delete',
+  'tutorial.settings_tip.text': 'Psst. Volume, language and a copy of your save are behind the cog. Just so you know.',
   'tutorial.trophy_open.text': 'A trophy! Every trophy makes the tavern a little better, for good. Have a look in the Trophies tab.',
   'tutorial.trophy_done.text': 'Here they all are, with how far you got. Your statistics are at the bottom.',
 };

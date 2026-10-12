@@ -11,6 +11,7 @@ import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
+import { mountSettings, type SaveCodes } from '@/settings/settings-view';
 import { mountLegacy } from '@/prestige/prestige-view';
 import { mountRecipeBook } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
@@ -60,7 +61,7 @@ export function placeGame(container: HTMLElement, fit: Fit, refit: () => void): 
 }
 
 /** Builds the DOM overlay on top of the canvas. */
-export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void): void {
+export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void, saves: SaveCodes): void {
   fitToViewport(root, layout, onFit);
   mountHud(root, world.store, world.targets);
   const panels = createSidePanels(root, layout, world.targets);
@@ -85,4 +86,5 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   });
   mountWelcomeBack(root, world.offline.inbox);
   mountDailyBonus(root, world);
+  mountSettings(root, world, saves);
 }

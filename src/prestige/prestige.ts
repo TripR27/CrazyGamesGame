@@ -78,7 +78,8 @@ export const startGold = (prestige: Pick<PrestigeState, 'legacy'>): number =>
 
 /**
  * Sell the tavern: Golden Hop for the gold earned this run, and a fresh start. What stays: the recipes found, the
- * tutorial, the Golden Hop and the Legacy, the statistics, achievements and the daily streak (and the date the game began). Everything else starts over, with the start
+ * tutorial, the Golden Hop and the Legacy, the statistics, achievements, the daily streak and the settings (and the date
+ * the game began). Everything else starts over, with the start
  * gold of the Legacy. Does nothing when the tavern cannot be sold yet.
  */
 export function sellTavern({ store, bus, clock }: Pick<World, 'store' | 'bus' | 'clock'>): void {
@@ -86,9 +87,9 @@ export function sellTavern({ store, bus, clock }: Pick<World, 'store' | 'bus' | 
   if (!canSell(before)) return;
   const hops = hopsFor(before.prestige.runEarned);
   const fresh = createInitialState(clock.now());
-  const { recipesDiscovered, tutorial, meta, prestige, stats, achievements, daily } = before;
+  const { recipesDiscovered, tutorial, meta, prestige, stats, achievements, daily, settings } = before;
   store.update((s) => {
-    Object.assign(s, fresh, { recipesDiscovered, tutorial, stats, achievements, daily });
+    Object.assign(s, fresh, { recipesDiscovered, tutorial, stats, achievements, daily, settings });
     s.meta.createdAt = meta.createdAt;
     s.prestige = { ...prestige, hops: prestige.hops + hops, totalHops: prestige.totalHops + hops, runs: prestige.runs + 1, runEarned: num(0) };
     s.currencies.gold = num(startGold(prestige));
