@@ -1,10 +1,11 @@
 import type { World } from '@/app/world';
 import { DECORATIONS, type DecorDef } from '@/decor/decor';
 import { type UpgradeDef, BASE_STATS, upgrades, UPGRADE_STATS, type UpgradeEffect, type UpgradeStat } from '@/economy/upgrade-data';
+import { prestigeBonuses } from '@/prestige/prestige';
 import { ROOMS, type RoomDef } from '@/rooms/rooms';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { num, type Num, ZERO } from '@/shared/numbers';
-import type { UpgradeLevels } from '@/shared/state';
+import type { PrestigeState, UpgradeLevels } from '@/shared/state';
 
 /** Owned level of an upgrade; never above its max, even if an old save or a content change says so. */
 export function levelOf(levels: UpgradeLevels, def: UpgradeDef): number {
@@ -155,6 +156,8 @@ export interface MultiplierState {
   roomsBuilt?: readonly string[];
   /** Bought decorations; left out means none. */
   decorBought?: readonly string[];
+  /** Golden Hop ever earned and the Legacy bought; left out means none. */
+  prestige?: Pick<PrestigeState, 'totalHops' | 'legacy'>;
 }
 
 /** One bonus and how many times it counts (an upgrade's level, or 1 for a built room or a bought decoration). */
@@ -173,8 +176,8 @@ function applySources(stat: UpgradeStat, sources: readonly Source[]): Num {
 }
 
 /**
- * The one place where every source of a bonus is added up: upgrades, built rooms and decorations; prestige, achievements and
- * events join here later without the callers changing.
+ * The one place where every source of a bonus is added up: upgrades, built rooms, decorations and prestige (Golden Hop
+ * and the Legacy); achievements and events join here later without the callers changing.
  */
 export function getMultipliers(
   state: MultiplierState,
@@ -187,6 +190,7 @@ export function getMultipliers(
   const sources: Source[] = [
     ...defs.map((def) => ({ effect: def.effect, times: levelOf(state.upgrades, def) })),
     ...[...built, ...decorated].flatMap((owned) => owned.effects.map((effect) => ({ effect, times: 1 }))),
+    ...prestigeBonuses(state.prestige),
   ];
   const entries = UPGRADE_STATS.map((stat) => [stat, applySources(stat, sources)] as const);
   return Object.fromEntries(entries) as Multipliers;

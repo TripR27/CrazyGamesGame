@@ -286,6 +286,7 @@ export function createOffline(world: Pick<World, 'store' | 'bus' | 'rng' | 'cloc
         vipChance: stats.vipChance.toNumber(),
       });
       applyOffline(store, report);
+      if (report.served > 0) bus.emit('offline:paid', { gold: report.gold });
       const heroes = catchUpTrips(world, awayMs, report.limitHours * HOUR_MS);
       // The time is accounted for now; without this the same gap would count again at the next save.
       store.update((s) => touchLastSeen(s, clock.now()));

@@ -12,6 +12,7 @@ import { buyGearById, equipGear, firstBuyableGear, gearToWear } from '@/heroes/g
 import { aimHeroCauldron, clickShelf, drinkTaker } from '@/heroes/hero-brewing';
 import { HERO_CLASSES, HEROES, hireHeroById, hireOffer, readyHeroId } from '@/heroes/heroes';
 import { boldOption, currentCard, decideCard } from '@/heroes/trip-cards';
+import { buyLegacy, canSell, firstAffordableLegacy, sellTavern } from '@/prestige/prestige';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { discoverableNow } from '@/recipes/recipes';
 import { ROOMS, buildRoomById, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
@@ -42,11 +43,17 @@ function upgradeBudget(state: GameState): Num {
 }
 
 /**
- * One purchase like a sensible player: a new ingredient first (new recipes to try), then a room it can afford,
- * then a hero to hire, the Quartermaster, gear, a decoration and otherwise the cheapest upgrade, but while a room is
- * for sale it saves up for it (it only buys what costs a small share of the room). Returns true when it bought something.
+ * One purchase like a sensible player: a Legacy bonus for Golden Hop, a new ingredient (new recipes to try), a room it
+ * can afford, then a hero to hire, the Quartermaster, gear, a decoration and otherwise the cheapest upgrade, but while a
+ * room is for sale it saves up for it (it only buys what costs a small share of the room). Returns true when it bought
+ * something.
  */
 export function shopOnce(world: World, state: GameState): boolean {
+  const legacy = firstAffordableLegacy(state.prestige);
+  if (legacy !== undefined) {
+    buyLegacy(world, legacy.id);
+    return true;
+  }
   const ingredient = firstBuyableIngredient(state, world.content);
   if (ingredient !== undefined) {
     buyIngredientById(world, ingredient.id);
@@ -197,6 +204,8 @@ export function createBot(world: World, options: BotOptions): Bot {
   return {
     act() {
       const state = store.getState();
+      // A sensible player sells the tavern as soon as it can be sold.
+      if (canSell(state)) return sellTavern(world);
       if (serveReady(world) || brewNext(world, state) || playHeroes(world, state) || sendReadyHero(world, state)) return;
       if (options.buys) shopOnce(world, state);
     },

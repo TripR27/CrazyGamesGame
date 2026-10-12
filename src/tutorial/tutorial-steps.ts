@@ -1,5 +1,5 @@
 import type { GameEvents } from '@/shared/events';
-import { autoLesson, bossLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson } from '@/tutorial/tutorial-later-steps';
+import { autoLesson, bossLesson, prestigeLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson } from '@/tutorial/tutorial-later-steps';
 
 export type TutorialEvent = keyof GameEvents;
 
@@ -37,7 +37,7 @@ export const GUIDE_TARGETS = [
   'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
   'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor', 'guide-hero-send', 'guide-loot', 'guide-gear-buy', 'guide-gear-equip', 'guide-hero-drink', 'guide-card',
-  'guide-quartermaster-buy', 'guide-hero-auto',
+  'guide-quartermaster-buy', 'guide-hero-auto', 'guide-prestige-sell', 'guide-legacy-buy',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
@@ -237,4 +237,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...cardLesson,
   ...bossLesson,
   ...autoLesson,
+  ...prestigeLesson,
 ];

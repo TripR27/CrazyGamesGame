@@ -177,6 +177,28 @@ export const autoLesson: readonly TutorialStep[] = [
 ];
 
 /**
+ * The hint for the first sale of the tavern: once it can be sold, the way to the Legacy tab and its sell button; after
+ * the sale (the page starts the new tavern) a bonus to spend the Golden Hop on. Both only count while on screen.
+ */
+export const prestigeLesson: readonly TutorialStep[] = [
+  {
+    id: 'prestige_sell',
+    lesson: 'prestige',
+    startWhen: { kind: 'event', event: 'prestige:available' },
+    target: 'guide-prestige-sell',
+    completeOn: { kind: 'event', event: 'prestige:done' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'prestige_spend',
+    lesson: 'prestige',
+    target: 'guide-legacy-buy',
+    completeOn: { kind: 'event', event: 'legacy:bought' },
+    onlyWhenShown: true,
+  },
+];
+
+/**
  * The hint for the first loot: when a hero first brings dungeon ingredients home, points at one on the shelf. It
  * explains the count (every drink with it uses one) and sends the player to the recipe book for what to make.
  */

@@ -1,0 +1,22 @@
+/* The Legacy tab of the side panel (selling the tavern). Sizes are design pixels; placeholder styling until the art pass. */
+.legacy-panel { overflow-y: auto; }
+.legacy-title { margin: 0 0 8px; font-size: 20px; }
+.legacy-hops { margin: 0 0 4px; font-size: 18px; font-weight: bold; color: #8a5a00; }
+.legacy-text { margin: 0 0 8px; font-size: 13px; line-height: 1.3; }
+.legacy-sell {
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 8px 6px;
+  border: 2px solid #8a5a00;
+  border-radius: 10px;
+  background: #ffd25e;
+  color: #3b2410;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.legacy-sell:hover:not(:disabled) { background: #ffe08a; }
+.legacy-sell:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+.legacy-sell--armed { background: #f07a4a; border-color: #8a2a1a; color: #fff; }
+.legacy-subtitle { margin: 6px 0 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.legacy-rows { display: flex; flex-direction: column; gap: 8px; }
