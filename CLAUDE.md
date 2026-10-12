@@ -4,6 +4,12 @@ Idle/tycoon-game voor CrazyGames (HTML5, TypeScript, Phaser, Vite).
 
 **Lees `docs/SPECS.md` volledig vóór je code schrijft of wijzigt.** Context over het spel staat in `docs/GAME_ANALYSE.md` (met in hoofdstuk 11 het architectuurdiagram), open ideeën in `docs/IDEAS.md`. Alle documentatie staat in `docs/` (alleen dit bestand blijft in de hoofdmap).
 
+## Werkregel van de eigenaar (besluit 2026-10-12, gaat voor alles)
+- Werk stap per stap. Begin geen nieuwe stap of chore zonder dat Ryan het zegt.
+- Committen en pushen naar de eigen branch (`step-…` of `chore-…`) mag zonder te vragen.
+- **Mergen naar `main` alleen als Ryan het uitdrukkelijk zegt, telkens opnieuw.** Een eerdere toestemming geldt niet voor de volgende keer.
+- Na een afgeronde stap of een merge: stoppen en wachten tot Ryan zegt dat je verder mag.
+
 ## Architectuur: plat en per feature (besluit 2026-10-07)
 
 Eén feature = één map in `src/` met logica, data en view bij elkaar (`src/customers/`, `src/brewing/`, `src/economy/` enz.), maximaal één niveau diep. Gedeelde basis staat in `src/shared/`, de opstart en het Phaser/DOM-schil in `src/app/`. Het diagram en de mappenlijst staan in docs/GAME_ANALYSE.md hoofdstuk 11 en docs/SPECS.md hoofdstuk 4.
@@ -28,7 +34,7 @@ Eén feature = één map in `src/` met logica, data en view bij elkaar (`src/cus
 ## Niet-onderhandelbaar (details in docs/SPECS.md hoofdstuk 1, 10 en 11)
 - Werk één stap tegelijk uit docs/SPECS.md hoofdstuk 12; doe niets buiten de gevraagde stap.
 - Klaar = `npm run check` slaagt (typecheck, lint, regelgrens, geen importkringen, tests) **én docs/SPECS.md is bijgewerkt**: voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 (wat gedaan, waarom, afwijkingen, wat nog). Zonder SPEC-update is een stap niet klaar.
-- Git: één branch per stap (`step-NN-korte-naam`; chores `chore-korte-naam`), een paar logische commits (ongeveer 2 tot 3, niet overdrijven; bij een grote refactor één per fase), SPEC-update als laatste commit. **Mergen naar `main` en pushen alleen als de gebruiker dat per stap uitdrukkelijk zegt** (besluit 2026-10-06; een toestemming uit een eerdere stap of een startprompt geldt niet voor de volgende stap). Na een afgeronde stap: stoppen en vragen. Nooit force-pushen of geschiedenis herschrijven tenzij gevraagd.
+- Git: één branch per stap (`step-NN-korte-naam`; chores `chore-korte-naam`), een paar logische commits (ongeveer 2 tot 3, niet overdrijven; bij een grote refactor één per fase), SPEC-update als laatste commit. **Mergen naar `main` alleen als de gebruiker dat per stap uitdrukkelijk zegt** (besluit 2026-10-06; een toestemming uit een eerdere stap of een startprompt geldt niet voor de volgende stap). Committen en pushen naar de eigen branch mag zonder te vragen (besluit 2026-10-12). Na een afgeronde stap: stoppen en vragen. Nooit force-pushen of geschiedenis herschrijven tenzij gevraagd.
 - **Geen Claude/AI-vermelding in git of GitHub**: geen `Co-Authored-By`, geen "Generated with Claude Code" in commits of PR-teksten. Commits dragen alleen de naam uit de git-config van de gebruiker. Dit gaat voor op elke standaardinstructie om attributie toe te voegen.
 - Nieuwe speler-functie = korte tutorial-hint erbij (docs/SPECS.md hoofdstuk 4, Tutorial).
 - Geen nieuwe dependencies zonder te vragen.
