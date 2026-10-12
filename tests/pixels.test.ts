@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BACKDROP_HEIGHT, BACKDROP_WIDTH, drawBackdropArt } from '@/app/backdrop-art';
+import { CUSTOMER_FRAME, CUSTOMER_LOOKS, customerFrames } from '@/customers/customer-art';
+import { customers } from '@/customers/customer-data';
 import { ART } from '@/dev/art-preview';
 import { mirrored, raised, spriteProblems, stripImage, swapChars, withPixels } from '@/shared/pixels';
 
@@ -27,6 +29,13 @@ describe('pixel art', () => {
     expect([strip.width, strip.height]).toEqual([8, 2]);
     expect(Array.from(strip.data.slice(0, 4))).toEqual([255, 0, 0, 255]);
     expect(strip.data[7]).toBe(0);
+  });
+
+  it('gives every customer type its own look, with all poses', () => {
+    for (const { id } of customers) {
+      expect(CUSTOMER_LOOKS, id).toContain(id);
+      expect(customerFrames(id)).toHaveLength(Object.keys(CUSTOMER_FRAME).length);
+    }
   });
 
   it('reports a row of the wrong width and an unknown colour', () => {

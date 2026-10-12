@@ -1,6 +1,7 @@
 import { drawBackdropArt } from '@/app/backdrop-art';
-import { CAULDRON, FLOOR_Y, READY_SLOTS } from '@/app/layout';
+import { CAULDRON, DOOR_ENTRY, FLOOR_Y, READY_SLOTS, SEAT_SLOTS } from '@/app/layout';
 import { CAULDRON_FRAMES, FIRE_FRAMES, MUG } from '@/brewing/brewing-art';
+import { CUSTOMER_FRAME, CUSTOMER_LOOKS, customerFrames } from '@/customers/customer-art';
 import { createImage, drawSprite, fillRect, PIXEL, type PixelImage, type Sprite, spriteHeight, spriteWidth } from '@/shared/pixels';
 
 /** Every sprite strip of the game by name: the preview sheet shows them all, the tests check them all. */
@@ -8,6 +9,7 @@ export const ART: Readonly<Record<string, readonly Sprite[]>> = {
   cauldron: CAULDRON_FRAMES,
   fire: FIRE_FRAMES,
   mug: [MUG],
+  ...Object.fromEntries(CUSTOMER_LOOKS.map((id) => [`customer_${id}`, customerFrames(id)])),
 };
 
 /** Draws a sprite with its feet (bottom centre) at a design-pixel position. */
@@ -23,6 +25,13 @@ function tavernScene(): PixelImage {
   if (fire !== undefined) place(img, fire, cx, FLOOR_Y - 4);
   if (cauldron !== undefined) place(img, cauldron, cx, FLOOR_Y);
   for (const slot of READY_SLOTS.slice(0, 3)) place(img, MUG, slot.x, slot.y);
+  // A customer of every type: walking in, seated, drinking and cheering.
+  const poses = [CUSTOMER_FRAME.walkA, CUSTOMER_FRAME.sit, CUSTOMER_FRAME.drinkHigh, CUSTOMER_FRAME.happy];
+  CUSTOMER_LOOKS.forEach((id, i) => {
+    const slot = SEAT_SLOTS[i + 1] ?? DOOR_ENTRY;
+    const frame = customerFrames(id)[poses[i] ?? 0];
+    if (frame !== undefined) place(img, frame, i === 0 ? DOOR_ENTRY.x + 60 : slot.x, i === 0 ? DOOR_ENTRY.y : slot.y);
+  });
   return img;
 }
 
