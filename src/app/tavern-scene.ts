@@ -13,6 +13,7 @@ import { clickShelf } from '@/heroes/hero-brewing';
 import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
 import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
+import { createStaffView, type StaffView } from '@/staff/staff-view';
 
 export const BOOT_SCENE_KEY = 'boot';
 
@@ -34,6 +35,7 @@ interface Views {
   shelf: ShelfView;
   cauldron: CauldronView;
   ready: ReadyView;
+  staff: StaffView;
   rooms: RoomsView;
   guild: GuildView;
   decor: DecorView;
@@ -67,6 +69,8 @@ export class TavernScene extends Scene {
         targets: world.targets,
       }),
       cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
+      // The brewer stands behind the counter, so the drinks on the bar are drawn after (in front of) them.
+      staff: createStaffView(this, world),
       ready: createReadyView(this, {
         station: world.station,
         selected: world.selection.selected,
@@ -92,6 +96,7 @@ export class TavernScene extends Scene {
     if (this.views === undefined) return;
     this.views.shelf.update();
     this.views.cauldron.update();
+    this.views.staff.update();
     this.views.ready.update();
     this.views.rooms.update();
     this.views.guild.update();

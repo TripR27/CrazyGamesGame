@@ -1,6 +1,8 @@
 import { SERVING } from '@/serving/effects';
 import { describe, expect, it, vi } from 'vitest';
+import { clickIngredient } from '@/brewing/brewing';
 import { buyUpgradeById } from '@/economy/upgrades';
+import { clickReadyDrink, discardPicked } from '@/serving/serving';
 import { newGame, playBasics } from './helpers';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
@@ -63,7 +65,7 @@ describe('drinking in the real game', () => {
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'shop_new_spot', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done', 'settings_tip',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'shop_new_spot', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'slop_tip', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done', 'settings_tip',
 ];
 
 /** Every lesson before the VIP one is done, and the player has `reputation`. */
@@ -110,7 +112,7 @@ describe('the VIP hint, played in the real game', () => {
 
 const BASICS_LIKES = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
 const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'shop_new_spot'];
-const SEATS = ['seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done'];
+const SEATS = ['seats_buy', 'seats_done', 'book_open', 'book_read', 'slop_tip', 'ingredient_buy', 'ingredient_done'];
 
 /** A game with the earlier lessons done and `gold` in the till. */
 function afterLessons(gold: number, done: string[] = [...BASICS_LIKES, ...UPGRADE, ...SEATS]) {
@@ -131,6 +133,33 @@ describe('staff in the real game', () => {
     game.tick(300_000);
     expect(game.state.currencies.gold.toNumber()).toBeGreaterThan(before);
     expect(game.state.reputation).toBeGreaterThan(0);
+  });
+
+  it('the brewer uses their own kettle, so the player can brew and try recipes at the same time', () => {
+    const game = afterLessons(10_000);
+    const w = game.world;
+    buyUpgradeById(w, 'brewer_assistant', 1);
+    for (let t = 0; t < 120_000 && w.kettle.brewing === null; t += 500) game.tick(500);
+    expect(w.kettle.brewing).not.toBeNull();
+    clickIngredient(w, 'swamp_slime');
+    expect(w.station.contents).toEqual(['swamp_slime']);
+    game.tick(30_000);
+    expect(w.station.contents).toEqual(['swamp_slime']); // the brewer never empties the player's cauldron
+  });
+
+  it('a picked drink goes into the slop bucket, and the bar has room again', () => {
+    const game = afterLessons(0);
+    const w = game.world;
+    w.station.ready.push('slime_sap', 'slime_sap', 'slime_sap');
+    const discarded = vi.fn();
+    w.bus.on('drink:discarded', discarded);
+    discardPicked(w); // nothing picked: nothing happens
+    expect(w.station.ready).toHaveLength(3);
+    clickReadyDrink(w, 1);
+    discardPicked(w);
+    expect(w.station.ready).toHaveLength(2);
+    expect(w.selection.selected()).toBeNull();
+    expect(discarded).toHaveBeenCalledWith(expect.objectContaining({ recipeId: 'slime_sap', by: 'player' }));
   });
 
   it('earn nothing without staff', () => {

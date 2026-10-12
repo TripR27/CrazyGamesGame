@@ -1,5 +1,5 @@
 import type { Scene } from 'phaser';
-import { CAULDRON, SEAT_SLOTS } from '@/app/layout';
+import { CAULDRON, SEAT_SLOTS, SLOP_BUCKET } from '@/app/layout';
 import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
@@ -129,6 +129,9 @@ export function createFeedbackLayer(scene: Scene, { bus }: Pick<World, 'bus'>): 
     }),
     bus.on('brew:notice', ({ messageKey }) => {
       floats.show(CAULDRON.x + CAULDRON.w / 2, CAULDRON.y - 60, line(messageKey), { color: BAD_COLOR });
+    }),
+    bus.on('drink:discarded', ({ recipeId, messageKey }) => {
+      floats.show(SLOP_BUCKET.x + SLOP_BUCKET.w / 2, SLOP_BUCKET.y - 30, line(messageKey, recipeId), { color: BAD_COLOR });
     }),
   ];
   return () => stops.forEach((stop) => stop());

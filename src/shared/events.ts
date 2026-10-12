@@ -71,6 +71,11 @@ export interface GameEvents {
   'brew:started': { recipeId: string };
   'brew:done': { recipeId: string };
   'brew:notice': { notice: BrewNotice; messageKey: string };
+  /** The brewer started a drink in their own kettle, and put a finished one on the bar. */
+  'brewer:started': { recipeId: string };
+  'brewer:done': { recipeId: string };
+  /** A drink from the bar went into the slop bucket: tipped by the player, or by the staff clearing a clogged bar. */
+  'drink:discarded': { recipeId: string; by: 'player' | 'staff'; messageKey: string };
   /** The player can pay for an upgrade after not being able to; fires on each such moment. */
   'upgrade:affordable': Record<string, never>;
   'upgrade:bought': { id: string; count: number };

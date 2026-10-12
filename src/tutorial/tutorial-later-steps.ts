@@ -1,6 +1,6 @@
 import type { TutorialStep } from '@/tutorial/tutorial-steps';
 
-/** Lessons for what opens later in a run: new things in the shop, rooms, decorations, heroes and their loot. The order is in TUTORIAL_STEPS. */
+/** Lessons for what opens later in a run: new things in the shop, the slop bucket, rooms, decorations, heroes and their loot. The order is in TUTORIAL_STEPS. */
 
 /**
  * The hint for the shop's dot: the shop lists things as they come in sight, so the first time something new waits while
@@ -16,6 +16,20 @@ export const shopNewLesson: readonly TutorialStep[] = [
     completeOn: { kind: 'event', event: 'shop:opened' },
     // Opening the shop early must not skip the lessons before this one; it counts only while the hint is on screen.
     onlyWhenShown: true,
+  },
+];
+
+/**
+ * The hint for the slop bucket, right after the recipe book (trying recipes is how a bar fills up with drinks nobody
+ * ordered). A pointer with a closing line, not a wait for a full bar: lessons run one by one, and a bar that never
+ * clogs must not hold the later lessons back.
+ */
+export const slopLesson: readonly TutorialStep[] = [
+  {
+    id: 'slop_tip',
+    lesson: 'slop',
+    target: 'bucket',
+    completeOn: { kind: 'after', ms: 7000 },
   },
 ];
 

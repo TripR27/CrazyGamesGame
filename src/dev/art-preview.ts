@@ -7,6 +7,7 @@ import { CUSTOMER_FRAME, CUSTOMER_LOOKS, customerFrames } from '@/customers/cust
 import { rugImage, TORCHES, TROPHIES } from '@/decor/decor-art';
 import { HERO_LOOKS, HERO_POT_FRAMES, heroFrames } from '@/heroes/hero-art';
 import { builtRoomImage } from '@/rooms/rooms-art';
+import { BREWER_FRAMES, BUCKET, KETTLE_FRAMES } from '@/staff/staff-art';
 import { createImage, drawSprite, fillRect, PIXEL, type PixelImage, type Sprite, spriteHeight, spriteWidth } from '@/shared/pixels';
 
 /** Every sprite strip of the game by name: the preview sheet shows them all, the tests check them all. */
@@ -18,6 +19,9 @@ export const ART: Readonly<Record<string, readonly Sprite[]>> = {
   ingredients: Object.values(INGREDIENT_ART),
   ...Object.fromEntries(HERO_LOOKS.map((id) => [`hero_${id}`, heroFrames(id)])),
   hero_pot: HERO_POT_FRAMES,
+  brewer: BREWER_FRAMES,
+  kettle: KETTLE_FRAMES,
+  bucket: [BUCKET],
   ...Object.fromEntries(Object.entries(TORCHES).map(([id, frames]) => [id, frames])),
   icons: Object.values(ICONS),
 };

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { recipes, rng, station, ab, catalog, cde, economy, floorWith } from './fixtures';
-import { startBrewSystem, BREWING } from '@/brewing/brewing';
+import { startBrewSystem } from '@/brewing/brewing';
 import { waitingCustomers } from '@/customers/customers';
 import { createEventBus, type GameEvents } from '@/shared/events';
-import { startWantedBrew, readyCustomer, createCharge, startStaff, createStaleWatch } from '@/staff/staff';
+import { advanceKettle, barClogged, createCharge, createKettle, readyCustomer, STAFF, startKettle, startStaff, unwantedSlot, wantedRecipe } from '@/staff/staff';
 
 describe('a worker pace', () => {
   it('is ready after enough time for one action and spends it', () => {
@@ -25,30 +25,71 @@ describe('a worker pace', () => {
 });
 
 describe('the brewer assistant', () => {
-  it('starts the drink the oldest waiting customer wants', () => {
+  it('starts, in their own kettle, the drink the oldest waiting customer wants', () => {
     const s = station();
-    const events = startWantedBrew(s, [{ recipeId: 'cde' }, { recipeId: 'ab' }], recipes, rng());
-    expect(events).toEqual([{ kind: 'started', recipeId: 'cde' }]);
-    expect(s.brewing?.recipeId).toBe('cde');
+    const kettle = createKettle();
+    expect(startKettle(kettle, s, [{ recipeId: 'cde' }, { recipeId: 'ab' }], recipes)?.id).toBe('cde');
+    expect(kettle.brewing?.recipeId).toBe('cde');
+    expect(s.brewing).toBeNull();
   });
 
-  it('skips a drink that already stands on the bar and takes the next one', () => {
+  it('skips an order a drink on the bar or in a cauldron already answers, one drink per order', () => {
     const s = station();
     s.ready.push('cde');
-    startWantedBrew(s, [{ recipeId: 'cde' }, { recipeId: 'ab' }], recipes, rng());
-    expect(s.brewing?.recipeId).toBe('ab');
+    expect(wantedRecipe([{ recipeId: 'cde' }, { recipeId: 'ab' }], s.ready, recipes)?.id).toBe('ab');
+    expect(wantedRecipe([{ recipeId: 'cde' }, { recipeId: 'cde' }], ['cde'], recipes)?.id).toBe('cde');
+    s.brewing = { recipeId: 'ab', remainingMs: 1, totalMs: 1 };
+    expect(startKettle(createKettle(), s, [{ recipeId: 'cde' }, { recipeId: 'ab' }], recipes)).toBeUndefined();
   });
 
-  it('does nothing while brewing, with ingredients in the cauldron, with a full bar or without customers', () => {
-    const busy = station();
+  it('works next to the player: ingredients in the cauldron or a brew there do not stop the kettle', () => {
+    const s = station();
+    s.contents = ['a'];
+    expect(startKettle(createKettle(), s, [{ recipeId: 'cde' }], recipes)?.id).toBe('cde');
+    expect(s.contents).toEqual(['a']);
+  });
+
+  it('waits while the kettle is busy, the bar has no room (keeping one for the player), or nobody waits', () => {
+    const busy = createKettle();
     busy.brewing = { recipeId: 'ab', remainingMs: 1, totalMs: 1 };
-    const half = station();
-    half.contents = ['a'];
+    expect(startKettle(busy, station(), [{ recipeId: 'cde' }], recipes)).toBeUndefined();
     const full = station(1);
     full.ready.push('ab');
-    for (const s of [busy, half, full]) expect(startWantedBrew(s, [{ recipeId: 'cde' }], recipes, rng())).toEqual([]);
-    expect(startWantedBrew(station(), [], recipes, rng())).toEqual([]);
-    expect(half.contents).toEqual(['a']);
+    expect(startKettle(createKettle(), full, [{ recipeId: 'cde' }], recipes)).toBeUndefined();
+    const playerBrewing = station(1);
+    playerBrewing.brewing = { recipeId: 'ab', remainingMs: 1, totalMs: 1 };
+    expect(startKettle(createKettle(), playerBrewing, [{ recipeId: 'cde' }], recipes)).toBeUndefined();
+    expect(startKettle(createKettle(), station(), [], recipes)).toBeUndefined();
+  });
+
+  it('puts a finished drink on the bar, or keeps it in the kettle until there is room', () => {
+    const s = station(1);
+    const kettle = createKettle();
+    startKettle(kettle, s, [{ recipeId: 'ab' }], recipes);
+    s.ready.push('cde');
+    expect(advanceKettle(kettle, s, 5000)).toBeUndefined();
+    expect(kettle.done).toBe('ab');
+    s.ready.pop();
+    expect(advanceKettle(kettle, s, 100)).toBe('ab');
+    expect(s.ready).toEqual(['ab']);
+    expect(kettle).toEqual({ brewing: null, done: null });
+  });
+});
+
+describe('a clogged bar', () => {
+  it('finds the oldest drink no waiting customer wants', () => {
+    expect(unwantedSlot(['ab', 'cde', 'ab'], [{ recipeId: 'ab' }, { recipeId: 'cde' }])).toBe(2);
+    expect(unwantedSlot(['ab'], [{ recipeId: 'ab' }])).toBe(-1);
+    expect(unwantedSlot(['cde', 'ab'], [{ recipeId: 'ab' }])).toBe(0);
+  });
+
+  it('is full and holds a drink nobody wants', () => {
+    const s = station(2);
+    s.ready.push('ab', 'cde');
+    expect(barClogged(s, [{ recipeId: 'ab' }])).toBe(true);
+    expect(barClogged(s, [{ recipeId: 'ab' }, { recipeId: 'cde' }])).toBe(false);
+    s.ready.pop();
+    expect(barClogged(s, [])).toBe(false);
   });
 });
 
@@ -62,29 +103,32 @@ describe('the waitress', () => {
   });
 });
 
-function crew(rates: { brew: number; serve: number }, orders: Array<[string, string]>) {
+function crew(rates: { brew: number; serve: number }, orders: Array<[string, string]>, capacity = 3) {
   const bus = createEventBus<GameEvents>();
-  const s = station();
+  const s = station(capacity);
+  const kettle = createKettle();
   const eco = economy();
   const floor = floorWith(...orders);
   startBrewSystem(s, bus);
   startStaff({
-    bus, station: s, floor, rng: rng(), serve: { economy: eco, catalog },
+    bus, station: s, kettle, floor, rng: rng(), serve: { economy: eco, catalog },
     getKnownRecipes: () => [ab, cde], getRates: () => rates,
   });
   const served = vi.fn();
+  const discarded = vi.fn();
   bus.on('customer:served', served);
+  bus.on('drink:discarded', discarded);
   const run = (ms: number): void => {
     for (let t = 0; t < ms; t += 100) bus.emit('tick', { deltaMs: 100 });
   };
-  return { run, served, eco, floor, s };
+  return { run, served, discarded, eco, floor, s, kettle };
 }
 
 describe('staff at work', () => {
   it('do nothing when nobody is hired', () => {
-    const { run, served, s } = crew({ brew: 0, serve: 0 }, [['plain', 'ab']]);
+    const { run, served, s, kettle } = crew({ brew: 0, serve: 0 }, [['plain', 'ab']]);
     run(60_000);
-    expect(s.brewing).toBeNull();
+    expect(kettle.brewing).toBeNull();
     expect(s.ready).toEqual([]);
     expect(served).not.toHaveBeenCalled();
   });
@@ -105,59 +149,26 @@ describe('staff at work', () => {
   });
 
   it('keep a customer waiting without brewing a drink nobody asked for', () => {
-    const { run, s } = crew({ brew: 1, serve: 1 }, []);
+    const { run, s, kettle } = crew({ brew: 1, serve: 1 }, []);
     run(10_000);
-    expect(s.brewing).toBeNull();
+    expect(kettle.brewing).toBeNull();
     expect(s.ready).toEqual([]);
   });
-});
 
-describe('a stale cauldron', () => {
-  it('counts as stale only after the same contents sat there for the limit', () => {
-    const watch = createStaleWatch(1000);
-    expect(watch.isStale(['a'], 900)).toBe(false);
-    expect(watch.isStale(['a'], 100)).toBe(false); // first look at these contents starts the count
-    expect(watch.isStale(['a'], 1000)).toBe(true);
+  it(`tip away the oldest drink nobody wants once the bar was clogged for ${STAFF.clearAfterMs / 1000} s`, () => {
+    const { run, s, discarded } = crew({ brew: 0, serve: 0.1 }, [['plain', 'ab']], 2);
+    s.ready.push('cde', 'cde');
+    run(STAFF.clearAfterMs - 1000);
+    expect(s.ready).toEqual(['cde', 'cde']);
+    run(1100);
+    expect(s.ready).toEqual(['cde']);
+    expect(discarded).toHaveBeenCalledWith(expect.objectContaining({ recipeId: 'cde', by: 'staff' }));
   });
 
-  it('starts over when the contents change, and never counts an empty cauldron', () => {
-    const watch = createStaleWatch(1000);
-    watch.isStale(['a'], 0);
-    watch.isStale(['a'], 900);
-    expect(watch.isStale(['a', 'b'], 900)).toBe(false);
-    expect(watch.isStale([], 5000)).toBe(false);
-  });
-});
-
-describe('the brewer and a cauldron the player left behind', () => {
-  function crew(brew: number) {
-    const bus = createEventBus<GameEvents>();
-    const s = station();
-    s.contents = ['c'];
-    const floor = floorWith(['plain', 'ab']);
-    startStaff({
-      bus, station: s, floor, rng: rng(),
-      serve: { economy: economy(), catalog },
-      getKnownRecipes: () => [ab],
-      getRates: () => ({ brew, serve: 0 }),
-    });
-    const run = (ms: number): void => {
-      for (let t = 0; t < ms; t += 100) bus.emit('tick', { deltaMs: 100 });
-    };
-    return { s, run };
-  }
-
-  it('clears it after a while and gets back to work', () => {
-    const { s, run } = crew(1);
-    run(BREWING.staleCauldronMs - 1000);
-    expect(s.contents).toEqual(['c']);
-    run(2000);
-    expect(s.brewing?.recipeId).toBe('ab');
-  });
-
-  it('is left alone when nobody is hired', () => {
-    const { s, run } = crew(0);
-    run(BREWING.staleCauldronMs * 2);
-    expect(s.contents).toEqual(['c']);
+  it('leave a clogged bar alone when nobody is hired', () => {
+    const { run, s } = crew({ brew: 0, serve: 0 }, [['plain', 'ab']], 2);
+    s.ready.push('cde', 'cde');
+    run(STAFF.clearAfterMs * 2);
+    expect(s.ready).toEqual(['cde', 'cde']);
   });
 });

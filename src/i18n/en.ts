@@ -98,6 +98,9 @@ export const feedback: Messages = {
   'feedback.empty.2': 'The jar is empty. Heroes fill it, not wishes.',
   'feedback.nohero.1': 'No hero at home with room in the bag. Heroes first, potions second.',
   'feedback.nohero.2': 'The hero cauldron is for heroes, and none of them can take a drink right now.',
+  'feedback.slop.1': 'Splash! Into the bucket with {drink}.',
+  'feedback.slop.2': 'Glug glug. Farewell, {drink}.',
+  'feedback.slop.3': 'The bucket accepts {drink} with quiet dignity.',
 };
 
 export const hud: Messages = {
@@ -205,7 +208,7 @@ export const tutorial: Messages = {
   'tutorial.ingredient_buy.text': 'Fresh stock! {shopIngredient} is for sale in the Shop tab. Buy it once and it stays on the shelf for good.',
   'tutorial.ingredient_done.text': 'There it is, on the shelf. The recipe book knows what to throw in with it. I am ready. Probably.',
   'tutorial.staff_hire.text': 'Tired of doing everything yourself? Hire {staff} in the Shop tab. They work while you complain.',
-  'tutorial.staff_done.text': 'Hired! Slower than you, but they never ask for a break. Buy Night Shift in the Shop tab and they even work while you are away.',
+  'tutorial.staff_done.text': 'Hired! They brew in their own kettle behind the bar, so yours stays free for new recipes. Buy Night Shift and they even work while you are away.',
   'tutorial.vip_spot.text': 'A VIP! Royalty wants {royal}, the fanciest thing we make. Pays triple, waits for nobody.',
   'tutorial.vip_done.text': 'Ka-ching. Keep the crown happy and the crown keeps paying.',
   'tutorial.room_buy.text': 'This shack has an upstairs? Build the {room} in the Shop tab. More room, more customers, more chaos.',

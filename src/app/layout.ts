@@ -41,8 +41,16 @@ export const INGREDIENT_SLOTS: readonly Point[] = Array.from({ length: SHELF_SLO
   y: SHELF.y - 22,
 }));
 
-/** Where finished drinks stand on the bar (centre x, y of the bar top). Room for the bar upgrades. */
-export const READY_SLOTS: readonly Point[] = [890, 955, 1020, 1085, 1150, 1215].map((x) => ({ x, y: 470 }));
+/** Where finished drinks stand on the bar (centre x, y of the bar top). Room for the bar upgrades; the right end is the brewer's. */
+export const READY_SLOTS: readonly Point[] = [880, 930, 980, 1030, 1080, 1130].map((x) => ({ x, y: 470 }));
+
+/**
+ * The brewer's corner at the right end of the bar: the brewer behind the counter (bottom centre on the counter top), their
+ * own kettle on the counter next to them, and the slop bucket on the floor in front (top-left, width and height).
+ */
+export const BREWER_SPOT: Point = { x: 1172, y: BAR.y };
+export const BREWER_KETTLE: Point = { x: 1204, y: BAR.y };
+export const SLOP_BUCKET: Rect = { x: 1180, y: FLOOR_Y + 4, w: 40, h: 36 };
 
 export const TABLES: readonly Rect[] = [
   { x: 260, y: 505, w: 120, h: 14 },
@@ -114,8 +122,8 @@ export const SEAT_SLOTS: readonly Point[] = [...CUSTOMER_SLOTS, ...ROOMS.flatMap
 export const DECOR_SPOTS: Readonly<Record<string, Rect>> = {
   wall_torch: { x: 196, y: 320, w: 28, h: 80 },
   woven_rug: { x: 230, y: 572, w: 420, h: 24 },
-  boar_trophy: { x: 925, y: 320, w: 90, h: 84 },
+  boar_trophy: { x: 890, y: 320, w: 90, h: 84 },
   everburning_torch: { x: 828, y: 320, w: 28, h: 80 },
   royal_carpet: { x: 870, y: 590, w: 360, h: 36 },
-  golden_tankard: { x: 1100, y: 320, w: 90, h: 84 },
+  golden_tankard: { x: 1010, y: 320, w: 90, h: 84 },
 };

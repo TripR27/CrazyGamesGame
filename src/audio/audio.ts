@@ -13,6 +13,8 @@ export const audioUrl = (name: string): string => `${import.meta.env.BASE_URL}au
 export const SOUND_EVENTS: { readonly [E in keyof GameEvents]?: SoundId | ((payload: GameEvents[E]) => SoundId | null) } = {
   'ingredient:clicked': 'plop',
   'brew:done': 'bubble',
+  'brewer:done': 'bubble',
+  'drink:discarded': 'buzz',
   'customer:served': 'coin',
   'customer:refused': 'buzz',
   'upgrade:bought': 'buy',

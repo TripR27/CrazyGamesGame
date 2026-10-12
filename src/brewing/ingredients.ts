@@ -119,14 +119,16 @@ export function orderableRecipeIds(state: IngredientState, catalog: IngredientCa
 
 /** Uses up the dungeon ingredients of every drink that starts brewing (by the player or the brewer). Returns a stop function. */
 export function watchStockUse({ store, bus, content }: Pick<World, 'store' | 'bus' | 'content'>): () => void {
-  return bus.on('brew:started', ({ recipeId }) => {
+  const use = ({ recipeId }: { recipeId: string }): void => {
     const recipe = content.recipes.find((r) => r.id === recipeId);
     if (recipe === undefined || !usesStock(recipe, content.ingredients)) return;
     store.update((s) => {
       for (const id of recipe.ingredients) if (isStocked(content.ingredients, id)) s.ingredientStock[id] = Math.max(0, stockOf(s, id) - 1);
     });
     bus.emit('saveRequested', {});
-  });
+  };
+  const stops = [bus.on('brew:started', use), bus.on('brewer:started', use)];
+  return () => stops.forEach((stop) => stop());
 }
 
 /** The part of the state the ingredient shop reads and changes. */

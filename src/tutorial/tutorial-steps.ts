@@ -1,5 +1,5 @@
 import type { GameEvents } from '@/shared/events';
-import { autoLesson, bossLesson, prestigeLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson, shopNewLesson } from '@/tutorial/tutorial-later-steps';
+import { autoLesson, bossLesson, prestigeLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson, shopNewLesson, slopLesson } from '@/tutorial/tutorial-later-steps';
 
 export type TutorialEvent = keyof GameEvents;
 
@@ -41,7 +41,7 @@ export const GUIDE_TARGETS = [
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
-export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'daily-claim', 'settings-button', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
+export const FIXED_TARGETS = ['cauldron', 'bucket', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'daily-claim', 'settings-button', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
 
 export const KNOWN_TARGETS: readonly string[] = [...GUIDE_TARGETS, ...FIXED_TARGETS];
 
@@ -280,6 +280,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...shopNewLesson,
   ...seatsLesson,
   ...bookLesson,
+  ...slopLesson,
   ...ingredientLesson,
   ...staffLesson,
   ...settingsLesson,
