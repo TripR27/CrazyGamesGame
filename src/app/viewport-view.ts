@@ -8,6 +8,7 @@ import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
+import { mountLegacy } from '@/prestige/prestige-view';
 import { mountRecipeBook } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
 import { toLevelUpView } from '@/reputation/level-up-model';
@@ -63,6 +64,7 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountShop({ root, panels }, world);
   mountRecipeBook({ root, panels }, world);
   mountHeroes({ root, panels }, world);
+  mountLegacy({ root, panels }, world);
   world.bus.on('shop:requested', () => panels.show('shop'));
   world.bus.on('heroes:requested', () => panels.show('heroes'));
   mountTripCards(root, world);

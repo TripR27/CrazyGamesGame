@@ -10,6 +10,7 @@ import { firstBuyableGear, gearToWear } from '@/heroes/gear';
 import type { GuildCauldron } from '@/heroes/hero-brewing';
 import { anyHeroTravelled, HERO_CLASSES, readyHeroId } from '@/heroes/heroes';
 import { boldOption, currentCard } from '@/heroes/trip-cards';
+import { canSell, firstAffordableLegacy } from '@/prestige/prestige';
 import { recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
 import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
@@ -25,6 +26,7 @@ const TAB_EVENTS = [
   { tab: 'shop', opened: 'shop:opened', closed: 'shop:closed' },
   { tab: 'recipes', opened: 'book:opened', closed: 'book:closed' },
   { tab: 'heroes', opened: 'heroes:opened', closed: 'heroes:closed' },
+  { tab: 'legacy', opened: 'legacy:opened', closed: 'legacy:closed' },
 ] as const;
 
 /**
@@ -94,6 +96,10 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'quartermaster:affordable': ({ store }) => store.getState().quartermaster || quartermasterOffer(store.getState()).affordable,
   'quartermaster:bought': ({ store }) => store.getState().quartermaster,
   'hero:auto': ({ store }) => Object.values(store.getState().heroes).some((h) => h.auto),
+  // A tavern sold before: the prestige lesson shows and its first step is done at once.
+  'prestige:available': ({ store }) => store.getState().prestige.runs > 0 || canSell(store.getState()),
+  'prestige:done': ({ store }) => store.getState().prestige.runs > 0,
+  'legacy:bought': ({ store }) => Object.values(store.getState().prestige.legacy).some((level) => level > 0),
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -177,6 +183,7 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients,
     heroDrinkIngredient: heroDrinkIngredient(store.getState(), ingredients, guild),
     card: openCardHint(store.getState(), clock.now()),
     bossHeroId: currentBoss(store.getState(), clock.now())?.heroId ?? null,
+    affordableLegacyId: firstAffordableLegacy(store.getState().prestige)?.id ?? null,
     autoHeroId: HERO_CLASSES.find((def) => store.getState().heroes[def.id]?.auto === false)?.id ?? null,
     openTab: openTab(),
   });

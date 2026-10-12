@@ -11,6 +11,7 @@ import { watchGearShop } from '@/heroes/gear';
 import { startHeroes } from '@/heroes/expedition';
 import { createGuildCauldron, type GuildCauldron, startGuildCauldron } from '@/heroes/hero-brewing';
 import { createOffline, type OfflineServices } from '@/offline/offline';
+import { startPrestige } from '@/prestige/prestige';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
 import { watchReputationLevels } from '@/reputation/reputation';
@@ -187,6 +188,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   // Heroes on Auto set out again once they are home and fit.
   startAuto({ store, bus, rng, clock, content: c });
   startGuildCauldron({ store, bus, clock, station, guild });
+  // Counts the gold of this tavern and says when it can be sold.
+  startPrestige({ store, bus });
   const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
   return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };

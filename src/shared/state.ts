@@ -57,6 +57,20 @@ export interface HeroState {
   auto: boolean;
 }
 
+/** Selling the tavern (prestige): what carries over from one tavern to the next. */
+export interface PrestigeState {
+  /** Golden Hop to spend in the Legacy. */
+  hops: number;
+  /** Every Golden Hop ever earned; each one makes drinks pricier for good. */
+  totalHops: number;
+  /** Taverns sold so far. */
+  runs: number;
+  /** Gold earned in this tavern (serving, and while away): the Golden Hop for selling come from this. */
+  runEarned: Num;
+  /** Bought level per Legacy bonus (an open map). */
+  legacy: Record<string, number>;
+}
+
 export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
@@ -78,6 +92,7 @@ export interface GameState {
   gearOwned: string[];
   /** The Quartermaster was bought: heroes can go on Auto. */
   quartermaster: boolean;
+  prestige: PrestigeState;
   tutorial: TutorialProgress;
 }
 
@@ -95,6 +110,7 @@ export function createInitialState(now: number): GameState {
     ingredientStock: {},
     gearOwned: [],
     quartermaster: false,
+    prestige: { hops: 0, totalHops: 0, runs: 0, runEarned: num(0), legacy: {} },
     tutorial: { completedSteps: [], skipped: false },
   };
 }

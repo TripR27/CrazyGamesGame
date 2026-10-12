@@ -69,6 +69,11 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
   bus.on('boss:resolved', ({ heroId, result }) => {
     if (result === 'won') once(`boss:${heroId}`, `${name('heroes', heroId)} beat the boss`);
   });
+  bus.on('prestige:done', ({ hops }) => {
+    timeline.entries.push({ ms: now(), text: `sold the tavern for ${hops} Golden Hop` });
+    // A new tavern: its firsts count again.
+    seen.clear();
+  });
   bus.on('quartermaster:bought', () => {
     timeline.purchases.push(now());
     once('quartermaster', 'bought the Quartermaster');

@@ -131,6 +131,17 @@ export interface GameEvents {
   'quartermaster:affordable': Record<string, never>;
   'quartermaster:bought': Record<string, never>;
   'hero:auto': { heroId: string; on: boolean };
+  /** The staff's earnings while the player was away were paid out. */
+  'offline:paid': { gold: Num };
+  /**
+   * The tavern can be sold (after not being able to), it was sold for `hops` Golden Hop, and a Legacy bonus was bought.
+   * The Legacy tab came on screen or went off it.
+   */
+  'prestige:available': Record<string, never>;
+  'prestige:done': { hops: number };
+  'legacy:bought': { id: string };
+  'legacy:opened': Record<string, never>;
+  'legacy:closed': Record<string, never>;
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

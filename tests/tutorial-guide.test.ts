@@ -29,6 +29,7 @@ const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   card: null,
   bossHeroId: null,
   autoHeroId: null,
+  affordableLegacyId: null,
   openTab: null,
   ...over,
 });
@@ -120,6 +121,7 @@ const ctx2 = (over: Partial<GuideContext> = {}): GuideContext => ({
   card: null,
   bossHeroId: null,
   autoHeroId: null,
+  affordableLegacyId: null,
   openTab: null,
   ...over,
 });

@@ -168,6 +168,7 @@ Dit is het belangrijkste onderdeel van een idle-game en moet in een spreadsheet 
 - **Wat blijft:** recepten (de ontdekking blijft), receptenboek, cosmetica, Gouden Hop-tree, achievements.
 - Dat laatste is bewust: recepten behouden voorkomt dat prestige "alles weggooien" voelt.
 - Tweede prestige-laag later mogelijk (bijv. "Legendarische Taverne"), maar pas na lancering en data.
+- *Gebouwd in stap 17 (met andere getallen: +10% per Hop, minimaal 4 Hop, een lijst van vier bonussen): zie SPECS.md, hoofdstuk 4, "Prestige".*
 
 ---
 

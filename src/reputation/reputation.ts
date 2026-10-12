@@ -75,7 +75,11 @@ export function watchReputationLevels(store: LevelStore, bus: EventBus<GameEvent
   let level = levelFor(store.getState().reputation);
   return store.subscribe((state) => {
     const now = levelFor(state.reputation);
-    if (now <= level) return;
+    // Selling the tavern starts the reputation over; the levels are announced again on the way up.
+    if (now <= level) {
+      level = now;
+      return;
+    }
     const from = level;
     level = now;
     for (let reached = from + 1; reached <= now; reached++) bus.emit('reputation:levelUp', { level: reached });

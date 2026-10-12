@@ -44,6 +44,8 @@ export interface GuideContext {
   bossHeroId: string | null;
   /** The hero whose Auto switch the lesson points at: the first one not on Auto yet. */
   autoHeroId: string | null;
+  /** The first Legacy bonus the player can pay for with Golden Hop. */
+  affordableLegacyId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -138,6 +140,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-hero-drink': (ctx) => (ctx.heroDrinkIngredient === null ? null : `ingredient:${ctx.heroDrinkIngredient}`),
   'guide-quartermaster-buy': (ctx) => toTab(ctx, 'heroes') ?? 'quartermaster-buy',
   'guide-hero-auto': (ctx) => toTab(ctx, 'heroes') ?? (ctx.autoHeroId === null ? null : `hero-auto:${ctx.autoHeroId}`),
+  'guide-prestige-sell': (ctx) => toTab(ctx, 'legacy') ?? 'prestige-sell',
+  'guide-legacy-buy': (ctx) => toTab(ctx, 'legacy') ?? (ctx.affordableLegacyId === null ? null : `legacy-buy:${ctx.affordableLegacyId}`),
   'guide-card': (ctx) => (ctx.card === null ? null : `card-option:${ctx.card.boldOptionId}`),
   'guide-gear-equip': (ctx) => {
     const wear = ctx.gearToWear;
