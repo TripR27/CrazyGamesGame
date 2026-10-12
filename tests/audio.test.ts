@@ -1,6 +1,7 @@
+import { existsSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { newGame } from './flows/helpers';
-import { effectiveVolume, MUSIC, SOUND_EVENTS, SOUNDS, toggleMute } from '@/audio/audio';
+import { audioUrl, effectiveVolume, MUSIC, SOUND_EVENTS, SOUND_IDS, toggleMute } from '@/audio/audio';
 import { createInitialState } from '@/shared/state';
 
 describe('sound', () => {
@@ -23,19 +24,18 @@ describe('sound', () => {
 
   it('hooks only sounds that exist, and a boss strike sounds like a hit or a miss', () => {
     for (const sound of Object.values(SOUND_EVENTS)) {
-      if (typeof sound === 'string') expect(sound in SOUNDS).toBe(true);
+      if (typeof sound === 'string') expect((SOUND_IDS as readonly string[]).includes(sound)).toBe(true);
     }
     const strike = SOUND_EVENTS['boss:struck'];
     expect(typeof strike === 'function' ? strike({ heroId: 'warrior', hit: true }) : null).toBe('hit');
     expect(typeof strike === 'function' ? strike({ heroId: 'warrior', hit: false }) : null).toBe('miss');
   });
 
-  it('has quiet, short placeholder sounds, and no music until a file is delivered', () => {
-    for (const sound of Object.values(SOUNDS)) {
-      expect(sound.notes.length).toBeGreaterThan(0);
-      expect(sound.gain).toBeLessThanOrEqual(0.3);
-      expect(sound.notes.length * sound.noteMs).toBeLessThanOrEqual(600);
-    }
-    expect(MUSIC.src).toBeNull();
+  it('has a file for every sound and the music, within the size budget, with relative paths', () => {
+    expect(audioUrl('coin')).toBe('/audio/coin.ogg'.replace(/^\//, import.meta.env.BASE_URL));
+    const bytes = (name: string): number => statSync(`public/audio/${name}.ogg`).size;
+    for (const id of [...SOUND_IDS, MUSIC.id]) expect(existsSync(`public/audio/${id}.ogg`), id).toBe(true);
+    expect(SOUND_IDS.reduce((sum, id) => sum + bytes(id), 0)).toBeLessThan(400 * 1024);
+    expect(bytes(MUSIC.id)).toBeLessThan(2 * 1024 * 1024);
   });
 });
