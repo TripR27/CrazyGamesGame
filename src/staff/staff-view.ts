@@ -77,7 +77,7 @@ export function createStaffView(scene: Scene, world: World): StaffView {
     update() {
       brewer.setVisible(hired);
       pot.setVisible(hired);
-      const now = kettle.brewing !== null;
+      const now = kettle.brewing.length > 0;
       if (now === busy) return;
       busy = now;
       brewer.play(now ? ANIM.stir : ANIM.idle);

@@ -1,5 +1,5 @@
 import type { World } from '@/app/world';
-import { clickIngredient } from '@/brewing/brewing';
+import { clickCauldron, clickIngredient } from '@/brewing/brewing';
 import { brewableRecipes, buyIngredientById, firstBuyableIngredient, usesStock } from '@/brewing/ingredients';
 import { waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
@@ -16,8 +16,9 @@ import { buyLegacy, canSell, firstAffordableLegacy, sellTavern } from '@/prestig
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { discoverableNow } from '@/recipes/recipes';
 import { ROOMS, buildRoomById, firstBuildableRoom, roomOffer } from '@/rooms/rooms';
-import { clickCustomer } from '@/serving/serving';
+import { clickCustomer, clickReadyDrink, discardPicked } from '@/serving/serving';
 import { num, type Num } from '@/shared/numbers';
+import { barClogged, coveredDrinks, openOrders, unwantedSlot } from '@/staff/staff';
 import type { GameState } from '@/shared/state';
 
 /**
@@ -105,16 +106,27 @@ export interface Bot {
 
 const fits = (contents: readonly string[], r: RecipeDef): boolean => contents.every((id) => r.ingredients.includes(id));
 
-/** What to brew next: a recipe to discover first (players try new ones soon), then what a waiting customer wants. */
+/**
+ * What to brew next: a recipe to discover first (players try new ones soon), then what a waiting customer wants that is
+ * not on the bar or in the brewer's kettle yet (like a player who watches the brewer).
+ */
 function targetRecipe(world: World, state: GameState): RecipeDef | undefined {
-  const { station, floor } = world;
+  const { station, floor, kettle } = world;
   // Drinks with a dungeon ingredient only while it is in stock.
-  const known = brewableRecipes(state, world.content);
-  const wanted = waitingCustomers(floor)
-    .map((c) => known.find((r) => r.id === c.recipeId))
-    .filter((r): r is RecipeDef => r !== undefined && !station.ready.includes(r.id));
+  const wanted = openOrders(waitingCustomers(floor), coveredDrinks(station, kettle), brewableRecipes(state, world.content));
   const options = [...discoverableNow(world), ...wanted];
   return options.find((r) => fits(station.contents, r));
+}
+
+/** A bar full of drinks nobody wants: pick the oldest such drink up, then tip it in the slop bucket (one click each). */
+function clearBar(world: World): boolean {
+  const { station, selection } = world;
+  const waiting = waitingCustomers(world.floor);
+  if (!barClogged(station, waiting)) return false;
+  const slot = unwantedSlot(station.ready, waiting);
+  if (selection.selected() === station.ready[slot]) discardPicked(world);
+  else clickReadyDrink(world, slot);
+  return true;
 }
 
 /** The drink the bot brews for heroes: a luck drink without dungeon ingredients (more loot), else any such drink. */
@@ -193,7 +205,13 @@ function serveReady(world: World): boolean {
 function brewNext(world: World, state: GameState): boolean {
   const { station } = world;
   if (station.brewing !== null || station.ready.length >= station.capacity) return false;
-  const next = targetRecipe(world, state)?.ingredients.find((id) => !station.contents.includes(id));
+  const target = targetRecipe(world, state);
+  // Nothing fits what is in the cauldron any more (the brewer took that order): empty it, like a player would.
+  if (target === undefined && station.contents.length > 0) {
+    clickCauldron(world);
+    return true;
+  }
+  const next = target?.ingredients.find((id) => !station.contents.includes(id));
   if (next === undefined) return false;
   clickIngredient(world, next);
   return true;
@@ -206,7 +224,7 @@ export function createBot(world: World, options: BotOptions): Bot {
       const state = store.getState();
       // A sensible player sells the tavern as soon as it can be sold.
       if (canSell(state)) return sellTavern(world);
-      if (serveReady(world) || brewNext(world, state) || playHeroes(world, state) || sendReadyHero(world, state)) return;
+      if (serveReady(world) || clearBar(world) || brewNext(world, state) || playHeroes(world, state) || sendReadyHero(world, state)) return;
       if (options.buys) shopOnce(world, state);
     },
   };

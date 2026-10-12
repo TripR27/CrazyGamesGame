@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { runSimulation, type SimOptions } from '@/dev/simulator';
-import { formatIdleShare, formatRun, clockTime } from '@/dev/simulator-report';
+import { formatIdleShare, formatRun, clockTime, walkoutShare } from '@/dev/simulator-report';
+import { num } from '@/shared/numbers';
 
 const short: SimOptions = { minutes: 3, seed: 1, actionMs: 700, bot: { buys: true } };
 
@@ -39,5 +40,13 @@ describe('the balance simulator', () => {
   it('writes times as minutes and seconds', () => {
     expect(clockTime(0)).toBe('0:00');
     expect(clockTime(65_400)).toBe('1:05');
+  });
+
+  it('counts the share of customers who left without a drink in a window', () => {
+    const result = runSimulation(short);
+    result.timeline.earned = [{ ms: 60_000, gold: num(5) }, { ms: 61_000, gold: num(5) }, { ms: 62_000, gold: num(5) }, { ms: 200_000, gold: num(5) }];
+    result.timeline.walkouts = [63_000, 10_000];
+    expect(walkoutShare(result, 1, 2)).toBe(0.25);
+    expect(walkoutShare(result, 10, 11)).toBe(0);
   });
 });
