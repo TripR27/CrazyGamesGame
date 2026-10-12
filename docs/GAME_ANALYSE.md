@@ -51,8 +51,9 @@ Voorlopige keuze: **Brewmaster's Tavern**. Vóór lancering checken of de naam a
 ```
 Klant komt binnen
    -> bestelt drankje (zichtbaar in spraakwolk)
-   -> speler brouwt (klik/hold) of personeel doet het automatisch
-   -> serveren
+   -> speler brouwt in de taverneketel, of de brouwer in zijn eigen ketel (automatisch)
+   -> serveren (zelf, of de serveerster)
+   -> (een drankje dat niemand wil: in de slopemmer)
    -> goud + reputatie
    -> upgrades kopen (ketels, personeel, kamers)
    -> sneller/meer/betere drankjes
@@ -72,7 +73,8 @@ Held inhuren -> uitrusten -> met drankjes op pad sturen
 
 ### Handmatig versus idle
 - **Actief spelen** geeft altijd meer opbrengst dan niets doen (combo's, snel serveren, bonus bij perfecte timing).
-- **Idle** levert ongeveer 30 tot 40% van de actieve snelheid zodra personeel is ingehuurd. Zo blijft een tweede tabblad loont, maar loont actief spelen méér.
+- **Idle** levert een flink deel van de actieve snelheid zodra personeel is ingehuurd: oorspronkelijk 30 tot 40%; na de eerste speelronde wil de eigenaar meer automatisering (2026-10-12), dus het doel wordt (voorstel) **50 tot 70%**, met volledig getraind personeel dat zo snel werkt dat (bijna) niemand zonder drankje vertrekt. Actief spelen levert altijd het meest op (ontdekken, zelf brouwen naast de brouwer, sneller serveren). Zie SPECS.md, hoofdstuk 4, "Gameplay-ronde na de art-pass" (stap 22c).
+- **Nooit vast:** de speler kan altijd zelf brouwen (de brouwer heeft een eigen ketel) en een drankje dat niemand wil weggooien in de slopemmer; het personeel ruimt een volle bar zelf op, zodat idle nooit vastloopt (stap 22b).
 - **Offline-voortgang:** gelimiteerd (bijv. max 2 uur basis, uitbreidbaar via upgrades en rewarded ad voor dubbel).
 
 ---
@@ -110,7 +112,7 @@ Voorbeeld-ladder:
 
 ### 5.4 Upgrades en uitbreidingen
 - **Ketels:** snelheid, capaciteit, automatisering, speciale ketels (vuur, ijs, arcane) voor hogere tiers.
-- **Personeel:** barman, serveerster, brouwer-assistent. Elk met niveaus en eigenschappen. Eventueel namen en kleine persoonlijkheden (charme).
+- **Personeel:** barman, serveerster, brouwer-assistent. Elk met niveaus en eigenschappen. Eventueel namen en kleine persoonlijkheden (charme). De brouwer-assistent werkt aan een **eigen ketel** (de taverneketel blijft van de speler) en brouwt op hogere niveaus meerdere drankjes tegelijk; vanaf het eerste niveau merkbaar snel, zodat de speler eerder tijd heeft voor andere dingen (wens eigenaar, 2026-10-12; stap 22b en 22c).
 - **Kamers** (ontgrendelen via goud + reputatie):
   1. Houten krot (start)
   2. Uitbouw met meer tafels
@@ -183,6 +185,7 @@ Keuzes (zie vragen):
 
 ### UI
 - Minimalistisch, grote knoppen, goed op muis én touch.
+- **De winkel groeit mee:** een aanbod verschijnt pas als het in zicht komt (het niveau is bereikt en de speler had ooit de helft van de prijs), met per groep één vergrendelde teaser en een "New!"-label; wat uitverkocht of op het hoogste niveau is, verdwijnt (wens eigenaar, 2026-10-12; stap 22a). Zo is de winkel nooit overweldigend en blijft er iets te ontdekken.
 - Duidelijke feedback: opspringende "+12 goud", partikels bij ontdekking, scherm-shake bij legendarisch drankje.
 - Alles klikbaar op desktop zonder toetsenbord nodig.
 - Bruikbaar op 16:9 en op mobiel (responsive canvas).
@@ -200,7 +203,7 @@ Keuzes (zie vragen):
 
 - **Platform:** HTML5, draait in een iframe. Moet snel laden. CrazyGames hanteert richtlijnen voor de initiële downloadgrootte (orde van enkele tientallen MB; houd het zo klein mogelijk) en een totaalgrootte-limiet.
 - **CrazyGames SDK integreren:**
-  - **Ads:** midgame-ads op natuurlijke pauzes (bijv. na een prestige of terugkeer van een expeditie) en **rewarded ads** (opt-in: dubbele offline-beloning, tijdelijke boost, extra held-slot-tijd). Nooit een ad zonder dat de speler iets doet of een natuurlijk moment.
+  - **Ads:** midgame-ads op natuurlijke pauzes (bijv. na een prestige of terugkeer van een expeditie) en **rewarded ads** (opt-in: dubbele offline-beloning, tijdelijke boost, extra held-slot-tijd). Nooit een ad zonder dat de speler iets doet of een natuurlijk moment. *Wens eigenaar (2026-10-12):* tussendoor iets meer midgame-ads (niet te veel) en meer rewarded keuzes: een goudbuidel, tijdelijke power-ups en sneller kopen in de winkel, aangeboden door een rondtrekkende marskramer (uitwerking: SPECS hoofdstuk 4, stap 22d).
   - **Gameplay start/stop-signalen:** de SDK wil weten wanneer de speler echt speelt (belangrijk voor ads en statistiek).
   - **Data-module / cloud-save:** opslag gekoppeld aan het CrazyGames-account, met `localStorage` als terugval.
   - **Taalondersteuning** en eventuele gebruikersinfo via de SDK.
