@@ -18,9 +18,9 @@
 
 ---
 
-## 2. Winkel-layout en schermindeling: checklist voor stap 21 en 22d
+## 2. Winkel-layout en schermindeling: checklist voor stap 21 en 22e
 
-**Besluit:** nu niets veranderen; deze lijst is een checklist voor de art-pass (stap 21) en de QA-stap (stap 22d; was 22).
+**Besluit:** nu niets veranderen; deze lijst is een checklist voor de art-pass (stap 21) en de QA-stap (stap 22e; was 22).
 
 **Wat er nu is:** één knop "☰ Menu" rechtsboven in het spel klapt een zijpaneel uit met tabbladen (Shop, Recipes). Spel en paneel passen samen als één kader in het venster; het spel wordt kleiner zodra het paneel opent, zodat je kunt blijven serveren. Zie `ui/side-panels.ts`, `ui/side-layout.ts`, `ui/fit-root.ts` en `ui/shop/`.
 

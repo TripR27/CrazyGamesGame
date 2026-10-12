@@ -203,7 +203,7 @@ Keuzes (zie vragen):
 
 - **Platform:** HTML5, draait in een iframe. Moet snel laden. CrazyGames hanteert richtlijnen voor de initiële downloadgrootte (orde van enkele tientallen MB; houd het zo klein mogelijk) en een totaalgrootte-limiet.
 - **CrazyGames SDK integreren:**
-  - **Ads:** midgame-ads op natuurlijke pauzes (bijv. na een prestige of terugkeer van een expeditie) en **rewarded ads** (opt-in: dubbele offline-beloning, tijdelijke boost, extra held-slot-tijd). Nooit een ad zonder dat de speler iets doet of een natuurlijk moment.
+  - **Ads:** midgame-ads op natuurlijke pauzes (bijv. na een prestige of terugkeer van een expeditie) en **rewarded ads** (opt-in: dubbele offline-beloning, tijdelijke boost, extra held-slot-tijd). Nooit een ad zonder dat de speler iets doet of een natuurlijk moment. *Wens eigenaar (2026-10-12):* tussendoor iets meer midgame-ads (niet te veel) en meer rewarded keuzes: een goudbuidel, tijdelijke power-ups en sneller kopen in de winkel, aangeboden door een rondtrekkende marskramer (uitwerking: SPECS hoofdstuk 4, stap 22d).
   - **Gameplay start/stop-signalen:** de SDK wil weten wanneer de speler echt speelt (belangrijk voor ads en statistiek).
   - **Data-module / cloud-save:** opslag gekoppeld aan het CrazyGames-account, met `localStorage` als terugval.
   - **Taalondersteuning** en eventuele gebruikersinfo via de SDK.

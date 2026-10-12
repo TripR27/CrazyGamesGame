@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. Alles tot en met stap 21e staat op `main` (de eigenaar mergede 21a t/m 21e zelf op 2026-10-12 en vond de art "top"). **Laatst afgerond stap:** 21e (panelen in hout en pixel-iconen). **Volgende stap:** 22a (winkel geleidelijk en uitverkocht weg). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22d. Idle zit nu op gemiddeld 34,7%; het doel gaat in 22c omhoog (zie hoofdstuk 4).
+**Nu bezig:** niets. Alles tot en met stap 21e staat op `main` (de eigenaar mergede 21a t/m 21e zelf op 2026-10-12 en vond de art "top"). **Laatst afgerond stap:** 21e (panelen in hout en pixel-iconen). **Volgende stap:** 22a (winkel geleidelijk en uitverkocht weg). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22e. Daarna wilde de eigenaar meer advertenties en rewarded beloningen: hoofdstuk 4, "Meer advertenties en rewarded beloningen", stap 22d. Idle zit nu op gemiddeld 34,7%; het doel gaat in 22c omhoog (zie hoofdstuk 4).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -58,7 +58,8 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 22a | Winkel geleidelijk en uitverkocht weg | ⬜ | |
 | 22b | Eigen ketel voor de brouwer en drankjes weggooien | ⬜ | |
 | 22c | Sneller personeel (balans) | ⬜ | |
-| 22d | Performance, QA, indienklaar (was 22) | ⬜ | |
+| 22d | Meer advertenties en rewarded beloningen | ⬜ | |
+| 22e | Performance, QA, indienklaar (was 22) | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
 
 ---
@@ -86,7 +87,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
 ## 2. Geverifieerde CrazyGames-eisen
 
-Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw checken vlak voor indienen (stap 22d).
+Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw checken vlak voor indienen (stap 22e).
 
 | Eis | Waarde | Gevolg voor ons |
 |---|---|---|
@@ -109,7 +110,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Gebruiker | `user.getUser()`, `isUserAccountAvailable`, `showAuthPrompt()` | Gebruikersnaam kleine HUD-weergave; geen eigen login |
 | Privacy | melding nodig als we extra persoonsdata verzamelen | We verzamelen niets extra |
 
-**Nog niet gecontroleerd (doen in stap 22d):** exacte thumbnail-formaten, de CrazyGames QA/preview-tool, beoordelingscriteria voor Basic → Full Launch, en of een externe analytics-oplossing is toegestaan (standaard: **geen analytics**).
+**Nog niet gecontroleerd (doen in stap 22e):** exacte thumbnail-formaten, de CrazyGames QA/preview-tool, beoordelingscriteria voor Basic → Full Launch, en of een externe analytics-oplossing is toegestaan (standaard: **geen analytics**).
 
 ---
 
@@ -612,6 +613,27 @@ De eigenaar speelde de game na stap 21 en gaf zes punten. De wens zelf is van de
   - de tempodoelen uit GAME_ANALYSE.md hoofdstuk 6 (eerste personeel, eerste kamer, eerste prestige) blijven gelden.
 - De offline-formules volgen vanzelf (ze rekenen met het tempo van het personeel); de Night Shift-getallen worden nagemeten.
 
+### Meer advertenties en rewarded beloningen (wens eigenaar, 2026-10-12; uitwerking Claude, stap 22d)
+
+De eigenaar wil iets meer advertenties: **tussendoor iets meer (niet te veel)**, en vooral dat spelers **zelf een ad kunnen kijken** voor iets nuttigs: een power-up, meer goud, of iets in de winkel sneller kopen. De wens is van de eigenaar; de uitwerking en de getallen met *(voorstel)* zijn van Claude en worden bij stap 22d aan de eigenaar voorgelegd.
+
+**Nu (stap 20):** een midgame-ad alleen als een held terugkomt (hooguit elke 3 minuten, `ADS.gapMs`), en één rewarded ad: het offline-loon verdubbelen in het welkom-venster. Vóór de gildekamer (niveau 5, ongeveer minuut 13) ziet een speler dus nooit een ad.
+
+**1. Midgame iets vaker, op natuurlijke momenten.**
+- Extra momenten *(voorstel)*: een nieuw reputatieniveau (na de melding), een kamer gebouwd, en het sluiten van het welkom-venster. De held die terugkomt blijft.
+- Grenzen *(voorstel)*: minstens **4 minuten** tussen twee ads (CrazyGames eist minstens 3), geen midgame-ad in de **eerste 5 minuten** van een nieuwe speler, en nooit terwijl een tutorial-les in beeld is, een baasgevecht loopt of een kaartje open staat. Een rewarded ad telt mee voor de wachttijd (zoals nu).
+
+**2. Rewarded ads: de speler kiest zelf** (altijd opt-in, met een duidelijke knop "📺 Watch an ad"; bij `adblock`, `unfilled` of een fout: geen ad, geen beloning, gewoon doorspelen, zoals nu).
+- **Goudbuidel** *(voorstel)*: goud gelijk aan ongeveer **3 minuten** van wat de speler nu verdient (gemeten over de laatste minuten, minimaal een vast bedrag per reputatieniveau, zoals de dagbonus).
+- **Power-ups** *(voorstel, één tegelijk, elk een paar minuten)*: **Happy Hour** (drankjes 2× zo duur, 3 min), **Extra handen** (personeel 2× zo snel, 5 min), **Haast** (ketel 2× zo snel, 3 min). Ze tellen mee in `getMultipliers` als tijdelijke bron, met een balkje en aftelling in de HUD.
+- **Sneller kopen in de winkel** *(voorstel)*: een rij in de winkel die de speler nog niet kan betalen maar waarvan hij al **minstens 70%** heeft, krijgt een knopje 📺: na de ad betaalt de speler alleen wat hij heeft en is het item gekocht (het tekort is gratis). Hooguit één keer per **5 minuten** *(voorstel)*.
+- **Helden** *(voorstel, optioneel)*: een held die rust meteen fit maken, of een lopende tocht meteen laten eindigen.
+- **Bestaand:** het offline-loon verdubbelen blijft.
+- **Hoe de speler het ziet** *(voorstel)*: een rondtrekkende **marskramer** komt af en toe (ongeveer elke 5 minuten, niet tijdens een les) de taverne binnen met één aanbod (goud of een power-up) en gaat na 30 s weer weg; klikken toont het aanbod met de ad-knop. Het winkelknopje 📺 staat gewoon bij de rij. Zo is een rewarded ad nooit opdringerig en altijd een keuze.
+- **Grenzen:** geen pay-to-win en niets wat alleen via ads kan (ontwerppijler 5 in GAME_ANALYSE); de beloning is altijd iets wat de speler ook door spelen haalt, alleen sneller.
+- **Tutorial-hint:** de eerste keer dat de marskramer komt, wijst de ketel hem aan ("A peddler! Watch an ad for a treat, or ignore him.").
+- **Simulator:** de bot kijkt geen ads, dus de balans blijft gelijk; de beloningen schalen met het eigen tempo van de speler.
+
 ### Rendering
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
@@ -852,14 +874,16 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 21e: Panelen en iconen (wens eigenaar, 2026-10-12).** De DOM-panelen in dezelfde stijl: winkel, receptenboek, helden, Legacy, Trophies, instellingen, menu, HUD en de vensters (welkom, dagbonus, niveau, baas, kaartjes), met de pixelkaders (`--frame-…`) en het lettertype. De emoji in de speltekst worden eigen pixel-iconen (in de DOM als plaatje in de tekst, in de bestelwolkjes in het canvas naast de tekst getekend).
 - (oorspronkelijk) **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
-*Na de art-pass gaf de eigenaar op 2026-10-12 gameplay-feedback; Claude verdeelde die over 22a, 22b en 22c. De oude stap 22 heet nu 22d. Uitwerking: hoofdstuk 4, "Gameplay-ronde na de art-pass".*
+*Na de art-pass gaf de eigenaar op 2026-10-12 gameplay-feedback; Claude verdeelde die over 22a, 22b en 22c. De wens voor meer advertenties werd 22d. De oude stap 22 heet nu 22e. Uitwerking: hoofdstuk 4, "Gameplay-ronde na de art-pass".*
 - [ ] **Stap 22a: Winkel geleidelijk en uitverkocht weg.** De winkel (en het gear-deel van het tabblad Heroes en de Legacy) toont niet meer alles in één keer: een aanbod verschijnt pas als het in zicht komt, met per groep hoogstens één vergrendelde teaser; wat nieuw is krijgt een "New!"-label en een bolletje op de Menu-knop; wat uitverkocht of op het hoogste niveau is, verdwijnt. Tutorial-hint: de upgrade-les blijft werken (die start pas als iets betaalbaar is, en dan is het al zichtbaar); de eerste keer dat er iets nieuws is, wijst de ketel het bolletje aan.
   *Klaar wanneer:* bij de start staat alleen wat in zicht is in de winkel, items verschijnen één voor één tijdens het spelen, niets dat vol of gekocht is staat er nog, verkopen van de taverne zet het terug, tests voor de zichtbaarheidsregels slagen, de simulator blijft byte-identiek (de winkel is weergave; de bot koopt via de logica).
 - [ ] **Stap 22b: Eigen ketel voor de brouwer en drankjes weggooien.** De brouwer-assistent krijgt een eigen ketel (met een pixel-art figuur ernaast), zodat de taverneketel alleen van de speler is en de speler altijd zelf kan brouwen en ontdekken. Een slopemmer naast de bar: een opgepakt drankje erin gooien maakt plek op de bar. Het personeel gooit een drankje dat niemand wil zelf weg als de bar vol staat, zodat idle nooit vastloopt. Tutorial-hint: een les "weggooien" de eerste keer dat de bar vol staat met een drankje dat niemand wil.
   *Klaar wanneer:* de brouwer brouwt in zijn eigen ketel terwijl de speler in de taverneketel brouwt, de speler kan de bar altijd leegmaken, een volle bar met ongewilde drankjes lost zichzelf op met personeel, de oude "stale cauldron"-regel is weg, tests slagen; de simulator verandert (bewust) en wordt opnieuw gemeten (seeds 1 t/m 9).
 - [ ] **Stap 22c: Sneller personeel (balans).** Het personeel werkt vanaf het eerste niveau merkbaar sneller, zodat de speler eerder andere dingen kan doen, en volledig getraind zo snel dat (bijna) niemand meer zonder drankje vertrekt. De brouwerketel brouwt op hogere niveaus meerdere drankjes tegelijk. Afstellen met de simulator op de nieuwe doelen uit hoofdstuk 4. Geen nieuwe speler-functie, dus geen nieuwe hint (de personeelsles blijft kloppen).
   *Klaar wanneer:* de nieuwe doelen (hoofdstuk 4) zijn gehaald over seeds 1 t/m 9, de prijzen van het personeel zijn erop aangepast, tests slagen, SPECS en GAME_ANALYSE hebben de gemeten getallen.
-- [ ] **Stap 22d: Performance, QA en indienklaar maken (was stap 22).** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
+- [ ] **Stap 22d: Meer advertenties en rewarded beloningen.** Midgame-ads op een paar extra natuurlijke momenten (met eigen grenzen bovenop de 3-minutenregel), en rewarded ads die de speler zelf kiest: een goudbuidel, tijdelijke power-ups en sneller kopen in de winkel (het tekort gratis bij 70%), aangeboden door een rondtrekkende marskramer en een knopje bij de winkelrij. Tutorial-hint: de eerste marskramer. Zie hoofdstuk 4, "Meer advertenties en rewarded beloningen"; de *(voorstel)*-punten eerst aan de eigenaar voorleggen. Mag in twee delen als hij te groot blijkt (midgame en goud/power-ups, daarna de winkel en de helden).
+  *Klaar wanneer:* een midgame-ad komt ook vóór de gildekamer op een natuurlijk moment en nooit vaker dan de grens, elke rewarded beloning werkt alleen na een volledig bekeken ad (met de mock te proberen), adblock of een fout breekt niets, de simulator blijft byte-identiek (de bot kijkt geen ads), tests slagen.
+- [ ] **Stap 22e: Performance, QA en indienklaar maken (was stap 22).** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
 
 ---
@@ -896,6 +920,7 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
 
 ### Chore: gameplay-feedback na de art-pass (2026-10-12, `chore-gameplay-feedback`)
+- **Aanvulling (zelfde dag):** de eigenaar wil ook meer advertenties: tussendoor iets meer (niet te veel) en vooral rewarded ads voor power-ups, meer goud of sneller kopen in de winkel. Uitgewerkt in hoofdstuk 4 ("Meer advertenties en rewarded beloningen") als nieuwe stap 22d; Performance en QA heet nu 22e. Open voor de eigenaar: de extra momenten en grenzen voor midgame-ads, welke beloningen (goud, Happy Hour, Extra handen, Haast, de winkel bij 70%, helden) en de marskramer.
 - **Gedaan:** de wensen van de eigenaar na het spelen uitgewerkt in hoofdstuk 4 ("Gameplay-ronde na de art-pass") en GAME_ANALYSE.md (hoofdstuk 4 en 5.4): de winkel toont geleidelijk, uitverkocht verdwijnt, de brouwer krijgt een eigen ketel zodat de speler altijd zelf kan brouwen, drankjes weggooien in een slopemmer (en het personeel ruimt een volle bar op), sneller personeel vanaf het begin en volledig getraind snel genoeg dat (bijna) niemand zonder drankje vertrekt. Hoofdstuk 12: nieuwe stappen 22a, 22b en 22c; de oude stap 22 heet nu 22d. Geen code veranderd.
 - **Waarom (keuzes):** een eigen ketel voor de brouwer (zoals de heldenketel) lost het blokkeren in één keer op en maakt de regel over de half gevulde ketel overbodig. Een slopemmer is één duidelijke handeling die bij het oppakken van drankjes past; het personeel ruimt zelf op zodat idle nooit vastloopt. Het idle-doel gaat omhoog omdat de eigenaar meer automatisering wil; actief spelen moet wel het meest blijven opleveren.
 - **Afwijkingen van het plan:** het idle-doel van 30 tot 40% uit GAME_ANALYSE.md hoofdstuk 4 wordt (voorstel) 50 tot 70%; de eigenaar bevestigt dat bij stap 22c.
