@@ -7,6 +7,7 @@ import { customers, type CustomerDef } from '@/customers/customer-data';
 import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFloor, waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
+import { startShopSight } from '@/economy/shop-sight';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { startAuto, watchQuartermaster } from '@/heroes/auto';
 import { watchGearShop } from '@/heroes/gear';
@@ -184,6 +185,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);
   startBrewSystem(station, bus);
   watchShop(store, bus, c);
+  // The shop lists an offer once it comes in sight (its level, and half its price), and says what is new.
+  startShopSight({ store, content: c });
   startStaffWork({ store, bus, floor, station, rng, catalog });
   // Heroes come back when their trip's (absolute) end time has passed, also right after loading.
   startHeroes({ store, bus, rng, clock, content: c });

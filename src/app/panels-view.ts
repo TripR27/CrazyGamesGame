@@ -42,6 +42,9 @@ export interface SidePanels {
   add(tab: SideTab): void;
   /** Unfold the panel on this tab (for example when the scene asks for the shop). */
   show(tabId: string): void;
+  isOpen(): boolean;
+  /** A dot on a tab (something new there); the Menu button has one while any tab has. */
+  setBadge(tabId: string, on: boolean): void;
 }
 
 interface Entry {
@@ -100,5 +103,10 @@ export function createSidePanels(root: HTMLElement, layout: SideLayout, targets:
       render();
     },
     show: (tabId) => apply(state.select(tabId)),
+    isOpen: () => state.isOpen(),
+    setBadge(tabId, on) {
+      entries.find((e) => e.tab.id === tabId)?.button.classList.toggle('side-tab--new', on);
+      toggle.classList.toggle('side-button--new', entries.some((e) => e.button.classList.contains('side-tab--new')));
+    },
   };
 }

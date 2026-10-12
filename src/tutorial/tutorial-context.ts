@@ -1,8 +1,9 @@
 import type { BrewStation } from '@/brewing/brewing';
-import { brewableRecipes, firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
+import { brewableRecipes, firstBuyableIngredient, ingredients as allIngredients, type IngredientCatalog } from '@/brewing/ingredients';
 import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { dailyOffer } from '@/daily/daily';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
+import { allSightEntries, isFresh } from '@/economy/shop-sight';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { quartermasterOffer } from '@/heroes/auto';
@@ -58,6 +59,8 @@ type Check = (world: World) => boolean;
 
 const hasDecor = (state: GameState): boolean => state.decorBought.length > 0;
 
+const sightEntries = allSightEntries({ upgrades, ingredients: allIngredients, recipes, rooms: ROOMS, decor: DECORATIONS });
+
 const canBuy = (group: (defs: readonly UpgradeDef[]) => UpgradeDef[]): Check => ({ store }) =>
   firstAffordable(store.getState(), group(upgrades)) !== undefined;
 
@@ -108,6 +111,8 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'daily:available': ({ store, clock }) => store.getState().daily.streak > 0 || dailyOffer(store.getState(), clock.now()).available,
   'daily:claimed': ({ store }) => store.getState().daily.streak > 0,
   'shop:opened': ({ openTab }) => openTab() === 'shop',
+  // Something new in the shop waits while the panel is folded away (the Menu button has its dot).
+  'shop:new': ({ store, openTab }) => openTab() === null && sightEntries.some((entry) => isFresh(entry, store.getState())),
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
 

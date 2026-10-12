@@ -7,7 +7,7 @@ import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
 import { computeFit, type Fit, type SideLayout } from '@/app/ui-model';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
-import { mountShop } from '@/economy/shop-view';
+import { mountNewBadges, mountShop } from '@/economy/shop-view';
 import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
@@ -84,6 +84,7 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountHeroes({ root, panels }, world);
   mountLegacy({ root, panels }, world);
   mountTrophies({ root, panels }, world);
+  mountNewBadges(panels, world);
   world.bus.on('shop:requested', () => panels.show('shop'));
   world.bus.on('heroes:requested', () => panels.show('heroes'));
   mountTripCards(root, world);

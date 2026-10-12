@@ -51,3 +51,10 @@
 .shop-buy:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
 
 .shop-kind { margin: 6px 0 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+
+/* Offers come in sight one by one (economy/shop-sight.ts): a "New!" label on what just did, and a grey teaser per group. */
+.shop-row-title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; min-width: 0; }
+.shop-row-new { color: #f5c542; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.shop-row-new[hidden], .shop-row-text[hidden], .shop-buy[hidden] { display: none; }
+.shop-row--teaser { opacity: 0.55; filter: grayscale(0.8); }
+.shop-row--teaser .shop-row-head { font-weight: normal; }

@@ -93,6 +93,10 @@ export interface GameState {
   roomsBuilt: string[];
   /** Decoration ids bought for downstairs (one-time purchases). */
   decorBought: string[];
+  /** Shop offers that came in sight in this tavern (`<kind>:<id>`); they stay listed until sold out. The Legacy ones stay when the tavern is sold. */
+  shopSeen: string[];
+  /** Of those, the ones that came in sight since their tab was last open ("New!"). */
+  shopNew: string[];
   upgrades: UpgradeLevels;
   /** The heroes the player has, by hero class id (an open map: the guild hall brings the first). */
   heroes: Record<string, HeroState>;
@@ -122,6 +126,8 @@ export function createInitialState(now: number): GameState {
     ingredientsBought: [],
     roomsBuilt: [],
     decorBought: [],
+    shopSeen: [],
+    shopNew: [],
     upgrades: {},
     heroes: {},
     ingredientStock: {},

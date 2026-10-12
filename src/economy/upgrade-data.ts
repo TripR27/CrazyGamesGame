@@ -29,6 +29,8 @@ export interface UpgradeDef {
   maxLevel?: number;
   /** For sale only once the player owns a level of one of these (Night Shift after the first staff member). */
   unlockedBy?: readonly UpgradeId[];
+  /** Listed from the start, before it comes in sight (economy/shop-sight.ts), so the shop is never empty. */
+  shownFromStart?: boolean;
 }
 
 /**
@@ -60,6 +62,7 @@ export const tier01Upgrades: readonly UpgradeDef[] = [
     growth: 1.15,
     effect: { stat: 'brewSpeed', mode: 'multiply', perLevel: 0.1 },
     maxLevel: 15,
+    shownFromStart: true,
   },
   {
     id: 'better_prices',

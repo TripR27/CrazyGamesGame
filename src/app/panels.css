@@ -88,3 +88,18 @@
 /* Buttons keep dark letters on their gold, green, wood or stone; no light shadow on them. */
 .side-panel button { text-shadow: none; }
 .side-panel select { text-shadow: none; }
+
+/* A dot on a tab and on the Menu button while something new is in the shop (economy/shop-view.ts). */
+/* The Menu button is already positioned (absolute), so its dot needs nothing more. */
+.side-tab--new { position: relative; overflow: visible; }
+.side-tab--new::after, .side-button--new::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 8px;
+  height: 8px;
+  background: #e8402a;
+  box-shadow: 0 0 0 2px #2a1608;
+  image-rendering: pixelated;
+}

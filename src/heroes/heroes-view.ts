@@ -1,5 +1,6 @@
 import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
+import { clearNew, gearSightEntries } from '@/economy/shop-sight';
 import { createUpgradeRow } from '@/economy/shop-view';
 import { buyQuartermaster, setHeroAuto } from '@/heroes/auto';
 import { GEAR, GEAR_SLOTS, type GearSlot, buyGearById, equipGear } from '@/heroes/gear';
@@ -229,6 +230,7 @@ export function mountHeroes({ root, panels }: { root: HTMLElement; panels: SideP
     },
     onClose: () => {
       window.clearInterval(timer);
+      clearNew(world, gearSightEntries(), 'heroes');
       world.bus.emit('heroes:closed', {});
     },
   });
