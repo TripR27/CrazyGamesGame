@@ -25,9 +25,10 @@ const { state, status } = manager.load();
 const store = createStore(state);
 const bus = createEventBus<GameEvents>();
 const world = createWorld({ store, bus, rng: systemRng, clock });
-// Gameplay stops while the tab is hidden or an ad plays; during an ad the game is paused (its time is skipped).
+// Gameplay stops while the tab is hidden or an ad is on its way; during an ad the game is paused (its time is skipped).
+// Without ads in this session (an ad blocker, a Basic Launch) the rewarded offers go away instead of doing nothing.
 const gameplay = createGameplay(platform, ['loading']);
-const ads = createAds(platform, clock, (paused) => gameplay.pause('ad', paused));
+const ads = createAds(platform, clock, (paused) => gameplay.pause('ad', paused), () => world.rewards.disable());
 startPlatform(world, platform, ads);
 document.addEventListener('visibilitychange', () => gameplay.pause('hidden', document.hidden));
 // Time the tab was throttled or the computer slept is counted with the offline formulas, not simulated.
@@ -38,7 +39,7 @@ const ticker = createTicker({
 });
 // The time since the last save (the game was closed) goes through the same formulas.
 if (status === 'loaded') world.offline.handleAway(clock.now() - state.meta.lastSeenAt);
-startLoopDriver({ advance: () => (ads.playing() ? ticker.skip() : ticker.advance()), skip: () => ticker.skip() });
+startLoopDriver({ advance: () => (ads.busy() ? ticker.skip() : ticker.advance()), skip: () => ticker.skip() });
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, platform.environment, store.getState());
 const layout = createSideLayout();

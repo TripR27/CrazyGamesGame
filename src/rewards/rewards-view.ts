@@ -76,23 +76,35 @@ function buildCard() {
   const badge = createEl('div', 'rewards-badge');
   card.append(title, line, watch, skip);
   box.append(card, badge);
-  return { box, card, line, watch, skip, badge };
+  return { box, card, title, line, watch, skip, badge };
 }
 
+const ADS_OFF_MS = 8000;
+
 /**
- * The peddler's offer as a small card under the HUD while he is in the tavern ("📺 Watch an ad" or "No thanks"), and a
- * badge with the power-up that runs and its time left. No ad (adblock, none to show) means no reward and no harm.
+ * The peddler's offer as a small card under the HUD while he is in the tavern ("📺 Watch an ad" or "No thanks", alike in
+ * size and colour as CrazyGames asks), and a badge with the power-up that runs and its time left. The same card says
+ * when an ad did not come ("No ad right now") or when ads are off for the session, so no ad button ever does nothing.
  */
 export function mountRewards(root: HTMLElement, world: World, ads: Pick<Ads, 'rewarded'>): () => void {
   const { store, clock, bus, rewards, targets } = world;
   const ui = buildCard();
   root.append(ui.box);
-  let thanksUntil = 0;
+  let noticeUntil = 0;
+  const notice = (title: string, text: string, ms: number): void => {
+    noticeUntil = clock.now() + ms;
+    ui.card.hidden = false;
+    ui.title.textContent = title;
+    ui.line.textContent = text;
+    ui.watch.hidden = true;
+    ui.skip.hidden = true;
+  };
   const render = (): void => {
     const visit = rewards.peddler();
     const now = clock.now();
-    if (now >= thanksUntil) {
+    if (now >= noticeUntil) {
       ui.card.hidden = visit === null;
+      ui.title.textContent = t('rewards.title');
       ui.watch.hidden = false;
       ui.skip.hidden = false;
       if (visit !== null) ui.line.textContent = offerText(world, visit.offer);
@@ -108,28 +120,24 @@ export function mountRewards(root: HTMLElement, world: World, ads: Pick<Ads, 're
         ui.watch.disabled = false;
         rewards.accept();
       },
-      () => {
+      (unavailable) => {
         ui.watch.disabled = false;
-        ui.line.textContent = t('rewards.no_ad');
-        thanksUntil = clock.now() + THANKS_MS;
+        if (!unavailable) bus.emit('ad:none', {});
       },
     );
   });
   ui.skip.addEventListener('click', () => rewards.dismiss());
-  const stopGranted = bus.on('reward:granted', ({ offer, gold }) => {
-    thanksUntil = clock.now() + THANKS_MS;
-    ui.card.hidden = false;
-    ui.line.textContent = thanksText(offer, formatNumber(gold));
-    ui.watch.hidden = true;
-    ui.skip.hidden = true;
-  });
-  const stopTarget = targets.register('peddler-watch', () => (ui.card.hidden || ui.watch.hidden ? null : domBounds(ui.watch, root)));
+  const stops = [
+    bus.on('reward:granted', ({ offer, gold }) => notice(t('rewards.title'), thanksText(offer, formatNumber(gold)), THANKS_MS)),
+    bus.on('ad:none', () => notice(t('rewards.title'), t('rewards.no_ad'), THANKS_MS)),
+    bus.on('rewards:off', () => notice(t('rewards.ads_off_title'), t('rewards.ads_off'), ADS_OFF_MS)),
+    targets.register('peddler-watch', () => (ui.card.hidden || ui.watch.hidden ? null : domBounds(ui.watch, root))),
+  ];
   const timer = window.setInterval(render, REFRESH_MS);
   render();
   return () => {
     window.clearInterval(timer);
-    stopGranted();
-    stopTarget();
+    stops.forEach((stop) => stop());
     ui.box.remove();
   };
 }

@@ -16,6 +16,7 @@ interface CrazySdk {
   };
   ad: {
     requestAd(type: AdType, callbacks: { adStarted?: () => void; adFinished?: () => void; adError?: (error: { code: string }) => void }): void;
+    hasAdblock(): Promise<boolean>;
   };
   data: StorageAdapter & { clear(): void };
   user: { isUserAccountAvailable: boolean; getUser(): Promise<{ username: string } | null> };
@@ -25,6 +26,8 @@ const sdk = (): CrazySdk | undefined => (window as unknown as { CrazyGames?: { S
 
 /** The save key the game used before the data module existed (copied over once for a returning player). */
 const LEGACY_KEYS = ['bt_save'];
+/** Ad errors that last the whole session (docs.crazygames.com/sdk/video-ads, checked 2026-10-12). */
+const UNAVAILABLE_CODES = ['adblock', 'adsDisabledBasicLaunch'];
 
 /** On CrazyGames the data module keeps the save (and syncs it with the account); a save in localStorage moves over once. */
 function dataStorage(s: CrazySdk): StorageAdapter {
@@ -62,13 +65,15 @@ export async function createCrazyGamesPlatform(): Promise<Platform | null> {
         s.ad.requestAd(type, {
           adStarted: onStart,
           adFinished: () => resolve('finished'),
-          // Unfilled, adblock, cooldown, Basic Launch: just carry on (a rewarded ad then gives nothing).
+          // Unfilled, cooldown, an error: just carry on (a rewarded ad then gives nothing). An ad blocker or a Basic
+          // Launch means no ads for the rest of the session, so the game hides its rewarded offers.
           adError: (error) => {
             debug('ad not shown', error.code);
-            resolve('failed');
+            resolve(UNAVAILABLE_CODES.includes(error.code) ? 'unavailable' : 'failed');
           },
         });
       }),
+    hasAdblock: () => s.ad.hasAdblock(),
     muted: () => s.game.settings.muteAudio,
     username: async () => (s.user.isUserAccountAvailable ? ((await s.user.getUser())?.username ?? null) : null),
   };

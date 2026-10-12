@@ -163,7 +163,7 @@ interface ShopListHosts {
   root: HTMLElement;
   panel: HTMLElement;
   world: World;
-  ads: Pick<Ads, 'rewarded'>;
+  ads: Pick<Ads, 'rewarded' | 'available'>;
 }
 
 /**
@@ -185,7 +185,10 @@ function mountRows({ list, root, panel, world, ads }: ShopListHosts, entries: re
     // After a rewarded ad the missing gold is added, then the normal purchase runs.
     const withAd = (): void => {
       const cost = kind.cost(world, entry.id, amount());
-      if (cost !== undefined) ads.rewarded(() => (topUpForShop(world, cost), kind.buy(world, entry.id, amount())));
+      if (cost === undefined) return;
+      // No ad this time: the card under the HUD says so (no ads at all: the button goes and the card says why).
+      const none = (unavailable: boolean): void => void (unavailable || world.bus.emit('ad:none', {}));
+      ads.rewarded(() => (topUpForShop(world, cost), kind.buy(world, entry.id, amount())), none);
     };
     const row = createUpgradeRow(() => kind.buy(world, entry.id, amount()), withAd);
     list.append(row.el);
@@ -210,7 +213,7 @@ export interface ShopHosts {
   /** The scaled overlay box, to measure tutorial targets against. */
   root: HTMLElement;
   panels: SidePanels;
-  ads: Pick<Ads, 'rewarded'>;
+  ads: Pick<Ads, 'rewarded' | 'available'>;
 }
 
 /**
@@ -238,7 +241,7 @@ export function mountShop({ root, panels, ads }: ShopHosts, world: World): () =>
       row.el.hidden = view === null;
       if (view === null) continue;
       const cost = status === 'shown' ? kind.cost(world, entry.id, amount) : undefined;
-      row.update({ ...view, adBuy: cost !== undefined && shopAdOffered(cost, state.currencies.gold, world.clock.now(), state.rewards.shopAdAt) });
+      row.update({ ...view, adBuy: cost !== undefined && ads.available() && shopAdOffered(cost, state.currencies.gold, world.clock.now(), state.rewards.shopAdAt) });
     }
     for (const [group, heading] of headings) heading.hidden = rows.every(({ entry, row }) => entry.group !== group || row.el.hidden);
   }

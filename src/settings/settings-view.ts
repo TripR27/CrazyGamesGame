@@ -37,6 +37,7 @@ function buildWindow() {
   const message = createEl('p', 'settings-message');
   const reset = createEl('button', 'settings-action settings-danger', t('settings.reset'));
   const user = createEl('p', 'settings-note settings-user');
+  const ads = createEl('p', 'settings-note');
   card.append(
     close,
     createEl('h2', 'settings-title', t('settings.title')),
@@ -49,10 +50,11 @@ function buildWindow() {
     message,
     row(t('settings.reset_label'), reset),
     user,
+    ads,
   );
   overlay.append(card);
   overlay.hidden = true;
-  return { overlay, close, volume, language, tutorial, exportButton, code, importButton, message, reset, user };
+  return { overlay, close, volume, language, tutorial, exportButton, code, importButton, message, reset, user, ads };
 }
 
 /**
@@ -75,6 +77,8 @@ export function mountSettings(root: HTMLElement, world: World, { saves, username
     ui.message.textContent = '';
     ui.reset.textContent = t('settings.reset');
     ui.user.textContent = '';
+    // CrazyGames: a feature that is off because of an ad blocker gets a notice (not a popup) saying why.
+    ui.ads.textContent = world.rewards.enabled() ? '' : t('settings.ads_off');
     void username().then((name) => void (ui.user.textContent = name === null ? '' : t('settings.signed_in', { name })));
     ui.overlay.hidden = false;
     bus.emit('settings:opened', {});

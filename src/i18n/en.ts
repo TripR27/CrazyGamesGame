@@ -231,6 +231,8 @@ export const welcome: Messages = {
   'welcome.heroes': 'Your heroes on Auto made {trips} trips and brought home {loot}.',
   'welcome.double': '📺 Double it (watch an ad)',
   'welcome.doubled': 'Doubled!',
+  'welcome.no_ad': 'No ad right now. Try again?',
+  'welcome.ads_off': 'Ads are blocked or off here',
   'welcome.collect': 'Great!',
   'time.hours': '{n}h',
   'time.minutes': '{n}m',

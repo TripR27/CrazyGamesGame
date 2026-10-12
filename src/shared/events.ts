@@ -170,8 +170,10 @@ export interface GameEvents {
   'peddler:left': Record<string, never>;
   /** A rewarded ad paid out: a bag of gold (`gold`) or a power-up (`offer`, gold 0). */
   'reward:granted': { offer: string; gold: Num };
-  /** The welcome-back window was closed (a natural moment for a midgame ad). */
-  'welcome:closed': Record<string, never>;
+  /** A rewarded ad the player asked for did not come this time (unfilled, cooldown, an error): no reward. From the views. */
+  'ad:none': Record<string, never>;
+  /** No ads in this session (an ad blocker, a Basic Launch): the rewarded offers go away. */
+  'rewards:off': Record<string, never>;
   /** Something new came in sight in the shop while the side panel is folded away (the Menu button gets a dot). */
   'shop:new': Record<string, never>;
   /** The shop panel was opened or closed (the tutorial follows this). */

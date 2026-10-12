@@ -17,7 +17,8 @@
 .welcome-button { margin-top: 16px; padding: 2px 26px; border: 6px solid transparent; border-image: var(--frame-green) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #1f3a10; font-family: var(--font); font-size: 20px; font-weight: bold; cursor: pointer; }
 .welcome-button:hover { filter: brightness(1.08); }
 /* The rewarded-ad offer above the close button. */
-.welcome-double { display: block; margin: 16px auto 0; border-image: var(--frame-gold) 3 fill / 6px; color: #3b2410; font-size: 17px; }
+/* The rewarded-ad offer above the close button; CrazyGames: both look the same (size, font and colour). */
+.welcome-double { display: block; margin: 16px auto 0; }
 .welcome-double[hidden] { display: none; }
 .welcome-double:disabled { opacity: 0.7; cursor: default; }
 .welcome-card button { text-shadow: none; }

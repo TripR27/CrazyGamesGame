@@ -53,3 +53,7 @@
 .hud-item--reputation {
   align-items: center;
 }
+
+/* Over everything while an ad is on its way or playing, so the player cannot act (CrazyGames rule). */
+.ad-shield { position: absolute; inset: 0; pointer-events: auto; z-index: 10; }
+.ad-shield[hidden] { display: none; }
