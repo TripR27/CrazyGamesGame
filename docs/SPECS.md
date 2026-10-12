@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`) en 18b (`step-18b-daily-bonus`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18b (Dagelijkse bonus). **Volgende stap:** 18c (Instellingen). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`) en 18c (`step-18c-settings`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18c (Instellingen). **Volgende stap:** 19 (Audio). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -46,7 +46,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 17 | Prestige | ✅ | `step-17-prestige` |
 | 18a | Statistieken en achievements | ✅ | `step-18a-achievements` |
 | 18b | Dagelijkse bonus | ✅ | `step-18b-daily-bonus` |
-| 18c | Instellingen | ⬜ | |
+| 18c | Instellingen | ✅ | `step-18c-settings` |
 | 19 | Audio | ⬜ | |
 | 20 | CrazyGames SDK | ⬜ | |
 | 21 | Art-pass in pixel art + animaties | ⬜ | |
@@ -201,7 +201,7 @@ Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root
 - Autosave elke 30 s, bij belangrijke acties (aankoop, prestige: via de event `saveRequested`) en bij `visibilitychange`/`beforeunload`. Elke autosave zet eerst `meta.lastSeenAt` (nodig voor offline-voortgang in stap 10).
 - Een onleesbare of te nieuwe save wordt **niet** weggegooid: de ruwe tekst gaat naar `bt_save_backup` en er start een nieuw spel (`status: recovered`).
 - Bij laden wordt de save samengevoegd met de defaults (`reconcile`): ontbrekende velden krijgen een default, onbekende velden vallen weg, velden van het verkeerde type vallen terug op de default. **Regel:** een leeg object in de default-state (`{}`) betekent een open lijst (bijv. upgrade-niveaus per id); de opgeslagen inhoud blijft dan volledig behouden.
-- Handmatige **export/import** als tekst (base64) in Settings, als vangnet.
+- Handmatige **export/import** als tekst (base64) in Settings, als vangnet (gebouwd in stap 18c).
 - Grootte bewaken: < 200 KB (SDK-limiet is 1 MB).
 - Alle opslag via een `StorageAdapter`-interface: `localStorageAdapter` (dev/Basic Launch) en `crazyGamesAdapter` (SDK data-module).
 
@@ -223,7 +223,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, trophy (sinds stap 18a), dagbonus (sinds stap 18b), plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, trophy (sinds stap 18a), dagbonus (sinds stap 18b), plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, instellingen (sinds stap 18c), VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -526,6 +526,20 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 - **Tutorial-hint** (les `daily`, na de trophy-les): wijst de knop Claim aan (doel `daily-claim`), daarna een afsluitzin over de reeks. Wie al eens claimde, krijgt alleen de afsluitzin.
 - **Simulator:** de bot claimt niets (een run duurt minder dan een dag), dus de balans blijft gelijk.
 
+### Instellingen (gebouwd in stap 18c)
+
+- **Code:** `settings/settings.ts` (de acties `setVolume`, `setLanguage`, `resetGame` en `importGame`; de talen in `LANGUAGES`) en `settings/settings-view.ts` met `settings.css` (de knop en het venster). `main.ts` geeft de export- en importfunctie van de save-manager door aan `mountUi` (`SaveCodes`).
+- **Knop:** een ronde ⚙ links van de Menu-knop, rechtsboven in het spel. Hij opent een venster over het spel (✕ sluit het).
+- **In het venster:**
+  - **Volume:** een schuifje (0-100%), bewaard als `settings.volume` (0 tot 1). Geluid komt in stap 19; tot dan staat er "Sound arrives in a later update."
+  - **Taal:** een keuzelijst met alleen English (`settings.language`); een nieuwe taal is een id in `LANGUAGES` plus een i18n-bestand.
+  - **Tutorial:** "Play it again" begint de tutorial opnieuw (dezelfde functie als het debug-commando) en sluit het venster.
+  - **Save:** Export zet de save als tekst (base64, de bestaande `exportString`) in een tekstvak met de melding om die te bewaren; Import leest geplakte tekst (`importString`, met migratie en `reconcile`) en vervangt het spel, of zegt "That is not a save this game can read."
+  - **Opnieuw beginnen:** "Delete everything" vraagt met een tweede klik ("Sure? Click again to delete", 4 s) en begint een nieuw spel; alleen de instellingen blijven.
+- **Na import of opnieuw beginnen** (event `game:replaced`) wordt de save meteen geschreven en laadt de pagina opnieuw, zodat alles wat niet opgeslagen is ook bij het nieuwe spel hoort.
+- **State:** `settings: { volume, language }` (blijft bij het verkopen van de taverne en bij opnieuw beginnen).
+- **Tutorial-hint** (les `settings`, na de personeelsles, zonder startvoorwaarde): de ketel wijst 5,5 s de ⚙ aan: "Volume, language and a copy of your save are behind the cog."
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -590,7 +604,7 @@ LegacyDef  { id, baseCost, maxLevel, effects: UpgradeEffect[], startGold? }   //
 // State: prestige: { hops, totalHops, runs, runEarned (Decimal), legacy: { [id]: niveau } } (17)
 AchievementDef { id, stat, goal, bonus: UpgradeEffect, big? }   // stap 18a; tekst achievements.<id>.name
 // State: stats: { served, vipServed, goldEarned (Decimal), trips, bossWins }, achievements: id[] (18a; blijven bij verkopen)
-// State: daily: { lastDay (lokaal dagnummer), streak } (18b; blijft bij verkopen)
+// State: daily: { lastDay (lokaal dagnummer), streak } (18b; blijft bij verkopen), settings: { volume (0-1), language } (18c)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -755,7 +769,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 *Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (vier losse onderdelen; de eigenaar zei door te gaan zonder te stoppen). Hieronder eerst de oorspronkelijke omschrijving.*
 - [x] **Stap 18a: Statistieken en achievements.** Een `stats`-sectie, 14 achievements met kleine permanente bonussen, een melding en een tabblad Trophies. Tutorial-hint: eerste trophy. Zie hoofdstuk 4, "Statistieken en achievements".
 - [x] **Stap 18b: Dagelijkse bonus.** Een beloning bij de eerste keer spelen op een dag, met een reeks dagen. Tutorial-hint: eerste dagbonus.
-- [ ] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
+- [x] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
 - (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
@@ -796,6 +810,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 18c: Instellingen (2026-10-12, `step-18c-settings`)
+- **Gedaan:** (code in `src/settings/` (nieuw: `settings.ts`, `settings-view.ts`, `settings.css`), `src/app/viewport-view.ts` en `src/main.ts` (de save-functies doorgeven), `src/prestige/prestige.ts` (instellingen blijven bij verkopen), `src/shared/` (state, events), `src/tutorial/` en `src/i18n/en-achievements.ts`; tests in `tests/settings.test.ts` (nieuw) en de personeelsles-test)
+  - **Knop, venster, volume, taal, tutorial, export/import, opnieuw beginnen en tutorial-hint:** zie hoofdstuk 4, "Instellingen".
+  - 3 tests erbij (528 totaal): volume en taal binnen de grenzen, opnieuw beginnen (alleen de instellingen blijven, `game:replaced`), en een geëxporteerde save importeren (en onzin weigeren).
+- **Waarom (keuzes):** een eigen knop met een venster in plaats van een zesde tabblad, omdat de tabbladen bij het spel horen en de instellingen er even tussendoor zijn. Opnieuw beginnen en importeren laden de pagina opnieuw, net als verkopen (stap 17): zo hoeft geen enkele view zichzelf terug te zetten. Het volume wordt nu al bewaard, zodat stap 19 alleen het geluid hoeft aan te sluiten. De hint staat na de personeelsles, zodat het begin van het spel niet vol meta-lessen staat (trophy en dagbonus staan al vroeg).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. `npm run simulate -- 60 1` byte-identiek met 18b. In de browser (testsave met 1.234 goud op Cozy Inn en alle lessen af; daarna de oorspronkelijke save teruggezet): de ⚙ staat links van Menu en opent het venster; Export gaf een tekst van 1.708 tekens met de melding; "Delete everything" twee keer gaf een nieuw spel (0 goud, Shabby Shack, tutorial vanaf het begin); Import met "not a save" gaf de foutmelding, met de geëxporteerde tekst kwamen 1.234 goud, Cozy Inn en de tutorial terug; "Play it again" zette de tutorial terug op nul en sloot het venster. Geen consolefouten.
+- **Afwijkingen van het plan:** het volume doet nog niets tot stap 19 (Audio). Verder geen.
+- **Nu te proberen:** klik op de ⚙, exporteer je save en bewaar de tekst; speel de tutorial nog eens.
+- **Nog te doen / volgende stap:** stap 19, Audio. Mergen van 16b t/m 18c naar `main` wacht op de eigenaar.
 
 ### Stap 18b: Dagelijkse bonus (2026-10-12, `step-18b-daily-bonus`)
 - **Gedaan:** (code in `src/daily/` (nieuw: `daily.ts`, `daily-view.ts`, `daily.css`), `src/prestige/prestige.ts` (de reeks blijft bij verkopen), `src/app/` (world, viewport-view), `src/shared/` (state, events), `src/tutorial/` en `src/i18n/en-achievements.ts`; tests in `tests/daily.test.ts` (nieuw) en aanpassingen in de flow-tests)
