@@ -2,7 +2,8 @@ import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
 import { createUpgradeRow } from '@/economy/shop-view';
 import { GEAR, GEAR_SLOTS, type GearSlot, buyGearById, equipGear } from '@/heroes/gear';
-import { HERO_CLASSES, hireHeroById, sendHero } from '@/heroes/heroes';
+import { sendHero } from '@/heroes/expedition';
+import { HERO_CLASSES, hireHeroById } from '@/heroes/heroes';
 import { type HeroCardView, type SlotView, toHeroesView } from '@/heroes/heroes-model';
 import { t } from '@/i18n/translator';
 import './heroes.css';
@@ -65,11 +66,12 @@ function createCard(onAction: (card: Card) => void, onGear: (slot: GearSlot, gea
   const xp = createEl('span', 'hero-xp');
   bar.append(fill, xp);
   const status = createEl('p', 'hero-status');
+  const bag = createEl('p', 'hero-bag');
   const button = createEl('button', 'hero-button');
   const gear = createEl('div', 'hero-gear');
   const slots = Object.fromEntries(GEAR_SLOTS.map((slot) => [slot, createSlotRow((id) => onGear(slot, id))])) as Record<GearSlot, SlotRow>;
   gear.append(...GEAR_SLOTS.map((slot) => slots[slot].el));
-  el.append(head, tagline, bar, status, gear, button);
+  el.append(head, tagline, bar, status, bag, gear, button);
   const card: Card = {
     el,
     button,
@@ -86,6 +88,7 @@ function createCard(onAction: (card: Card) => void, onGear: (slot: GearSlot, gea
       bar.hidden = view.level === '';
       fill.style.width = `${Math.round(view.xpFraction * 100)}%`;
       setText(status, view.status);
+      setText(bag, view.bag);
       setText(button, view.action.label);
       button.disabled = !view.action.enabled;
     },
@@ -99,11 +102,12 @@ function buildPanel() {
   const noGuild = createEl('p', 'heroes-no-guild');
   const stockTitle = createEl('h3', 'heroes-stock-title');
   const stock = createEl('ul', 'heroes-stock');
+  const help = createEl('p', 'heroes-help');
   const list = createEl('div', 'heroes-list');
   const shopTitle = createEl('h3', 'heroes-stock-title', t('gear.shop_title'));
   const shop = createEl('div', 'heroes-gear-shop');
-  panel.append(createEl('h2', 'heroes-title', t('heroes.title')), noGuild, stockTitle, stock, list, shopTitle, shop);
-  return { panel, noGuild, stockTitle, stock, list, shopTitle, shop };
+  panel.append(createEl('h2', 'heroes-title', t('heroes.title')), noGuild, stockTitle, stock, help, list, shopTitle, shop);
+  return { panel, noGuild, stockTitle, stock, help, list, shopTitle, shop };
 }
 
 type Panel = ReturnType<typeof buildPanel>;
@@ -148,7 +152,7 @@ function mountCards({ root, panel, list }: Panel & { root: HTMLElement }, world:
 export function mountHeroes({ root, panels }: { root: HTMLElement; panels: SidePanels }, world: World): () => void {
   const { store, clock } = world;
   const parts = buildPanel();
-  const { panel, noGuild, stockTitle, stock, shopTitle } = parts;
+  const { panel, noGuild, stockTitle, stock, help, shopTitle } = parts;
   const cards = mountCards({ ...parts, root }, world);
   const gearRows = mountGearShop({ ...parts, root }, world);
 
@@ -160,6 +164,8 @@ export function mountHeroes({ root, panels }: { root: HTMLElement; panels: SideP
     setText(noGuild, view.noGuild ?? '');
     setText(stockTitle, view.stockTitle);
     stockTitle.hidden = view.stock.length === 0;
+    setText(help, view.drinksHelp);
+    help.hidden = view.drinksHelp === '';
     if (view.stock.join('|') !== shownStock) {
       shownStock = view.stock.join('|');
       stock.replaceChildren(...view.stock.map((line) => createEl('li', 'heroes-stock-item', line)));

@@ -95,6 +95,8 @@ export const feedback: Messages = {
   'feedback.busy.2': 'One brew at a time. The cauldron is shy.',
   'feedback.empty.1': 'Out of that one. Send a hero to the swamp for more.',
   'feedback.empty.2': 'The jar is empty. Heroes fill it, not wishes.',
+  'feedback.nohero.1': 'No hero at home with room in the bag. Heroes first, potions second.',
+  'feedback.nohero.2': 'The hero cauldron is for heroes, and none of them can take a drink right now.',
 };
 
 export const hud: Messages = {
@@ -155,6 +157,14 @@ export const recipes: Messages = {
   'recipes.witchs_kiss.hint': 'Moss a witch grew on purpose, and a grape that only ripens at night. Charming, in a creepy way.',
   'recipes.mossy_grog.name': 'Mossy Grog',
   'recipes.mossy_grog.hint': 'Witchy greens and troll effort. Tastes like a swamp that lifts weights.',
+  'recipes.frog_fizz.name': 'Frog Fizz',
+  'recipes.frog_fizz.hint': 'Slime and a pearl from the bog. It hops. Drinkers hop out too, quickly.',
+  'recipes.hex_glow.name': 'Hex Glow',
+  'recipes.hex_glow.hint': 'Witchy moss and something that glows. Lucky drinkers see coins everywhere.',
+  'recipes.pearly_moon.name': 'Pearly Moon',
+  'recipes.pearly_moon.hint': 'A bog pearl drowned in night-time fruit. Absurdly charming.',
+  'recipes.witch_honey.name': 'Witch Honey',
+  'recipes.witch_honey.hint': 'Sweet, sticky and slightly cursed. Makes arms bigger and opinions louder.',
   'recipes.bog_royale.name': 'Bog Royale',
   'recipes.bog_royale.hint': 'Everything the swamp has to offer, plus fire. Drinkers leave before they finish their sentence.',
 };

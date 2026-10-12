@@ -103,7 +103,7 @@ describe('ordering a drink with a dungeon ingredient', () => {
 describe('dungeon drinks elsewhere', () => {
   it('are the pricey new recipes of Famous Tavern and Legendary Hall', () => {
     const dungeon = recipes.filter((r) => usesStock(r, ingredients));
-    expect(dungeon.map((r) => r.id)).toEqual(['pearl_mead', 'witchs_kiss', 'mossy_grog', 'bog_royale']);
+    expect(dungeon.map((r) => r.id)).toEqual(['pearl_mead', 'witchs_kiss', 'mossy_grog', 'frog_fizz', 'hex_glow', 'pearly_moon', 'witch_honey', 'bog_royale']);
     const shopTop = Math.max(...recipes.filter((r) => !usesStock(r, ingredients)).map((r) => r.basePrice));
     expect(Math.min(...dungeon.map((r) => r.basePrice))).toBeGreaterThan(shopTop);
   });
@@ -119,7 +119,7 @@ describe('dungeon drinks elsewhere', () => {
   it('do not count while the player is away', () => {
     const state = late({ bog_pearl: 50, witch_moss: 50 });
     state.upgrades = { brewer_assistant: 7, waitress: 7, night_shift: 1 };
-    const withDungeon = late({ bog_pearl: 50, witch_moss: 50 }, ['pearl_mead', 'witchs_kiss', 'mossy_grog', 'bog_royale']);
+    const withDungeon = late({ bog_pearl: 50, witch_moss: 50 }, recipes.filter((r) => usesStock(r, ingredients)).map((r) => r.id));
     withDungeon.upgrades = state.upgrades;
     const gold = (s: GameState): number => {
       const g = newGame(s);

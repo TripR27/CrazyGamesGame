@@ -87,6 +87,46 @@ export const gearLesson: readonly TutorialStep[] = [
 ];
 
 /**
+ * The hint for the first hero drink: click the hero cauldron in the guild hall, then brew; the drink goes into a bag.
+ * Handing a hero a drink from the bar earlier must not skip lessons, so the second step only counts while on screen.
+ */
+export const heroBrewLesson: readonly TutorialStep[] = [
+  {
+    id: 'hero_brew_aim',
+    lesson: 'hero_brew',
+    startWhen: { kind: 'event', event: 'hero:recruited' },
+    target: 'hero-cauldron',
+    completeOn: { kind: 'event', event: 'guild:aimed' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'hero_brew_fill',
+    lesson: 'hero_brew',
+    target: 'guide-hero-drink',
+    completeOn: { kind: 'event', event: 'hero:drink' },
+    onlyWhenShown: true,
+  },
+];
+
+/** The hint for the first choice card: points at the bold option while the card is open, then a closing line. */
+export const cardLesson: readonly TutorialStep[] = [
+  {
+    id: 'card_pick',
+    lesson: 'card',
+    startWhen: { kind: 'event', event: 'card:opened' },
+    target: 'guide-card',
+    completeOn: { kind: 'event', event: 'card:resolved' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'card_done',
+    lesson: 'card',
+    target: 'hud-gold',
+    completeOn: { kind: 'after', ms: 6000 },
+  },
+];
+
+/**
  * The hint for the first loot: when a hero first brings dungeon ingredients home, points at one on the shelf. It
  * explains the count (every drink with it uses one) and sends the player to the recipe book for what to make.
  */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { recipes } from './fixtures';
-import { guideRecipe, likedCustomer, nextIngredient, readyCustomerId, type GuideContext, resolveTarget, arrowPlacement, spotlightBounds, SPOT_PADDING } from '@/tutorial/tutorial-guide';
+import { guideRecipe, likedCustomer, nextIngredient, readyCustomerId, type GuideContext, resolveTarget, arrowPlacement, spotlightBounds, SPOT_PADDING, speech } from '@/tutorial/tutorial-guide';
+import { recipes as realRecipes } from '@/recipes/recipe-data';
 
 /** A waiting customer; `liked` when they like the effect of what they ordered. */
 const w = (id: number, recipeId: string, liked = false, vip = false) => ({ id, recipeId, liked, vip });
@@ -24,9 +25,13 @@ const ctx = (over: Partial<GuideContext> = {}): GuideContext => ({
   lootId: null,
   affordableGearId: null,
   gearToWear: null,
+  heroDrinkIngredient: null,
+  card: null,
   openTab: null,
   ...over,
 });
+
+const ctxFor = (): GuideContext => ctx();
 
 describe('guide recipe', () => {
   it('teaches what the oldest waiting customer ordered', () => {
@@ -109,6 +114,8 @@ const ctx2 = (over: Partial<GuideContext> = {}): GuideContext => ({
   lootId: null,
   affordableGearId: null,
   gearToWear: null,
+  heroDrinkIngredient: null,
+  card: null,
   openTab: null,
   ...over,
 });
@@ -138,6 +145,16 @@ describe('the way to a tab of the side panel', () => {
     expect(resolveTarget('guide-upgrade', ctx2({ openTab: 'shop' }))).toBe('upgrade:price_up');
     expect(resolveTarget('guide-seats', ctx2({ openTab: 'shop' }))).toBeNull();
     expect(resolveTarget('guide-shop', ctx2({ openTab: 'shop' }))).toBeNull();
+  });
+});
+
+describe('what the mascot says', () => {
+  it('names the ingredient for the customer in the basics, even while a hero drink could be brewed', () => {
+    const ctx = { knownRecipes: realRecipes.filter((r) => r.id === 'glowcap_stout'), heroDrinkIngredient: 'swamp_slime', customers: [{ id: 1, recipeId: 'glowcap_stout', liked: false, vip: false }] };
+    const line = speech('basics_add', { ...ctxFor(), ...ctx });
+    expect(line).toContain('Glowcap Mushroom');
+    expect(line).not.toContain('Swamp Slime');
+    expect(speech('hero_brew_fill', { ...ctxFor(), ...ctx })).toContain('Swamp Slime');
   });
 });
 

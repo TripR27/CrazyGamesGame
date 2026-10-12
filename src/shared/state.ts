@@ -19,10 +19,24 @@ export interface TutorialProgress {
 /** Purchased level per upgrade id. An open map: new upgrades need no change here. */
 export type UpgradeLevels = Record<string, number>;
 
-/** A hero on a trip: which dungeon, and the wall-clock time they are back (absolute, so it also runs while the game is closed). */
+/** A choice card on a trip: when it opens (wall clock) and the option taken (null while open or still to come). */
+export interface TripCard {
+  id: string;
+  at: number;
+  choice: string | null;
+  /** The drink handed over by an option that needs one. */
+  drink?: string;
+}
+
+/**
+ * A hero on a trip: which dungeon, the wall-clock time they are back (absolute, so it also runs while the game is closed),
+ * the drinks they took along (recipe ids) and the choice cards on the way.
+ */
 export interface Expedition {
   dungeon: string;
   endsAt: number;
+  drinks: string[];
+  cards: TripCard[];
 }
 
 /**
@@ -35,6 +49,8 @@ export interface HeroState {
   injuredUntil: number;
   expedition: Expedition | null;
   gear: Record<string, string>;
+  /** Drinks (recipe ids) waiting to go along on the next trip. */
+  bag: string[];
 }
 
 export interface GameState {

@@ -26,8 +26,11 @@ export function createEventBus<E extends object>(): EventBus<E> {
 
 /** Why a customer left the tavern. */
 export type LeaveReason = 'impatient' | 'served';
-/** Small cauldron messages: it is busy, the bar is full, the combination failed, or a dungeon ingredient ran out. */
-export type BrewNotice = 'busy' | 'full' | 'fizzle' | 'empty';
+/**
+ * Small cauldron messages: it is busy, the bar is full, the combination failed, a dungeon ingredient ran out, or no hero
+ * at home can take a drink from the hero cauldron.
+ */
+export type BrewNotice = 'busy' | 'full' | 'fizzle' | 'empty' | 'nohero';
 export type RefuseReason = 'nothing-ready' | 'wrong-drink';
 
 /** All events on the game bus. Add new events here as features arrive. */
@@ -108,6 +111,13 @@ export interface GameEvents {
   'gear:equipped': { heroId: string; id: string };
   /** An injured hero drank a drink from the bar and is fit again. */
   'hero:healed': { id: string; recipeId: string };
+  /** A drink went into a hero's bag (from the hero cauldron or the bar). */
+  'hero:drink': { id: string; recipeId: string };
+  /** The hero cauldron in the guild hall was clicked: the next ingredients go into it (`aimed`) or back to the tavern. */
+  'guild:aimed': { aimed: boolean };
+  /** A choice card opened on a hero's trip, and it was decided (`picked`: by the player, otherwise the safe default). */
+  'card:opened': { heroId: string; cardId: string };
+  'card:resolved': { heroId: string; cardId: string; optionId: string; picked: boolean };
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

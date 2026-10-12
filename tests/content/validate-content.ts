@@ -4,7 +4,9 @@ import { customers } from '@/customers/customer-data';
 import { DECORATIONS, type DecorDef } from '@/decor/decor';
 import { upgrades, UPGRADE_STATS, type UpgradeEffect } from '@/economy/upgrade-data';
 import { GEAR, GEAR_SLOTS, type GearDef } from '@/heroes/gear';
-import { DUNGEONS, type DungeonDef, HERO_CLASSES, type HeroClassDef } from '@/heroes/heroes';
+import { DUNGEONS, type DungeonDef } from '@/heroes/expedition';
+import { CARDS, type CardDef } from '@/heroes/trip-cards';
+import { HERO_CLASSES, type HeroClassDef } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
 import { GUILD_ROOM_ID, ROOMS, type RoomDef } from '@/rooms/rooms';
@@ -153,6 +155,22 @@ export const gearTable = (items: readonly GearDef[]): ContentTable =>
     ],
   });
 
+/** A card has a title, a line and a text per option, and exactly one safe default that needs no drink. */
+export const cardTable = (items: readonly CardDef[]): ContentTable =>
+  defineTable({
+    domain: 'cards',
+    items,
+    textFields: (card) => ['title', 'text', ...card.options.map((o) => o.id)],
+    check: (card) => {
+      const defaults = card.options.filter((o) => o.default === true);
+      return [
+        ...(defaults.length === 1 ? [] : ['needs exactly one default option']),
+        ...(defaults.some((o) => o.needsDrink === true) ? ['the default option must not need a drink'] : []),
+        ...(card.options.length >= 2 ? [] : ['needs at least two options']),
+      ];
+    },
+  });
+
 /** Every content list the validator checks. A new domain is one more line here. */
 export const CONTENT_TABLES: readonly ContentTable[] = [
   ingredientTable(ingredients),
@@ -167,4 +185,5 @@ export const CONTENT_TABLES: readonly ContentTable[] = [
   heroClassTable(HERO_CLASSES),
   dungeonTable(DUNGEONS),
   gearTable(GEAR),
+  cardTable(CARDS),
 ];

@@ -1,11 +1,13 @@
 import type { BrewStation } from '@/brewing/brewing';
-import { firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
+import { brewableRecipes, firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
 import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
 import { firstBuyableGear, gearToWear } from '@/heroes/gear';
+import type { GuildCauldron } from '@/heroes/hero-brewing';
 import { anyHeroTravelled, readyHeroId } from '@/heroes/heroes';
+import { boldOption, currentCard } from '@/heroes/trip-cards';
 import { recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
 import { ROOMS, firstBuildableRoom } from '@/rooms/rooms';
@@ -36,12 +38,14 @@ export function followOpenTab(bus: EventBus<GameEvents>): () => string | null {
   return () => open;
 }
 
-/** What the checks may look at: the saved state, the customers, and the side-panel tab on screen. */
+/** What the checks may look at: the saved state, the customers, the side-panel tab on screen and the hero cauldron. */
 interface World {
   store: Store<GameState>;
   floor: CustomerFloor;
   openTab(): string | null;
   ingredients: IngredientCatalog;
+  guild: GuildCauldron;
+  clock: Clock;
 }
 
 type Check = (world: World) => boolean;
@@ -79,6 +83,10 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'gear:affordable': ({ store }) => store.getState().gearOwned.length > 0 || firstBuyableGear(store.getState()) !== undefined,
   'gear:bought': ({ store }) => store.getState().gearOwned.length > 0,
   'gear:equipped': ({ store }) => Object.values(store.getState().heroes).some((h) => Object.keys(h.gear).length > 0),
+  'guild:aimed': ({ guild }) => guild.aimed,
+  // A hero with a drink in the bag or on a trip with one: the first hero drink is done already.
+  'hero:drink': ({ store }) => Object.values(store.getState().heroes).some((h) => h.bag.length > 0 || (h.expedition?.drinks.length ?? 0) > 0),
+  'card:opened': ({ store, clock }) => currentCard(store.getState(), clock.now()) !== undefined,
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -94,11 +102,27 @@ export interface TutorialDeps {
   station: BrewStation;
   clock: Clock;
   ingredients: IngredientCatalog;
+  guild: GuildCauldron;
 }
 
 export interface TutorialServices {
   machine: TutorialMachine;
   getGuideContext(): GuideContext;
+}
+
+/** The next ingredient for a drink in the hero cauldron: a known drink that fits what is in it, one without dungeon stock first. */
+function heroDrinkIngredient(state: GameState, catalog: IngredientCatalog, guild: GuildCauldron): string | null {
+  const contents = guild.station.contents;
+  const fits = brewableRecipes(state, catalog).filter((r) => contents.every((id) => r.ingredients.includes(id)));
+  const recipe = fits.find((r) => r.ingredients.every((id) => catalog.ingredients.find((i) => i.id === id)?.source === 'shop')) ?? fits[0];
+  return recipe?.ingredients.find((id) => !contents.includes(id)) ?? null;
+}
+
+/** The open choice card and its bold option, for the card lesson. */
+function openCardHint(state: GameState, now: number): { heroId: string; boldOptionId: string } | null {
+  const open = currentCard(state, now);
+  const bold = open === undefined ? undefined : boldOption(open.trip, open.card);
+  return open === undefined || bold === undefined ? null : { heroId: open.heroId, boldOptionId: bold.id };
 }
 
 /** Every game event any step listens to, once each. */
@@ -108,7 +132,7 @@ function listenedEvents(): TutorialEvent[] {
 }
 
 /** Connects the tutorial machine to the saved state and the game bus. */
-export function createTutorial({ store, bus, floor, station, clock, ingredients }: TutorialDeps): TutorialServices {
+export function createTutorial({ store, bus, floor, station, clock, ingredients, guild }: TutorialDeps): TutorialServices {
   const progress: ProgressStore = {
     get: () => store.getState().tutorial,
     update: (mutator) => store.update((state) => mutator(state.tutorial)),
@@ -117,7 +141,7 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients 
   const affordableSeats = (): string | null => firstAffordable(store.getState(), seatsOnly(upgrades))?.id ?? null;
   const affordableStaff = (): string | null => firstAffordable(store.getState(), staffOnly(upgrades))?.id ?? null;
   const openTab = followOpenTab(bus);
-  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds({ store, floor, openTab, ingredients }));
+  const machine = createTutorialMachine(TUTORIAL_STEPS, progress, createAlreadyHolds({ store, floor, openTab, ingredients, guild, clock }));
 
   for (const event of listenedEvents()) bus.on(event, () => machine.onEvent(event));
   bus.on('tick', ({ deltaMs }) => machine.onTick(deltaMs));
@@ -143,6 +167,8 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients 
     lootId: Object.keys(store.getState().ingredientStock)[0] ?? null,
     affordableGearId: firstBuyableGear(store.getState())?.id ?? null,
     gearToWear: gearToWear(store.getState()),
+    heroDrinkIngredient: heroDrinkIngredient(store.getState(), ingredients, guild),
+    card: openCardHint(store.getState(), clock.now()),
     openTab: openTab(),
   });
   return { machine, getGuideContext };
