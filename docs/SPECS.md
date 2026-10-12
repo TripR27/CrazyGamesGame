@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`) en 18c (`step-18c-settings`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18c (Instellingen). **Volgende stap:** 19 (Audio). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`) en 19 (`step-19-audio`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 19 (Audio). **Volgende stap:** 20 (CrazyGames SDK). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -47,7 +47,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 18a | Statistieken en achievements | ✅ | `step-18a-achievements` |
 | 18b | Dagelijkse bonus | ✅ | `step-18b-daily-bonus` |
 | 18c | Instellingen | ✅ | `step-18c-settings` |
-| 19 | Audio | ⬜ | |
+| 19 | Audio | ✅ | `step-19-audio` |
 | 20 | CrazyGames SDK | ⬜ | |
 | 21 | Art-pass in pixel art + animaties | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
@@ -117,7 +117,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Waarschuwing `max-lines: 300`, fout `max-lines-per-function: 60` |
 | UI | **Vanilla TypeScript + DOM** voor HUD/menu's, Phaser-canvas voor de taverne | n.v.t. | Geen React/Vue (bundlegrootte, eenvoud) |
 | Opslag | via `Storage`-adapter: SDK data-module of `localStorage` | n.v.t. | |
-| Audio | Phaser's eigen audio | n.v.t. | Geen Howler nodig |
+| Audio | Phaser's eigen audio | n.v.t. | Geen Howler nodig. *Sinds stap 19:* placeholder-geluidjes met de Web Audio API (geen bestanden); echte bestanden en muziek via de browser (zie hoofdstuk 4, Audio) |
 
 Alles buiten deze lijst: eerst vragen.
 
@@ -135,7 +135,7 @@ main.ts
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
-                  reputation/ offline/ tutorial/ heroes/ prestige/ achievements/   (later audio/ platform/)
+                  reputation/ offline/ tutorial/ heroes/ prestige/ achievements/ daily/ settings/ audio/   (later platform/)
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
@@ -161,7 +161,7 @@ crazyGamesGame/
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
     customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/  prestige/
-    achievements/
+    achievements/  daily/  settings/  audio/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
@@ -540,6 +540,16 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 - **State:** `settings: { volume, language }` (blijft bij het verkopen van de taverne en bij opnieuw beginnen).
 - **Tutorial-hint** (les `settings`, na de personeelsles, zonder startvoorwaarde): de ketel wijst 5,5 s de ⚙ aan: "Volume, language and a copy of your save are behind the cog."
 
+### Audio (gebouwd in stap 19)
+
+- **Code:** `audio/audio.ts` (de geluiden als data, welke game-event welk geluid speelt, de muziekhaak, `effectiveVolume` en `toggleMute`) en `audio/audio-view.ts` met `audio.css` (geluid maken en de luidsprekerknop).
+- **Placeholder-geluiden** (`SOUNDS`): tien korte geluidjes die de browser zelf maakt met de Web Audio API (een paar noten van één golfvorm): `plop` (ingrediënt), `bubble` (drankje klaar), `coin` (klant betaalt, ook via personeel; dagbonus), `buzz` (weigering), `buy` (aankoop van upgrade, ingrediënt, kamer, decoratie of uitrusting), `eureka` (ontdekking), `fanfare` (nieuw niveau, achievement, taverne verkocht), `horn` (held terug), `hit` en `miss` (slag tegen de baas). Hetzelfde geluid start nooit twee keer binnen 60 ms. Echte bestanden vervangen ze later met dezelfde ids (stap 21, of eerder als de eigenaar ze aanlevert).
+- **Haken** (`SOUND_EVENTS`): per game-event een geluid, of een functie die er een kiest (de baas: raak of mis). Een nieuw geluid is één regel.
+- **Muziek:** `MUSIC.src` is leeg tot de eigenaar een bestand levert (in `public/audio/`); dan speelt het als loop op de helft van het volume.
+- **Volume en dempen:** het volume uit de instellingen (stap 18c) en een **luidsprekerknop** 🔊/🔇 links van de ⚙ (`settings.muted`). `effectiveVolume` neemt ook "gedempt door het platform" mee: `muteAudio` van de CrazyGames-SDK gaat voor (aansluiten in stap 20).
+- **Browsers:** er wordt pas geluid gemaakt na de eerste klik van de speler (AudioContext pas dan).
+- **Tutorial-hint:** de instellingenhint (stap 18c) noemt nu ook de luidspreker: "Psst. The speaker turns the sound off. Volume, language and a copy of your save are behind the cog."
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -604,7 +614,7 @@ LegacyDef  { id, baseCost, maxLevel, effects: UpgradeEffect[], startGold? }   //
 // State: prestige: { hops, totalHops, runs, runEarned (Decimal), legacy: { [id]: niveau } } (17)
 AchievementDef { id, stat, goal, bonus: UpgradeEffect, big? }   // stap 18a; tekst achievements.<id>.name
 // State: stats: { served, vipServed, goldEarned (Decimal), trips, bossWins }, achievements: id[] (18a; blijven bij verkopen)
-// State: daily: { lastDay (lokaal dagnummer), streak } (18b; blijft bij verkopen), settings: { volume (0-1), language } (18c)
+// State: daily: { lastDay (lokaal dagnummer), streak } (18b; blijft bij verkopen), settings: { volume (0-1), muted, language } (18c, muted 19)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -771,7 +781,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 18b: Dagelijkse bonus.** Een beloning bij de eerste keer spelen op een dag, met een reeks dagen. Tutorial-hint: eerste dagbonus.
 - [x] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
 - (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
-- [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
+- [x] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 - [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
@@ -810,6 +820,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 19: Audio (2026-10-12, `step-19-audio`)
+- **Gedaan:** (code in `src/audio/` (nieuw: `audio.ts`, `audio-view.ts`, `audio.css`), `src/app/viewport-view.ts`, `src/shared/state.ts` (`settings.muted`) en `src/i18n/en-achievements.ts`; tests in `tests/audio.test.ts` (nieuw))
+  - **Geluiden, haken, muziek, volume, dempen en de hint:** zie hoofdstuk 4, "Audio".
+  - 4 tests erbij (532 totaal): het volume (gedempt hier of door het platform), de luidsprekerknop, haken naar bestaande geluiden (en raak of mis bij de baas), en korte, zachte geluidjes zonder muziek tot er een bestand is.
+- **Waarom (keuzes):** er zijn nog geen geluidsbestanden, en Claude kan geen audio opnemen; geluidjes die de browser zelf maakt zijn klein (0 bytes aan bestanden) en laten nu al horen waar geluid komt. Phaser's audio speelt alleen bestanden, dus de placeholders gebruiken de Web Audio API rechtstreeks (in de view); met echte bestanden kan het via Phaser of de browser. De eigenaar kreeg een prompt om de geluiden in een andere chat met meerdere agents te laten maken (zelfde ids, OGG, groottegrenzen).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. `npm run simulate -- 60 1` byte-identiek (audio doet niets in de simulator). In de browser (testsave; daarna de oorspronkelijke save teruggezet; geluid kan Claude niet horen, dus geteld via de oscillators): na het klikken van ingrediënten werden geluiden gemaakt; de luidspreker ging naar 🔇 en `muted` werd bewaard; gedempt kwam er bij een klik en 6 s spelen geen enkel geluid meer bij. Geen consolefouten.
+- **Afwijkingen van het plan:** placeholder-geluiden via de Web Audio API in plaats van bestanden via Phaser (zie boven). De SDK-demping wordt in stap 20 aangesloten.
+- **Nu te proberen:** speel met geluid aan; zet het af met de luidspreker en stel het volume in bij de ⚙.
+- **Nog te doen / volgende stap:** stap 20, CrazyGames SDK. De echte geluiden en muziek (de eigenaar laat ze maken) koppelen zodra de bestanden er zijn. Mergen van 16b t/m 19 naar `main` wacht op de eigenaar.
 
 ### Stap 18c: Instellingen (2026-10-12, `step-18c-settings`)
 - **Gedaan:** (code in `src/settings/` (nieuw: `settings.ts`, `settings-view.ts`, `settings.css`), `src/app/viewport-view.ts` en `src/main.ts` (de save-functies doorgeven), `src/prestige/prestige.ts` (instellingen blijven bij verkopen), `src/shared/` (state, events), `src/tutorial/` en `src/i18n/en-achievements.ts`; tests in `tests/settings.test.ts` (nieuw) en de personeelsles-test)
