@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. Alles tot en met stap 22e staat op `main` (gemerged op 2026-10-12 op verzoek van de eigenaar). Stap 22f (leesbaarheid) is klaar op `step-22f-readability` en wacht op het akkoord van de eigenaar om te mergen. **Laatst afgerond stap:** 22f. **Volgende stap:** 23 (indienen en na-lancering). De zip voor CrazyGames maak je met `npm run build` en daarna `npm run zip` (`release/brewmasters-tavern.zip`). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22e. Daarna wilde de eigenaar meer advertenties en rewarded beloningen: hoofdstuk 4, "Meer advertenties en rewarded beloningen", stap 22d. Idle zit sinds 22c op gemiddeld 75% van actief spelen (doel 60-80%), en met volledig getraind personeel vertrekt niemand meer zonder drankje (zie hoofdstuk 4).
+**Nu bezig:** niets. Alles tot en met stap 22e staat op `main` (gemerged op 2026-10-12 op verzoek van de eigenaar). Stap 22f (leesbaarheid, `step-22f-readability`) en stap 23 (indienpakket, `step-23-submission`, gemaakt vanaf 22f, dus een merge van 23 neemt 22f mee) zijn klaar en wachten op het akkoord van de eigenaar om te mergen. **Laatst afgerond stap:** 23 (het deel dat Claude kan doen). **Volgende stap:** de eigenaar dient in volgens [SUBMISSION.md](SUBMISSION.md) (account, zip, covers, trailer, QA-tool); daarna kiest de eigenaar uit de voorstellen 24a t/m 24d (hoofdstuk 12). De zip voor CrazyGames maak je met `npm run build` en daarna `npm run zip` (`release/brewmasters-tavern.zip`). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22e. Daarna wilde de eigenaar meer advertenties en rewarded beloningen: hoofdstuk 4, "Meer advertenties en rewarded beloningen", stap 22d. Idle zit sinds 22c op gemiddeld 75% van actief spelen (doel 60-80%), en met volledig getraind personeel vertrekt niemand meer zonder drankje (zie hoofdstuk 4).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -61,7 +61,11 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 22d | Meer advertenties en rewarded beloningen | ✅ | `step-22d-ads` |
 | 22e | Performance, QA, indienklaar (was 22) | ✅ | `step-22e-submission-ready` |
 | 22f | Leesbaarheid op het kleinste CrazyGames-venster | ✅ | `step-22f-readability` |
-| 23 | Indienen en na-lancering | ⬜ | |
+| 23 | Indienen en na-lancering (indienpakket klaar; indienen door de eigenaar) | ✅ | `step-23-submission` |
+| 24a | Nederlandse vertaling (voorstel) | ⬜ | |
+| 24b | Seizoensevents (voorstel) | ⬜ | |
+| 24c | Meer content: kerker, klanten, recepten (voorstel) | ⬜ | |
+| 24d | Tweede prestige-laag (voorstel) | ⬜ | |
 
 ---
 
@@ -115,7 +119,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com), en opni
 | Privacy | melding nodig als we extra persoonsdata verzamelen | We verzamelen niets extra |
 
 **Gecontroleerd in stap 22e (2026-10-12; was "nog niet gecontroleerd"):**
-- **Covers (verplicht bij indienen, drie stuks):** landscape 16:9 **1920×1080**, portrait 2:3 **800×1200**, vierkant **800×800**, in dezelfde stijl. Geen rand, als tekst alleen de titel (geen "New", "Play"), geen iconen of store-logo's, niet wazig of korrelig. `npm run pixel:preview` maakt al ruw materiaal op precies die maten (`art/pixel/thumbnail-*.png`); de titel komt er nog op.
+- **Covers (verplicht bij indienen, drie stuks):** landscape 16:9 **1920×1080**, portrait 2:3 **800×1200**, vierkant **800×800**, in dezelfde stijl. Geen rand, als tekst alleen de titel (geen "New", "Play"), geen iconen of store-logo's, niet wazig of korrelig. `npm run pixel:preview` maakt al ruw materiaal op precies die maten (`art/pixel/thumbnail-*.png`). *Sinds stap 23:* de covers met de titel staan in `art/covers/` (gemaakt met `scripts/covers/make_covers.py`, zie [SUBMISSION.md](SUBMISSION.md)).
 - **Preview-video (bij de covers):** 15 tot 20 s, hooguit 50 MB, **zonder geluid**, landscape 1080p 16:9 én portrait 1080p 2:3, niet versneld, de cover als eerste beeld, geen zwarte balken, geen standaard-muiscursor, geen "Play now". Nog te maken (stap 23, door de eigenaar of met een schermopname).
 - **QA-tool:** staat in het Developer Portal (developer.crazygames.com): draait de game zoals op CrazyGames, controleert de eisen en test de SDK-onderdelen. Kan pas met een account en een upload (stap 23).
 - **Basic → Full Launch:** Basic Launch duurt minstens 7 dagen en 500 plays (na 21 dagen stopt hij hoe dan ook). CrazyGames kijkt naar gemiddelde speeltijd (goede games 10+ minuten), dag-1-retentie (10-15%) en conversie (wie na het starten minstens een minuut speelt; top 80%+, laden onder 10 s, build onder 20 MB). Een harde grens noemen ze niet; Full Launch krijg je na selectie. In Basic Launch staan ads uit (fout `adsDisabledBasicLaunch`) en mag de game niet vastlopen of knoppen hebben die niets doen.
@@ -947,7 +951,13 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 22e: Performance, QA en indienklaar maken (was stap 22).** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [x] **Stap 22f (voorstel uit 22e, gekozen door de eigenaar): Leesbaarheid op het kleinste CrazyGames-venster.** Alle tekst minstens 16 ontwerp-pixels (10 schermpixels op 821×462), meer contrast op de naambordjes van de ingrediënten, en nakijken dat panelen en kaartjes niet overlopen. Zie hoofdstuk 2, "Gecontroleerd in stap 22e".
   *Klaar wanneer:* op 821×462 met `devicePixelRatio` 1 is alle tekst leesbaar, niets loopt over, tests slagen.
-- [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
+- [x] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
+  *Gedaan door Claude (2026-10-12):* het indienpakket in [SUBMISSION.md](SUBMISSION.md): de zip, de drie covers met titel, de Engelse teksten (beschrijving, besturing, tags), een recept voor de trailer, wat je in de QA-tool nakijkt, en wat Basic en Full Launch inhouden. *Door de eigenaar:* het account, de upload, de trailer en het indienen. Het "daarna" is opgesplitst in voorstellen 24a t/m 24d hieronder, omdat elk een eigen stap is.
+*Voorstellen voor na de lancering (Claude, 2026-10-12; de eigenaar kiest de volgorde of iets anders, liefst op basis van de cijfers uit de Basic Launch).*
+- [ ] **Stap 24a (voorstel): Nederlandse vertaling.** `i18n/nl.ts` (en de gebiedsbestanden), Nederlands in de taalkeuze, en de taal uit de SDK (`user.systemInfo.locale`) bij een eerste start, met Engels als terugval (CrazyGames-eis voor vertalingen). *Klaar wanneer:* elke sleutel heeft een Nederlandse tekst (een test bewaakt dat), de taal wisselt zonder herladen of na één herlaad, tests slagen.
+- [ ] **Stap 24b (voorstel): Seizoensevents.** Een tijdelijk event (bijv. een oogstfeest) met een eigen klant, een eigen recept en een kleine beloning, als data met een begin- en einddatum. Tutorial-hint bij het eerste event.
+- [ ] **Stap 24c (voorstel): Meer content.** Een tweede kerker met een eigen baas en buit, een of twee klanttypes en een paar recepten (de contentomvang uit hoofdstuk 5 was ~30 recepten en 3 kerkers), afgesteld met de simulator.
+- [ ] **Stap 24d (voorstel): Tweede prestige-laag.** Iets boven het verkopen van de taverne (bijv. een brouwerijketen) voor spelers die vaak verkocht hebben, met een eigen munt en blijvende bonussen; eerst uitwerken met de eigenaar.
 
 ---
 
@@ -981,6 +991,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 23: Indienen, het indienpakket (2026-10-12, `step-23-submission`)
+- **Gedaan:** (nieuw `docs/SUBMISSION.md`, `scripts/covers/make_covers.py`, `art/covers/cover-*.png`; bijgewerkt `docs/ASSETS.md` en de previews in `art/pixel/`)
+  - **Covers** in de drie verplichte maten met de titel "Brewmaster's Tavern" in het spellettertype, goud met een donkere rand, scherp op het pixelraster. Landscape is de hele taverne met de titel op het dak; vierkant en staand tonen de kolom met de ketel, de bar en het schap, met een hoger dak voor de titel. Het script gebruikt Pillow (al gebruikt voor de audioscripts, geen projectdependency).
+  - **SUBMISSION.md:** wat klaarstaat, de stappen voor de eigenaar, de Engelse teksten om te plakken (titel, korte en lange beschrijving, besturing, tags), een recept voor de trailer met Xbox Game Bar en Clipchamp (er is geen ffmpeg), een lijst voor de QA-tool, en wat Basic en Full Launch inhouden.
+  - **Zip** opnieuw gemaakt met 22f erin (16 bestanden, 1,35 MB); uitgepakt in een submap geserveerd: laadt zonder fouten.
+  - **Na de lancering:** de punten uit de oude stap 23 (events, content, tweede prestige-laag, Nederlands) staan als voorstellen 24a t/m 24d in hoofdstuk 12.
+- **Waarom (keuzes):** de covers moeten bij indienen klaar zijn en mogen alleen de titel als tekst hebben; het eigen lettertype en dezelfde pixelschaal als de art houden ze in stijl en scherp. Vierkant en staand uit dezelfde taverne-afbeelding, zodat de drie covers bij elkaar passen (een eis). Het account, de upload en de trailer kan alleen de eigenaar doen.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt (577 tests). De covers zijn 1920×1080, 800×800 en 800×1200 en zijn bekeken. CrazyGames-docs nagekeken voor het formulier (FAQ: build, beschrijving, instructies, covers, trailer; quality guidelines: overslaanbare onboarding, geen browsertoetsen; onze game gebruikt alleen de muis).
+- **Afwijkingen van het plan:** geen trailer (geen ffmpeg en geen manier om een video op te slaan zonder download; recept in SUBMISSION.md). Het "daarna" van stap 23 is niet gebouwd maar als voorstellen 24a t/m 24d gepland. Een aandachtspunt: "Brewmastery: Tavern Simulator" (Steam) lijkt op onze naam.
+- **Nu te proberen:** bekijk `art/covers/`; lees SUBMISSION.md en volg paragraaf 2.
+- **Nog te doen / volgende stap:** de eigenaar dient in. Daarna een keuze uit 24a t/m 24d (of feedback uit de QA van CrazyGames verwerken).
 
 ### Stap 22f: Leesbaarheid op het kleinste CrazyGames-venster (2026-10-12, `step-22f-readability`)
 - **Gedaan:** (code in `src/app/ui-model.ts`, `src/app/viewport-view.ts`, alle `.css`-bestanden met een lettergrootte, `src/app/panels.css`, `src/heroes/heroes.css`, `src/brewing/brewing-view.ts`, `src/customers/customers-view.ts`, `src/heroes/guild-view.ts`; tests in `tests/app-model.test.ts`)
