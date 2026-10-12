@@ -34,13 +34,6 @@
 
 ---
 
-## 3. Offline verdienen: wat er na Night Shift nog kan
-
-Night Shift zelf (kopen en upgraden) is gebouwd in stap 14d, en de prestige-bonus Night Watch (langere offline-limiet) in stap 17 (SPECS.md, hoofdstuk 4). Nog open:
-- Een rewarded ad die de offline-opbrengst verdubbelt (stap 20).
-
----
-
 ## 4. Helden: nog open
 
 De heldenlaag is uitgewerkt met de eigenaar (SPECS.md, hoofdstuk 4, Helden, en stap 15a t/m 16c; 15a is gebouwd). Nog open:

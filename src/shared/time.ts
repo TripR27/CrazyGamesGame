@@ -19,6 +19,8 @@ export interface TickerOptions {
 export interface Ticker {
   /** Process the wall-clock time elapsed since the last call as fixed steps. */
   advance(): void;
+  /** Let the time since the last call pass without playing it (the game was paused, e.g. during an ad). */
+  skip(): void;
 }
 
 export function createTicker(options: TickerOptions): Ticker {
@@ -43,6 +45,10 @@ export function createTicker(options: TickerOptions): Ticker {
         accumulator -= stepMs;
         onStep(stepMs);
       }
+    },
+    skip() {
+      last = clock.now();
+      accumulator = 0;
     },
   };
 }

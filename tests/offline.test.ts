@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { plain, recipes, rich } from './fixtures';
-import { computeOffline, offlineWithMissed, type OfflineInput, averageReward, applyOffline, type OfflineState, createOfflineInbox, type OfflineReport, formatDuration, toWelcomeView } from '@/offline/offline';
+import { computeOffline, offlineWithMissed, type OfflineInput, averageReward, applyOffline, type OfflineState, createOfflineInbox, type OfflineReport } from '@/offline/offline';
+import { formatDuration, toWelcomeView } from '@/offline/welcome-model';
 import { num } from '@/shared/numbers';
 import { createStore } from '@/shared/state';
 

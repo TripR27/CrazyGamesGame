@@ -35,3 +35,4 @@
 .settings-danger { border-color: #8a2a1a; background: #f6c2b0; }
 .settings-code { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 12px; }
 .settings-message { min-height: 1.2em; margin: 4px 0; font-size: 13px; }
+.settings-user { margin: 8px 0 0; }

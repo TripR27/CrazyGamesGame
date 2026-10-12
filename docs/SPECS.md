@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`) en 19 (`step-19-audio`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 19 (Audio). **Volgende stap:** 20 (CrazyGames SDK). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`), 19 (`step-19-audio`) en 20 (`step-20-crazygames-sdk`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 20 (CrazyGames SDK). **Volgende stap:** 21 (Art-pass in pixel art). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -48,7 +48,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 18b | Dagelijkse bonus | ✅ | `step-18b-daily-bonus` |
 | 18c | Instellingen | ✅ | `step-18c-settings` |
 | 19 | Audio | ✅ | `step-19-audio` |
-| 20 | CrazyGames SDK | ⬜ | |
+| 20 | CrazyGames SDK | ✅ | `step-20-crazygames-sdk` |
 | 21 | Art-pass in pixel art + animaties | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
@@ -135,7 +135,7 @@ main.ts
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
-                  reputation/ offline/ tutorial/ heroes/ prestige/ achievements/ daily/ settings/ audio/   (later platform/)
+                  reputation/ offline/ tutorial/ heroes/ prestige/ achievements/ daily/ settings/ audio/ platform/
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
@@ -161,7 +161,7 @@ crazyGamesGame/
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
     customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/  prestige/
-    achievements/  daily/  settings/  audio/
+    achievements/  daily/  settings/  audio/  platform/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
@@ -623,12 +623,16 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 
 ## 6. Platform-laag (CrazyGames)
 
-`src/platform/` is de **enige** plek die `window.CrazyGames` aanraakt.
+`src/platform/` is de **enige** plek die `window.CrazyGames` aanraakt. *Gebouwd in stap 20 (API gecontroleerd op docs.crazygames.com op 2026-10-12, SDK v3.8.0 in de lokale test):*
 
-- Interface `Platform`: `init()`, `loadingStart/Stop()`, `gameplayStart/Stop()`, `requestMidgameAd()`, `requestRewardedAd()`, `storage`, `getUsername()`, `onMuteChange()`.
-- `crazyGamesPlatform` (SDK) en `mockPlatform` (lokaal/dev, logt en geeft nep-ads) worden gekozen op basis van aanwezigheid van het SDK-script.
-- `gameplay-state.ts`: roept `gameplayStart/Stop` aan op basis van: tab zichtbaar, geen modal open, geen ad actief.
-- `ads.ts`: regels *wanneer* een ad gevraagd wordt (na prestige, na terugkeer van expeditie, niet binnen 3 min, nooit tijdens actieve interactie). Rewarded ads alleen na speler-keuze (dubbele offline-beloning, tijdelijke boost). Altijd correct afhandelen: `adblock`, `unfilled`, `adCooldown`.
+- **Interface `Platform`** (`platform/platform.ts`, een echte naad zoals tijd en opslag): `environment`, `storage`, `loadingStart/Stop()`, `gameplayStart/Stop()`, `happytime()`, `requestAd(type, onStart)` (geeft `finished` of `failed`), `muted()` en `username()`.
+- **`platform/crazygames.ts`** (in de ESLint-uitzondering voor browsercode, naast `shared/browser.ts`): `createCrazyGamesPlatform()` laadt niets zelf; het script staat in `index.html` (de enige externe request, hoofdstuk 1 regel 8). Zonder script, als `init()` faalt of in de omgeving `disabled` geeft het `null` en gebruikt het spel `createMockPlatform()` (logt, en een ad "speelt" meteen tot het eind, zodat de flows lokaal te proberen zijn). Op `localhost` draait de SDK in de omgeving `local` (ads zijn een tekst-overlay).
+- **Opslag:** op CrazyGames (`environment === 'crazygames'`) gaat de save naar de data-module (zelfde API als localStorage, gesynct met het account, limiet 1 MB); een save die nog in localStorage stond, gaat één keer mee. Elders blijft het localStorage. `main.ts` wacht op de SDK voor het laden van de save.
+- **Laden en spelen:** `loadingStart` voor het laden, `loadingStop` als de UI staat; `createGameplay` stuurt `gameplayStart/Stop` op redenen om te pauzeren ("loading" bij de start, "hidden" bij een verborgen tab, "ad" tijdens een advertentie) en geeft alleen wijzigingen door.
+- **Ads** (`createAds`): tijdens een ad is het spel gepauzeerd (de ticker slaat die tijd over met `skip()`) en stil. **Midgame:** als een held terugkomt (een natuurlijk moment), hooguit elke 3 minuten (`ADS.gapMs`; ook een rewarded ad telt). Niet bij het verkopen van de taverne: daarna laadt de pagina opnieuw. **Rewarded:** alleen als de speler kiest: "📺 Double it (watch an ad)" in het welkom-venster betaalt het offline-loon nog een keer uit (`payOfflineAgain`). Elke fout (`unfilled`, `adblock`, `adCooldown`, `adsDisabledBasicLaunch`) = gewoon doorspelen, geen beloning.
+- **Happytime** bij de drie grote achievements (`big`: alle recepten, een legendarisch drankje, de taverne verkocht).
+- **Geluid:** `muted()` van de SDK (`game.settings.muteAudio`) gaat voor de eigen instelling; tijdens een ad is alles stil.
+- **Gebruiker:** met een CrazyGames-account staat in de instellingen een regel dat de voortgang in het account is opgeslagen.
 - **Direct in gameplay:** er is geen hoofdmenu. De speler staat meteen in de taverne met de eerste klant; instellingen via een tandwiel.
 
 ---
@@ -782,7 +786,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
 - (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [x] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
-- [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
+- [x] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 - [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
 - [ ] **Stap 22: Performance, QA en indienklaar maken.** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
@@ -820,6 +824,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 20: CrazyGames SDK (2026-10-12, `step-20-crazygames-sdk`)
+- **Gedaan:** (code in `src/platform/` (nieuw: `platform.ts`, `crazygames.ts`), `src/main.ts` (wacht op de SDK, save via het platform, gameplay, ads, pauze), `index.html` (het SDK-script), `eslint.config.js` (uitzondering voor `platform/crazygames.ts`), `src/shared/time.ts` (`skip()`), `src/offline/` (`payOfflineAgain`; het welkom-view-model verhuisde naar het nieuwe `welcome-model.ts` omdat `offline.ts` anders boven 300 regels kwam; het welkom-venster kreeg de knop), `src/audio/audio-view.ts` en `src/settings/settings-view.ts` (demping en gebruikersnaam), `src/app/viewport-view.ts` (`UiServices`) en i18n; tests in `tests/platform.test.ts` (nieuw) en de offline-test (import)
+  - **Platform, opslag, laden en spelen, ads, happytime, geluid en gebruiker:** zie hoofdstuk 6.
+  - 7 tests erbij (539 totaal): gameplay start/stop op redenen en pas na het laden, de 3-minutenregel met pauzeren, belonen alleen na een volledige ad, ads en happytime op de juiste events, de stand-in, en het dubbele offline-loon.
+- **Waarom (keuzes):** de SDK-API is eerst gecontroleerd in de officiële documentatie (init, `environment`, game-, ad-, data- en user-module). Midgame alleen bij een terugkerende held: dat is een pauzemoment, terwijl "na prestige" niet kan omdat de pagina dan herlaadt. De rewarded ad verdubbelt het offline-loon (IDEAS.md punt 3); een tijdelijke boost is niet gebouwd. Zonder SDK werkt alles met de stand-in, zodat tests, de simulator en ontwikkelen zonder internet blijven werken.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen; `vite build` slaagt (415 kB gzip). In de browser op localhost (SDK v3.8.0, omgeving `local`; testsave met personeel, Night Shift en 10 minuten weg; daarna de oorspronkelijke save teruggezet): de SDK-log toont loading start, loading stop en gameplay start; het welkom-venster bood "Double it (watch an ad)"; de SDK toonde "A rewarded ad would appear here", met gameplay stop en daarna weer start; het goud ging van 760 naar 1,52K en de knop werd "Doubled!". Geen consolefouten.
+- **Afwijkingen van het plan:** testen met de preview/QA-tool van CrazyGames kan pas als de eigenaar de game daar heeft staan (stap 22/23). `onMuteChange` is niet gebouwd: het geluid leest `muted()` op het moment zelf. Geen midgame na prestige (zie boven).
+- **Nu te proberen:** laat het spel 10 minuten dicht met Night Shift en kies daarna "Double it".
+- **Nog te doen / volgende stap:** stap 21, Art-pass in pixel art. Bij indienen (stap 22/23): de "Progress Save"-schakelaar aanzetten (anders is de data-module uit) en testen in de QA-tool. Mergen van 16b t/m 20 naar `main` wacht op de eigenaar.
 
 ### Stap 19: Audio (2026-10-12, `step-19-audio`)
 - **Gedaan:** (code in `src/audio/` (nieuw: `audio.ts`, `audio-view.ts`, `audio.css`), `src/app/viewport-view.ts`, `src/shared/state.ts` (`settings.muted`) en `src/i18n/en-achievements.ts`; tests in `tests/audio.test.ts` (nieuw))
