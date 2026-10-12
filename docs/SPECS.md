@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b staat op `step-16b-boss-fight`, klaar om te mergen na akkoord van de eigenaar. **Laatst afgerond stap:** 16b (Baasgevecht). **Volgende stap:** 16c (Quartermaster). Let op: idle zit sinds stap 16 onder het doel (zie de logboeken van stap 16 en 16b). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`) en 16c (`step-16c-quartermaster`, gebouwd op 16b) zijn klaar; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus beide wachten nog op een merge naar `main`. **Laatst afgerond stap:** 16c (Quartermaster). **Volgende stap:** 17 (Prestige). Idle zit na 16c weer binnen het doel (gemiddeld 34,2%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -42,7 +42,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 15c | Uitrusting | ✅ | `step-15c-gear` |
 | 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ✅ | `step-16-hero-cauldron-cards` |
 | 16b | Baasgevecht (timing-minigame) | ✅ | `step-16b-boss-fight` |
-| 16c | Quartermaster: helden op auto en offline | ⬜ | |
+| 16c | Quartermaster: helden op auto en offline | ✅ | `step-16c-quartermaster` |
 | 17 | Prestige | ⬜ | |
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
@@ -173,7 +173,7 @@ Bestandsnamen: `kebab-case.ts`. Regelrichtlijn en anti-over-engineering-regels: 
 
 `createWorld({ store, bus, rng, clock, content })` in `app/world.ts` bouwt alles één keer: `{ store, bus, rng, clock, content, floor, station, selection, targets, tutorial, offline }`. `content` bundelt de data-tabellen (recepten, klanttypes, upgrades, kamers, decoraties, ingrediënten) en is in tests te vervangen door een kleine catalogus. Spelersacties en dingen die de views nodig hebben zijn gewone functies per feature die `world` krijgen (of met `Pick<World, ...>` alleen de delen die ze gebruiken, zodat tests geen volledige wereld hoeven te bouwen): `clickIngredient`, `buyUpgradeById`, `clickCustomer`, `shelfIds`, `roomOfferById`. Rekenfuncties (prijs, kosten, niveau, `matchRecipe`) blijven puur en nemen waarden.
 
-**Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel, helden (sinds stap 15a). De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
+**Tick-volgorde:** `createWorld` start de tick-systemen in vaste volgorde en die volgorde van de aanroepen is de volgorde waarin ze draaien: tutorial (binnen `createTutorial`), klanten, brouwen, personeel, helden (sinds stap 15a), Auto van de helden (sinds stap 16c). De RNG-aanroepvolgorde hangt daar vanaf; de simulator (`npm run simulate -- 60 1`) moet voor en na een wijziging byte-identiek zijn.
 
 Views krijgen de wereld in `main.ts` (`createGame('game', world)`, `mountUi(root, world, ...)`). De views lezen de echte `content`-tabellen uit de feature-bestanden; `world.content` is bedoeld voor logica en tests.
 
@@ -220,7 +220,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -450,6 +450,16 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Tutorial-hint** (les `boss`, na de kaartjesles): bij de eerste baas wijst de ketel de knop Strike! aan (doel `boss-strike`), daarna een afsluitzin over de standaarduitkomst en kracht-drankjes. De actiestap telt alleen in beeld en is ook klaar als de held terugkomt zonder gevecht, zodat de les nooit blijft hangen.
 - **Simulator:** de bot slaat zodra de wijzer binnen 1,6× het groene vak staat (ongeveer 60% treffers, zoals een speler); de tijdlijn toont "Brakka beat the boss".
 
+**Gebouwd in stap 16c (Quartermaster: helden op auto en offline; getallen gekozen door Claude):**
+- **Code:** `heroes/auto.ts` (de aankoop, de knop, `startAuto` op de tick na de helden, en `catchUpTrips` voor de tijd weg). `heroes/expedition.ts` kreeg `startTrip` (een tocht laten beginnen op een gegeven tijd, zonder melding) en `returnHero` meldt optioneel niets. `offline/offline.ts` roept `catchUpTrips` aan in `handleAway` en krijgt nu de wereld (`store`, `bus`, `rng`, `clock`, `content`) in plaats van een eigen `OfflineDeps`.
+- **Quartermaster:** een eenmalige aankoop van **12.000** bovenaan het tabblad Heroes, te koop zodra de gildekamer staat; daarna verdwijnt de rij. State: `quartermaster` (boolean).
+- **Auto:** daarna heeft elke gehuurde held op zijn kaartje een knop "Auto: off" / "🔁 Auto: on", op elk moment aan of uit te zetten (`setHeroAuto`, event `hero:auto`). State: per held `auto`.
+- **Online:** een held op Auto die thuis en fit is, vertrekt na **10 s** opnieuw (`QUARTERMASTER.homeMs`), zodat de speler hem nog drankjes kan geven; met een volle rugzak meteen. Een gewonde held vertrekt pas als hij fit is. Kaartjes en baas lopen zoals altijd: wie niet kiest, krijgt de veilige standaard en de standaarduitkomst; kiest de speler zelf, dan telt die keuze. Auto uit: de held maakt de tocht af en wacht thuis.
+- **Offline:** bij terugkomst (laden, of een tab die sliep) speelt `catchUpTrips` de tochten van de helden op Auto na: elke tocht begint als de vorige klaar was (plus rust bij gewond en de 10 s thuis), met de standaardkeuzes. Een tocht begint alleen binnen de **offline-limiet** (stat `offlineHours`, vanaf het moment van weggaan); Night Shift is daarvoor niet nodig. De laatste tocht kan nog lopen. Er komt geen melding per tocht (geen zwevende tekst); helden die niet op Auto staan, komen zoals vroeger terug op de volgende tick.
+- **Welkom-venster:** "Your heroes on Auto made 12 trips and brought home Bog Pearl ×21, Witch Moss ×15." (`trips` en `heroLoot` in het offline-rapport).
+- **Tutorial-hint** (les `auto`, na de baasles): start zodra de Quartermaster te koop én betaalbaar is; wijst Menu, het tabblad Heroes en de koopknop aan (alias `guide-quartermaster-buy`), daarna de Auto-knop van de eerste held die nog niet op Auto staat (`guide-hero-auto`), en sluit af bij de gildekamer: "On Auto they take the safe choices. Pick a card or fight the boss yourself and your choice counts." Beide acties tellen alleen in beeld.
+- **Simulator:** de bot koopt de Quartermaster als die in zijn budget past (na huren, vóór uitrusting) en zet daarna elke held op Auto. De tijdlijn toont "bought the Quartermaster" en "Brakka on Auto". In het idle-deel (de laatste 10 minuten niets doen) blijven de helden op Auto dus op tocht gaan.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -508,7 +518,7 @@ Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { 
 Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearChance, gearDrops: { gear, weight }[], cards: Card[] }   // 15a, 15c (gearChance, gearDrops) en 16
 Boss       { id, hp, loot: TripMods }   // stap 16b, in BOSSES per kerker-id; tekst bosses.<id>.name
 Card       { id, options: { id, default?, needsDrink?, mods, boost?: { effect, mods(p) } }[] }   // stap 16 (gebouwd); mods: duur, buit, kans gewond, kans op gear, extra buit
-// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt, drinks, cards: { id, at, choice, drink? }[], boss?: { hits, lastAt } } | null, gear, bag } (15a, gear 15c, bag/drinks/cards 16, boss 16b; later auto),
+// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt, drinks, cards: { id, at, choice, drink? }[], boss?: { hits, lastAt } } | null, gear, bag, auto } (15a, gear 15c, bag/drinks/cards 16, boss 16b, auto 16c), quartermaster: boolean (16c),
 // ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
 ```
 
@@ -667,7 +677,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes.** De tweede ketel in de gildekamer (ketel aanklikken, dan ingrediënten; het schap springt daarna terug). Drankjes gaan in de rugzak (max 2), of van de bar naar de held. De vier drankeffecten krijgen elk een rol op expeditie; de magiër haalt er meer uit. 2 keuzekaartjes per expeditie met een standaardkeuze na ~10 s. Receptencontent naar ~20 tot 30. Tutorial-hint: eerste heldendrankje en eerste kaartje.
   *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
 - [x] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een timing-balk met 3 slagen tegen de moerasheks (muis en touch); kracht-drankjes maken het groene vak groter. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
-- [ ] **Stap 16c: Quartermaster, helden op auto en offline.** Een aankoop geeft elke held een knop Auto (aan/uit, op elk moment). Op Auto vertrekt hij vanzelf opnieuw met standaardkeuzes, ook offline binnen de offline-limiet; zelf kiezen telt altijd. Het offline-rapport noemt de expedities. Daarna `npm run simulate` met helden (idle 30-40% van actief). Tutorial-hint: Auto-knop.
+- [x] **Stap 16c: Quartermaster, helden op auto en offline.** Een aankoop geeft elke held een knop Auto (aan/uit, op elk moment). Op Auto vertrekt hij vanzelf opnieuw met standaardkeuzes, ook offline binnen de offline-limiet; zelf kiezen telt altijd. Het offline-rapport noemt de expedities. Daarna `npm run simulate` met helden (idle 30-40% van actief). Tutorial-hint: Auto-knop.
 - [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
 ### Fase D: Afwerking
@@ -711,6 +721,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 16c: Quartermaster, helden op auto en offline (2026-10-12, `step-16c-quartermaster`)
+- **Gedaan:** (code in `src/heroes/` (nieuw: `auto.ts`; aangepast: `expedition.ts`, `heroes.ts`, `heroes-model.ts`, `heroes-view.ts`, `heroes.css`), `src/offline/offline.ts`, `src/app/world.ts`, `src/shared/` (state, events, purchases), `src/tutorial/`, `src/i18n/` en `src/dev/` (bot en tijdlijn); tests in `tests/auto.test.ts` (nieuw) en kleine aanpassingen in de offline-, gear-, heroes- en gids-tests)
+  - **Quartermaster, Auto, online, offline, welkom-venster, tutorial-hint en simulator:** zie hoofdstuk 4, Helden ("Gebouwd in stap 16c").
+  - Gebouwd op `step-16b-boss-fight`, omdat de merge van 16b naar `main` werd tegengehouden door de veiligheidscontrole van Claude Code (de eigenaar had akkoord gegeven).
+  - 10 tests erbij (501 totaal): de aankoop (op slot zonder gildekamer, één keer), de Auto-knop (alleen met de Quartermaster, in het tabblad), online vertrekken na 10 s en meteen met een volle rugzak, Auto uit laat de held thuis, een eigen keuze op een kaartje blijft staan, offline tochten na elkaar met de laatste nog onderweg en zonder meldingen, geen tochten na de offline-limiet en niets voor helden zonder Auto, het welkom-rapport, en de les.
+- **Waarom (keuzes):** de eigenaar liet de details aan Claude. De Quartermaster staat in het tabblad Heroes (daar horen de helden; de winkel is voor de taverne). 12.000 komt na de VIP Lounge en Mildred (rond minuut 29-32 in de simulator). De 10 s thuis geven de speler tijd om de rugzak te vullen, anders vertrekt een held op Auto altijd met lege handen. Offline speelt de tochten echt na (met de RNG), in plaats van een gemiddelde formule: zo kloppen de buit, de XP, de levels en de gevonden uitrusting, en de lopende tocht staat bij terugkomst op de goede plek. Night Shift is niet nodig: de Quartermaster is zelf de aankoop die de helden laat doorwerken. Geen melding per tocht bij het inhalen, anders zouden na een lange afwezigheid tientallen zwevende teksten tegelijk verschijnen.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels (`offline/offline.ts` 296), geen kringen. Simulator 60 minuten, seeds 1 t/m 9: de eerste 20 minuten ongewijzigd; Quartermaster gekocht tussen 28:39 en 32:19; goud op minuut 60 524K / 245K / 389K / 228K / 570K / 201K / 582K / 286K / 219K. **Idle 32 / 39 / 36 / 38 / 30 / 35 / 33 / 32 / 33%, gemiddeld 34,2%** (16b: 25,9%): weer binnen het doel van 30-40%. Gevonden stukken per run 4 / 1 / 4 / 4 / 4 / 2 / 3 / 4 / 4 (16b: samen 24, nu 30), omdat helden op Auto vaker op tocht gaan. In de browser (testsaves; de oorspronkelijke save daarna teruggezet): de les verscheen met de gildekamer en 50K goud en wees Menu, Heroes en "Buy · 12K" aan; kopen (50K naar 38K) haalde de rij weg en toonde "Auto: off" bij Brakka; aanzetten gaf "🔁 Auto: on" en de afsluitzin, en 10 s later stond Brakka "In the Swamp, back in 2:00". Een save van 30 minuten oud met Brakka op Auto gaf het welkom-venster "Your heroes on Auto made 12 trips and brought home Witch Moss ×15, Bog Pearl ×21.", Brakka ging van level 2 naar 4 en was weer onderweg (nog 1:08). Geen consolefouten.
+- **Afwijkingen van het plan:** geen. Het idle-besluit uit stap 16 en 16b ("zo laten tot 16c") is hiermee afgehandeld.
+- **Nu te proberen:** koop in het tabblad Heroes de Quartermaster en zet Brakka op Auto. Sluit het spel een kwartier en kijk wat het welkom-venster zegt. Kies tussendoor zelf een kaartje: dat telt gewoon.
+- **Nog te doen / volgende stap:** stap 17, Prestige. Mergen van 16b en 16c naar `main` wacht op de eigenaar (de veiligheidscontrole houdt een merge door Claude tegen).
 
 ### Stap 16b: Baasgevecht (2026-10-12, `step-16b-boss-fight`)
 - **Gedaan:** (code in `src/heroes/` (nieuw: `boss-fight.ts`, `boss-view.ts`; aangepast: `expedition.ts`, `heroes.ts` (`bossPower`), `trip-cards.ts`, `guild-view.ts`, `heroes.css`), `src/shared/` (state, events, content), `src/tutorial/`, `src/i18n/en-heroes.ts`, `src/app/viewport-view.ts` en `src/dev/` (bot en tijdlijn); tests in `tests/boss.test.ts` (nieuw) en kleine aanpassingen in de stock- en gids-tests)

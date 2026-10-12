@@ -16,7 +16,7 @@ const classDef = (id: string) => {
   return def;
 };
 const swamp = DUNGEONS[0] ?? (() => { throw new Error('no dungeon'); })();
-const heroesState = (over: Partial<HeroesState> = {}): HeroesState => ({ heroes: {}, roomsBuilt: [], currencies: { gold: num(0) }, ingredientStock: {}, gearOwned: [], ...over });
+const heroesState = (over: Partial<HeroesState> = {}): HeroesState => ({ heroes: {}, roomsBuilt: [], currencies: { gold: num(0) }, ingredientStock: {}, gearOwned: [], quartermaster: false, ...over });
 
 describe('hero growth', () => {
   it('needs more XP for every next level', () => {

@@ -40,7 +40,7 @@ export const HEROES = {
   bagSize: 2,
 } as const;
 
-export const newHero = (): HeroState => ({ level: 1, xp: 0, injuredUntil: 0, expedition: null, gear: {}, bag: [] });
+export const newHero = (): HeroState => ({ level: 1, xp: 0, injuredUntil: 0, expedition: null, gear: {}, bag: [], auto: false });
 
 /** XP needed to go from `level` to the next one. */
 export const xpToNext = (level: number): number => Math.round(HEROES.firstLevelXp * HEROES.xpGrowth ** (level - 1));

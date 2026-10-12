@@ -115,7 +115,7 @@ describe('offline earnings', () => {
 });
 
 const report = (over: Partial<OfflineReport> = {}): OfflineReport => ({
-  awayMs: 1000, countedMs: 1000, capped: false, limitHours: 2, hadStaff: true, served: 4, gold: num(80), reputation: 4, missed: num(0), ...over,
+  awayMs: 1000, countedMs: 1000, capped: false, limitHours: 2, hadStaff: true, served: 4, gold: num(80), reputation: 4, missed: num(0), trips: 0, heroLoot: {}, ...over,
 });
 
 describe('paying out offline earnings', () => {
@@ -156,7 +156,7 @@ describe('the offline inbox', () => {
 });
 
 const welcomeReport = (over: Partial<OfflineReport> = {}): OfflineReport => ({
-  awayMs: 3_600_000, countedMs: 3_600_000, capped: false, limitHours: 2, hadStaff: true, served: 90, gold: num(1800), reputation: 90, missed: num(0), ...over,
+  awayMs: 3_600_000, countedMs: 3_600_000, capped: false, limitHours: 2, hadStaff: true, served: 90, gold: num(1800), reputation: 90, missed: num(0), trips: 0, heroLoot: {}, ...over,
 });
 
 describe('formatDuration', () => {
@@ -187,6 +187,11 @@ describe('welcome-back window', () => {
       'Your staff went home. With Night Shift they could have earned 1.2K gold.',
       'Buy Night Shift in the shop and they keep working while you are away.',
     ]);
+  });
+
+  it('sums up the trips of the heroes on Auto', () => {
+    const view = toWelcomeView(welcomeReport({ trips: 12, heroLoot: { bog_pearl: 20, witch_moss: 9 } }));
+    expect(view.lines.at(-1)).toBe('Your heroes on Auto made 12 trips and brought home Bog Pearl ×20, Witch Moss ×9.');
   });
 
   it('says when the staff stopped working before the player came back', () => {

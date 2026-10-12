@@ -224,6 +224,7 @@ export const welcome: Messages = {
   'welcome.missed': 'Your staff went home. With Night Shift they could have earned {gold} gold.',
   'welcome.night_shift': 'Buy Night Shift in the shop and they keep working while you are away.',
   'welcome.capped': 'Staff stop working after {limit} away.',
+  'welcome.heroes': 'Your heroes on Auto made {trips} trips and brought home {loot}.',
   'welcome.collect': 'Great!',
   'time.hours': '{n}h',
   'time.minutes': '{n}m',

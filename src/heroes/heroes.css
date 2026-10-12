@@ -33,6 +33,10 @@
 }
 .hero-button:hover:not(:disabled) { background: #a6e676; }
 .hero-button:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+/* Auto: a smaller switch below the main button, green while on. */
+.hero-auto { width: 100%; margin-top: 4px; padding: 4px 6px; border: 2px solid #b0a37c; border-radius: 8px; background: #f2dfb0; color: #3b2410; font-size: 13px; font-weight: bold; cursor: pointer; }
+.hero-auto[hidden] { display: none; }
+.hero-auto--on { border-color: #3d6b22; background: #cdeeb0; color: #1f3a10; }
 
 .hero-gear { display: grid; gap: 3px; margin: 4px 0 6px; }
 .hero-gear[hidden] { display: none; }

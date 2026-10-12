@@ -53,6 +53,8 @@ export interface HeroState {
   gear: Record<string, string>;
   /** Drinks (recipe ids) waiting to go along on the next trip. */
   bag: string[];
+  /** On Auto the hero sets out again by themselves (needs the Quartermaster). */
+  auto: boolean;
 }
 
 export interface GameState {
@@ -74,6 +76,8 @@ export interface GameState {
   ingredientStock: Record<string, number>;
   /** Gear ids the player owns (bought or found); each piece is worn by at most one hero. */
   gearOwned: string[];
+  /** The Quartermaster was bought: heroes can go on Auto. */
+  quartermaster: boolean;
   tutorial: TutorialProgress;
 }
 
@@ -90,6 +94,7 @@ export function createInitialState(now: number): GameState {
     heroes: {},
     ingredientStock: {},
     gearOwned: [],
+    quartermaster: false,
     tutorial: { completedSteps: [], skipped: false },
   };
 }

@@ -148,6 +148,35 @@ export const bossLesson: readonly TutorialStep[] = [
 ];
 
 /**
+ * The hint for Auto: once the Quartermaster can be bought, the way to the Heroes tab and its buy button, then a hero's
+ * Auto switch, then a closing line. Both actions can happen before this lesson's turn, so they only count while on screen;
+ * a player who already did them gets the remaining steps done at once.
+ */
+export const autoLesson: readonly TutorialStep[] = [
+  {
+    id: 'auto_buy',
+    lesson: 'auto',
+    startWhen: { kind: 'event', event: 'quartermaster:affordable' },
+    target: 'guide-quartermaster-buy',
+    completeOn: { kind: 'event', event: 'quartermaster:bought' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'auto_on',
+    lesson: 'auto',
+    target: 'guide-hero-auto',
+    completeOn: { kind: 'event', event: 'hero:auto' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'auto_done',
+    lesson: 'auto',
+    target: 'room:guild_hall',
+    completeOn: { kind: 'after', ms: 6500 },
+  },
+];
+
+/**
  * The hint for the first loot: when a hero first brings dungeon ingredients home, points at one on the shelf. It
  * explains the count (every drink with it uses one) and sends the player to the recipe book for what to make.
  */

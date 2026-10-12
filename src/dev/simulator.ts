@@ -69,6 +69,13 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
   bus.on('boss:resolved', ({ heroId, result }) => {
     if (result === 'won') once(`boss:${heroId}`, `${name('heroes', heroId)} beat the boss`);
   });
+  bus.on('quartermaster:bought', () => {
+    timeline.purchases.push(now());
+    once('quartermaster', 'bought the Quartermaster');
+  });
+  bus.on('hero:auto', ({ heroId, on }) => {
+    if (on) once(`auto:${heroId}`, `${name('heroes', heroId)} on Auto`);
+  });
   bus.on('gear:bought', ({ id }) => {
     timeline.purchases.push(now());
     once(`gear:${id}`, `bought ${name('gear', id)}`);

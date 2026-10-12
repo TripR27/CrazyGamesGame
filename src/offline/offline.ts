@@ -1,17 +1,18 @@
+import type { World } from '@/app/world';
 import { ingredients, usesStock } from '@/brewing/ingredients';
 import { type CustomerDef, VIP_SPAWN } from '@/customers/customer-data';
-import { priciestRecipe, meanSpawnIntervalMs, type CustomerCatalog } from '@/customers/customers';
+import { priciestRecipe, meanSpawnIntervalMs } from '@/customers/customers';
 import { NIGHT_SHIFT_SHARE } from '@/economy/upgrade-data';
 import { getMultipliers } from '@/economy/upgrades';
+import { catchUpTrips } from '@/heroes/auto';
 import { t } from '@/i18n/translator';
 import { type RecipeDef, recipes } from '@/recipes/recipe-data';
 import { levelFor } from '@/reputation/reputation';
 import { drinkBonus, orderWeight, tipSize, SERVING } from '@/serving/effects';
 import { computePayout } from '@/serving/serving';
-import type { EventBus, GameEvents } from '@/shared/events';
+import { textKey } from '@/shared/content';
 import { type Num, num, ZERO, formatNumber } from '@/shared/numbers';
-import { touchLastSeen, type GameState, type Store } from '@/shared/state';
-import type { Clock } from '@/shared/time';
+import { touchLastSeen } from '@/shared/state';
 
 /** Placeholder numbers for progress while the player is away. The share of the staff's pace is the stat `offlineShare`. */
 export const OFFLINE = {
@@ -35,6 +36,9 @@ export interface OfflineReport {
   reputation: number;
   /** Without Night Shift: the gold a full crew could have earned with it (zero otherwise). */
   missed: Num;
+  /** Trips the heroes on Auto finished meanwhile, and their loot (ingredient id to amount). */
+  trips: number;
+  heroLoot: Record<string, number>;
 }
 
 /** What one served drink brings on average: gold (tips counted by their chance) and reputation. */
@@ -136,6 +140,8 @@ export function computeOffline(input: OfflineInput): OfflineReport {
     gold: reward.gold.mul(served).round(),
     reputation: Math.floor(served * reward.reputation),
     missed: ZERO,
+    trips: 0,
+    heroLoot: {},
   };
 }
 
@@ -227,7 +233,11 @@ function idleLines(report: OfflineReport): string[] {
   return [t('welcome.missed', { gold: formatNumber(report.missed) }), t('welcome.night_shift')];
 }
 
-/** The welcome-back window as plain strings: what was earned, or why nothing was. */
+/** "12 Bog Pearl, 5 Witch Moss": the loot the heroes brought home. */
+const lootText = (loot: Record<string, number>): string =>
+  Object.entries(loot).map(([id, n]) => t('heroes.stock_item', { name: t(textKey('ingredients', id, 'name')), n })).join(', ');
+
+/** The welcome-back window as plain strings: what was earned (or why nothing was), and what the heroes on Auto did. */
 export function toWelcomeView(report: OfflineReport): WelcomeView {
   const earned = report.served > 0;
   const lines = [
@@ -239,15 +249,9 @@ export function toWelcomeView(report: OfflineReport): WelcomeView {
         ]
       : idleLines(report)),
     ...(report.capped && earned ? [t('welcome.capped', { limit: formatDuration(report.countedMs) })] : []),
+    ...(report.trips > 0 ? [t('welcome.heroes', { trips: report.trips, loot: lootText(report.heroLoot) })] : []),
   ];
   return { title: t('welcome.title'), lines, button: t('welcome.collect') };
-}
-
-export interface OfflineDeps {
-  store: Store<GameState>;
-  bus: EventBus<GameEvents>;
-  clock: Clock;
-  catalog: CustomerCatalog;
 }
 
 export interface OfflineServices {
@@ -256,8 +260,12 @@ export interface OfflineServices {
   inbox: OfflineInbox;
 }
 
-/** Connects the offline formulas to the saved state: a gap in the clock becomes gold and a report. */
-export function createOffline({ store, bus, clock, catalog }: OfflineDeps): OfflineServices {
+/**
+ * Connects the offline formulas to the saved state: a gap in the clock becomes gold, trips of the heroes on Auto, and a
+ * report.
+ */
+export function createOffline(world: Pick<World, 'store' | 'bus' | 'rng' | 'clock' | 'content'>): OfflineServices {
+  const { store, bus, clock, content } = world;
   const inbox = createOfflineInbox();
   return {
     inbox,
@@ -273,15 +281,16 @@ export function createOffline({ store, bus, clock, catalog }: OfflineDeps): Offl
         reputation: state.reputation,
         // Dungeon ingredients run out, so drinks with them do not count while the player is away.
         knownRecipes: recipes.filter((r) => state.recipesDiscovered.includes(r.id) && !usesStock(r, ingredients)),
-        customerTypes: catalog.customerTypes,
+        customerTypes: content.customerTypes,
         sellMultiplier: stats.sellPrice,
         vipChance: stats.vipChance.toNumber(),
       });
       applyOffline(store, report);
+      const heroes = catchUpTrips(world, awayMs, report.limitHours * HOUR_MS);
       // The time is accounted for now; without this the same gap would count again at the next save.
       store.update((s) => touchLastSeen(s, clock.now()));
-      if (awayMs >= OFFLINE.minWelcomeMs) inbox.post(report);
-      if (report.served > 0) bus.emit('saveRequested', {});
+      if (awayMs >= OFFLINE.minWelcomeMs) inbox.post({ ...report, trips: heroes.trips, heroLoot: heroes.loot });
+      if (report.served > 0 || heroes.trips > 0) bus.emit('saveRequested', {});
     },
   };
 }

@@ -42,6 +42,8 @@ export interface GuideContext {
   card: { heroId: string; boldOptionId: string } | null;
   /** The hero fighting a boss right now. */
   bossHeroId: string | null;
+  /** The hero whose Auto switch the lesson points at: the first one not on Auto yet. */
+  autoHeroId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -134,6 +136,8 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   'guide-loot': (ctx) => (ctx.lootId === null ? null : `ingredient:${ctx.lootId}`),
   'guide-gear-buy': (ctx) => toTab(ctx, 'heroes') ?? (ctx.affordableGearId === null ? null : `gear-buy:${ctx.affordableGearId}`),
   'guide-hero-drink': (ctx) => (ctx.heroDrinkIngredient === null ? null : `ingredient:${ctx.heroDrinkIngredient}`),
+  'guide-quartermaster-buy': (ctx) => toTab(ctx, 'heroes') ?? 'quartermaster-buy',
+  'guide-hero-auto': (ctx) => toTab(ctx, 'heroes') ?? (ctx.autoHeroId === null ? null : `hero-auto:${ctx.autoHeroId}`),
   'guide-card': (ctx) => (ctx.card === null ? null : `card-option:${ctx.card.boldOptionId}`),
   'guide-gear-equip': (ctx) => {
     const wear = ctx.gearToWear;
@@ -205,6 +209,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     loot: name('ingredients', ctx.lootId ?? undefined),
     cardHero: ctx.card === null ? '' : t(textKey('heroes', ctx.card.heroId, 'name')),
     bossHero: ctx.bossHeroId === null ? '' : t(textKey('heroes', ctx.bossHeroId, 'name')),
+    autoHero: ctx.autoHeroId === null ? '' : t(textKey('heroes', ctx.autoHeroId, 'name')),
     gear: ctx.affordableGearId === null ? '' : t(textKey('gear', ctx.affordableGearId, 'name')),
     slot: ctx.gearToWear === null ? '' : t(`gear.slot_${ctx.gearToWear.slot}`),
     wearer: ctx.gearToWear === null ? '' : t(textKey('heroes', ctx.gearToWear.heroId, 'name')),
