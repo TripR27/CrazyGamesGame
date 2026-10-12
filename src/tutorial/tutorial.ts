@@ -22,6 +22,8 @@ export interface TutorialMachine {
   skip(): void;
   /** Play the tutorial again from the start. */
   restart(): void;
+  /** Mark a lesson done without showing it, for a feature that is off in this session (no ads: no peddler). */
+  skipLesson(lesson: string): void;
   /** Called whenever what `visibleStep()` returns may have changed. Returns an unsubscribe function. */
   subscribe(listener: () => void): () => void;
 }
@@ -131,6 +133,13 @@ export function createTutorialMachine(
         progress.completedSteps = [];
         progress.skipped = false;
       }),
+    skipLesson(lesson) {
+      const ids = steps.filter((s) => s.lesson === lesson).map((s) => s.id);
+      if (ids.every((id) => store.get().completedSteps.includes(id))) return;
+      change((progress) => {
+        for (const id of ids) if (!progress.completedSteps.includes(id)) progress.completedSteps.push(id);
+      });
+    },
     subscribe(listener) {
       session.listeners.add(listener);
       return () => session.listeners.delete(listener);

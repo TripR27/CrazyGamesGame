@@ -6,8 +6,11 @@ import { debug } from '@/shared/events';
 import type { Clock } from '@/shared/time';
 
 export type AdType = 'midgame' | 'rewarded';
-/** `finished`: the ad played to the end (a rewarded ad then pays out); `failed`: no ad, adblock, cooldown or an error. */
-export type AdResult = 'finished' | 'failed';
+/**
+ * `finished`: the ad played to the end (a rewarded ad then pays out); `failed`: no ad this time (unfilled, cooldown, an
+ * error); `unavailable`: no ads at all in this session (an ad blocker, or ads are off during a Basic Launch).
+ */
+export type AdResult = 'finished' | 'failed' | 'unavailable';
 
 /**
  * The game's platform (one of the real seams, like time and storage): CrazyGames through its SDK, or a stand-in when
@@ -26,6 +29,8 @@ export interface Platform {
   happytime(): void;
   /** Plays an ad. `onStart` runs when it really starts: pause and mute then. */
   requestAd(type: AdType, onStart: () => void): Promise<AdResult>;
+  /** An ad blocker is there (the SDK's guess, not foolproof). */
+  hasAdblock(): Promise<boolean>;
   /** The platform muted the game; its setting goes before the game's own (read when a sound plays). */
   muted(): boolean;
   /** The CrazyGames user name, or null (not signed in, or no platform). */
@@ -47,6 +52,7 @@ export function createMockPlatform(): Platform {
       onStart();
       return Promise.resolve('finished');
     },
+    hasAdblock: () => Promise.resolve(false),
     muted: () => false,
     username: () => Promise.resolve(null),
   };
@@ -86,43 +92,72 @@ export function createGameplay(
 export const ADS = { gapMs: 240_000, newPlayerMs: 300_000, afterLevelMs: 5_000 } as const;
 
 export interface Ads {
-  /** An ad is on screen: the game is paused and muted. */
+  /** An ad is on screen: the game is muted (CrazyGames: mute only once the ad really starts). */
   playing(): boolean;
-  /** A midgame ad at a natural moment, unless one played less than `gapMs` ago or one is playing. */
+  /** From the request until the ad is over: the game is paused and the player cannot act (CrazyGames asks for both). */
+  busy(): boolean;
+  /** Ads can play in this session; false after an ad blocker or a Basic Launch, so rewarded offers are hidden. */
+  available(): boolean;
+  /** A midgame ad at a natural moment, unless one played less than `gapMs` ago or one is on its way. */
   midgame(): void;
-  /** A rewarded ad the player asked for; `onReward` only when it played to the end, otherwise `onNone` (no ad, adblock, an error). */
-  rewarded(onReward: () => void, onNone?: () => void): void;
+  /**
+   * A rewarded ad the player asked for; `onReward` only when it played to the end, otherwise `onNone`, with `unavailable`
+   * true when ads turned out to be off for the whole session.
+   */
+  rewarded(onReward: () => void, onNone?: (unavailable: boolean) => void): void;
 }
 
-/** Ads with the 3-minute rule; `onPause` is told when an ad starts and ends (pause the game, gameplayStop). */
-export function createAds(platform: Pick<Platform, 'requestAd'>, clock: Clock, onPause: (paused: boolean) => void): Ads {
+/**
+ * Ads with the 3-minute rule. `onPause` is told when an ad is requested and when it is over (pause the game,
+ * gameplayStop); `onUnavailable` once, when ads turn out to be off for the session (an ad blocker, a Basic Launch).
+ */
+export function createAds(
+  platform: Pick<Platform, 'requestAd' | 'hasAdblock'>,
+  clock: Clock,
+  onPause: (paused: boolean) => void,
+  onUnavailable: () => void = () => undefined,
+): Ads {
+  let busy = false;
   let playing = false;
+  let available = true;
   let lastAt = -Infinity;
+  const turnOff = (): void => {
+    if (!available) return;
+    available = false;
+    onUnavailable();
+  };
+  void platform.hasAdblock().then(
+    (blocked) => blocked && turnOff(),
+    () => undefined,
+  );
   const show = (type: AdType): Promise<AdResult> => {
     lastAt = clock.now();
+    busy = true;
+    onPause(true);
     return platform
-      .requestAd(type, () => {
-        playing = true;
-        onPause(true);
-      })
+      .requestAd(type, () => void (playing = true))
       .catch((): AdResult => 'failed')
       .then((result) => {
-        if (playing) onPause(false);
+        busy = false;
         playing = false;
+        onPause(false);
         lastAt = clock.now();
+        if (result === 'unavailable') turnOff();
         return result;
       });
   };
   return {
     playing: () => playing,
+    busy: () => busy,
+    available: () => available,
     midgame() {
-      if (!playing && clock.now() - lastAt >= ADS.gapMs) void show('midgame');
+      if (available && !busy && clock.now() - lastAt >= ADS.gapMs) void show('midgame');
     },
     rewarded(onReward, onNone) {
-      if (playing) return onNone?.();
+      if (busy || !available) return onNone?.(!available);
       void show('rewarded').then((result) => {
         if (result === 'finished') onReward();
-        else onNone?.();
+        else onNone?.(result === 'unavailable');
       });
     },
   };
@@ -139,9 +174,9 @@ export function quietMoment({ store, clock, tutorial }: Omit<AdWorld, 'bus'>): b
 }
 
 /**
- * The game's moments for the platform: a midgame ad at a natural pause (a hero comes back, a room is built, a new level
- * once its message is gone, the welcome-back window is closed; at most every 4 minutes), and happytime for the great
- * achievements. One call in main.ts, after the world is built.
+ * The game's moments for the platform: a midgame ad at a natural pause (a hero comes back, a new level once its message
+ * is gone; at most every 4 minutes), and happytime for the great achievements. Never straight after a button: CrazyGames
+ * forbids midgame ads on shop and menu buttons, and a midgame ad right after a rewarded offer. One call in main.ts.
  */
 export function startPlatform(world: AdWorld, platform: Pick<Platform, 'happytime'>, ads: Pick<Ads, 'midgame'>): void {
   const { bus, clock } = world;
@@ -150,8 +185,6 @@ export function startPlatform(world: AdWorld, platform: Pick<Platform, 'happytim
   };
   let levelAdAt = 0;
   bus.on('hero:returned', maybe);
-  bus.on('room:built', maybe);
-  bus.on('welcome:closed', maybe);
   bus.on('reputation:levelUp', () => void (levelAdAt = clock.now() + ADS.afterLevelMs));
   bus.on('tick', () => {
     if (levelAdAt === 0 || clock.now() < levelAdAt) return;

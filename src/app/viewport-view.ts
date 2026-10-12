@@ -64,10 +64,24 @@ export function placeGame(container: HTMLElement, fit: Fit, refit: () => void): 
   refit();
 }
 
+const SHIELD_CHECK_MS = 100;
+
+/**
+ * A see-through cover over the whole frame while an ad is on its way or playing: CrazyGames does not let the player act
+ * then (the game itself is paused by main.ts).
+ */
+function mountAdShield(root: HTMLElement, ads: Pick<Ads, 'busy'>): void {
+  const shield = document.createElement('div');
+  shield.className = 'ad-shield';
+  shield.hidden = true;
+  root.append(shield);
+  window.setInterval(() => void (shield.hidden = !ads.busy()), SHIELD_CHECK_MS);
+}
+
 /** What the overlay gets from main.ts besides the world: saves as text, ads, and the platform's mute and user name. */
 export interface UiServices {
   saves: SaveCodes;
-  ads: Pick<Ads, 'rewarded'>;
+  ads: Pick<Ads, 'rewarded' | 'available' | 'busy'>;
   /** True while sound must be off for the platform: muted by CrazyGames, or an ad is playing. */
   silenced(): boolean;
   username(): Promise<string | null>;
@@ -105,4 +119,5 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountRewards(root, world, services.ads);
   mountSettings(root, world, services);
   mountAudio(root, world, services.silenced);
+  mountAdShield(root, services.ads);
 }

@@ -83,7 +83,13 @@ export interface RewardServices {
   accept(): void;
   /** No thanks: he leaves. */
   dismiss(): void;
+  /** No ads in this session (an ad blocker, a Basic Launch): the peddler leaves for good and his lesson is skipped. */
+  disable(): void;
+  /** False once `disable` was called. */
+  enabled(): boolean;
 }
+
+const PEDDLER_LESSON = 'peddler';
 
 type RewardWorld = Pick<World, 'store' | 'bus' | 'clock' | 'tutorial'>;
 
@@ -119,6 +125,7 @@ export function startRewards(world: RewardWorld): RewardServices {
   let visit: PeddlerVisit | null = null;
   let nextAt = clock.now() + REWARDS.peddler.firstAfterMs;
   let turn = 0;
+  let enabled = true;
   const leave = (): void => {
     visit = null;
     nextAt = clock.now() + REWARDS.peddler.everyMs;
@@ -129,7 +136,7 @@ export function startRewards(world: RewardWorld): RewardServices {
     const rewards = store.getState().rewards;
     if (rewards.boost !== '' && now >= rewards.boostEndsAt) store.update((s) => void (s.rewards = { ...s.rewards, boost: '', boostEndsAt: 0 }));
     if (visit !== null && now >= visit.leavesAt) leave();
-    if (visit !== null || now < nextAt || tutorial.machine.visibleStep() !== null) return;
+    if (!enabled || visit !== null || now < nextAt || tutorial.machine.visibleStep() !== null) return;
     const planned = PEDDLER_OFFERS[turn % PEDDLER_OFFERS.length] ?? 'gold';
     turn++;
     visit = { offer: rewards.boost !== '' && planned !== 'gold' ? 'gold' : planned, leavesAt: now + REWARDS.peddler.staysMs };
@@ -147,5 +154,15 @@ export function startRewards(world: RewardWorld): RewardServices {
     dismiss() {
       if (visit !== null) leave();
     },
+    disable() {
+      if (!enabled) return;
+      enabled = false;
+      if (visit !== null) leave();
+      bus.emit('rewards:off', {});
+      // Waiting for a peddler who never comes would hold back every later lesson (also after "play it again").
+      tutorial.machine.skipLesson(PEDDLER_LESSON);
+      tutorial.machine.subscribe(() => tutorial.machine.skipLesson(PEDDLER_LESSON));
+    },
+    enabled: () => enabled,
   };
 }

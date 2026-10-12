@@ -71,6 +71,8 @@ export const rewards: Messages = {
   'rewards.thanks_gold': 'Pleasure doing business! +{gold} gold.',
   'rewards.thanks_boost': '{name}! {does} for {minutes} minutes.',
   'rewards.no_ad': 'No ad right now. Maybe next time.',
+  'rewards.ads_off_title': 'No ads here',
+  'rewards.ads_off': 'Ads are blocked or switched off, so the peddler and the 📺 rewards stay away. Everything else plays the same.',
   'rewards.running': '{name} {time}',
   'rewards.happy_hour.name': 'Happy Hour',
   'rewards.happy_hour.does': 'drinks sell for double',

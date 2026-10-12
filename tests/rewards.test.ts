@@ -55,6 +55,28 @@ describe('the peddler', () => {
     expect(getMultipliers(g.state).sellPrice.toNumber()).toBe(1);
   });
 
+  it('stays away for good without ads in the session, and his lesson does not hold back the later ones', () => {
+    const g = newGame(createInitialState(0), { now: () => 0 });
+    const off = vi.fn();
+    g.world.bus.on('rewards:off', off);
+    g.world.rewards.disable();
+    expect(off).toHaveBeenCalledTimes(1);
+    expect(g.world.rewards.enabled()).toBe(false);
+    expect(g.state.tutorial.completedSteps).toContain('peddler_spot');
+    g.world.tutorial.machine.restart();
+    expect(g.state.tutorial.completedSteps).toEqual(['peddler_spot']);
+  });
+
+  it('leaves at once when ads turn out to be off while he is there', () => {
+    const g = game();
+    g.tick(REWARDS.peddler.firstAfterMs + 100);
+    expect(g.world.rewards.peddler()).not.toBeNull();
+    g.world.rewards.disable();
+    expect(g.world.rewards.peddler()).toBeNull();
+    g.tick(REWARDS.peddler.everyMs * 3);
+    expect(g.world.rewards.peddler()).toBeNull();
+  });
+
   it('offers gold instead of a second power-up while one runs, and leaves when sent off', () => {
     const g = game();
     g.store.update((s) => void (s.rewards = { boost: 'rush', boostEndsAt: 1e12, shopAdAt: 0 }));
@@ -93,21 +115,21 @@ describe('the shop 📺 button', () => {
 describe('midgame ads at natural moments', () => {
   const hero = { id: 'warrior', dungeon: 'swamp', loot: {}, gear: null, xp: 40, level: 1, levelUp: false, injured: false, boss: null };
 
-  it("wait out a new game's first minutes, then come with a room, a hero, the welcome window and (a moment later) a new level", () => {
+  it("wait out a new game's first minutes, then come with a hero and (a moment later) a new level, never after a shop button", () => {
     const g = game(0);
     const ads = { midgame: vi.fn() };
     startPlatform(g.world, { happytime: vi.fn() }, ads);
-    g.world.bus.emit('room:built', { id: 'extension' });
+    g.world.bus.emit('hero:returned', hero);
     expect(ads.midgame).not.toHaveBeenCalled();
     g.at(ADS.newPlayerMs);
     g.world.bus.emit('room:built', { id: 'extension' });
+    expect(ads.midgame).not.toHaveBeenCalled();
     g.world.bus.emit('hero:returned', hero);
-    g.world.bus.emit('welcome:closed', {});
-    expect(ads.midgame).toHaveBeenCalledTimes(3);
+    expect(ads.midgame).toHaveBeenCalledTimes(1);
     g.world.bus.emit('reputation:levelUp', { level: 2 });
-    expect(ads.midgame).toHaveBeenCalledTimes(3);
+    expect(ads.midgame).toHaveBeenCalledTimes(1);
     g.tick(ADS.afterLevelMs + 100);
-    expect(ads.midgame).toHaveBeenCalledTimes(4);
+    expect(ads.midgame).toHaveBeenCalledTimes(2);
   });
 
   it('never come while a lesson is on screen', () => {
@@ -117,7 +139,7 @@ describe('midgame ads at natural moments', () => {
     startPlatform(g.world, { happytime: vi.fn() }, ads);
     g.tick(4_000); // the first customer arrives and the first lesson shows
     expect(g.shown()).not.toBeNull();
-    g.world.bus.emit('welcome:closed', {});
+    g.world.bus.emit('hero:returned', hero);
     expect(ads.midgame).not.toHaveBeenCalled();
   });
 });

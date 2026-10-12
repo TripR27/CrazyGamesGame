@@ -10,7 +10,7 @@ import './welcome.css';
  * The "welcome back" window: shown when a report arrives (or was already waiting), closed with one button. When the staff
  * earned something, a rewarded ad can double it (the player chooses; no ad, no reward).
  */
-export function mountWelcomeBack(root: HTMLElement, world: World, ads: Pick<Ads, 'rewarded'>): () => void {
+export function mountWelcomeBack(root: HTMLElement, world: World, ads: Pick<Ads, 'rewarded' | 'available'>): () => void {
   const backdrop = createEl('div', 'welcome');
   backdrop.hidden = true;
   const card = createEl('div', 'welcome-card');
@@ -22,17 +22,21 @@ export function mountWelcomeBack(root: HTMLElement, world: World, ads: Pick<Ads,
   backdrop.append(card);
   root.append(backdrop);
   let report: OfflineReport | null = null;
-  button.addEventListener('click', () => {
-    backdrop.hidden = true;
-    world.bus.emit('welcome:closed', {});
-  });
+  button.addEventListener('click', () => void (backdrop.hidden = true));
   double.addEventListener('click', () => {
     const shown = report;
     double.disabled = true;
-    ads.rewarded(() => {
-      if (shown !== null) payOfflineAgain(world, shown);
-      double.textContent = t('welcome.doubled');
-    });
+    ads.rewarded(
+      () => {
+        if (shown !== null) payOfflineAgain(world, shown);
+        double.textContent = t('welcome.doubled');
+      },
+      // No ad this time: say so and let the player try again; no ads at all in this session: say why.
+      (unavailable) => {
+        double.textContent = t(unavailable ? 'welcome.ads_off' : 'welcome.no_ad');
+        double.disabled = unavailable;
+      },
+    );
   });
 
   const show = (next: OfflineReport): void => {
@@ -41,7 +45,7 @@ export function mountWelcomeBack(root: HTMLElement, world: World, ads: Pick<Ads,
     title.textContent = view.title;
     button.textContent = view.button;
     lines.replaceChildren(...view.lines.map((line) => createEl('p', 'welcome-line', line)));
-    double.hidden = next.served === 0;
+    double.hidden = next.served === 0 || !ads.available();
     double.disabled = false;
     double.textContent = t('welcome.double');
     backdrop.hidden = false;

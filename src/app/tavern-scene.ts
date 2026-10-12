@@ -121,5 +121,7 @@ export function createGame(parent: string, world: World): Game {
     // Sprites at whole pixels keep the pixel art sharp; the art textures are nearest-neighbour each, so text stays smooth.
     render: { roundPixels: true },
     scene: [new BootScene(), new TavernScene(world)],
+    // No engine banner in the console (no console output in production, SPECS chapter 9).
+    banner: false,
   });
 }

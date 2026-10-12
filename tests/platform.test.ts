@@ -14,7 +14,7 @@ function testClock(start = 1_000_000) {
 function adPlatform() {
   const pending: { type: string; start: () => void; end: (r: AdResult) => void }[] = [];
   const requestAd = (type: string, start: () => void): Promise<AdResult> => new Promise((end) => pending.push({ type, start, end }));
-  return { pending, requestAd };
+  return { pending, requestAd, hasAdblock: (): Promise<boolean> => Promise.resolve(false) };
 }
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
@@ -42,17 +42,21 @@ describe('gameplay events', () => {
 });
 
 describe('ads', () => {
-  it('play a midgame ad at most every 3 minutes, pausing while it plays', async () => {
+  it('play a midgame ad at most every 3 minutes, paused from the request and muted once it starts', async () => {
     const clock = testClock();
     const platform = adPlatform();
     const pauses: boolean[] = [];
     const ads = createAds(platform, clock, (p) => pauses.push(p));
     ads.midgame();
+    expect(ads.busy()).toBe(true);
+    expect(ads.playing()).toBe(false);
+    expect(pauses).toEqual([true]);
     platform.pending[0]?.start();
     expect(ads.playing()).toBe(true);
     platform.pending[0]?.end('finished');
     await flush();
     expect(ads.playing()).toBe(false);
+    expect(ads.busy()).toBe(false);
     expect(pauses).toEqual([true, false]);
     clock.advance(ADS.gapMs - 1000);
     ads.midgame();
@@ -75,6 +79,35 @@ describe('ads', () => {
     platform.pending[1]?.end('finished');
     await flush();
     expect(reward).toHaveBeenCalledTimes(1);
+  });
+
+  it('turn off for the session after an ad blocker or a Basic Launch, so no rewarded button does nothing', async () => {
+    const platform = adPlatform();
+    const off = vi.fn();
+    const ads = createAds(platform, testClock(), () => undefined, off);
+    const none = vi.fn();
+    ads.rewarded(vi.fn(), none);
+    platform.pending[0]?.end('failed');
+    await flush();
+    expect(none).toHaveBeenLastCalledWith(false);
+    expect(ads.available()).toBe(true);
+    ads.rewarded(vi.fn(), none);
+    platform.pending[1]?.end('unavailable');
+    await flush();
+    expect(none).toHaveBeenLastCalledWith(true);
+    expect(ads.available()).toBe(false);
+    expect(off).toHaveBeenCalledTimes(1);
+    ads.rewarded(vi.fn(), none);
+    ads.midgame();
+    expect(platform.pending).toHaveLength(2);
+  });
+
+  it('turn off when the SDK sees an ad blocker at the start', async () => {
+    const off = vi.fn();
+    const ads = createAds({ ...adPlatform(), hasAdblock: () => Promise.resolve(true) }, testClock(), () => undefined, off);
+    await flush();
+    expect(ads.available()).toBe(false);
+    expect(off).toHaveBeenCalledTimes(1);
   });
 
   it('are asked for when a hero comes back, and happytime comes with the great achievements', () => {
