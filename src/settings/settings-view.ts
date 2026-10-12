@@ -36,6 +36,7 @@ function buildWindow() {
   const importButton = createEl('button', 'settings-action', t('settings.import'));
   const message = createEl('p', 'settings-message');
   const reset = createEl('button', 'settings-action settings-danger', t('settings.reset'));
+  const user = createEl('p', 'settings-note settings-user');
   card.append(
     close,
     createEl('h2', 'settings-title', t('settings.title')),
@@ -47,10 +48,11 @@ function buildWindow() {
     code,
     message,
     row(t('settings.reset_label'), reset),
+    user,
   );
   overlay.append(card);
   overlay.hidden = true;
-  return { overlay, close, volume, language, tutorial, exportButton, code, importButton, message, reset };
+  return { overlay, close, volume, language, tutorial, exportButton, code, importButton, message, reset, user };
 }
 
 /**
@@ -58,7 +60,7 @@ function buildWindow() {
  * the save as text (export and import) and starting over (two clicks). A reset or an import reloads the page. The
  * button is the tutorial target `settings-button`. Returns an unmount function.
  */
-export function mountSettings(root: HTMLElement, world: World, saves: SaveCodes): () => void {
+export function mountSettings(root: HTMLElement, world: World, { saves, username }: { saves: SaveCodes; username(): Promise<string | null> }): () => void {
   const { store, bus, clock, tutorial, targets } = world;
   const button = createEl('button', 'side-button settings-button', '⚙');
   const ui = buildWindow();
@@ -72,6 +74,8 @@ export function mountSettings(root: HTMLElement, world: World, saves: SaveCodes)
     ui.code.value = '';
     ui.message.textContent = '';
     ui.reset.textContent = t('settings.reset');
+    ui.user.textContent = '';
+    void username().then((name) => void (ui.user.textContent = name === null ? '' : t('settings.signed_in', { name })));
     ui.overlay.hidden = false;
     bus.emit('settings:opened', {});
   };

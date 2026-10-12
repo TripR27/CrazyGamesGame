@@ -38,14 +38,15 @@ function hookSounds(bus: EventBus<GameEvents>, play: (id: SoundId) => void): (()
 /**
  * Sound: placeholder sounds on game events, music once a file is delivered (`MUSIC`), and a speaker button that turns it
  * all off. Browsers only allow sound after the player clicked, so nothing is made before the first click. The volume
- * and mute come from the settings (`effectiveVolume`). The button is the tutorial target `mute-button`.
+ * and mute come from the settings and the platform (`silenced`: CrazyGames muted the game, or an ad plays). The button
+ * is the tutorial target `mute-button`.
  */
-export function mountAudio(root: HTMLElement, world: World): () => void {
+export function mountAudio(root: HTMLElement, world: World, silenced: () => boolean): () => void {
   const { store, bus, targets } = world;
   let ctx: AudioContext | null = null;
   const lastPlayed = new Map<SoundId, number>();
   const music = MUSIC.src === null ? null : Object.assign(new Audio(MUSIC.src), { loop: true });
-  const volume = (): number => effectiveVolume(store.getState().settings);
+  const volume = (): number => effectiveVolume(store.getState().settings, silenced());
 
   const unlock = (): void => {
     ctx ??= new AudioContext();

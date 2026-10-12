@@ -2,7 +2,9 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 // Only presentation files know Phaser and the DOM; everything else must also run in Node (tests, simulator).
-const PRESENTATION_FILES = ['src/**/*-view.ts', 'src/**/*-scene.ts', 'src/main.ts', 'src/shared/browser.ts'];
+// shared/browser.ts (loop, autosave, localStorage) and platform/crazygames.ts (the CrazyGames SDK) are the two other
+// places that touch the browser.
+const PRESENTATION_FILES = ['src/**/*-view.ts', 'src/**/*-scene.ts', 'src/main.ts', 'src/shared/browser.ts', 'src/platform/crazygames.ts'];
 const BANNED_FOR_LOGIC = ['phaser', '**/*-view', '**/*-scene'];
 
 export default tseslint.config(

@@ -12,6 +12,7 @@ import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
+import type { Ads } from '@/platform/platform';
 import { mountSettings, type SaveCodes } from '@/settings/settings-view';
 import { mountLegacy } from '@/prestige/prestige-view';
 import { mountRecipeBook } from '@/recipes/recipe-book-view';
@@ -61,8 +62,17 @@ export function placeGame(container: HTMLElement, fit: Fit, refit: () => void): 
   refit();
 }
 
+/** What the overlay gets from main.ts besides the world: saves as text, ads, and the platform's mute and user name. */
+export interface UiServices {
+  saves: SaveCodes;
+  ads: Pick<Ads, 'rewarded'>;
+  /** True while sound must be off for the platform: muted by CrazyGames, or an ad is playing. */
+  silenced(): boolean;
+  username(): Promise<string | null>;
+}
+
 /** Builds the DOM overlay on top of the canvas. */
-export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void, saves: SaveCodes): void {
+export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void, services: UiServices): void {
   fitToViewport(root, layout, onFit);
   mountHud(root, world.store, world.targets);
   const panels = createSidePanels(root, layout, world.targets);
@@ -85,8 +95,8 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
       stopTrophies();
     };
   });
-  mountWelcomeBack(root, world.offline.inbox);
+  mountWelcomeBack(root, world, services.ads);
   mountDailyBonus(root, world);
-  mountSettings(root, world, saves);
-  mountAudio(root, world);
+  mountSettings(root, world, services);
+  mountAudio(root, world, services.silenced);
 }

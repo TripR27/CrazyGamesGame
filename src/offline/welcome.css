@@ -35,3 +35,7 @@
   cursor: pointer;
 }
 .welcome-button:hover { background: #a6e676; }
+/* The rewarded-ad offer above the close button. */
+.welcome-double { display: block; margin: 16px auto 0; border-color: #8a5a00; background: #ffd25e; color: #3b2410; font-size: 17px; }
+.welcome-double[hidden] { display: none; }
+.welcome-double:disabled { opacity: 0.7; cursor: default; }
