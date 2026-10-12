@@ -12,7 +12,7 @@ import { resolveTarget } from '@/tutorial/tutorial-guide';
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'seats_buy', 'seats_done',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'seats_buy', 'seats_done',
 ];
 
 /** The lessons before the book lesson are done, and the player has `reputation`. */
@@ -158,7 +158,7 @@ describe('coming back after being away', () => {
   });
 });
 
-const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done'];
+const DONE = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done', 'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done'];
 
 const LATER_LESSONS = ['seats_buy', 'seats_done', 'staff_hire', 'staff_done'];
 

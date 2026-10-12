@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { claimDaily } from '@/daily/daily';
 import { buyUpgradeById } from '@/economy/upgrades';
 import { buildRoomById, requestShop } from '@/rooms/rooms';
 import { buyIngredientById, shelfIds } from '@/brewing/ingredients';
@@ -12,7 +13,7 @@ import { TUTORIAL_STEPS } from '@/tutorial/tutorial-steps';
 
 const BEFORE = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'seats_buy', 'seats_done', 'book_open', 'book_read',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'seats_buy', 'seats_done', 'book_open', 'book_read',
 ];
 
 /** The lessons before the ingredient lesson are done; the player has `reputation` and `gold`. */
@@ -190,8 +191,14 @@ describe('the upgrade hint, played in the real gameRooms', () => {
     gameRooms.world.bus.emit('trophies:opened', {});
     expect(gameRooms.shown()).toBe('trophy_done');
     gameRooms.tick(6_100);
-    expect(gameRooms.shown()).toBeNull();
+    // Then the daily bonus (a new player gets day 1 at once).
+    expect(gameRooms.shown()).toBe('daily_claim');
     expect(gameRooms.state.currencies.gold.toNumber()).toBe(0);
+    claimDaily(gameRooms.world);
+    expect(gameRooms.shown()).toBe('daily_done');
+    gameRooms.tick(6_100);
+    // The bonus pays for an extra seat, so the seat lesson follows at once.
+    expect(gameRooms.shown()).toBe('seats_buy');
   });
 
   it('starts at once after a reload when the player already has the gold', () => {

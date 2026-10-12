@@ -97,6 +97,6 @@ describe('the trophy lesson', () => {
     g.world.bus.emit('trophies:opened', {});
     expect(g.shown()).toBe('trophy_done');
     g.tick(6_100);
-    expect(g.shown()).toBeNull();
+    expect(g.shown()).toBe('daily_claim');
   });
 });

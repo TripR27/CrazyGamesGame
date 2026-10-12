@@ -1,6 +1,7 @@
 import type { BrewStation } from '@/brewing/brewing';
 import { brewableRecipes, firstBuyableIngredient, type IngredientCatalog } from '@/brewing/ingredients';
 import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
+import { dailyOffer } from '@/daily/daily';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
@@ -103,6 +104,9 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'legacy:bought': ({ store }) => Object.values(store.getState().prestige.legacy).some((level) => level > 0),
   'achievement:unlocked': ({ store }) => store.getState().achievements.length > 0,
   'trophies:opened': ({ openTab }) => openTab() === 'trophies',
+  // Claimed before (any day): the daily lesson shows and its first step is done at once.
+  'daily:available': ({ store, clock }) => store.getState().daily.streak > 0 || dailyOffer(store.getState(), clock.now()).available,
+  'daily:claimed': ({ store }) => store.getState().daily.streak > 0,
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
