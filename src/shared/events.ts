@@ -147,6 +147,9 @@ export interface GameEvents {
   /** The Trophies tab came on screen or went off it. */
   'trophies:opened': Record<string, never>;
   'trophies:closed': Record<string, never>;
+  /** The daily bonus can be claimed (a new day began), and it was claimed: day `day` of the streak, for `gold`. */
+  'daily:available': Record<string, never>;
+  'daily:claimed': { day: number; gold: Num };
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

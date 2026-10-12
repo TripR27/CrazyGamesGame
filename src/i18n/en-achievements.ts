@@ -1,6 +1,6 @@
 import type { Messages } from '@/i18n/translator';
 
-/** Achievements, the Trophies tab and the lifetime statistics. */
+/** Achievements, the Trophies tab, the lifetime statistics and the daily bonus. */
 export const achievements: Messages = {
   'trophies.tab': 'Trophies',
   'trophies.title': 'Trophies',
@@ -42,6 +42,12 @@ export const achievements: Messages = {
   'stats.trips': 'Hero trips: {n}',
   'stats.bosses': 'Bosses beaten: {n}',
   'stats.taverns': 'Taverns sold: {n}',
+  'daily.title': '🎁 Daily bonus',
+  'daily.offer': 'Day {day} of {days}: +{gold} gold',
+  'daily.claim': 'Claim',
+  'daily.thanks': 'Come back tomorrow for day {next}!',
+  'tutorial.daily_claim.text': 'A gift for showing up! Claim your daily bonus.',
+  'tutorial.daily_done.text': 'Come back every day: the bonus grows for 7 days in a row. Miss a day and it starts over.',
   'tutorial.trophy_open.text': 'A trophy! Every trophy makes the tavern a little better, for good. Have a look in the Trophies tab.',
   'tutorial.trophy_done.text': 'Here they all are, with how far you got. Your statistics are at the bottom.',
 };

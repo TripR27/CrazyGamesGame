@@ -106,6 +106,8 @@ export interface GameState {
   stats: Stats;
   /** Achievement ids reached (each gives a small bonus for good). */
   achievements: string[];
+  /** The daily bonus: the local day number it was last claimed, and how many days in a row. */
+  daily: { lastDay: number; streak: number };
   tutorial: TutorialProgress;
 }
 
@@ -126,6 +128,7 @@ export function createInitialState(now: number): GameState {
     prestige: { hops: 0, totalHops: 0, runs: 0, runEarned: num(0), legacy: {} },
     stats: { served: 0, vipServed: 0, goldEarned: num(0), trips: 0, bossWins: 0 },
     achievements: [],
+    daily: { lastDay: 0, streak: 0 },
     tutorial: { completedSteps: [], skipped: false },
   };
 }

@@ -1,5 +1,6 @@
 import { startAchievements } from '@/achievements/achievements';
 import { CUSTOMER_SLOTS } from '@/app/layout';
+import { startDaily } from '@/daily/daily';
 import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/brewing/brewing';
 import { brewableRecipes, ingredients, orderableRecipeIds, watchIngredientShop, watchStockUse, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
@@ -193,6 +194,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startPrestige({ store, bus });
   // Lifetime statistics, and achievements as soon as one is reached.
   startAchievements({ store, bus });
+  // Says when a new day's bonus can be claimed while the game is open.
+  startDaily({ store, bus, clock });
   const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
   return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };

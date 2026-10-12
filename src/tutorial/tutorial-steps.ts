@@ -41,7 +41,7 @@ export const GUIDE_TARGETS = [
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
-export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
+export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'daily-claim', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
 
 export const KNOWN_TARGETS: readonly string[] = [...GUIDE_TARGETS, ...FIXED_TARGETS];
 
@@ -239,12 +239,34 @@ export const trophyLesson: readonly TutorialStep[] = [
   },
 ];
 
+/**
+ * The hint for the daily bonus: right after the trophy lesson (a new player gets day 1 at once, so it never waits a
+ * day and holds the other lessons back). Points at the Claim button, then a closing line about the streak.
+ */
+export const dailyLesson: readonly TutorialStep[] = [
+  {
+    id: 'daily_claim',
+    lesson: 'daily',
+    startWhen: { kind: 'event', event: 'daily:available' },
+    target: 'daily-claim',
+    completeOn: { kind: 'event', event: 'daily:claimed' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'daily_done',
+    lesson: 'daily',
+    target: 'hud-gold',
+    completeOn: { kind: 'after', ms: 6000 },
+  },
+];
+
 /** All tutorial steps in order. A new lesson is one more list (here or in tutorial-later-steps.ts) plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...basicsLesson,
   ...likesLesson,
   ...upgradeLesson,
   ...trophyLesson,
+  ...dailyLesson,
   ...seatsLesson,
   ...bookLesson,
   ...ingredientLesson,

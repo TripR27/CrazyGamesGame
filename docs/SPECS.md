@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`) en 18a (`step-18a-achievements`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18a (Statistieken en achievements). **Volgende stap:** 18b (Dagelijkse bonus). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`) en 18b (`step-18b-daily-bonus`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18b (Dagelijkse bonus). **Volgende stap:** 18c (Instellingen). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -45,7 +45,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 16c | Quartermaster: helden op auto en offline | ✅ | `step-16c-quartermaster` |
 | 17 | Prestige | ✅ | `step-17-prestige` |
 | 18a | Statistieken en achievements | ✅ | `step-18a-achievements` |
-| 18b | Dagelijkse bonus | ⬜ | |
+| 18b | Dagelijkse bonus | ✅ | `step-18b-daily-bonus` |
 | 18c | Instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
 | 20 | CrazyGames SDK | ⬜ | |
@@ -223,7 +223,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, trophy (sinds stap 18a), plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, trophy (sinds stap 18a), dagbonus (sinds stap 18b), plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -515,6 +515,17 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 - **Tabblad Trophies** (vijfde tabblad; de tabbladen zijn smaller gemaakt zodat er vijf passen): "2/14 reached", per achievement 🏆 of 🔒 met naam, doel en bonus ("Serve 100 customers · Drinks +2% pricier") en de voortgang ("37/100"), en onderaan de statistieken.
 - **Tutorial-hint** (les `trophy`, na de upgradeles, omdat de speler dan het paneel en de tabbladen kent; de eerste achievement komt al met de eerste klant): wijst Menu en het tabblad Trophies aan (alias `guide-trophies`), daarna de kop van de lijst (doel `trophies-panel`) met een afsluitzin. De eerste stap telt alleen in beeld.
 
+### Dagelijkse bonus (gebouwd in stap 18b; uitwerking door Claude)
+
+- **Code:** `daily/daily.ts` (getallen, de lokale dag, `dailyOffer`, `claimDaily`, en `startDaily` dat één keer per minuut kijkt of er een nieuwe dag begon; één regel in `createWorld`) en `daily/daily-view.ts` met `daily.css` (het kaartje).
+- **Wanneer:** één keer per **kalenderdag van de speler** (lokale middernacht). Een nieuwe speler krijgt dag 1 meteen, zodat de les nooit een dag wacht en de lessen erna niet tegenhoudt.
+- **Reeks:** elke dag op rij is één stap verder, tot dag 7 (daarna blijft het dag 7). Een gemiste dag begint weer bij dag 1.
+- **Beloning:** goud, afhankelijk van het reputatieniveau (dag 1: 50 / 200 / 800 / 3.000 / 10.000 / 30.000 op niveau 1 t/m 6), keer 1 / 1,5 / 2 / 2,5 / 3 / 4 / 6 voor dag 1 t/m 7. Zo blijft de bonus de moeite waard na een verkoop van de taverne (het niveau begint dan opnieuw).
+- **Kaartje:** linksboven onder de HUD: "🎁 Daily bonus · Day 3 of 7: +1.6K gold" met een knop Claim; daarna 3 s "Come back tomorrow for day 4!". Het kaartje wacht zolang een andere tutorial-les in beeld is.
+- **State:** `daily: { lastDay, streak }` (blijft bij het verkopen van de taverne). Events `daily:available` (een nieuwe dag begon terwijl het spel open is) en `daily:claimed`.
+- **Tutorial-hint** (les `daily`, na de trophy-les): wijst de knop Claim aan (doel `daily-claim`), daarna een afsluitzin over de reeks. Wie al eens claimde, krijgt alleen de afsluitzin.
+- **Simulator:** de bot claimt niets (een run duurt minder dan een dag), dus de balans blijft gelijk.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -579,6 +590,7 @@ LegacyDef  { id, baseCost, maxLevel, effects: UpgradeEffect[], startGold? }   //
 // State: prestige: { hops, totalHops, runs, runEarned (Decimal), legacy: { [id]: niveau } } (17)
 AchievementDef { id, stat, goal, bonus: UpgradeEffect, big? }   // stap 18a; tekst achievements.<id>.name
 // State: stats: { served, vipServed, goldEarned (Decimal), trips, bossWins }, achievements: id[] (18a; blijven bij verkopen)
+// State: daily: { lastDay (lokaal dagnummer), streak } (18b; blijft bij verkopen)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -742,7 +754,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 ### Fase D: Afwerking
 *Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (vier losse onderdelen; de eigenaar zei door te gaan zonder te stoppen). Hieronder eerst de oorspronkelijke omschrijving.*
 - [x] **Stap 18a: Statistieken en achievements.** Een `stats`-sectie, 14 achievements met kleine permanente bonussen, een melding en een tabblad Trophies. Tutorial-hint: eerste trophy. Zie hoofdstuk 4, "Statistieken en achievements".
-- [ ] **Stap 18b: Dagelijkse bonus.** Een beloning bij de eerste keer spelen op een dag, met een reeks dagen. Tutorial-hint: eerste dagbonus.
+- [x] **Stap 18b: Dagelijkse bonus.** Een beloning bij de eerste keer spelen op een dag, met een reeks dagen. Tutorial-hint: eerste dagbonus.
 - [ ] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
 - (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
@@ -784,6 +796,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 18b: Dagelijkse bonus (2026-10-12, `step-18b-daily-bonus`)
+- **Gedaan:** (code in `src/daily/` (nieuw: `daily.ts`, `daily-view.ts`, `daily.css`), `src/prestige/prestige.ts` (de reeks blijft bij verkopen), `src/app/` (world, viewport-view), `src/shared/` (state, events), `src/tutorial/` en `src/i18n/en-achievements.ts`; tests in `tests/daily.test.ts` (nieuw) en aanpassingen in de flow-tests)
+  - **Wanneer, reeks, beloning, kaartje, state en tutorial-hint:** zie hoofdstuk 4, "Dagelijkse bonus".
+  - **Flow-tests:** de les `daily` staat na de trophy-les, dus de lijsten "lessen tot en met de plekken" bevatten nu ook `daily_claim` en `daily_done`; in de upgradeles-test volgen na de trophy-les de dagbonus en (met dat goud) meteen de plekkenles.
+  - 6 tests erbij (525 totaal): de lokale dag, het aanbod (dag 1 meteen, groeien, opnieuw na een gemiste dag, het maximum, per niveau), één keer per dag claimen, de melding bij een nieuwe dag, de reeks blijft bij verkopen, en de les.
+- **Waarom (keuzes):** een beloning in goud die met het niveau meegroeit is eenvoudig en blijft nuttig in elke fase; Golden Hop of kerker-ingrediënten als dagbeloning zouden prestige en de helden te veel versnellen. Dag 1 meteen voor nieuwe spelers, omdat een les die een dag wacht alle lessen erna tegenhoudt (de tutorial loopt les voor les). Een klein kaartje in plaats van een venster: het blokkeert niets.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. `npm run simulate -- 60 1` byte-identiek met 18a (de bot claimt niets). In de browser (testsave op Cozy Inn met een reeks van 2 tot gisteren; daarna de oorspronkelijke save teruggezet): het kaartje toonde "Day 3 of 7: +1.6K gold" en de les de afsluitzin (er was al eens geclaimd); Claim gaf 1.600 goud, reeks 3 en "Come back tomorrow for day 4!", en het kaartje verdween na 3 s. Geen consolefouten.
+- **Afwijkingen van het plan:** geen. Dagelijkse taken (GAME_ANALYSE 5.6) zijn niet gebouwd; dat kan later als data.
+- **Nu te proberen:** claim de bonus, en kom morgen terug voor dag 2.
+- **Nog te doen / volgende stap:** stap 18c, Instellingen. Mergen van 16b t/m 18b naar `main` wacht op de eigenaar.
 
 ### Stap 18a: Statistieken en achievements (2026-10-12, `step-18a-achievements`)
 - **Gedaan:** (code in `src/achievements/` (nieuw: `achievements.ts`, `achievements-view.ts`, `achievements.css`), `src/economy/upgrades.ts` (`achievementBonuses`), `src/prestige/prestige.ts` (statistieken en achievements blijven bij verkopen), `src/app/` (world, viewport-view met de gedeelde melding, `panels.css` voor vijf tabbladen), `src/shared/` (state, events, content), `src/tutorial/` en `src/i18n/en-achievements.ts` (nieuw); tests in `tests/achievements.test.ts` (nieuw) en aanpassingen in de flow-tests)
