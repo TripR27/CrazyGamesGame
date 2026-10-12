@@ -1,6 +1,6 @@
 import { Scene, AUTO, Game, Scale } from 'phaser';
 import type { World } from '@/app/world';
-import { drawBar, drawCauldron, drawCustomerSlots, drawRoomShell, drawShelf, drawTables } from '@/app/backdrop-view';
+import { addBackdrop } from '@/app/backdrop-view';
 import { clickCauldron } from '@/brewing/brewing';
 import { shelfCount, shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
@@ -15,7 +15,7 @@ import { createFeedbackLayer } from '@/serving/serving-view';
 
 export const BOOT_SCENE_KEY = 'boot';
 
-/** Entry scene. Asset loading joins here in the art pass; for now everything is drawn in code. */
+/** Entry scene. The pixel art is drawn in code (no files to load), so it goes straight to the tavern. */
 export class BootScene extends Scene {
   constructor() {
     super(BOOT_SCENE_KEY);
@@ -38,7 +38,7 @@ interface Views {
   decor: DecorView;
 }
 
-/** Placeholder cross-section of the tavern: static shapes on one Graphics object, plus the live parts. */
+/** The cross-section of the tavern: a pixel-art backdrop, plus the live parts. */
 export class TavernScene extends Scene {
   private views?: Views;
 
@@ -48,15 +48,9 @@ export class TavernScene extends Scene {
 
   create(): void {
     const { world } = this;
-    const g = this.add.graphics();
-    drawRoomShell(g);
-    drawShelf(g);
-    drawTables(g);
-    drawBar(g);
-    drawCauldron(g);
-    // Decorations lie on the backdrop; the seat outlines go on top, so a rug never hides where customers sit.
+    addBackdrop(this);
+    // Decorations lie on the backdrop, under everything that moves.
     const decor = createDecorView(this, world);
-    drawCustomerSlots(this.add.graphics());
     // The rooms come first, so customers upstairs are drawn in front of them.
     const rooms = createRoomsView(this, world);
     const guild = createGuildView(this, world);
@@ -111,6 +105,8 @@ export function createGame(parent: string, world: World): Game {
     height: GAME_HEIGHT,
     backgroundColor: BACKGROUND_COLOR,
     scale: { mode: Scale.FIT, autoCenter: Scale.CENTER_BOTH },
+    // Sprites at whole pixels keep the pixel art sharp; the art textures are nearest-neighbour each, so text stays smooth.
+    render: { roundPixels: true },
     scene: [new BootScene(), new TavernScene(world)],
   });
 }

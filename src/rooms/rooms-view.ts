@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from 'phaser';
 import type { Graphics } from '@/app/backdrop-view';
-import { type Rect, ROOM_SPOTS, UPPER_BEAM, type RoomSpot } from '@/app/layout';
+import { type Rect, ROOM_SPOTS, type RoomSpot } from '@/app/layout';
 import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
@@ -100,7 +100,6 @@ function createRoom(scene: Scene, room: RoomDef, spot: RoomSpot, services: World
 
 /** The rooms on the upper floor: boarded up with a sign until they are built, then furnished. */
 export function createRoomsView(scene: Scene, services: World): RoomsView {
-  scene.add.graphics().fillStyle(0x5e3a18, 1).fillRect(UPPER_BEAM.x, UPPER_BEAM.y, UPPER_BEAM.w, UPPER_BEAM.h);
   const shown = ROOMS.flatMap((room) => {
     const spot = ROOM_SPOTS[room.id];
     return spot === undefined ? [] : [createRoom(scene, room, spot, services)];
