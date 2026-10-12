@@ -142,6 +142,11 @@ export interface GameEvents {
   'legacy:bought': { id: string };
   'legacy:opened': Record<string, never>;
   'legacy:closed': Record<string, never>;
+  /** An achievement was reached; `big`: one of the great moments (the platform celebrates those later). */
+  'achievement:unlocked': { id: string; big: boolean };
+  /** The Trophies tab came on screen or went off it. */
+  'trophies:opened': Record<string, never>;
+  'trophies:closed': Record<string, never>;
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

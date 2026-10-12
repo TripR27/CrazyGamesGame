@@ -1,3 +1,4 @@
+import { startAchievements } from '@/achievements/achievements';
 import { CUSTOMER_SLOTS } from '@/app/layout';
 import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/brewing/brewing';
 import { brewableRecipes, ingredients, orderableRecipeIds, watchIngredientShop, watchStockUse, type IngredientDef } from '@/brewing/ingredients';
@@ -190,6 +191,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startGuildCauldron({ store, bus, clock, station, guild });
   // Counts the gold of this tavern and says when it can be sold.
   startPrestige({ store, bus });
+  // Lifetime statistics, and achievements as soon as one is reached.
+  startAchievements({ store, bus });
   const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
   return { store, bus, rng, clock, content: c, floor, station, selection, guild, targets: createTargetRegistry(), tutorial, offline };

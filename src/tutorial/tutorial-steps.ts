@@ -34,14 +34,14 @@ export interface TutorialStep {
 
 /** Aliases the guide resolves to a concrete target while playing (see systems/tutorial/guide.ts). */
 export const GUIDE_TARGETS = [
-  'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book',
+  'guide-ingredient', 'guide-drink', 'guide-customer', 'guide-shop', 'guide-book', 'guide-trophies',
   'guide-upgrade', 'guide-staff', 'guide-seats', 'guide-liked', 'guide-vip', 'guide-ingredient-buy', 'guide-new-ingredient',
   'guide-room-buy', 'guide-new-room', 'guide-decor-buy', 'guide-new-decor', 'guide-hero-send', 'guide-loot', 'guide-gear-buy', 'guide-gear-equip', 'guide-hero-drink', 'guide-card',
   'guide-quartermaster-buy', 'guide-hero-auto', 'guide-prestige-sell', 'guide-legacy-buy',
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
-export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
+export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
 
 export const KNOWN_TARGETS: readonly string[] = [...GUIDE_TARGETS, ...FIXED_TARGETS];
 
@@ -218,11 +218,33 @@ export const vipLesson: readonly TutorialStep[] = [
   },
 ];
 
+/**
+ * The hint for the first trophy (it comes with the first customer served): after the upgrade lesson, so the player
+ * already knows the panel and its tabs. The way to the Trophies tab, then the list with a closing line.
+ */
+export const trophyLesson: readonly TutorialStep[] = [
+  {
+    id: 'trophy_open',
+    lesson: 'trophy',
+    startWhen: { kind: 'event', event: 'achievement:unlocked' },
+    target: 'guide-trophies',
+    completeOn: { kind: 'event', event: 'trophies:opened' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'trophy_done',
+    lesson: 'trophy',
+    target: 'trophies-panel',
+    completeOn: { kind: 'after', ms: 6000 },
+  },
+];
+
 /** All tutorial steps in order. A new lesson is one more list (here or in tutorial-later-steps.ts) plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...basicsLesson,
   ...likesLesson,
   ...upgradeLesson,
+  ...trophyLesson,
   ...seatsLesson,
   ...bookLesson,
   ...ingredientLesson,

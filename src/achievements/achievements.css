@@ -1,0 +1,12 @@
+/* The Trophies tab of the side panel. Sizes are design pixels; placeholder styling until the art pass. */
+.trophies-panel { overflow-y: auto; }
+.trophies-title { margin: 0 0 6px; font-size: 20px; }
+.trophies-count { margin: 0 0 8px; font-size: 13px; line-height: 1.3; }
+.trophies-list { display: flex; flex-direction: column; gap: 6px; }
+.trophy { padding: 6px 10px; border: 2px solid #d8c18a; border-radius: 10px; background: #f2ead2; opacity: 0.8; }
+.trophy--reached { background: #fff3c4; border-color: #c9a227; opacity: 1; }
+.trophy-head { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.trophy-progress { font-size: 12px; opacity: 0.75; }
+.trophy-text { margin: 2px 0 0; font-size: 12px; line-height: 1.25; }
+.trophies-subtitle { margin: 10px 0 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.trophies-stats { margin: 0; padding: 0 0 0 16px; font-size: 13px; line-height: 1.5; }

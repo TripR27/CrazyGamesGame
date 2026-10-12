@@ -27,6 +27,7 @@ const TAB_EVENTS = [
   { tab: 'recipes', opened: 'book:opened', closed: 'book:closed' },
   { tab: 'heroes', opened: 'heroes:opened', closed: 'heroes:closed' },
   { tab: 'legacy', opened: 'legacy:opened', closed: 'legacy:closed' },
+  { tab: 'trophies', opened: 'trophies:opened', closed: 'trophies:closed' },
 ] as const;
 
 /**
@@ -100,6 +101,8 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   'prestige:available': ({ store }) => store.getState().prestige.runs > 0 || canSell(store.getState()),
   'prestige:done': ({ store }) => store.getState().prestige.runs > 0,
   'legacy:bought': ({ store }) => Object.values(store.getState().prestige.legacy).some((level) => level > 0),
+  'achievement:unlocked': ({ store }) => store.getState().achievements.length > 0,
+  'trophies:opened': ({ openTab }) => openTab() === 'trophies',
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };

@@ -63,7 +63,7 @@ describe('drinking in the real game', () => {
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done',
 ];
 
 /** Every lesson before the VIP one is done, and the player has `reputation`. */
@@ -109,7 +109,7 @@ describe('the VIP hint, played in the real game', () => {
 });
 
 const BASICS_LIKES = ['basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done'];
-const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done'];
+const UPGRADE = ['upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done'];
 const SEATS = ['seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done'];
 
 /** A game with the earlier lessons done and `gold` in the till. */

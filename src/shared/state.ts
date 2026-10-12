@@ -71,6 +71,16 @@ export interface PrestigeState {
   legacy: Record<string, number>;
 }
 
+/** Lifetime counters (they survive selling the tavern); achievements and the Trophies tab read them. */
+export interface Stats {
+  served: number;
+  vipServed: number;
+  /** Gold earned in all taverns: what customers paid (tips too) and the staff's pay while away. */
+  goldEarned: Num;
+  trips: number;
+  bossWins: number;
+}
+
 export interface GameState {
   meta: MetaState;
   currencies: CurrencyState;
@@ -93,6 +103,9 @@ export interface GameState {
   /** The Quartermaster was bought: heroes can go on Auto. */
   quartermaster: boolean;
   prestige: PrestigeState;
+  stats: Stats;
+  /** Achievement ids reached (each gives a small bonus for good). */
+  achievements: string[];
   tutorial: TutorialProgress;
 }
 
@@ -111,6 +124,8 @@ export function createInitialState(now: number): GameState {
     gearOwned: [],
     quartermaster: false,
     prestige: { hops: 0, totalHops: 0, runs: 0, runEarned: num(0), legacy: {} },
+    stats: { served: 0, vipServed: 0, goldEarned: num(0), trips: 0, bossWins: 0 },
+    achievements: [],
     tutorial: { completedSteps: [], skipped: false },
   };
 }
