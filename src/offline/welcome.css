@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(10, 6, 2, 0.55);
-  font-family: sans-serif;
+  font-family: var(--font);
   pointer-events: auto;
 }
 .welcome[hidden] { display: none; }

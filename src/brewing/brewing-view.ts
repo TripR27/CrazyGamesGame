@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from 'phaser';
 import { CAULDRON, FLOOR_Y, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } from '@/app/layout';
-import { addAnimation, addPixelSprite, addStripTexture, designSize } from '@/app/textures-view';
+import { addAnimation, addPixelSprite, addStripTexture, designSize, ropeTexture, signTexture } from '@/app/textures-view';
 import { brewProgress, type BrewStation } from '@/brewing/brewing';
 import { CAULDRON_BOIL, CAULDRON_FRAMES, CAULDRON_SIMMER, FIRE_FRAMES, MUG as MUG_ART } from '@/brewing/brewing-art';
 import { ingredientArt } from '@/brewing/ingredient-art';
@@ -8,6 +8,7 @@ import { PIXEL } from '@/shared/pixels';
 import { t } from '@/i18n/translator';
 import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
+import { FONT } from '@/config';
 
 /** The main colour of each ingredient, for the recipe book (DOM) and anything else that needs a colour, not the art. */
 const COLORS: Readonly<Record<string, number>> = {
@@ -23,7 +24,7 @@ const COLORS: Readonly<Record<string, number>> = {
 
 /** A dungeon ingredient that ran out stays on the shelf, greyed out. */
 const EMPTY_TINT = 0x6b6b6b;
-const COUNT_STYLE = { fontFamily: 'sans-serif', fontSize: '12px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 3, y: 1 } };
+const COUNT_STYLE = { fontFamily: FONT, fontSize: '12px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 3, y: 1 } };
 
 const FALLBACK = 0xcccccc;
 
@@ -114,16 +115,17 @@ export function createCauldronView(
 
 const RADIUS = 22;
 const HOVER_SCALE = PIXEL * 1.12;
+/** Painted on the wood: light letters with a dark shadow. They wrap so neighbouring signs never touch. */
 const LABEL_STYLE = {
-  fontFamily: 'sans-serif',
-  fontSize: '13px',
-  color: '#fff2cc',
+  fontFamily: FONT,
+  fontSize: '12px',
+  color: '#fff2d6',
   align: 'center',
-  // Labels wrap to the width of one shelf slot so neighbours never overlap.
-  wordWrap: { width: SHELF_GAP - 6 },
-  stroke: '#2a1a0c',
-  strokeThickness: 3,
+  wordWrap: { width: SHELF_GAP - 26 },
+  shadow: { offsetX: 1, offsetY: 1, color: '#2a1608', fill: true },
 };
+/** The name sign hangs on two short ropes under the shelf; the ropes sit on the sign's top nails. */
+const TAG = { rope: 8, pad: 9, lineHeight: 14, nailInset: 3.5 * PIXEL } as const;
 
 export interface ShelfView {
   /** Rebuilds the shelf when the set of ingredients changed, and keeps the stock counts up to date. Call every frame. */
@@ -140,9 +142,18 @@ interface Counter {
 
 function createItem(scene: Scene, id: string, slot: { x: number; y: number }, onClick: (id: string) => void) {
   const dot = addPixelSprite(scene, slot.x, SHELF.y, ingredientTexture(scene, id));
-  const label = scene.add
-    .text(slot.x, SHELF.y + SHELF.h + 10, t(textKey('ingredients', id, 'name')), LABEL_STYLE)
-    .setOrigin(0.5, 0);
+  const top = SHELF.y + SHELF.h + TAG.rope;
+  const label = scene.add.text(slot.x, 0, t(textKey('ingredients', id, 'name')), LABEL_STYLE).setOrigin(0.5);
+  // Sized by the number of wrapped lines: the measured height of the pixel font is too small for two lines.
+  const textHeight = Math.max(label.height, label.getWrappedText().length * TAG.lineHeight);
+  const rope = ropeTexture(scene, TAG.rope + PIXEL * 2);
+  const ropes = [-1, 1].map(() => scene.add.image(slot.x, SHELF.y + SHELF.h, rope).setOrigin(0.5, 0).setScale(PIXEL));
+  const tag = scene.add.image(slot.x, top, signTexture(scene, label.width, textHeight, TAG.pad)).setOrigin(0.5, 0).setScale(PIXEL);
+  const reach = (tag.width * PIXEL) / 2 - TAG.nailInset;
+  ropes.forEach((r, i) => r.setX(slot.x + (i === 0 ? -reach : reach)));
+  // The sign is made after the text (it is sized to it), so bring the text back in front; the bottom rows are its thickness.
+  label.setY(top + (tag.height * PIXEL) / 2 - PIXEL / 2);
+  scene.children.bringToTop(label);
   dot.setInteractive({ useHandCursor: true });
   dot.on('pointerover', () => dot.setScale(HOVER_SCALE));
   dot.on('pointerout', () => dot.setScale(PIXEL));
@@ -150,7 +161,7 @@ function createItem(scene: Scene, id: string, slot: { x: number; y: number }, on
     onClick(id);
     scene.tweens.add({ targets: dot, scale: { from: PIXEL * 1.3, to: HOVER_SCALE }, duration: 120 });
   });
-  return { dot, label };
+  return { dot, label, tag, ropes };
 }
 
 function createCounter(scene: Scene, id: string, dot: GameObjects.Sprite): Counter {
@@ -200,7 +211,7 @@ export function createShelfView(scene: Scene, { getShelf, getCount, onClick, tar
         return slot === undefined ? [] : [{ id, ...createItem(scene, id, slot, onClick) }];
       });
       counters = items.filter(({ id }) => getCount(id) !== null).map(({ id, dot }) => createCounter(scene, id, dot));
-      objects = [...items.flatMap(({ dot, label }) => [dot, label]), ...counters.map((c) => c.text)];
+      objects = [...items.flatMap(({ dot, label, tag, ropes }) => [dot, label, tag, ...ropes]), ...counters.map((c) => c.text)];
       for (const counter of counters) showCount(counter, getCount(counter.id) ?? 0);
     },
   };
@@ -212,7 +223,7 @@ const HIT = { w: 56, h: 56 };
 // Neighbouring labels are wider than the slot gap, so every other one stands higher.
 const LABEL_LIFT = 20;
 const LABEL_HEIGHT = 30;
-const READY_LABEL_STYLE = { fontFamily: 'sans-serif', fontSize: '13px', color: '#fff2cc', backgroundColor: '#2a1a0ccc' };
+const READY_LABEL_STYLE = { fontFamily: FONT, fontSize: '13px', color: '#fff2cc', backgroundColor: '#2a1a0ccc' };
 
 interface Spot {
   parts: GameObjects.Container;

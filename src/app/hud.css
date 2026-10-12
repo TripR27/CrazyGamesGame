@@ -4,7 +4,7 @@
   left: 16px;
   display: flex;
   gap: 12px;
-  font-family: sans-serif;
+  font-family: var(--font);
   pointer-events: none;
 }
 

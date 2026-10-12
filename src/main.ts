@@ -1,4 +1,5 @@
 import { createGame } from '@/app/tavern-scene';
+import { FONT } from '@/config';
 import { createSideLayout } from '@/app/ui-model';
 import { placeGame, mountUi } from '@/app/viewport-view';
 import { createWorld } from '@/app/world';
@@ -41,6 +42,9 @@ startLoopDriver({ advance: () => (ads.playing() ? ticker.skip() : ticker.advance
 startAutosave({ store, manager, clock, bus });
 debug('save status', status, platform.environment, store.getState());
 const layout = createSideLayout();
+// Text in the canvas needs the pixel font before it is drawn; after a moment the game starts anyway (with the fallback).
+const FONT_WAIT_MS = 1500;
+await Promise.race([document.fonts.load(`16px ${FONT}`), new Promise((resolve) => window.setTimeout(resolve, FONT_WAIT_MS))]);
 const game = createGame('game', world);
 registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
 const saves = { exportCode: () => manager.exportString(store.getState()), importCode: (code: string) => manager.importString(code) };

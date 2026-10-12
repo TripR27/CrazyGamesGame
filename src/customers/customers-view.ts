@@ -1,6 +1,7 @@
 import type { Scene, GameObjects } from 'phaser';
 import { DOOR_ENTRY, SEAT_SLOTS } from '@/app/layout';
-import { addAnimation, addPixelSprite, addStripTexture } from '@/app/textures-view';
+import { addAnimation, addPixelSprite, addStripTexture, bubbleTexture } from '@/app/textures-view';
+import { TAIL_ROWS } from '@/app/ui-art';
 import type { World } from '@/app/world';
 import { clickCustomer } from '@/serving/serving';
 import { CUSTOMER_FRAME as F, CUSTOMER_LOOKS, customerFrames } from '@/customers/customer-art';
@@ -9,7 +10,9 @@ import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
 import { effectIcon } from '@/serving/effects';
 import { type Effect, textKey } from '@/shared/content';
+import { PIXEL } from '@/shared/pixels';
 import { createPool, type Pool } from '@/shared/pool';
+import { FONT } from '@/config';
 
 /** What a customer is doing; each pose is one animation per customer type. */
 type Pose = 'walk' | 'sit' | 'cross' | 'drink' | 'cheer' | 'sulk';
@@ -69,7 +72,9 @@ const BAR_Y = -96;
 const BUBBLE_HEIGHT = 28;
 const BUBBLE_Y = { low: -122, raised: -152 } as const;
 const BAR_COLORS = { good: 0x7be05a, warn: 0xf5c542, bad: 0xe2563b } as const;
-const EDGE = { normal: 0x5e3a18, marked: 0x3fbf3f } as const;
+/** Room around the order text inside the bubble, and its smallest width (design pixels). */
+const BUBBLE_PAD = 8;
+const BUBBLE_MIN_TEXT = 50;
 /** Below this much patience left, a waiting customer sits there cross. */
 const CROSS_BELOW = 0.25;
 const STORMED_OUT_TINT = 0xffb0a0;
@@ -105,28 +110,42 @@ function createPatienceBar(scene: Scene) {
   return { barBack, bar };
 }
 
-/** The bubble with the order text, and the green arrow that marks a customer for the picked-up drink. */
+/**
+ * The pixel-art speech bubble with the order text (its tail points at the customer), and the green arrow that marks a
+ * customer for the picked-up drink; a marked bubble gets a green edge. The bubble texture is made once per size.
+ */
 function createBubble(scene: Scene) {
-  const bubble = scene.add.rectangle(0, BUBBLE_Y.low, 100, BUBBLE_HEIGHT, 0xfff7e0).setStrokeStyle(2, EDGE.normal);
+  const bubble = scene.add.image(0, BUBBLE_Y.low, '__DEFAULT').setOrigin(0.5, 0).setScale(PIXEL);
   const text = scene.add
-    .text(0, BUBBLE_Y.low, '', { fontFamily: 'sans-serif', fontSize: '14px', color: '#3b2410' })
+    .text(0, BUBBLE_Y.low, '', { fontFamily: FONT, fontSize: '14px', color: '#3b2410' })
     .setOrigin(0.5);
   const mark = scene.add
-    .text(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, '▼', { fontFamily: 'sans-serif', fontSize: '18px', color: '#3fbf3f' })
+    .text(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, '▼', { fontFamily: FONT, fontSize: '18px', color: '#3fbf3f', stroke: '#1a3a1a', strokeThickness: 3 })
     .setOrigin(0.5, 1)
     .setVisible(false);
+  const keys = { normal: '__DEFAULT', marked: '__DEFAULT' };
+  let marked = false;
+  const fit = (y: number): void => {
+    bubble.setTexture(marked ? keys.marked : keys.normal);
+    const bodyHeight = (bubble.height - TAIL_ROWS) * PIXEL;
+    bubble.setY(y - bodyHeight / 2);
+    mark.setY(y - bodyHeight / 2 - 2);
+  };
   return {
     parts: [bubble, text],
     mark,
     show(orderText: string, y: number): void {
       text.setText(orderText).setY(y);
-      mark.setY(y - BUBBLE_HEIGHT / 2);
-      bubble.setSize(Math.max(70, text.width + 20), BUBBLE_HEIGHT).setY(y);
+      const width = Math.max(BUBBLE_MIN_TEXT, text.width);
+      keys.normal = bubbleTexture(scene, width, text.height, 'parchment', true, BUBBLE_PAD);
+      keys.marked = bubbleTexture(scene, width, text.height, 'marked', true, BUBBLE_PAD);
+      fit(y);
     },
-    setMarked(marked: boolean): void {
-      if (mark.visible === marked) return;
-      mark.setVisible(marked);
-      bubble.setStrokeStyle(marked ? 4 : 2, marked ? EDGE.marked : EDGE.normal);
+    setMarked(now: boolean): void {
+      if (marked === now) return;
+      marked = now;
+      mark.setVisible(now);
+      fit(text.y);
     },
   };
 }

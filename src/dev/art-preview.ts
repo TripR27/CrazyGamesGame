@@ -108,10 +108,25 @@ function spriteSheet(): PixelImage {
   return img;
 }
 
-/** The preview images for `npm run pixel:preview`: name and image at art size. */
-export function artPreviews(): { name: string; image: PixelImage }[] {
+/** A part of an image (art pixels), for the thumbnails. */
+function crop(from: PixelImage, x: number, y: number, w: number, h: number): PixelImage {
+  const img = createImage(w, h);
+  for (let row = 0; row < h; row++) img.data.set(from.data.subarray(((y + row) * from.width + x) * 4, ((y + row) * from.width + x + w) * 4), row * w * 4);
+  return img;
+}
+
+/**
+ * The preview images for `npm run pixel:preview`: name, image at art size and how many times to scale it up. The three
+ * thumbnails are raw material for the CrazyGames covers (landscape 1920×1080, square 800×800, portrait 800×1200); the
+ * title and logo go on top in an image editor.
+ */
+export function artPreviews(): { name: string; image: PixelImage; scale: number }[] {
+  const tavern = tavernScene();
   return [
-    { name: 'tavern', image: tavernScene() },
-    { name: 'sprites', image: spriteSheet() },
+    { name: 'tavern', image: tavern, scale: 4 },
+    { name: 'sprites', image: spriteSheet(), scale: 8 },
+    { name: 'thumbnail-landscape', image: tavern, scale: 6 },
+    { name: 'thumbnail-square', image: crop(tavern, 110, 40, 100, 100), scale: 8 },
+    { name: 'thumbnail-portrait', image: crop(tavern, 120, 10, 100, 150), scale: 8 },
   ];
 }

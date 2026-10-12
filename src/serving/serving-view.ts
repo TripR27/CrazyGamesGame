@@ -7,6 +7,7 @@ import { withEffectIcon } from '@/serving/effects';
 import { type Effect, textKey } from '@/shared/content';
 import { formatNumber, type Num } from '@/shared/numbers';
 import { createPool } from '@/shared/pool';
+import { FONT } from '@/config';
 
 const RISE_PX = 50;
 const DURATION_MS = 2200;
@@ -29,7 +30,7 @@ export function createFloatingTexts(scene: Scene): FloatingTexts {
   const pool = createPool<GameObjects.Text>({
     create: () =>
       scene.add
-        .text(0, 0, '', { fontFamily: 'sans-serif', align: 'center', wordWrap: { width: MAX_WIDTH } })
+        .text(0, 0, '', { fontFamily: FONT, align: 'center', wordWrap: { width: MAX_WIDTH } })
         .setOrigin(0.5, 1)
         .setDepth(50),
     reset: (text) => text.setVisible(false),
