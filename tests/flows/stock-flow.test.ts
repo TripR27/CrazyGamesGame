@@ -137,7 +137,7 @@ describe('the loot lesson', () => {
     const g = newGame(state);
     expect(g.shown()).toBeNull();
     g.world.store.update((s) => void (s.ingredientStock.witch_moss = 2));
-    g.world.bus.emit('hero:returned', { id: 'warrior', dungeon: 'swamp', loot: { witch_moss: 2 }, gear: null, xp: 40, level: 1, levelUp: false, injured: false });
+    g.world.bus.emit('hero:returned', { id: 'warrior', dungeon: 'swamp', loot: { witch_moss: 2 }, gear: null, xp: 40, level: 1, levelUp: false, injured: false, boss: null });
     expect(g.shown()).toBe('loot_shelf');
     expect(g.guide().lootId).toBe('witch_moss');
     g.tick(8_100);

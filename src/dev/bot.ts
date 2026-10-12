@@ -5,6 +5,7 @@ import { waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, buyDecorById, firstBuyableDecor } from '@/decor/decor';
 import { upgrades } from '@/economy/upgrade-data';
 import { buyUpgradeById, quoteFor } from '@/economy/upgrades';
+import { bossBar, currentBoss, inZone, strikeBoss } from '@/heroes/boss-fight';
 import { sendHero } from '@/heroes/expedition';
 import { buyGearById, equipGear, firstBuyableGear, gearToWear } from '@/heroes/gear';
 import { aimHeroCauldron, clickShelf, drinkTaker } from '@/heroes/hero-brewing';
@@ -24,6 +25,8 @@ import type { GameState } from '@/shared/state';
 
 /** While saving for a room, the bot still buys upgrades that cost less than this share of the room. */
 const SAVING_SHARE = 0.1;
+/** The bot strikes at a boss when the pointer is within this many times the green zone (it misses now and then). */
+const BOSS_AIM = 1.6;
 
 /** The cheapest upgrade the bot may buy now, at most `limit` gold. */
 function cheapestUpgrade(state: GameState, limit: Num): string | undefined {
@@ -107,8 +110,24 @@ function heroDrink(world: World, state: GameState): RecipeDef | undefined {
   return plain.find((r) => r.effect === 'luck') ?? plain[0];
 }
 
+/**
+ * Strikes at an open boss when the pointer is near the green zone (within `BOSS_AIM` times its width), so like a
+ * player about 60% of its strikes hit. Returns true when it struck.
+ */
+function fightBoss(world: World, state: GameState): boolean {
+  const now = world.clock.now();
+  const open = currentBoss(state, now);
+  const hero = open === undefined ? undefined : state.heroes[open.heroId];
+  if (open === undefined || hero === undefined) return false;
+  const bar = bossBar(world.content.recipes, open.heroId, hero, open.trip, now, { pointer: 0, zone: 0 });
+  if (!inZone(bar.pointer, bar.zone * BOSS_AIM)) return false;
+  strikeBoss(world, open.heroId);
+  return true;
+}
+
 /** Takes the bold option of an open card, or fills the hero cauldron for a hero at home with room in the bag (one click). */
 function playHeroes(world: World, state: GameState): boolean {
+  if (fightBoss(world, state)) return true;
   const open = currentCard(state, world.clock.now());
   const bold = open === undefined ? undefined : boldOption(open.trip, open.card);
   if (open !== undefined && bold !== undefined) {

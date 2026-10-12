@@ -71,3 +71,30 @@
 .trip-card-option--safe { border-color: #b0a37c; background: #f2dfb0; color: #3b2410; }
 .trip-card-bar { height: 6px; margin-top: 8px; border-radius: 3px; background: #e6dcc0; overflow: hidden; }
 .trip-card-fill { height: 100%; background: #e8641a; }
+
+/* The boss fight: next to the choice card, below the shelf labels. */
+.boss-fight {
+  position: absolute;
+  left: 492px;
+  top: 356px;
+  width: 300px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 3px solid #4a1f5e;
+  border-radius: 12px;
+  background: #f4e8ff;
+  color: #2c1238;
+  font-family: sans-serif;
+  pointer-events: auto;
+  z-index: 2;
+}
+.boss-fight[hidden] { display: none; }
+.boss-title { display: block; font-size: 16px; }
+.boss-text { margin: 4px 0 8px; font-size: 13px; line-height: 1.3; }
+.boss-bar { position: relative; height: 26px; border: 2px solid #4a1f5e; border-radius: 6px; background: #e0cfa0; cursor: pointer; touch-action: manipulation; }
+.boss-zone { position: absolute; top: 0; bottom: 0; background: #6fcf4a; }
+.boss-pointer { position: absolute; top: -4px; bottom: -4px; width: 4px; margin-left: -2px; background: #2c1238; }
+.boss-marks { margin: 6px 0; font-size: 18px; letter-spacing: 6px; text-align: center; }
+.boss-strike { width: 100%; padding: 8px 6px; border: 2px solid #8a2a1a; border-radius: 10px; background: #f07a4a; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+.boss-strike:hover:not(:disabled) { background: #ff9566; }
+.boss-strike:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }

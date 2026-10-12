@@ -4,6 +4,7 @@ import { createSidePanels } from '@/app/panels-view';
 import { computeFit, type Fit, type SideLayout } from '@/app/ui-model';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { mountShop } from '@/economy/shop-view';
+import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
@@ -65,6 +66,7 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   world.bus.on('shop:requested', () => panels.show('shop'));
   world.bus.on('heroes:requested', () => panels.show('heroes'));
   mountTripCards(root, world);
+  mountBossFight(root, world);
   mountTutorial(root, world.tutorial, world.targets);
   mountLevelUpToast(root, (show) => world.bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, world.content.customerTypes))));
   mountWelcomeBack(root, world.offline.inbox);

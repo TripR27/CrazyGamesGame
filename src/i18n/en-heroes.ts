@@ -33,7 +33,10 @@ export const heroes: Messages = {
   'heroes.bag_empty': '🎒 Empty. Brew in the guild cauldron, or hand them a drink from the bar.',
   'heroes.took': '🎒 Took along: {drinks}',
   'heroes.took_nothing': '🎒 Took nothing along.',
-  'heroes.drinks_help': 'Drinks along: ⚡ back sooner, 🍀 more loot, 💪 tougher, 💖 better with strangers. The mage gets more out of them.',
+  'heroes.drinks_help':
+    'Drinks along: ⚡ back sooner, 🍀 more loot, 💪 tougher and a wider green zone against the boss, 💖 better with strangers. The mage gets more out of them.',
+  'heroes.boss_won': '👑 Beat {boss}!',
+  'heroes.boss_lost': '{boss} got away',
   'heroes.in_bag': '+{drink} in the bag',
   'heroes.cauldron_aimed': 'Next ingredients go into the hero cauldron',
   'heroes.cauldron_tavern': 'Back to the tavern cauldron',
@@ -76,6 +79,12 @@ export const heroes: Messages = {
   'cards.witch.text': '"A drink, dearie, and I might be generous." A charm drink makes her very generous.',
   'cards.witch.give': 'Give her {drink}',
   'cards.witch.walk': 'Walk on (safe)',
+  'bosses.bog_witch.name': 'the Bog Witch',
+  'boss.title': '{hero} vs. {boss}!',
+  'boss.text': 'Strike when the pointer is in the green. Three strikes, each one faster.',
+  'boss.strike': 'Strike!',
+  'boss.won': 'Victory! {boss} drops her treasure.',
+  'boss.lost': '{boss} cackles and flies off. No harm done.',
   'dungeons.swamp.name': 'the Swamp',
   'dungeons.swamp.description': 'Frogs, mud and a grumpy witch. Heroes bring back Bog Pearl and Witch Moss.',
   'tutorial.hero_send.text': 'Heroes upstairs! Open the Heroes tab and send {hero} to the Swamp. Mud, frogs, free ingredients.',
@@ -87,6 +96,8 @@ export const heroes: Messages = {
   'tutorial.hero_brew_fill.text': 'Now brew, like for a customer. {heroIngredient} is a start. The drink goes straight into a bag, never on the bar.',
   'tutorial.card_pick.text': 'A choice on the way! Bold choices bring more, safe ones bring {cardHero} home in one piece. Ten seconds.',
   'tutorial.card_done.text': 'No time to choose? Then they play it safe, also while you are away. Choosing yourself pays more.',
+  'tutorial.boss_fight.text': 'The boss! Hit Strike when the pointer is in the green. Win and {bossHero} brings home her treasure.',
+  'tutorial.boss_done.text': 'Not here to fight? Then the boss just leaves them alone. Strength drinks make the green zone wider.',
   'tutorial.hero_done.text':
     'Off they go. They come back on their own, even when the game is closed. Injured? Hand them a drink from the bar.',
 };

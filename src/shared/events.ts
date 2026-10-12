@@ -104,6 +104,8 @@ export interface GameEvents {
     level: number;
     levelUp: boolean;
     injured: boolean;
+    /** How the boss fight went, or null when the player did not fight (the default outcome). */
+    boss: 'won' | 'lost' | null;
   };
   /** Gear in the Heroes tab: a piece can be bought (after not being able to), was bought, or was put on a hero. */
   'gear:affordable': Record<string, never>;
@@ -118,6 +120,13 @@ export interface GameEvents {
   /** A choice card opened on a hero's trip, and it was decided (`picked`: by the player, otherwise the safe default). */
   'card:opened': { heroId: string; cardId: string };
   'card:resolved': { heroId: string; cardId: string; optionId: string; picked: boolean };
+  /**
+   * The boss at the end of a hero's trip showed up, was struck (`hit`: in the green zone), and the fight is over: after the
+   * last strike, or when the hero came back first (`result` null: the player did not fight).
+   */
+  'boss:opened': { heroId: string; dungeon: string };
+  'boss:struck': { heroId: string; hit: boolean };
+  'boss:resolved': { heroId: string; result: 'won' | 'lost' | null };
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;
   /** The Heroes tab came on screen or went off it. */

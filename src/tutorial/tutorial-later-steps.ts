@@ -127,6 +127,27 @@ export const cardLesson: readonly TutorialStep[] = [
 ];
 
 /**
+ * The hint for the first boss: points at the strike button while the fight is on, then a closing line. The fight ends
+ * with `boss:resolved` also when the hero comes back first, so the hint never waits for nothing.
+ */
+export const bossLesson: readonly TutorialStep[] = [
+  {
+    id: 'boss_fight',
+    lesson: 'boss',
+    startWhen: { kind: 'event', event: 'boss:opened' },
+    target: 'boss-strike',
+    completeOn: { kind: 'event', event: 'boss:resolved' },
+    onlyWhenShown: true,
+  },
+  {
+    id: 'boss_done',
+    lesson: 'boss',
+    target: 'hud-gold',
+    completeOn: { kind: 'after', ms: 6000 },
+  },
+];
+
+/**
  * The hint for the first loot: when a hero first brings dungeon ingredients home, points at one on the shelf. It
  * explains the count (every drink with it uses one) and sends the player to the recipe book for what to make.
  */

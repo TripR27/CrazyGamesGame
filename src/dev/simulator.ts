@@ -66,6 +66,9 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     once(`returned:${id}`, `${name('heroes', id)} back from the swamp`);
     if (gear !== null) once(`found:${gear}`, `found ${name('gear', gear)}`);
   });
+  bus.on('boss:resolved', ({ heroId, result }) => {
+    if (result === 'won') once(`boss:${heroId}`, `${name('heroes', heroId)} beat the boss`);
+  });
   bus.on('gear:bought', ({ id }) => {
     timeline.purchases.push(now());
     once(`gear:${id}`, `bought ${name('gear', id)}`);

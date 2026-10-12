@@ -1,4 +1,5 @@
 import type { World } from '@/app/world';
+import { bossMods, bossResult, runBoss, STRIKES } from '@/heroes/boss-fight';
 import { type GearDrop, gearPower, unfoundDrops } from '@/heroes/gear';
 import { completeHeroes, gainXp, HEROES, HERO_CLASSES, heroStatus, injuryChance, newHero, recruitGuildHeroes } from '@/heroes/heroes';
 import { addMods, cardMods, decideCard, defaultOption, drinkMods, drinkPower, scheduleCards, TRIP_CARDS } from '@/heroes/trip-cards';
@@ -102,7 +103,7 @@ function rollGear(state: Pick<GameState, 'gearOwned'>, dungeon: DungeonDef, rng:
 }
 
 /**
- * A trip is over: loot into the stock (more with a sword, luck drinks and bold choices), XP (and levels), maybe a piece
+ * A trip is over: loot into the stock (more with a sword, luck drinks, bold choices and a won boss fight), XP (and levels), maybe a piece
  * of gear, and maybe an injury (less likely with a shield or strength, more after risky choices) that rests from the
  * moment they were back.
  */
@@ -111,7 +112,8 @@ function returnHero({ store, bus, rng, content }: Pick<World, 'store' | 'bus' | 
   const hero = store.getState().heroes[heroId] ?? newHero();
   const level = hero.level;
   const power = drinkPower(heroId, hero);
-  const mods = addMods(drinkMods(content.recipes, trip.drinks, power), cardMods(content.recipes, trip, power));
+  const boss = bossResult(heroId, level, trip);
+  const mods = addMods(addMods(drinkMods(content.recipes, trip.drinks, power), cardMods(content.recipes, trip, power)), bossMods(boss, trip.dungeon));
   const loot = dungeon === undefined ? {} : rollLoot(dungeon, rng, gearPower(hero, 'sword') + mods.loot);
   for (const [id, n] of Object.entries(mods.extra)) loot[id] = (loot[id] ?? 0) + n;
   const injured = rng() < Math.min(1, Math.max(0, injuryChance(level, gearPower(hero, 'shield')) + mods.injury));
@@ -128,7 +130,9 @@ function returnHero({ store, bus, rng, content }: Pick<World, 'store' | 'bus' | 
     if (gear !== null) s.gearOwned.push(gear);
   });
   const now = store.getState().heroes[heroId]?.level ?? level;
-  bus.emit('hero:returned', { id: heroId, dungeon: trip.dungeon, loot, gear, xp, level: now, levelUp: gained > 0, injured });
+  // A fight that was cut short (or never fought) ends here; a finished one was announced at its last strike.
+  if ((trip.boss?.hits.length ?? 0) < STRIKES) bus.emit('boss:resolved', { heroId, result: boss });
+  bus.emit('hero:returned', { id: heroId, dungeon: trip.dungeon, loot, gear, xp, level: now, levelUp: gained > 0, injured, boss });
   bus.emit('saveRequested', {});
 }
 
@@ -162,7 +166,10 @@ export function returnHeroes(world: TripWorld): void {
   }
 }
 
-/** Runs the heroes: the warrior moves in with the guild hall, cards open and close, and trips end once their time has come. */
+/**
+ * Runs the heroes: the warrior moves in with the guild hall, cards open and close, the boss shows up near the end, and
+ * trips end once their time has come.
+ */
 export function startHeroes(world: TripWorld): void {
   completeHeroes(world.store);
   recruitGuildHeroes(world);
@@ -172,6 +179,7 @@ export function startHeroes(world: TripWorld): void {
   const announced = new Set<object>();
   world.bus.on('tick', () => {
     runCards(world, announced);
+    runBoss(world, announced);
     returnHeroes(world);
   });
 }
