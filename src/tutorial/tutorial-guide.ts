@@ -123,6 +123,7 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   // The way to a tab: unfold the panel first, then pick the tab. Once it is open the step is done by its event.
   'guide-shop': (ctx) => toTab(ctx, 'shop') ?? null,
   'guide-book': (ctx) => toTab(ctx, 'recipes') ?? null,
+  'guide-trophies': (ctx) => toTab(ctx, 'trophies') ?? null,
   // In the shop: the way there first, then the upgrade itself.
   'guide-staff': (ctx) => inShop(ctx, 'upgrade', ctx.affordableStaffId),
   'guide-seats': (ctx) => inShop(ctx, 'upgrade', ctx.affordableSeatsId),

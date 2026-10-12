@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { newGame } from './helpers';
+import { ACHIEVEMENTS } from '@/achievements/achievements';
 import { clickIngredient } from '@/brewing/brewing';
 import {
   brewableRecipes, ingredients, orderableRecipeIds, ownedIngredients, shelfCount, shelfIds, usableIngredientIds, usesStock,
@@ -121,6 +122,9 @@ describe('dungeon drinks elsewhere', () => {
     state.upgrades = { brewer_assistant: 7, waitress: 7, night_shift: 1 };
     const withDungeon = late({ bog_pearl: 50, witch_moss: 50 }, recipes.filter((r) => usesStock(r, ingredients)).map((r) => r.id));
     withDungeon.upgrades = state.upgrades;
+    // Knowing more recipes reaches more achievements (with bonuses); give both the same, to compare only the drinks.
+    state.achievements = ACHIEVEMENTS.map((a) => a.id);
+    withDungeon.achievements = state.achievements;
     const gold = (s: GameState): number => {
       const g = newGame(s);
       g.world.offline.handleAway(3_600_000);

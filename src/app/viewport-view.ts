@@ -1,3 +1,5 @@
+import { toAchievementToast } from '@/achievements/achievements';
+import { mountTrophies } from '@/achievements/achievements-view';
 import type { World } from '@/app/world';
 import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
@@ -65,11 +67,20 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountRecipeBook({ root, panels }, world);
   mountHeroes({ root, panels }, world);
   mountLegacy({ root, panels }, world);
+  mountTrophies({ root, panels }, world);
   world.bus.on('shop:requested', () => panels.show('shop'));
   world.bus.on('heroes:requested', () => panels.show('heroes'));
   mountTripCards(root, world);
   mountBossFight(root, world);
   mountTutorial(root, world.tutorial, world.targets);
-  mountLevelUpToast(root, (show) => world.bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, world.content.customerTypes))));
+  // A new reputation level and a new achievement share the toast at the top of the game.
+  mountLevelUpToast(root, (show) => {
+    const stopLevels = world.bus.on('reputation:levelUp', ({ level }) => show(toLevelUpView(level, world.content.customerTypes)));
+    const stopTrophies = world.bus.on('achievement:unlocked', ({ id }) => show(toAchievementToast(id)));
+    return () => {
+      stopLevels();
+      stopTrophies();
+    };
+  });
   mountWelcomeBack(root, world.offline.inbox);
 }

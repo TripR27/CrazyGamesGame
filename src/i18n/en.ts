@@ -1,3 +1,4 @@
+import { achievements } from '@/i18n/en-achievements';
 import { heroes } from '@/i18n/en-heroes';
 import { decor, rooms, shop, upgrades } from '@/i18n/en-shop';
 import type { Messages } from '@/i18n/translator';
@@ -249,4 +250,5 @@ export const en: Messages = {
   ...rooms,
   ...decor,
   ...heroes,
+  ...achievements,
 };
