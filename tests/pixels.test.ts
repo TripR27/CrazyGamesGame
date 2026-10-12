@@ -7,6 +7,9 @@ import { ingredients } from '@/brewing/ingredients';
 import { DECORATIONS } from '@/decor/decor';
 import { rugImage, TORCHES, TROPHIES } from '@/decor/decor-art';
 import { ART } from '@/dev/art-preview';
+import { hasIcons, splitIcons } from '@/app/icon-art';
+import { effectIcon } from '@/serving/effects';
+import { EFFECTS } from '@/shared/content';
 import { bubbleImage, FRAME_SIZE, FRAME_STYLES, frameImage, ropeImage, signImage, TAIL_ROWS } from '@/app/ui-art';
 import { heroFrames } from '@/heroes/hero-art';
 import { HERO_CLASSES } from '@/heroes/heroes';
@@ -68,6 +71,13 @@ describe('pixel art', () => {
     const sign = signImage(30, 12);
     expect(sign.data[((6 * 30) + 15) * 4 + 3]).toBe(255);
     expect(ropeImage(5).height).toBe(5);
+  });
+
+  it('splits a text into words and pixel icons, and finds icons for the effect emoji', () => {
+    expect(splitIcons('♥⚡ Slime Sap')).toEqual([{ icon: '♥' }, { icon: '⚡' }, { text: ' Slime Sap' }]);
+    expect(splitIcons('Sell · 🌼️ 5')).toEqual([{ text: 'Sell · ' }, { icon: '🌼' }, { text: ' 5' }]);
+    expect(hasIcons('plain words')).toBe(false);
+    for (const effect of EFFECTS) expect(hasIcons(effectIcon(effect)), effect).toBe(true);
   });
 
   it('reports a row of the wrong width and an unknown colour', () => {

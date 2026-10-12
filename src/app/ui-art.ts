@@ -18,6 +18,15 @@ export const FRAME_STYLES = {
   marked: { edge: 0x2f8a2f, fill: 0xf2ffe6, shade: 0xc8eab0, light: 0xffffff },
   wood: { edge: 0x3b2410, fill: 0xdcaa6c, shade: 0xb07a40, light: 0xf0c88a },
   dark: { edge: 0x120b05, fill: 0x2e1d10, shade: 0x22150a, light: 0x4a3220 },
+  // Buttons and cards in the DOM panels.
+  gold: { edge: 0x5a3a10, fill: 0xf5c542, shade: 0xc99a2a, light: 0xfff2a0 },
+  green: { edge: 0x1f3a10, fill: 0x8fd45f, shade: 0x5fa83a, light: 0xc8f0a0 },
+  stone: { edge: 0x6b5f48, fill: 0xe0d6bc, shade: 0xc0b394, light: 0xf2ead6 },
+  red: { edge: 0x5a1a10, fill: 0xf07a4a, shade: 0xc04a2a, light: 0xffb090 },
+  plum: { edge: 0x2c1238, fill: 0xf4e8ff, shade: 0xd8c4ec, light: 0xffffff },
+  card: { edge: 0x8a6a3a, fill: 0xfffdf3, shade: 0xeadfc0, light: 0xffffff },
+  // A wooden card on the panel's wooden wall (light text on it).
+  plank: { edge: 0x1e1006, fill: 0x8b5a2b, shade: 0x6b4423, light: 0xa5703a },
 } as const satisfies Readonly<Record<string, FrameStyle>>;
 
 export type FrameName = keyof typeof FRAME_STYLES;
@@ -101,3 +110,51 @@ export const FRAME_SLICE = 3;
 
 /** A 9×9 frame for CSS `border-image` (slice 3): the same box as the bubbles, stretched by the browser. */
 export const frameImage = (style: FrameStyle): PixelImage => bubbleImage(FRAME_SIZE, FRAME_SIZE, style, false);
+
+/** The side panel's frame: a dark edge and two pixels of wood around parchment (slice 3, like the other frames). */
+export function panelFrameImage(): PixelImage {
+  const image = createImage(FRAME_SIZE, FRAME_SIZE);
+  fillRect(image, 0, 0, FRAME_SIZE, FRAME_SIZE, SIGN_WOOD.edge);
+  fillRect(image, 1, 1, FRAME_SIZE - 2, FRAME_SIZE - 2, SIGN_WOOD.plank);
+  fillRect(image, 1, 1, FRAME_SIZE - 2, 1, SIGN_WOOD.top);
+  fillRect(image, 1, FRAME_SIZE - 2, FRAME_SIZE - 2, 1, SIGN_WOOD.bottom);
+  fillRect(image, FRAME_SLICE, FRAME_SLICE, FRAME_SIZE - 2 * FRAME_SLICE, FRAME_SIZE - 2 * FRAME_SLICE, FRAME_STYLES.parchment.fill);
+  return image;
+}
+
+/** A 16×16 tile of parchment with faint fibres and specks, repeated behind the panels. */
+export function paperImage(): PixelImage {
+  const size = 16;
+  const image = createImage(size, size);
+  fillRect(image, 0, 0, size, size, 0xf6e7c4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const n = (x * 7 + y * 13 + x * y) % 29;
+      if (n === 0) setPixel(image, x, y, 0xe8d3a6);
+      else if (n === 7) setPixel(image, x, y, 0xfbf0d6);
+      else if (n === 15 && x % 3 === 0) setPixel(image, x, y, 0xdcc391);
+    }
+  }
+  return image;
+}
+
+/**
+ * A tile of dark wooden wall (32×15: three planks of five rows, with seams, staggered joints and grain), repeated behind
+ * the side panel and the windows.
+ */
+export function woodWallImage(): PixelImage {
+  const w = 32;
+  const rows = 5;
+  const image = createImage(w, rows * 3);
+  const tones = [0x5e3a18, 0x4f3014, 0x684220] as const;
+  for (let plank = 0; plank < 3; plank++) {
+    const top = plank * rows;
+    fillRect(image, 0, top, w, rows, tones[plank] ?? 0x5e3a18);
+    fillRect(image, 0, top, w, 1, 0x2a1608);
+    fillRect(image, 0, top + 1, w, 1, 0x7a4e26);
+    const joint = (plank * 11 + 5) % w;
+    fillRect(image, joint, top + 1, 1, rows - 1, 0x2a1608);
+    for (let x = 0; x < w; x++) if ((x * 5 + plank * 9) % 13 === 0) fillRect(image, x, top + 3, 2, 1, 0x3e2610);
+  }
+  return image;
+}

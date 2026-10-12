@@ -8,16 +8,7 @@
   pointer-events: none;
 }
 
-.hud-item {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: rgba(27, 18, 9, 0.8);
-  color: #fff2cc;
-  font-size: 22px;
-}
+.hud-item { display: flex; align-items: baseline; gap: 8px; padding: 2px 10px; border: 6px solid transparent; border-image: var(--frame-dark) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #fff2cc; font-size: 22px; }
 
 .hud-label {
   font-size: 14px;
@@ -49,14 +40,7 @@
   color: #ffd9ee;
 }
 
-.hud-level-bar {
-  display: block;
-  width: 96px;
-  height: 5px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-}
+.hud-level-bar { display: block; width: 96px; height: 6px; border: 2px solid #120b05; background: #4a3220; overflow: hidden; }
 
 .hud-level-fill {
   display: block;

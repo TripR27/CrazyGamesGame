@@ -1,4 +1,4 @@
-import type { GameObjects, Scene } from 'phaser';
+import type { Scene } from 'phaser';
 import { CAULDRON, SEAT_SLOTS } from '@/app/layout';
 import type { World } from '@/app/world';
 import { t } from '@/i18n/translator';
@@ -8,6 +8,7 @@ import { type Effect, textKey } from '@/shared/content';
 import { formatNumber, type Num } from '@/shared/numbers';
 import { createPool } from '@/shared/pool';
 import { FONT } from '@/config';
+import { createIconText, type IconText } from '@/app/icon-text-view';
 
 const RISE_PX = 50;
 const DURATION_MS = 2200;
@@ -25,33 +26,30 @@ export interface FloatingTexts {
   show(x: number, y: number, text: string, options?: FloatOptions): void;
 }
 
-/** Pooled text that rises and fades; used for "+gold" and funny lines. */
+/** Pooled text (with pixel icons for the emoji) that rises and fades; used for "+gold" and funny lines. */
 export function createFloatingTexts(scene: Scene): FloatingTexts {
-  const pool = createPool<GameObjects.Text>({
-    create: () =>
-      scene.add
-        .text(0, 0, '', { fontFamily: FONT, align: 'center', wordWrap: { width: MAX_WIDTH } })
-        .setOrigin(0.5, 1)
-        .setDepth(50),
-    reset: (text) => text.setVisible(false),
+  const pool = createPool<IconText>({
+    create: () => {
+      const text = createIconText(scene, { fontFamily: FONT, align: 'center', wordWrap: { width: MAX_WIDTH } }, 1);
+      text.container.setDepth(50);
+      return text;
+    },
+    reset: (text) => text.container.setVisible(false),
   });
 
   return {
     show(x, y, text, { color = '#ffffff', size = 17 } = {}) {
-      const label = pool.acquire();
-      label
-        .setText(text)
-        .setStyle({ color, fontSize: `${size}px`, stroke: '#2a1a0c', strokeThickness: 4 })
-        .setPosition(Math.min(1140, Math.max(140, x)), y)
-        .setAlpha(1)
-        .setVisible(true);
+      const floating = pool.acquire();
+      floating.setStyle({ color, fontSize: `${size}px`, stroke: '#2a1a0c', strokeThickness: 4 });
+      floating.setText(text);
+      const label = floating.container.setPosition(Math.min(1140, Math.max(140, x)), y).setAlpha(1).setVisible(true);
       scene.tweens.add({
         targets: label,
         y: y - RISE_PX,
         alpha: { from: 1, to: 0, delay: HOLD_MS, duration: DURATION_MS - HOLD_MS },
         duration: DURATION_MS,
         ease: 'Sine.easeOut',
-        onComplete: () => pool.release(label),
+        onComplete: () => pool.release(floating),
       });
     },
   };
