@@ -6,6 +6,10 @@ Elke gebruikte asset staat hier met bron en licentie (SPECS.md, hoofdstuk 4, Ass
 
 Alle sprites en de achtergrond zijn tekstrasters met een palet in de TypeScript-code (`src/**/*-art.ts`), zelf gemaakt voor dit spel en vrij te gebruiken. Er zijn geen beeldbestanden: het spel maakt de textures bij het starten. Voorbeelden: `npm run pixel:preview` (schrijft naar `art/pixel/`).
 
+## Covers voor CrazyGames (`art/covers/`, niet in de game)
+
+`cover-landscape.png` (1920×1080), `cover-square.png` (800×800) en `cover-portrait.png` (800×1200): de eigen taverne-art uit `npm run pixel:preview` met de titel in Pixelify Sans (zie hieronder, OFL staat gebruik in afbeeldingen toe), gemaakt met `scripts/covers/make_covers.py` (stap 23). Vrij te gebruiken.
+
 ## Lettertype (`public/fonts/`)
 
 | bestand | grootte | herkomst en licentie |
