@@ -2,25 +2,28 @@
 .shop-title { margin: 0; font-size: 20px; }
 .shop-amounts { display: flex; gap: 4px; }
 .shop-amount {
-  padding: 4px 10px;
-  border: 2px solid #5e3a18;
-  border-radius: 8px;
-  background: #f2dfb0;
-  color: #3b2410;
+  padding: 0 6px;
+  border: 6px solid transparent;
+  border-image: var(--frame-wood) 3 fill / 6px;
+  image-rendering: pixelated;
+  background: none;
+  color: #2a1608;
+  font-family: var(--font);
   font-size: 14px;
   cursor: pointer;
 }
-.shop-amount--on { background: #f5c542; font-weight: bold; }
+.shop-amount--on { border-image: var(--frame-gold) 3 fill / 6px; font-weight: bold; }
 
 .shop-list { display: flex; flex-direction: column; flex: 1; gap: 8px; min-height: 0; overflow-y: auto; }
 .shop-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border: 2px solid #d8c18a;
-  border-radius: 10px;
-  background: #fffdf3;
+  padding: 2px 4px;
+  border: 6px solid transparent;
+  border-image: var(--frame-plank) 3 fill / 6px;
+  image-rendering: pixelated;
+  background: none;
 }
 .shop-row--maxed { opacity: 0.6; }
 .shop-row[hidden], .shop-kind[hidden] { display: none; }
@@ -32,16 +35,19 @@
 .shop-buy {
   flex: none;
   width: 104px;
-  padding: 8px 6px;
-  border: 2px solid #3d6b22;
-  border-radius: 10px;
-  background: #8fd45f;
+  padding: 2px 2px;
+  border: 6px solid transparent;
+  border-image: var(--frame-green) 3 fill / 6px;
+  image-rendering: pixelated;
+  background: none;
   color: #1f3a10;
+  font-family: var(--font);
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
 }
-.shop-buy:hover:not(:disabled) { background: #a6e676; }
-.shop-buy:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+.shop-buy:hover:not(:disabled) { filter: brightness(1.08); }
+.shop-buy:active:not(:disabled) { transform: translateY(2px); }
+.shop-buy:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
 
 .shop-kind { margin: 6px 0 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }

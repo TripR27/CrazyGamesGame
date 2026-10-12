@@ -1,6 +1,7 @@
 import type { Scene, GameObjects } from 'phaser';
 import { DOOR_ENTRY, SEAT_SLOTS } from '@/app/layout';
 import { addAnimation, addPixelSprite, addStripTexture, bubbleTexture } from '@/app/textures-view';
+import { createIconText, iconTexture } from '@/app/icon-text-view';
 import { TAIL_ROWS } from '@/app/ui-art';
 import type { World } from '@/app/world';
 import { clickCustomer } from '@/serving/serving';
@@ -75,6 +76,8 @@ const BAR_COLORS = { good: 0x7be05a, warn: 0xf5c542, bad: 0xe2563b } as const;
 /** Room around the order text inside the bubble, and its smallest width (design pixels). */
 const BUBBLE_PAD = 8;
 const BUBBLE_MIN_TEXT = 50;
+/** The green arrow over a customer who wants the drink the player holds. */
+const MARK_SCALE = 3;
 /** Below this much patience left, a waiting customer sits there cross. */
 const CROSS_BELOW = 0.25;
 const STORMED_OUT_TINT = 0xffb0a0;
@@ -116,13 +119,8 @@ function createPatienceBar(scene: Scene) {
  */
 function createBubble(scene: Scene) {
   const bubble = scene.add.image(0, BUBBLE_Y.low, '__DEFAULT').setOrigin(0.5, 0).setScale(PIXEL);
-  const text = scene.add
-    .text(0, BUBBLE_Y.low, '', { fontFamily: FONT, fontSize: '14px', color: '#3b2410' })
-    .setOrigin(0.5);
-  const mark = scene.add
-    .text(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, '▼', { fontFamily: FONT, fontSize: '18px', color: '#3fbf3f', stroke: '#1a3a1a', strokeThickness: 3 })
-    .setOrigin(0.5, 1)
-    .setVisible(false);
+  const text = createIconText(scene, { fontFamily: FONT, fontSize: '14px', color: '#3b2410' });
+  const mark = scene.add.image(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, iconTexture(scene, '▼')).setOrigin(0.5, 1).setScale(MARK_SCALE).setVisible(false);
   const keys = { normal: '__DEFAULT', marked: '__DEFAULT' };
   let marked = false;
   const fit = (y: number): void => {
@@ -132,10 +130,11 @@ function createBubble(scene: Scene) {
     mark.setY(y - bodyHeight / 2 - 2);
   };
   return {
-    parts: [bubble, text],
+    parts: [bubble, text.container],
     mark,
     show(orderText: string, y: number): void {
-      text.setText(orderText).setY(y);
+      text.setText(orderText);
+      text.container.setY(y);
       const width = Math.max(BUBBLE_MIN_TEXT, text.width);
       keys.normal = bubbleTexture(scene, width, text.height, 'parchment', true, BUBBLE_PAD);
       keys.marked = bubbleTexture(scene, width, text.height, 'marked', true, BUBBLE_PAD);
@@ -145,7 +144,7 @@ function createBubble(scene: Scene) {
       if (marked === now) return;
       marked = now;
       mark.setVisible(now);
-      fit(text.y);
+      fit(text.container.y);
     },
   };
 }

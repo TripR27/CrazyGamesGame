@@ -1,4 +1,4 @@
-/* The Heroes tab of the side panel. Sizes are design pixels; placeholder styling until the art pass. */
+/* The Heroes tab of the side panel. Sizes are design pixels. */
 .heroes-panel { overflow-y: auto; }
 .heroes-title { margin: 0 0 8px; font-size: 20px; }
 .heroes-no-guild { margin: 0 0 8px; font-size: 14px; line-height: 1.3; }
@@ -6,43 +6,33 @@
 .heroes-stock-title[hidden] { display: none; }
 .heroes-stock-title { margin: 6px 0 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
 .heroes-stock { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
-.heroes-stock-item { padding: 3px 8px; border: 2px solid #d8c18a; border-radius: 8px; background: #fffdf3; font-size: 13px; }
+.heroes-stock-item { padding: 0 4px; border: 6px solid transparent; border-image: var(--frame-plank) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; font-size: 13px; }
 
 .heroes-list { display: flex; flex-direction: column; gap: 8px; }
-.hero-card { padding: 8px 10px; border: 2px solid #d8c18a; border-radius: 10px; background: #fffdf3; }
+.hero-card { padding: 2px 4px; border: 6px solid transparent; border-image: var(--frame-plank) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; }
 .hero-card[hidden] { display: none; }
 .hero-head { display: flex; justify-content: space-between; gap: 8px; font-size: 16px; }
 .hero-level { font-size: 13px; opacity: 0.75; }
 .hero-tagline { margin: 2px 0 6px; font-size: 13px; font-style: italic; line-height: 1.25; }
-.hero-xp-bar { position: relative; height: 16px; border: 2px solid #5e3a18; border-radius: 6px; background: #e6dcc0; overflow: hidden; }
+.hero-xp-bar { position: relative; height: 16px; border: 2px solid #2c1238; background: #e6dcc0; overflow: hidden; }
 .hero-xp-bar[hidden] { display: none; }
 .hero-xp-fill { height: 100%; background: #b36bff; }
 .hero-xp { position: absolute; inset: 0; font-size: 11px; line-height: 16px; text-align: center; }
 .hero-status { margin: 6px 0; font-size: 13px; line-height: 1.25; }
 
-.hero-button {
-  width: 100%;
-  padding: 8px 6px;
-  border: 2px solid #3d6b22;
-  border-radius: 10px;
-  background: #8fd45f;
-  color: #1f3a10;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.hero-button:hover:not(:disabled) { background: #a6e676; }
-.hero-button:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+.hero-button { width: 100%; padding: 2px; border: 6px solid transparent; border-image: var(--frame-green) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #1f3a10; font-family: var(--font); font-size: 14px; font-weight: bold; cursor: pointer; }
+.hero-button:hover:not(:disabled) { filter: brightness(1.08); }
+.hero-button:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
 /* Auto: a smaller switch below the main button, green while on. */
-.hero-auto { width: 100%; margin-top: 4px; padding: 4px 6px; border: 2px solid #b0a37c; border-radius: 8px; background: #f2dfb0; color: #3b2410; font-size: 13px; font-weight: bold; cursor: pointer; }
+.hero-auto { width: 100%; margin-top: 4px; padding: 0 4px; border: 6px solid transparent; border-image: var(--frame-wood) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #2a1608; font-family: var(--font); font-size: 13px; font-weight: bold; cursor: pointer; }
 .hero-auto[hidden] { display: none; }
-.hero-auto--on { border-color: #3d6b22; background: #cdeeb0; color: #1f3a10; }
+.hero-auto--on { border-image: var(--frame-green) 3 fill / 6px; color: #1f3a10; }
 
 .hero-gear { display: grid; gap: 3px; margin: 4px 0 6px; }
 .hero-gear[hidden] { display: none; }
 .hero-slot { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 6px; font-size: 12px; }
 .hero-slot-name { font-weight: bold; }
-.hero-slot-select { min-width: 0; padding: 2px 4px; border: 2px solid #d8c18a; border-radius: 6px; background: #fff; color: #3b2410; font-size: 12px; }
+.hero-slot-select { min-width: 0; padding: 1px 4px; border: 2px solid #8b5a2b; background: #fffdf3; color: #3b2410; font-family: var(--font); font-size: 12px; }
 .hero-slot-select:disabled { opacity: 0.6; }
 .heroes-gear-shop { display: flex; flex-direction: column; gap: 8px; }
 .heroes-gear-shop .shop-row[hidden] { display: none; }
@@ -51,54 +41,28 @@
 .heroes-help[hidden] { display: none; }
 
 /* A choice card on a trip: left in the game below the shelf labels, never over the bar or the cauldron. */
-.trip-card {
-  position: absolute;
-  left: 176px;
-  top: 356px;
-  width: 300px;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border: 3px solid #5e3a18;
-  border-radius: 12px;
-  background: #fff7e0;
-  color: #3b2410;
-  font-family: var(--font);
-  pointer-events: auto;
-  z-index: 2;
-}
+.trip-card { position: absolute; left: 176px; top: 356px; width: 300px; box-sizing: border-box; padding: 2px 6px; border: 12px solid transparent; border-image: var(--frame-panel) 3 / 12px; image-rendering: pixelated; background: var(--wood) 0 0 / 128px 60px; background-clip: padding-box; text-shadow: 1px 1px 0 #1e1006; color: #fff2d6; font-family: var(--font); pointer-events: auto; z-index: 2; }
 .trip-card[hidden] { display: none; }
 .trip-card-title { display: block; font-size: 16px; }
 .trip-card-text { margin: 4px 0 8px; font-size: 13px; line-height: 1.3; }
 .trip-card-options { display: flex; flex-direction: column; gap: 6px; }
-.trip-card-option { padding: 6px 8px; border: 2px solid #3d6b22; border-radius: 8px; background: #8fd45f; color: #1f3a10; font-size: 13px; font-weight: bold; cursor: pointer; }
-.trip-card-option:hover { background: #a6e676; }
-.trip-card-option--safe { border-color: #b0a37c; background: #f2dfb0; color: #3b2410; }
-.trip-card-bar { height: 6px; margin-top: 8px; border-radius: 3px; background: #e6dcc0; overflow: hidden; }
+.trip-card-option { padding: 0 6px; border: 6px solid transparent; border-image: var(--frame-green) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #1f3a10; font-family: var(--font); font-size: 13px; font-weight: bold; cursor: pointer; }
+.trip-card-option:hover { filter: brightness(1.08); }
+.trip-card-option--safe { border-image: var(--frame-wood) 3 fill / 6px; color: #2a1608; }
+.trip-card-bar { height: 6px; margin-top: 8px; border: 2px solid #5e3a18; background: #e6dcc0; overflow: hidden; }
 .trip-card-fill { height: 100%; background: #e8641a; }
 
 /* The boss fight: next to the choice card, below the shelf labels, never over the bar or the cauldron. */
-.boss-fight {
-  position: absolute;
-  left: 488px;
-  top: 356px;
-  width: 204px;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border: 3px solid #4a1f5e;
-  border-radius: 12px;
-  background: #f4e8ff;
-  color: #2c1238;
-  font-family: var(--font);
-  pointer-events: auto;
-  z-index: 2;
-}
+.boss-fight { position: absolute; left: 488px; top: 356px; width: 204px; box-sizing: border-box; padding: 2px 6px; border: 12px solid transparent; border-image: var(--frame-plum) 3 fill / 12px; image-rendering: pixelated; background: none; color: #2c1238; font-family: var(--font); pointer-events: auto; z-index: 2; }
 .boss-fight[hidden] { display: none; }
 .boss-title { display: block; font-size: 16px; }
 .boss-text { margin: 4px 0 8px; font-size: 13px; line-height: 1.3; }
-.boss-bar { position: relative; height: 26px; border: 2px solid #4a1f5e; border-radius: 6px; background: #e0cfa0; cursor: pointer; touch-action: manipulation; }
+.boss-bar { position: relative; height: 26px; border: 3px solid #2c1238; background: #e0cfa0; cursor: pointer; touch-action: manipulation; }
 .boss-zone { position: absolute; top: 0; bottom: 0; background: #6fcf4a; }
 .boss-pointer { position: absolute; top: -4px; bottom: -4px; width: 4px; margin-left: -2px; background: #2c1238; }
 .boss-marks { margin: 6px 0; font-size: 18px; letter-spacing: 6px; text-align: center; }
-.boss-strike { width: 100%; padding: 8px 6px; border: 2px solid #8a2a1a; border-radius: 10px; background: #f07a4a; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
-.boss-strike:hover:not(:disabled) { background: #ff9566; }
-.boss-strike:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+.boss-strike { width: 100%; padding: 2px; border: 6px solid transparent; border-image: var(--frame-red) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #fff; font-family: var(--font); font-size: 16px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+.boss-strike:hover:not(:disabled) { filter: brightness(1.08); }
+.boss-strike:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
+.trip-card button { text-shadow: none; }
+.trip-card-title { color: #f5c542; }

@@ -1,4 +1,6 @@
-/* The side panel, its tabs and the one button that unfolds it. Sizes are design pixels. */
+/* The side panel, its tabs and the one button that unfolds it. Sizes are design pixels.
+   The frames are pixel art (app/ui-art.ts, handed to CSS by app/pixel-dom-view.ts as --frame-<style>, --frame-panel and
+   --paper): a 3-pixel corner shown at 4× (12px) for windows and the panel, at 2× (6px) for buttons, tabs and cards. */
 .side-button, .side-panel { font-family: var(--font); pointer-events: auto; }
 
 /* Sits in the top-right corner of the game, left of the open panel. */
@@ -7,20 +9,22 @@
   top: 12px;
   right: calc(var(--side-w, 0px) + 16px);
   min-width: 64px;
-  padding: 10px 22px;
-  border: 3px solid #5e3a18;
-  border-radius: 20px;
-  background: #f5c542;
+  padding: 4px 16px;
+  border: 6px solid transparent;
+  border-image: var(--frame-gold) 3 fill / 6px;
+  image-rendering: pixelated;
+  background: none;
   color: #3b2410;
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   z-index: 2;
 }
-.side-button:hover { background: #ffd865; }
+.side-button:hover { filter: brightness(1.08); }
+.side-button:active { transform: translateY(2px); }
 
-/* A column just right of the game, as tall as the game. Game and panel are fitted into the window together
-   (see ui/side-layout.ts), so serving keeps working while the panel is open. */
+/* A column just right of the game, as tall as the game: a wooden frame around a wall of dark planks. Game and panel are fitted into
+   the window together (see ui/side-layout.ts), so serving keeps working while the panel is open. */
 .side-panel {
   position: absolute;
   top: 0;
@@ -30,25 +34,30 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding: 14px;
-  border-left: 4px solid #5e3a18;
-  background: #fff7e0;
-  color: #3b2410;
+  padding: 6px 8px;
+  border: 12px solid transparent;
+  border-image: var(--frame-panel) 3 / 12px;
+  background: var(--wood) 0 0 / 128px 60px; background-clip: padding-box;
+  image-rendering: pixelated;
+  color: #fff2d6;
+  text-shadow: 1px 1px 0 #1e1006;
   z-index: 1;
 }
 .side-panel[hidden] { display: none; }
 
-/* Five tabs share the width: they shrink to fit (min-width 0) and keep a small padding. */
-.side-tabs { display: flex; gap: 4px; margin: -4px 0 12px; border-bottom: 3px solid #d8c18a; }
+/* Five wooden tabs share the width: they shrink to fit (min-width 0); the open one is gold. */
+.side-tabs { display: flex; gap: 2px; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 4px solid #2a1608; }
 .side-tab {
+  text-shadow: none;
   flex: 1 1 0;
   min-width: 0;
-  padding: 8px 2px;
-  border: 2px solid #d8c18a;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  background: #f2dfb0;
-  color: #3b2410;
+  padding: 2px 0;
+  border: 6px solid transparent;
+  border-image: var(--frame-wood) 3 fill / 6px;
+  image-rendering: pixelated;
+  background: none;
+  color: #2a1608;
+  font-family: var(--font);
   font-size: 14px;
   font-weight: bold;
   white-space: nowrap;
@@ -56,8 +65,26 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
-.side-tab:hover { background: #f7e8c2; }
-.side-tab--on { border-color: #5e3a18; background: #f5c542; }
+.side-tab:hover { filter: brightness(1.08); }
+.side-tab--on { border-image: var(--frame-gold) 3 fill / 6px; }
 
 .side-tab-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .side-tab-body[hidden] { display: none; }
+
+/* Titles in the panel: gold on the wood. */
+.shop-title, .book-title, .heroes-title, .legacy-title, .trophies-title { color: #f5c542; letter-spacing: 0.02em; }
+
+/* Section labels between groups in a list. */
+.shop-kind, .heroes-stock-title, .legacy-subtitle, .trophies-subtitle { color: #e0aa6a; opacity: 1; }
+
+/* Scrollbars in the wooden style. */
+.side-panel ::-webkit-scrollbar { width: 10px; }
+.side-panel ::-webkit-scrollbar-track { background: #2a1608; }
+.side-panel ::-webkit-scrollbar-thumb { background: #a5703a; border: 2px solid #1e1006; }
+
+/* The pixel icons that replace emoji in every text (app/pixel-dom-view.ts). */
+.px-icon { height: 1em; width: 1em; vertical-align: -0.12em; image-rendering: pixelated; pointer-events: none; }
+
+/* Buttons keep dark letters on their gold, green, wood or stone; no light shadow on them. */
+.side-panel button { text-shadow: none; }
+.side-panel select { text-shadow: none; }

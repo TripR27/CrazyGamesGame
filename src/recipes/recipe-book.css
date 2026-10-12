@@ -2,7 +2,7 @@
 .book-title { margin: 0; font-size: 20px; }
 .book-progress { font-size: 14px; font-weight: bold; opacity: 0.8; }
 
-.book-legend { margin-bottom: 10px; padding: 8px 10px; border: 2px solid #d8c18a; border-radius: 10px; background: #f7ecd0; }
+.book-legend { margin-bottom: 10px; padding: 2px 4px; border: 6px solid transparent; border-image: var(--frame-parchment) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #3b2410; text-shadow: none; }
 .book-legend-title { margin: 0 0 4px; font-size: 14px; }
 .book-legend-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.3; }
 .book-legend-item { display: flex; gap: 6px; }
@@ -11,30 +11,25 @@
 
 .book-grid { display: flex; flex-direction: column; flex: 1; gap: 8px; min-height: 0; overflow-y: auto; }
 
-.book-card {
-  padding: 8px 10px;
-  border: 2px solid #d8c18a;
-  border-radius: 10px;
-  background: #fffdf3;
-}
-.book-card--hidden { border-style: dashed; background: #f2e6c4; }
-.book-card--locked { border-style: dashed; background: #e6dcc0; opacity: 0.7; }
+.book-card { padding: 2px 4px; border: 6px solid transparent; border-image: var(--frame-plank) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; }
+.book-card--hidden { border-image: var(--frame-stone) 3 fill / 6px; }
+.book-card--locked { border-image: var(--frame-stone) 3 fill / 6px; opacity: 0.7; }
 
 .book-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .book-name { font-size: 16px; }
 .book-card--hidden .book-name, .book-card--locked .book-name { letter-spacing: 0.2em; opacity: 0.6; }
 
 .book-rarity { font-size: 11px; font-weight: bold; letter-spacing: 0.06em; text-transform: uppercase; }
-.book-rarity--common { color: #7b6f4f; }
-.book-rarity--uncommon { color: #3d8a2a; }
-.book-rarity--rare { color: #2a64b0; }
-.book-rarity--epic { color: #7a3fb8; }
-.book-rarity--legendary { color: #c27a00; }
+.book-rarity--common { color: #d8c8a8; }
+.book-rarity--uncommon { color: #9be070; }
+.book-rarity--rare { color: #7ac0ff; }
+.book-rarity--epic { color: #d0a4ff; }
+.book-rarity--legendary { color: #f5c542; }
 
 .book-ingredients { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px; font-size: 13px; }
 .book-chip { display: inline-flex; align-items: center; gap: 5px; }
-.book-dot { width: 12px; height: 12px; border: 2px solid #2a1a0c; border-radius: 50%; }
+.book-dot { width: 10px; height: 10px; border: 2px solid #1e1006; }
 
 .book-details, .book-hint { margin: 4px 0 0; font-size: 13px; line-height: 1.3; }
 .book-hint { font-style: italic; }
-.book-needs { margin: 4px 0 0; font-size: 13px; font-weight: bold; color: #b0441c; }
+.book-needs { margin: 4px 0 0; font-size: 13px; font-weight: bold; color: #ff9a6a; }

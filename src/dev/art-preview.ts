@@ -1,4 +1,5 @@
 import { drawBackdropArt } from '@/app/backdrop-art';
+import { ICONS } from '@/app/icon-art';
 import { CAULDRON, DECOR_SPOTS, DOOR_ENTRY, FLOOR_Y, HERO_CAULDRON, HERO_SPOTS, INGREDIENT_SLOTS, READY_SLOTS, ROOM_SPOTS, SEAT_SLOTS, SHELF } from '@/app/layout';
 import { CAULDRON_FRAMES, FIRE_FRAMES, MUG } from '@/brewing/brewing-art';
 import { ingredientArt, INGREDIENT_ART } from '@/brewing/ingredient-art';
@@ -18,6 +19,7 @@ export const ART: Readonly<Record<string, readonly Sprite[]>> = {
   ...Object.fromEntries(HERO_LOOKS.map((id) => [`hero_${id}`, heroFrames(id)])),
   hero_pot: HERO_POT_FRAMES,
   ...Object.fromEntries(Object.entries(TORCHES).map(([id, frames]) => [id, frames])),
+  icons: Object.values(ICONS),
 };
 
 const a = (n: number): number => Math.round(n / PIXEL);

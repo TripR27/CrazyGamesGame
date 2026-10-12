@@ -1,2 +1,2 @@
 /* The speaker button, left of the settings cog. */
-.mute-button { right: calc(var(--side-w, 0px) + 226px); min-width: 0; padding: 10px 12px; }
+.mute-button { right: calc(var(--side-w, 0px) + 226px); min-width: 0; padding: 4px 8px; }
