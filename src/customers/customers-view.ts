@@ -119,7 +119,7 @@ function createPatienceBar(scene: Scene) {
  */
 function createBubble(scene: Scene) {
   const bubble = scene.add.image(0, BUBBLE_Y.low, '__DEFAULT').setOrigin(0.5, 0).setScale(PIXEL);
-  const text = createIconText(scene, { fontFamily: FONT, fontSize: '14px', color: '#3b2410' });
+  const text = createIconText(scene, { fontFamily: FONT, fontSize: '16px', color: '#3b2410' });
   const mark = scene.add.image(0, BUBBLE_Y.low - BUBBLE_HEIGHT / 2, iconTexture(scene, '▼')).setOrigin(0.5, 1).setScale(MARK_SCALE).setVisible(false);
   const keys = { normal: '__DEFAULT', marked: '__DEFAULT' };
   let marked = false;

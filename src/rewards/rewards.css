@@ -2,12 +2,12 @@
 .rewards { position: absolute; left: 256px; top: 70px; width: 230px; display: flex; flex-direction: column; gap: 6px; font-family: var(--font); pointer-events: none; z-index: 2; }
 .rewards-card { box-sizing: border-box; padding: 2px 6px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; color: #3b2410; pointer-events: auto; }
 .rewards-card[hidden], .rewards-badge[hidden], .rewards-watch[hidden], .rewards-skip[hidden] { display: none; }
-.rewards-title { display: block; font-size: 16px; }
-.rewards-line { margin: 4px 0 6px; font-size: 13px; line-height: 1.3; }
-.rewards-watch, .rewards-skip { width: 100%; padding: 0; border: 6px solid transparent; image-rendering: pixelated; background: none; font-family: var(--font); font-size: 14px; font-weight: bold; cursor: pointer; }
+.rewards-title { display: block; font-size: max(16px, var(--min-font, 0px)); }
+.rewards-line { margin: 4px 0 6px; font-size: max(13px, var(--min-font, 0px)); line-height: 1.3; }
+.rewards-watch, .rewards-skip { width: 100%; padding: 0; border: 6px solid transparent; image-rendering: pixelated; background: none; font-family: var(--font); font-size: max(14px, var(--min-font, 0px)); font-weight: bold; cursor: pointer; }
 /* CrazyGames: the way out looks exactly like the ad button (size, font and colour). */
 .rewards-watch, .rewards-skip { border-image: var(--frame-green) 3 fill / 6px; color: #1f3a10; }
 .rewards-skip { margin-top: 2px; }
 .rewards-watch:hover, .rewards-skip:hover { filter: brightness(1.08); }
 .rewards-watch:disabled { filter: grayscale(0.6); cursor: default; }
-.rewards-badge { align-self: flex-start; padding: 0 8px; border: 6px solid transparent; border-image: var(--frame-dark) 3 fill / 6px; image-rendering: pixelated; color: #f5c542; font-size: 14px; }
+.rewards-badge { align-self: flex-start; padding: 0 8px; border: 6px solid transparent; border-image: var(--frame-dark) 3 fill / 6px; image-rendering: pixelated; color: #f5c542; font-size: max(14px, var(--min-font, 0px)); }

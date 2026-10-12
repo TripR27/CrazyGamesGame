@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { computeFit, toHudView, createSideLayout, SHOP_PANEL_WIDTH, createPanelState } from '@/app/ui-model';
+import { computeFit, toHudView, createSideLayout, SHOP_PANEL_WIDTH, createPanelState, MIN_TEXT_SCREEN_PX, minFontPx } from '@/app/ui-model';
 import { num } from '@/shared/numbers';
 
 describe('computeFit', () => {
@@ -23,6 +23,21 @@ describe('computeFit', () => {
 
   it('scales up on a large screen', () => {
     expect(computeFit(2560, 1440, 1280, 720).scale).toBe(2);
+  });
+});
+
+describe('minFontPx', () => {
+  it("keeps text readable in CrazyGames' smallest window, also with the side panel open", () => {
+    const gameOnly = computeFit(821, 462, 1280, 720).scale;
+    const withPanel = computeFit(821, 462, 1280 + SHOP_PANEL_WIDTH, 720).scale;
+    expect(minFontPx(gameOnly) * gameOnly).toBeGreaterThanOrEqual(MIN_TEXT_SCREEN_PX);
+    expect(minFontPx(withPanel) * withPanel).toBeGreaterThanOrEqual(MIN_TEXT_SCREEN_PX);
+    expect(minFontPx(withPanel)).toBe(21);
+  });
+
+  it('changes nothing in a full-size window (the CSS sizes are larger)', () => {
+    expect(minFontPx(1)).toBe(MIN_TEXT_SCREEN_PX);
+    expect(minFontPx(2)).toBe(5);
   });
 });
 

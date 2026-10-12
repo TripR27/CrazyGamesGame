@@ -5,7 +5,7 @@ import { mountAudio } from '@/audio/audio-view';
 import { mountDailyBonus } from '@/daily/daily-view';
 import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
-import { computeFit, type Fit, type SideLayout } from '@/app/ui-model';
+import { computeFit, type Fit, minFontPx, type SideLayout } from '@/app/ui-model';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { mountNewBadges, mountShop } from '@/economy/shop-view';
 import { mountBossFight } from '@/heroes/boss-view';
@@ -39,6 +39,8 @@ export function fitToViewport(root: HTMLElement, side: SideLayout, onFit: (fit: 
     root.style.setProperty('--side-w', `${side.width()}px`);
     const fit = computeFit(window.innerWidth, window.innerHeight, width, GAME_HEIGHT);
     root.style.transform = `translate(${fit.left}px, ${fit.top}px) scale(${fit.scale})`;
+    // Small windows (and an open side panel) shrink everything; text grows back to stay readable (CrazyGames rule).
+    root.style.setProperty('--min-font', `${minFontPx(fit.scale)}px`);
     onFit(fit);
   };
   apply();

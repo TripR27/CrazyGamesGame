@@ -52,7 +52,7 @@ interface Plate {
 function createPlate(scene: Scene, x: number, y: number): Plate {
   const PAD = 6;
   const plate = scene.add.image(x, y, '__DEFAULT').setOrigin(0.5, 1).setScale(PIXEL).setVisible(false);
-  const text = createIconText(scene, { fontFamily: FONT, fontSize: '15px', color: '#3b2410' });
+  const text = createIconText(scene, { fontFamily: FONT, fontSize: '16px', color: '#3b2410' });
   text.container.setPosition(x, y).setVisible(false);
   return {
     setText(value) {
@@ -217,7 +217,7 @@ export function createGuildView(scene: Scene, world: World): GuildView {
     if (item !== undefined) floats.show(item.spot.x, item.spot.y - LABEL_ABOVE, t('heroes.in_bag', { drink }), { color: LOOT_COLOR, size: 16 });
   });
   world.bus.on('guild:aimed', ({ aimed }) => {
-    floats.show(HERO_CAULDRON.x, HERO_CAULDRON.y - 50, t(aimed ? 'heroes.cauldron_aimed' : 'heroes.cauldron_tavern'), { color: GOLD_COLOR, size: 15 });
+    floats.show(HERO_CAULDRON.x, HERO_CAULDRON.y - 50, t(aimed ? 'heroes.cauldron_aimed' : 'heroes.cauldron_tavern'), { color: GOLD_COLOR, size: 16 });
   });
   const cauldron = createHeroCauldron(scene, world);
 

@@ -1,11 +1,11 @@
 /* The Legacy tab of the side panel (selling the tavern). Sizes are design pixels. */
 .legacy-panel { overflow-y: auto; }
-.legacy-title { margin: 0 0 8px; font-size: 20px; }
-.legacy-hops { margin: 0 0 4px; font-size: 18px; font-weight: bold; color: #f5c542; }
-.legacy-text { margin: 0 0 8px; font-size: 13px; line-height: 1.3; }
-.legacy-sell { width: 100%; margin: 0 0 12px; padding: 2px 4px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #3b2410; font-family: var(--font); font-size: 15px; font-weight: bold; cursor: pointer; }
+.legacy-title { margin: 0 0 8px; font-size: max(20px, var(--min-font, 0px)); }
+.legacy-hops { margin: 0 0 4px; font-size: max(18px, var(--min-font, 0px)); font-weight: bold; color: #f5c542; }
+.legacy-text { margin: 0 0 8px; font-size: max(13px, var(--min-font, 0px)); line-height: 1.3; }
+.legacy-sell { width: 100%; margin: 0 0 12px; padding: 2px 4px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; background: none; border-radius: 0; color: #3b2410; font-family: var(--font); font-size: max(15px, var(--min-font, 0px)); font-weight: bold; cursor: pointer; }
 .legacy-sell:hover:not(:disabled) { filter: brightness(1.08); }
 .legacy-sell:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
 .legacy-sell--armed { border-image: var(--frame-red) 3 fill / 6px; color: #fff; }
-.legacy-subtitle { margin: 6px 0 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.legacy-subtitle { margin: 6px 0 4px; font-size: max(13px, var(--min-font, 0px)); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
 .legacy-rows { display: flex; flex-direction: column; gap: 8px; }
