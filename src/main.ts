@@ -25,7 +25,7 @@ const store = createStore(state);
 const bus = createEventBus<GameEvents>();
 const world = createWorld({ store, bus, rng: systemRng, clock });
 // Gameplay stops while the tab is hidden or an ad plays; during an ad the game is paused (its time is skipped).
-const gameplay = createGameplay(platform);
+const gameplay = createGameplay(platform, ['loading']);
 const ads = createAds(platform, clock, (paused) => gameplay.pause('ad', paused));
 startPlatform(world, platform, ads);
 document.addEventListener('visibilitychange', () => gameplay.pause('hidden', document.hidden));
@@ -56,3 +56,4 @@ mountUi(
   { saves, ads, silenced: () => platform.muted() || ads.playing(), username: () => platform.username() },
 );
 platform.loadingStop();
+gameplay.pause('loading', false);

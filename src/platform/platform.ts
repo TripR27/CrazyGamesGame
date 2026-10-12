@@ -52,10 +52,13 @@ export function createMockPlatform(): Platform {
 
 /**
  * Tells the platform when the player really plays: gameplay stops for every reason to pause (the tab is hidden, an ad
- * plays) and starts again once none is left. Only changes are passed on.
+ * plays, still loading: `startPaused`) and starts again once none is left. Only changes are passed on.
  */
-export function createGameplay(platform: Pick<Platform, 'gameplayStart' | 'gameplayStop'>): { pause(reason: string, on: boolean): void } {
-  const reasons = new Set<string>();
+export function createGameplay(
+  platform: Pick<Platform, 'gameplayStart' | 'gameplayStop'>,
+  startPaused: readonly string[] = [],
+): { pause(reason: string, on: boolean): void } {
+  const reasons = new Set<string>(startPaused);
   let playing = false;
   const sync = (): void => {
     const should = reasons.size === 0;

@@ -31,6 +31,14 @@ describe('gameplay events', () => {
     gameplay.pause('ad', false);
     expect(platform.gameplayStart).toHaveBeenCalledTimes(2);
   });
+
+  it('wait for loading to end when told to start paused', () => {
+    const platform = { gameplayStart: vi.fn(), gameplayStop: vi.fn() };
+    const gameplay = createGameplay(platform, ['loading']);
+    expect(platform.gameplayStart).not.toHaveBeenCalled();
+    gameplay.pause('loading', false);
+    expect(platform.gameplayStart).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('ads', () => {
