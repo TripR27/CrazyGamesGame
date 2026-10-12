@@ -49,6 +49,10 @@ export const LEGACY: readonly LegacyDef[] = [
   { id: 'night_watch', baseCost: 2, maxLevel: 4, effects: [{ stat: 'offlineHours', mode: 'add', perLevel: 1 }] },
 ];
 
+/** The Legacy bonuses in the shop's sight (`shopSeen`) start with this; they stay seen when the tavern is sold. */
+export const LEGACY_SIGHT_PREFIX = 'legacy:';
+const keepLegacy = (keys: readonly string[]): string[] => keys.filter((key) => key.startsWith(LEGACY_SIGHT_PREFIX));
+
 const HOP_BONUS: UpgradeEffect = { stat: 'sellPrice', mode: 'add', perLevel: PRESTIGE.pricePerHop };
 
 type Legacy = Pick<PrestigeState, 'totalHops' | 'legacy'>;
@@ -78,8 +82,8 @@ export const startGold = (prestige: Pick<PrestigeState, 'legacy'>): number =>
 
 /**
  * Sell the tavern: Golden Hop for the gold earned this run, and a fresh start. What stays: the recipes found, the
- * tutorial, the Golden Hop and the Legacy, the statistics, achievements, the daily streak and the settings (and the date
- * the game began). Everything else starts over, with the start
+ * tutorial, the Golden Hop and the Legacy (and which Legacy bonuses came in sight), the statistics, achievements, the
+ * daily streak and the settings (and the date the game began). Everything else starts over, with the start
  * gold of the Legacy. Does nothing when the tavern cannot be sold yet.
  */
 export function sellTavern({ store, bus, clock }: Pick<World, 'store' | 'bus' | 'clock'>): void {
@@ -88,8 +92,10 @@ export function sellTavern({ store, bus, clock }: Pick<World, 'store' | 'bus' | 
   const hops = hopsFor(before.prestige.runEarned);
   const fresh = createInitialState(clock.now());
   const { recipesDiscovered, tutorial, meta, prestige, stats, achievements, daily, settings } = before;
+  const shopSeen = keepLegacy(before.shopSeen);
+  const shopNew = keepLegacy(before.shopNew);
   store.update((s) => {
-    Object.assign(s, fresh, { recipesDiscovered, tutorial, stats, achievements, daily, settings });
+    Object.assign(s, fresh, { recipesDiscovered, tutorial, stats, achievements, daily, settings, shopSeen, shopNew });
     s.meta.createdAt = meta.createdAt;
     s.prestige = { ...prestige, hops: prestige.hops + hops, totalHops: prestige.totalHops + hops, runs: prestige.runs + 1, runEarned: num(0) };
     s.currencies.gold = num(startGold(prestige));

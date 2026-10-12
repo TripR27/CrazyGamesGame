@@ -1,4 +1,5 @@
 import type { RowView } from '@/economy/shop-model';
+import { gearSightEntries, sightRow, sightStatuses } from '@/economy/shop-sight';
 import { quartermasterOffer } from '@/heroes/auto';
 import { GEAR, GEAR_SLOTS, type GearDef, type GearSlot, gearOffer, wearer } from '@/heroes/gear';
 import { DUNGEONS } from '@/heroes/expedition';
@@ -11,7 +12,7 @@ import { formatNumber } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
 
 /** What the Heroes tab and the guild hall read. */
-export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock' | 'gearOwned' | 'quartermaster'>;
+export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock' | 'gearOwned' | 'quartermaster' | 'shopSeen' | 'shopNew'>;
 
 /** A countdown as "1:05" (rounded up, so it never shows 0:00 while time is left). */
 export function clockText(ms: number): string {
@@ -64,7 +65,7 @@ export interface HeroesView {
   drinksHelp: string;
   /** One line per dungeon ingredient held, or the line that there is nothing yet; empty without the guild hall. */
   stock: string[];
-  /** Gear for sale (not owned yet); empty without the guild hall. */
+  /** Gear for sale that came in sight, and one grey teaser of the next piece; empty without the guild hall. */
   gearShop: { id: string; row: RowView }[];
   /** The Quartermaster while it is for sale, otherwise null. */
   quartermaster: RowView | null;
@@ -146,14 +147,22 @@ export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): 
   };
 }
 
-/** The gear for sale in the Heroes tab, as shop rows (a bought piece leaves the list). */
+const gearEntries = gearSightEntries();
+
+/** One piece for sale as a shop row. */
+function gearRow(def: GearDef, state: HeroesState): RowView {
+  const offer = gearOffer(state, def);
+  const description = t('gear.option', { name: t(`gear.slot_${def.slot}`), does: gearDoes(def) });
+  return { name: gearName(def.id), description, level: '', buyLabel: t('shop.buy_once', { cost: formatNumber(offer.cost) }), canBuy: offer.affordable, maxed: false };
+}
+
+/** The gear for sale in the Heroes tab, as shop rows: what came in sight, and a teaser of the next piece (a bought piece leaves). */
 function gearShop(state: HeroesState): { id: string; row: RowView }[] {
-  return GEAR.flatMap((def) => {
-    const offer = gearOffer(state, def);
-    if (offer.status !== 'forSale') return [];
-    const description = t('gear.option', { name: t(`gear.slot_${def.slot}`), does: gearDoes(def) });
-    const row = { name: gearName(def.id), description, level: '', buyLabel: t('shop.buy_once', { cost: formatNumber(offer.cost) }), canBuy: offer.affordable, maxed: false };
-    return [{ id: def.id, row }];
+  const statuses = sightStatuses(gearEntries, state);
+  return gearEntries.flatMap((entry, i) => {
+    const def = GEAR.find((g) => g.id === entry.id);
+    const row = def === undefined ? null : sightRow(entry, statuses[i] ?? 'hidden', state, () => gearRow(def, state));
+    return row === null ? [] : [{ id: entry.id, row }];
   });
 }
 

@@ -1,6 +1,23 @@
 import type { TutorialStep } from '@/tutorial/tutorial-steps';
 
-/** Lessons for what opens later in a run: rooms, decorations, heroes and their loot. The order is in TUTORIAL_STEPS. */
+/** Lessons for what opens later in a run: new things in the shop, rooms, decorations, heroes and their loot. The order is in TUTORIAL_STEPS. */
+
+/**
+ * The hint for the shop's dot: the shop lists things as they come in sight, so the first time something new waits while
+ * the panel is folded away, the kettle points at the dot on the Menu button and then the Shop tab. New things keep
+ * coming in sight as the gold grows, so it never waits long.
+ */
+export const shopNewLesson: readonly TutorialStep[] = [
+  {
+    id: 'shop_new_spot',
+    lesson: 'shop_new',
+    startWhen: { kind: 'event', event: 'shop:new' },
+    target: 'guide-shop',
+    completeOn: { kind: 'event', event: 'shop:opened' },
+    // Opening the shop early must not skip the lessons before this one; it counts only while the hint is on screen.
+    onlyWhenShown: true,
+  },
+];
 
 /** The hint for the first room: starts once one can be built, then points at it on the upper floor. */
 export const roomLesson: readonly TutorialStep[] = [

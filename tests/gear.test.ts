@@ -141,6 +141,7 @@ describe('gear in the Heroes tab', () => {
   it('lists the pieces for sale and, per hero, what fits each slot', () => {
     const state = guild(5000);
     state.gearOwned = ['rusty_sword', 'swamp_cleaver'];
+    state.shopSeen = ['gear:wooden_shield', 'gear:leather_cap', 'gear:lucky_charm'];
     state.heroes.warrior = hero({ gear: { sword: 'swamp_cleaver' }, expedition: { dungeon: 'swamp', endsAt: 9e12, drinks: [], cards: [] } });
     const view = toHeroesView(state, 0);
     expect(view.gearShop.map((g) => g.id)).toEqual(['wooden_shield', 'leather_cap', 'lucky_charm']);

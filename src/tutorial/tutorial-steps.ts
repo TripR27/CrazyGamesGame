@@ -1,5 +1,5 @@
 import type { GameEvents } from '@/shared/events';
-import { autoLesson, bossLesson, prestigeLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson } from '@/tutorial/tutorial-later-steps';
+import { autoLesson, bossLesson, prestigeLesson, cardLesson, decorLesson, gearLesson, heroBrewLesson, heroLesson, lootLesson, roomLesson, shopNewLesson } from '@/tutorial/tutorial-later-steps';
 
 export type TutorialEvent = keyof GameEvents;
 
@@ -277,6 +277,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...upgradeLesson,
   ...trophyLesson,
   ...dailyLesson,
+  ...shopNewLesson,
   ...seatsLesson,
   ...bookLesson,
   ...ingredientLesson,

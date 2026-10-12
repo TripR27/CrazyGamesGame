@@ -53,6 +53,10 @@ export const shop: Messages = {
   'shop.amount_1': 'x1',
   'shop.amount_10': 'x10',
   'shop.amount_max': 'Max',
+  'shop.new': 'New!',
+  'shop.teaser_save': 'Save up to see it',
+  'shop.teaser_after': 'Comes after {name}',
+  'shop.or': ' or ',
 };
 
 /** `{amount}` is the effect per level, filled in from the upgrade data (for example "+10%"). */
@@ -89,6 +93,7 @@ export const upgrades: Messages = {
   'legacy.level': '{level}/{max}',
   'legacy.buy': 'Buy · 🌼 {cost}',
   'legacy.maxed': 'Maxed',
+  'legacy.teaser': 'Earn Golden Hop to see it',
   'legacy.copper_kettle.name': "Grandma's Copper Kettle",
   'legacy.copper_kettle.description': 'The cauldron brews 10% faster per level. She swears by it.',
   'legacy.seed_money.name': 'Seed Money',

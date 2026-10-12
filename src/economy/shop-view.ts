@@ -1,15 +1,13 @@
 import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
-import { DECORATIONS, buyDecorById, decorOffer, type DecorState } from '@/decor/decor';
-import { buyIngredientById, ingredients, shopIngredients, type IngredientShopState } from '@/brewing/ingredients';
-import { type RowView, isIngredientListed, isUpgradeListed, toDecorRowView, toIngredientRowView, isListed, toRoomRowView, toRowView } from '@/economy/shop-model';
-import { upgrades } from '@/economy/upgrade-data';
-import { buyUpgradeById, type BuyAmount, type UpgradeState } from '@/economy/upgrades';
+import { DECORATIONS, buyDecorById } from '@/decor/decor';
+import { buyIngredientById, ingredients } from '@/brewing/ingredients';
+import { type RowView, toDecorRowView, toIngredientRowView, toRoomRowView, toRowView } from '@/economy/shop-model';
+import { allSightEntries, clearNew, type SightEntry, type SightKind, type SightTab, shopSightEntries, sightRow, sightStatuses, tabHasNew, teaserRow } from '@/economy/shop-sight';
+import { buyUpgradeById, type BuyAmount } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
-import { ROOMS, buildRoomById, roomOffer, type RoomState } from '@/rooms/rooms';
-import type { Listener } from '@/shared/state';
-import type { TargetRegistry } from '@/shared/targets';
+import { buildRoomById, ROOMS } from '@/rooms/rooms';
 import './shop.css';
 
 /** Scrolls a buy button into view in the shop list (only as far as needed), so the tutorial arrow is never off-screen. */
@@ -22,15 +20,21 @@ export interface UpgradeRow {
   update(view: RowView): void;
 }
 
-/** One line in the shop: name, level, description and a buy button. Only text and flags change after creation. */
+/**
+ * One line in the shop: name, level, description and a buy button, with a "New!" label when it just came in sight. A
+ * teaser is grey, with only the name and what it waits for. Only text and flags change after creation.
+ */
 export function createUpgradeRow(onBuy: () => void): UpgradeRow {
   const el = createEl('div', 'shop-row');
   const name = createEl('span', 'shop-row-name');
+  const fresh = createEl('span', 'shop-row-new', t('shop.new'));
   const level = createEl('span', 'shop-row-level');
   const description = createEl('p', 'shop-row-text');
   const buy = createEl('button', 'shop-buy');
+  const title = createEl('span', 'shop-row-title');
+  title.append(name, fresh);
   const head = createEl('div', 'shop-row-head');
-  head.append(name, level);
+  head.append(title, level);
   const info = createEl('div', 'shop-row-info');
   info.append(head, description);
   el.append(info, buy);
@@ -41,11 +45,15 @@ export function createUpgradeRow(onBuy: () => void): UpgradeRow {
     buy,
     update(view) {
       name.textContent = view.name;
+      fresh.hidden = view.fresh !== true;
       level.textContent = view.level;
       description.textContent = view.description;
+      description.hidden = view.description === '';
       buy.textContent = view.buyLabel;
       buy.disabled = !view.canBuy;
+      buy.hidden = view.teaser === true;
       el.classList.toggle('shop-row--maxed', view.maxed);
+      el.classList.toggle('shop-row--teaser', view.teaser === true);
     },
   };
 }
@@ -66,99 +74,89 @@ export function createAmountPicker(onPick: (amount: BuyAmount) => void): { el: H
   };
 }
 
-export type OneTimeState = IngredientShopState & RoomState & DecorState;
+/** How the Shop tab shows and buys each kind of offer. A new kind of offer is one more entry. */
+interface KindRows {
+  /** Tutorial target of the buy button: `<target>:<id>`. */
+  target: string;
+  view(world: World, id: string, amount: BuyAmount): RowView | undefined;
+  buy(world: World, id: string, amount: BuyAmount): void;
+}
 
-export interface OneTimeGroupHosts {
+const catalog = { ingredients, recipes };
+const byId = <T extends { id: string }>(list: readonly T[], id: string): T | undefined => list.find((item) => item.id === id);
+
+const KIND_ROWS: Partial<Record<SightKind, KindRows>> = {
+  ingredient: {
+    target: 'ingredient-buy',
+    view: ({ store }, id) => {
+      const def = byId(ingredients, id);
+      return def && toIngredientRowView(def, store.getState(), catalog);
+    },
+    buy: (world, id) => buyIngredientById(world, id),
+  },
+  room: {
+    target: 'room-buy',
+    view: ({ store }, id) => {
+      const room = byId(ROOMS, id);
+      return room && toRoomRowView(room, store.getState());
+    },
+    buy: (world, id) => buildRoomById(world, id),
+  },
+  decor: {
+    target: 'decor-buy',
+    view: ({ store }, id) => {
+      const def = byId(DECORATIONS, id);
+      return def && toDecorRowView(def, store.getState());
+    },
+    buy: (world, id) => buyDecorById(world, id),
+  },
+  upgrade: {
+    target: 'upgrade',
+    view: ({ store, content }, id, amount) => {
+      const def = byId(content.upgrades, id);
+      return def && toRowView(def, store.getState(), amount);
+    },
+    buy: (world, id, amount) => buyUpgradeById(world, id, amount),
+  },
+};
+
+interface ShopRow {
+  entry: SightEntry;
+  kind: KindRows;
+  row: UpgradeRow;
+}
+
+interface ShopListHosts {
   list: HTMLElement;
+  /** The overlay box and the shop panel, to measure and hide tutorial targets. */
   root: HTMLElement;
   panel: HTMLElement;
   world: World;
 }
 
-/** The groups at the top of the shop: ingredients, rooms, then decorations. Returns the render function for all of them. */
-export function mountOneTimeGroups({ list, root, panel, world }: OneTimeGroupHosts): (state: OneTimeState) => void {
-  const catalog = { ingredients, recipes };
-  const renderIngredients = mountOneTimeSection<OneTimeState>({
-    list, root, panel, targets: world.targets,
-    headingKey: 'shop.kind_ingredients',
-    targetPrefix: 'ingredient-buy',
-    entries: shopIngredients(catalog).map((def) => ({
-      id: def.id,
-      listed: (state) => isIngredientListed(def, state, catalog),
-      view: (state) => toIngredientRowView(def, state, catalog),
-    })),
-    onBuy: (id) => buyIngredientById(world, id),
-  });
-  const renderRooms = mountOneTimeSection<OneTimeState>({
-    list, root, panel, targets: world.targets,
-    headingKey: 'shop.kind_rooms',
-    targetPrefix: 'room-buy',
-    entries: ROOMS.map((room) => ({
-      id: room.id,
-      listed: (state) => isListed(roomOffer(state, room)),
-      view: (state) => toRoomRowView(room, state),
-    })),
-    onBuy: (id) => buildRoomById(world, id),
-  });
-  const renderDecor = mountOneTimeSection<OneTimeState>({
-    list, root, panel, targets: world.targets,
-    headingKey: 'shop.kind_decor',
-    targetPrefix: 'decor-buy',
-    entries: DECORATIONS.map((def) => ({
-      id: def.id,
-      listed: (state) => isListed(decorOffer(state, def)),
-      view: (state) => toDecorRowView(def, state),
-    })),
-    onBuy: (id) => buyDecorById(world, id),
-  });
-  return (state) => {
-    renderIngredients(state);
-    renderRooms(state);
-    renderDecor(state);
-  };
-}
-
-/** One thing sold once: how to show it right now, and whether it is still in the shop. */
-export interface OneTimeEntry<S> {
-  id: string;
-  listed(state: S): boolean;
-  view(state: S): RowView;
-}
-
-export interface OneTimeSectionParts<S> {
-  list: HTMLElement;
-  /** The overlay box and the shop panel, to measure and hide tutorial targets. */
-  root: HTMLElement;
-  panel: HTMLElement;
-  headingKey: string;
-  /** Tutorial target of each buy button: `<targetPrefix>:<id>`. */
-  targetPrefix: string;
-  entries: readonly OneTimeEntry<S>[];
-  onBuy(id: string): void;
-  targets: TargetRegistry;
-}
-
 /**
- * A group of one-time purchases in the shop (ingredients, rooms, decorations): one row per entry still for sale. Bought ones
- * leave the shop, and the heading goes when nothing is left. Returns the render function.
+ * One row per offer of the Shop tab, under a heading per group (ingredients, rooms, decorations, then the upgrades by
+ * kind). Every buy button is a tutorial target. Returns the rows, the headings by group and an unregister function.
  */
-export function mountOneTimeSection<S>(parts: OneTimeSectionParts<S>): (state: S) => void {
-  const { list, root, panel, entries, onBuy, targets } = parts;
-  const heading = createEl('h3', 'shop-kind', t(parts.headingKey));
-  list.append(heading);
-  const rows = entries.map((entry) => {
-    const row = createUpgradeRow(() => onBuy(entry.id));
-    list.append(row.el);
-    targets.register(`${parts.targetPrefix}:${entry.id}`, () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy));
-    return { entry, row };
-  });
-  return (state) => {
-    for (const { entry, row } of rows) {
-      row.el.hidden = !entry.listed(state);
-      if (!row.el.hidden) row.update(entry.view(state));
+function mountRows({ list, root, panel, world }: ShopListHosts, entries: readonly SightEntry[], amount: () => BuyAmount) {
+  const headings = new Map<string, HTMLElement>();
+  const rows: ShopRow[] = [];
+  const removers: Array<() => void> = [];
+  for (const entry of entries) {
+    const kind = KIND_ROWS[entry.kind];
+    if (kind === undefined) continue;
+    if (!headings.has(entry.group)) {
+      const heading = createEl('h3', 'shop-kind', t(`shop.kind_${entry.group}`));
+      headings.set(entry.group, heading);
+      list.append(heading);
     }
-    heading.hidden = rows.every(({ row }) => row.el.hidden);
-  };
+    const row = createUpgradeRow(() => kind.buy(world, entry.id, amount()));
+    list.append(row.el);
+    const bounds = () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root));
+    removers.push(world.targets.register(`${kind.target}:${entry.id}`, bounds, () => reveal(row.buy)));
+    rows.push({ entry, kind, row });
+  }
+  return { rows, headings, unregister: () => removers.forEach((remove) => remove()) };
 }
 
 export function buildPanel(onPick: (amount: BuyAmount) => void) {
@@ -171,79 +169,85 @@ export function buildPanel(onPick: (amount: BuyAmount) => void) {
   return { panel, list, picker };
 }
 
-export interface TargetParts {
-  /** The element whose bounds are measured against `root` (the panel sits outside the scaled game box). */
-  root: HTMLElement;
-  panel: HTMLElement;
-  rows: Array<{ def: { id: string }; row: UpgradeRow }>;
-}
-
-/** Each buy button (while the shop tab is on screen) is something the tutorial can point at. */
-export function registerTargets(targets: TargetRegistry, { root, panel, rows }: TargetParts): () => void {
-  const removers = rows.map(({ def, row }) =>
-    targets.register(`upgrade:${def.id}`, () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root)), () => reveal(row.buy)),
-  );
-  return () => removers.forEach((remove) => remove());
-}
-
-type ShopState = UpgradeState & OneTimeState;
-
-export interface ShopSource {
-  getState(): ShopState;
-  subscribe(listener: Listener<ShopState>): () => void;
-}
-
 export interface ShopHosts {
   /** The scaled overlay box, to measure tutorial targets against. */
   root: HTMLElement;
   panels: SidePanels;
 }
 
-/** The Shop tab of the side panel: ingredients, rooms and decorations for sale, then one row per upgrade. Returns an unmount function. */
-export function mountShop(
-  { root, panels }: ShopHosts,
-  world: World,
-): () => void {
-  const { store: source, targets } = world;
+/**
+ * The Shop tab of the side panel: what came in sight in this tavern, with a "New!" label on what just did, and per group
+ * one grey teaser of what comes later (economy/shop-sight.ts); sold-out offers leave. Returns an unmount function.
+ */
+export function mountShop({ root, panels }: ShopHosts, world: World): () => void {
+  const { store } = world;
   let amount: BuyAmount = 1;
   const { panel, list, picker } = buildPanel((picked) => {
     amount = picked;
     render();
   });
-
-  const renderOneTime = mountOneTimeGroups({ list, root, panel, world });
-  const headings = new Map<string, HTMLElement>();
-  const rows = upgrades.map((def) => {
-    const row = createUpgradeRow(() => buyUpgradeById(world, def.id, amount));
-    // A small heading above the first upgrade of each kind (the list is ordered by kind).
-    if (!headings.has(def.kind)) {
-      const heading = createEl('h3', 'shop-kind', t(`shop.kind_${def.kind}`));
-      headings.set(def.kind, heading);
-      list.append(heading);
-    }
-    list.append(row.el);
-    return { def, row };
-  });
-  const unregister = registerTargets(targets, { root, panel, rows });
+  const entries = shopSightEntries(world.content);
+  const { rows, headings, unregister } = mountRows({ list, root, panel, world }, entries, () => amount);
 
   function render(): void {
-    const state = source.getState();
+    if (panel.hidden) return;
+    const state = store.getState();
     picker.select(amount);
-    renderOneTime(state);
-    for (const { def, row } of rows) {
-      // Locked upgrades (Night Shift before the first staff member) and bought one-time ones are not listed.
-      row.el.hidden = !isUpgradeListed(def, state);
-      if (!row.el.hidden) row.update(toRowView(def, state, amount));
+    const statuses = sightStatuses(entries, state);
+    for (const { entry, kind, row } of rows) {
+      const status = statuses[entries.indexOf(entry)] ?? 'hidden';
+      const view = sightRow(entry, status, state, () => kind.view(world, entry.id, amount) ?? teaserRow(entry, state));
+      row.el.hidden = view === null;
+      if (view !== null) row.update(view);
     }
-    for (const [kind, heading] of headings) heading.hidden = rows.every(({ def, row }) => def.kind !== kind || row.el.hidden);
+    for (const [group, heading] of headings) heading.hidden = rows.every(({ entry, row }) => entry.group !== group || row.el.hidden);
   }
-  panels.add({ id: 'shop', labelKey: 'shop.tab', content: panel, onOpen: () => world.bus.emit('shop:opened', {}), onClose: () => world.bus.emit('shop:closed', {}) });
-  const unsubscribe = source.subscribe(render);
-  render();
+  panels.add({
+    id: 'shop',
+    labelKey: 'shop.tab',
+    content: panel,
+    onOpen: () => {
+      render();
+      world.bus.emit('shop:opened', {});
+    },
+    onClose: () => {
+      clearNew(world, entries, 'shop');
+      world.bus.emit('shop:closed', {});
+    },
+  });
+  const unsubscribe = store.subscribe(render);
 
   return () => {
     unsubscribe();
     unregister();
     panel.remove();
   };
+}
+
+const TABS: readonly SightTab[] = ['shop', 'heroes', 'legacy'];
+
+/**
+ * A dot on each tab with something new in sight, and on the Menu button while any has. Each time something new waits
+ * while the panel is folded away, the tutorial hears `shop:new`. Returns a stop function.
+ */
+export function mountNewBadges(panels: SidePanels, world: World): () => void {
+  const { store, bus } = world;
+  const entries = allSightEntries(world.content);
+  const shown = new Map<SightTab, boolean>();
+  let waited = false;
+  const update = (): void => {
+    const state = store.getState();
+    let any = false;
+    for (const tab of TABS) {
+      const on = tabHasNew(entries, state, tab);
+      any ||= on;
+      if (shown.get(tab) !== on) panels.setBadge(tab, on);
+      shown.set(tab, on);
+    }
+    const waiting = any && !panels.isOpen();
+    if (waiting && !waited) bus.emit('shop:new', {});
+    waited = waiting;
+  };
+  update();
+  return store.subscribe(update);
 }

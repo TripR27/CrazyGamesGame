@@ -1,7 +1,7 @@
 import { type DecorDef, decorOffer, type DecorState } from '@/decor/decor';
 import { type IngredientDef, ingredientOffer, type IngredientCatalog, type IngredientShopState } from '@/brewing/ingredients';
 import type { UpgradeDef, UpgradeEffect, UpgradeStat } from '@/economy/upgrade-data';
-import { isUnlocked, quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
+import { quoteFor, type UpgradeState, levelOf, type BuyAmount } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
 import { type RoomDef, roomOffer, type RoomState } from '@/rooms/rooms';
@@ -17,6 +17,10 @@ export interface RowView {
   buyLabel: string;
   canBuy: boolean;
   maxed: boolean;
+  /** A grey teaser of what comes later: name and what it waits for, no button. */
+  teaser?: boolean;
+  /** Just came in sight: a "New!" label until its tab was open. */
+  fresh?: boolean;
 }
 
 /** Stats that are a share (0 to 1): an added amount reads as a percentage too. */
@@ -27,10 +31,6 @@ export function effectAmount(effect: UpgradeEffect): string {
   const percent = effect.mode === 'multiply' || SHARE_STATS.includes(effect.stat);
   return percent ? `+${Math.round(effect.perLevel * 100)}%` : `+${effect.perLevel}`;
 }
-
-/** An upgrade is in the shop once it is unlocked; a one-time one (max level 1) leaves it once bought. */
-export const isUpgradeListed = (def: UpgradeDef, state: UpgradeState): boolean =>
-  isUnlocked(state.upgrades, def) && !(def.maxLevel === 1 && levelOf(state.upgrades, def) >= 1);
 
 export function toRowView(def: UpgradeDef, state: UpgradeState, amount: BuyAmount): RowView {
   const level = levelOf(state.upgrades, def);
@@ -45,10 +45,6 @@ export function toRowView(def: UpgradeDef, state: UpgradeState, amount: BuyAmoun
     maxed,
   };
 }
-
-/** A bought ingredient leaves the shop (see `isListed`). */
-export const isIngredientListed = (def: IngredientDef, state: IngredientShopState, catalog: IngredientCatalog): boolean =>
-  isListed(ingredientOffer(state, def, catalog));
 
 /** One ingredient in the shop: locked until its level, then for sale once. */
 export function toIngredientRowView(def: IngredientDef, state: IngredientShopState, catalog: IngredientCatalog): RowView {
@@ -72,9 +68,6 @@ export interface OneTimeLabels {
 }
 
 const levelName = (level: number): string => t(textKey('reputation', REPUTATION_LEVELS[level - 1]?.id ?? '', 'name'));
-
-/** Bought ones leave the shop: they are there for good, so listing them would only clutter it. */
-export const isListed = (offer: OneTimeOffer): boolean => offer.status !== 'owned';
 
 /** One row for a one-time purchase: locked until its level ("Unlocks at …"), then for sale with its price. */
 export function toOneTimeRowView(labels: OneTimeLabels, offer: OneTimeOffer): RowView {
