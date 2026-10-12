@@ -32,6 +32,10 @@ export interface GuideContext {
   readyHeroId: string | null;
   /** The first dungeon ingredient the heroes found (it stands on the shelf). */
   lootId: string | null;
+  /** The first piece of gear for sale that the player can pay for. */
+  affordableGearId: string | null;
+  /** An owned piece nobody wears, and the hero at home who could put it on (in its slot). */
+  gearToWear: { heroId: string; slot: string; gearId: string } | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -122,6 +126,11 @@ const ALIASES: Readonly<Record<string, AliasResolver>> = {
   // The way to the Heroes tab first, then the send button of a hero who is ready.
   'guide-hero-send': (ctx) => toTab(ctx, 'heroes') ?? (ctx.readyHeroId === null ? null : `hero-send:${ctx.readyHeroId}`),
   'guide-loot': (ctx) => (ctx.lootId === null ? null : `ingredient:${ctx.lootId}`),
+  'guide-gear-buy': (ctx) => toTab(ctx, 'heroes') ?? (ctx.affordableGearId === null ? null : `gear-buy:${ctx.affordableGearId}`),
+  'guide-gear-equip': (ctx) => {
+    const wear = ctx.gearToWear;
+    return toTab(ctx, 'heroes') ?? (wear === null ? null : `gear-slot:${wear.heroId}:${wear.slot}`);
+  },
 };
 
 /** Turns a step's target into a registry id; fixed targets pass through, aliases are resolved. */
@@ -185,6 +194,9 @@ export function speech(stepId: string, ctx: GuideContext): string {
     shopIngredient: name('ingredients', ctx.affordableIngredientId ?? ctx.newestIngredientId ?? undefined),
     hero: ctx.readyHeroId === null ? '' : t(textKey('heroes', ctx.readyHeroId, 'name')),
     loot: name('ingredients', ctx.lootId ?? undefined),
+    gear: ctx.affordableGearId === null ? '' : t(textKey('gear', ctx.affordableGearId, 'name')),
+    slot: ctx.gearToWear === null ? '' : t(`gear.slot_${ctx.gearToWear.slot}`),
+    wearer: ctx.gearToWear === null ? '' : t(textKey('heroes', ctx.gearToWear.heroId, 'name')),
     ...likedEffect(ctx),
   });
 }

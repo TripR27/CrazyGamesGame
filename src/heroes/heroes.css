@@ -33,3 +33,12 @@
 }
 .hero-button:hover:not(:disabled) { background: #a6e676; }
 .hero-button:disabled { border-color: #b0a37c; background: #e6dcc0; color: #7b6f4f; cursor: default; }
+
+.hero-gear { display: grid; gap: 3px; margin: 4px 0 6px; }
+.hero-gear[hidden] { display: none; }
+.hero-slot { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 6px; font-size: 12px; }
+.hero-slot-name { font-weight: bold; }
+.hero-slot-select { min-width: 0; padding: 2px 4px; border: 2px solid #d8c18a; border-radius: 6px; background: #fff; color: #3b2410; font-size: 12px; }
+.hero-slot-select:disabled { opacity: 0.6; }
+.heroes-gear-shop { display: flex; flex-direction: column; gap: 8px; }
+.heroes-gear-shop .shop-row[hidden] { display: none; }

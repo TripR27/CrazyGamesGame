@@ -1,13 +1,15 @@
-import { DUNGEONS, GUILD_ROOM_ID, HERO_CLASSES, HEROES, type HeroClassDef, guildBuilt, heroStatus, heroWaitMs, hireOffer, xpToNext } from '@/heroes/heroes';
+import type { RowView } from '@/economy/shop-model';
+import { GEAR, GEAR_SLOTS, type GearDef, type GearSlot, gearOffer, wearer } from '@/heroes/gear';
+import { DUNGEONS, HERO_CLASSES, HEROES, type HeroClassDef, guildBuilt, heroStatus, heroWaitMs, hireOffer, xpToNext } from '@/heroes/heroes';
 import { t } from '@/i18n/translator';
 import { REPUTATION_LEVELS } from '@/reputation/reputation';
-import { ROOMS } from '@/rooms/rooms';
+import { GUILD_ROOM_ID, ROOMS } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';
 import { formatNumber } from '@/shared/numbers';
 import type { GameState } from '@/shared/state';
 
 /** What the Heroes tab and the guild hall read. */
-export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock'>;
+export type HeroesState = Pick<GameState, 'heroes' | 'roomsBuilt' | 'currencies' | 'ingredientStock' | 'gearOwned'>;
 
 /** A countdown as "1:05" (rounded up, so it never shows 0:00 while time is left). */
 export function clockText(ms: number): string {
@@ -34,6 +36,18 @@ export interface HeroCardView {
   xpFraction: number;
   status: string;
   action: HeroAction;
+  /** The four gear slots; empty for a hero who is not hired yet. */
+  slots: SlotView[];
+}
+
+/** One gear slot on a hero's card: what can go in it, what is in it, and whether it can change now (only at home). */
+export interface SlotView {
+  slot: GearSlot;
+  label: string;
+  /** `id` '' is the empty slot. */
+  options: { id: string; label: string }[];
+  selected: string;
+  enabled: boolean;
 }
 
 export interface HeroesView {
@@ -42,6 +56,8 @@ export interface HeroesView {
   stockTitle: string;
   /** One line per dungeon ingredient held, or the line that there is nothing yet; empty without the guild hall. */
   stock: string[];
+  /** Gear for sale (not owned yet); empty without the guild hall. */
+  gearShop: { id: string; row: RowView }[];
   cards: HeroCardView[];
 }
 
@@ -66,7 +82,33 @@ function statusLine(def: HeroClassDef, state: HeroesState, now: number): { statu
   return byStatus[heroStatus(hero, now)];
 }
 
-/** One hero's card: name and class, level and XP, where they are, and what the player can do. */
+/** What a piece does, as the player reads it: "+25% loot", "trips 15% shorter". */
+export const gearDoes = (def: GearDef): string => t(`gear.does_${def.slot}`, { n: Math.round(def.power * 100) });
+const gearName = (id: string): string => t(textKey('gear', id, 'name'));
+
+/** A hero's four slots. A piece worn by a hero who is on a trip cannot move, so it is not offered to the others. */
+function slotViews(heroId: string, state: HeroesState): SlotView[] {
+  const hero = state.heroes[heroId];
+  if (hero === undefined) return [];
+  return GEAR_SLOTS.map((slot) => {
+    const owned = GEAR.filter((g) => g.slot === slot && state.gearOwned.includes(g.id));
+    const options = owned.flatMap((g) => {
+      const on = wearer(state, g.id);
+      if (on !== undefined && on !== heroId && state.heroes[on]?.expedition !== null) return [];
+      const label = t('gear.option', { name: gearName(g.id), does: gearDoes(g) });
+      return [{ id: g.id, label: on === undefined || on === heroId ? label : t('gear.worn_by', { gear: label, hero: name('heroes', on) }) }];
+    });
+    return {
+      slot,
+      label: t(`gear.slot_${slot}`),
+      options: [{ id: '', label: t('gear.none') }, ...options],
+      selected: hero.gear[slot] ?? '',
+      enabled: hero.expedition === null,
+    };
+  });
+}
+
+/** One hero's card: name and class, level and XP, where they are, their gear, and what the player can do. */
 export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): HeroCardView {
   const hero = state.heroes[def.id];
   const top = hero !== undefined && hero.level >= HEROES.maxLevel;
@@ -79,7 +121,19 @@ export function toHeroCard(def: HeroClassDef, state: HeroesState, now: number): 
     xp: hero === undefined || top ? '' : t('heroes.xp', { xp: hero.xp, next }),
     xpFraction: hero === undefined ? 0 : top ? 1 : hero.xp / next,
     ...statusLine(def, state, now),
+    slots: slotViews(def.id, state),
   };
+}
+
+/** The gear for sale in the Heroes tab, as shop rows (a bought piece leaves the list). */
+function gearShop(state: HeroesState): { id: string; row: RowView }[] {
+  return GEAR.flatMap((def) => {
+    const offer = gearOffer(state, def);
+    if (offer.status !== 'forSale') return [];
+    const description = t('gear.option', { name: t(`gear.slot_${def.slot}`), does: gearDoes(def) });
+    const row = { name: gearName(def.id), description, level: '', buyLabel: t('shop.buy_once', { cost: formatNumber(offer.cost) }), canBuy: offer.affordable, maxed: false };
+    return [{ id: def.id, row }];
+  });
 }
 
 /** The dungeon ingredients held, in the order the dungeons drop them. */
@@ -100,6 +154,7 @@ export function toHeroesView(state: HeroesState, now: number): HeroesView {
     noGuild: built ? null : t('heroes.no_guild', { level: levelName }),
     stockTitle: t('heroes.stock_title'),
     stock: built ? stockLines(state) : [],
+    gearShop: gearShop(state),
     cards: built ? HERO_CLASSES.map((def) => toHeroCard(def, state, now)) : [],
   };
 }

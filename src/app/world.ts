@@ -6,6 +6,7 @@ import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFl
 import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { watchGearShop } from '@/heroes/gear';
 import { startHeroes } from '@/heroes/heroes';
 import { createOffline, type OfflineServices } from '@/offline/offline';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
@@ -35,7 +36,7 @@ export function syncStationStats(store: Store<GameState>, station: BrewStation):
   return store.subscribe(apply);
 }
 
-/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient, room and decoration become affordable. */
+/** Tutorial moments: the first shop upgrade, extra seat, staff member, ingredient, room, decoration and gear become affordable. */
 export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, content: Content): void {
   watchAffordable(store, bus, generalOnly(content.upgrades));
   watchAffordable(store, bus, seatsOnly(content.upgrades), 'seats:affordable');
@@ -43,6 +44,7 @@ export function watchShop(store: Store<GameState>, bus: EventBus<GameEvents>, co
   watchIngredientShop(store, bus, content);
   watchRoomShop(store, bus, content.rooms);
   watchDecorShop(store, bus, content.decor);
+  watchGearShop(store, bus);
 }
 
 const TUTORIAL_MAX_CUSTOMERS = 1;

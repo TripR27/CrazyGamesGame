@@ -3,10 +3,11 @@ import { ingredients, type IngredientDef } from '@/brewing/ingredients';
 import { customers } from '@/customers/customer-data';
 import { DECORATIONS, type DecorDef } from '@/decor/decor';
 import { upgrades, UPGRADE_STATS, type UpgradeEffect } from '@/economy/upgrade-data';
-import { DUNGEONS, type DungeonDef, GUILD_ROOM_ID, HERO_CLASSES, type HeroClassDef } from '@/heroes/heroes';
+import { GEAR, GEAR_SLOTS, type GearDef } from '@/heroes/gear';
+import { DUNGEONS, type DungeonDef, HERO_CLASSES, type HeroClassDef } from '@/heroes/heroes';
 import { recipes } from '@/recipes/recipe-data';
 import { REPUTATION_LEVELS, type ReputationLevel } from '@/reputation/reputation';
-import { ROOMS, type RoomDef } from '@/rooms/rooms';
+import { GUILD_ROOM_ID, ROOMS, type RoomDef } from '@/rooms/rooms';
 import { RARITIES } from '@/shared/content';
 import { FEEDBACK_POOLS } from '@/shared/random';
 import { TUTORIAL_STEPS, KNOWN_TARGETS, type TutorialStep } from '@/tutorial/tutorial-steps';
@@ -130,6 +131,25 @@ export const dungeonTable = (items: readonly DungeonDef[]): ContentTable =>
       ...(Number.isInteger(d.lootRolls) && d.lootRolls >= 1 ? [] : ['lootRolls must be a whole number >= 1']),
       ...(d.drops.length > 0 ? [] : ['needs at least one drop']),
       ...d.drops.flatMap((drop) => [...positive(drop.weight, 'drop weight'), ...(Number.isInteger(drop.amount) && drop.amount >= 1 ? [] : ['drop amount must be a whole number >= 1'])]),
+      ...(d.gearChance >= 0 && d.gearChance <= 1 ? [] : ['gearChance must be from 0 to 1']),
+      ...d.gearDrops.flatMap((drop) => [
+        ...positive(drop.weight, 'gear drop weight'),
+        ...(GEAR.some((g) => g.id === drop.gear && g.buy === undefined) ? [] : [`gear drop "${drop.gear}" must be loot-only gear`]),
+      ]),
+    ],
+  });
+
+/** Gear sits in a known slot, does something (a shield or helmet less than all of it) and, when sold, costs gold. */
+export const gearTable = (items: readonly GearDef[]): ContentTable =>
+  defineTable({
+    domain: 'gear',
+    items,
+    textFields: ['name'],
+    check: (g) => [
+      ...oneOf(g.slot, GEAR_SLOTS, 'slot'),
+      ...positive(g.power, 'power'),
+      ...((g.slot === 'shield' || g.slot === 'helmet') && g.power >= 1 ? ['power of a shield or helmet must stay below 1'] : []),
+      ...(g.buy === undefined ? [] : positive(g.buy.cost, 'buy.cost')),
     ],
   });
 
@@ -146,4 +166,5 @@ export const CONTENT_TABLES: readonly ContentTable[] = [
   decorTable(DECORATIONS),
   heroClassTable(HERO_CLASSES),
   dungeonTable(DUNGEONS),
+  gearTable(GEAR),
 ];

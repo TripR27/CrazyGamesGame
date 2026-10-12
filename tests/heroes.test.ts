@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { HERO_SPOTS, ROOM_SPOTS } from '@/app/layout';
-import {
-  DUNGEONS, GUILD_ROOM_ID, HERO_CLASSES, HEROES, gainXp, heroStatus, heroWaitMs, hireOffer, injuryChance, newHero, readyHeroId, rollLoot, xpToNext,
-} from '@/heroes/heroes';
+import { DUNGEONS, HERO_CLASSES, HEROES, gainXp, heroStatus, heroWaitMs, hireOffer, injuryChance, newHero, readyHeroId, rollLoot, xpToNext } from '@/heroes/heroes';
 import { clockText, type HeroesState, toHeroesView } from '@/heroes/heroes-model';
 import { hasKey } from '@/i18n/translator';
-import { ROOMS } from '@/rooms/rooms';
+import { GUILD_ROOM_ID, ROOMS } from '@/rooms/rooms';
 import { num } from '@/shared/numbers';
 import { createSeededRng } from '@/shared/random';
 import type { HeroState } from '@/shared/state';
@@ -17,7 +15,7 @@ const classDef = (id: string) => {
   return def;
 };
 const swamp = DUNGEONS[0] ?? (() => { throw new Error('no dungeon'); })();
-const heroesState = (over: Partial<HeroesState> = {}): HeroesState => ({ heroes: {}, roomsBuilt: [], currencies: { gold: num(0) }, ingredientStock: {}, ...over });
+const heroesState = (over: Partial<HeroesState> = {}): HeroesState => ({ heroes: {}, roomsBuilt: [], currencies: { gold: num(0) }, ingredientStock: {}, gearOwned: [], ...over });
 
 describe('hero growth', () => {
   it('needs more XP for every next level', () => {
