@@ -7,8 +7,16 @@
     <!-- The CrazyGames SDK: the only external script (SPECS chapter 1, rule 8). Without it the game uses a stand-in. -->
     <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
     <style>
+      /* Pixelify Sans (SIL Open Font License, public/fonts/PixelifySans-OFL.txt): the game's lettering, in the DOM and the canvas. */
+      @font-face {
+        font-family: 'Pixelify Sans';
+        src: url('./fonts/PixelifySans.ttf') format('truetype');
+        font-weight: 400 700;
+        font-display: block;
+      }
+      :root { --font: 'Pixelify Sans', sans-serif; }
       html, body { margin: 0; height: 100%; background: #1b1209; overflow: hidden; }
-      body { user-select: none; }
+      body { user-select: none; font-family: var(--font); }
       #game { position: absolute; }
       #ui-root { position: absolute; top: 0; left: 0; pointer-events: none; }
     </style>

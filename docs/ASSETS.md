@@ -6,6 +6,12 @@ Elke gebruikte asset staat hier met bron en licentie (SPECS.md, hoofdstuk 4, Ass
 
 Alle sprites en de achtergrond zijn tekstrasters met een palet in de TypeScript-code (`src/**/*-art.ts`), zelf gemaakt voor dit spel en vrij te gebruiken. Er zijn geen beeldbestanden: het spel maakt de textures bij het starten. Voorbeelden: `npm run pixel:preview` (schrijft naar `art/pixel/`).
 
+## Lettertype (`public/fonts/`)
+
+| bestand | grootte | herkomst en licentie |
+|---|---|---|
+| `PixelifySans.ttf` | 79 KB | Pixelify Sans (variabel, gewicht 400-700), Copyright 2021 The Pixelify Sans Project Authors; uit de Google Fonts-repository (github.com/google/fonts, `ofl/pixelifysans`); SIL Open Font License 1.1, tekst in `PixelifySans-OFL.txt` |
+
 ## Audio (`public/audio/`)
 
 | bestand | duur | grootte | herkomst en licentie |

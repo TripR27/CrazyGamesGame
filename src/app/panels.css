@@ -1,5 +1,5 @@
 /* The side panel, its tabs and the one button that unfolds it. Sizes are design pixels. */
-.side-button, .side-panel { font-family: sans-serif; pointer-events: auto; }
+.side-button, .side-panel { font-family: var(--font); pointer-events: auto; }
 
 /* Sits in the top-right corner of the game, left of the open panel. */
 .side-button {

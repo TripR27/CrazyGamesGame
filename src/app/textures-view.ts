@@ -1,4 +1,5 @@
 import type { GameObjects, Scene, Textures } from 'phaser';
+import { bubbleImage, FRAME_STYLES, type FrameName, ropeImage, signImage } from '@/app/ui-art';
 import { PIXEL, type PixelImage, type Sprite, spriteHeight, spriteWidth, stripImage } from '@/shared/pixels';
 
 /** Phaser's `Textures.FilterMode.NEAREST`, as a plain value so this file stays loadable without a browser (tests import views). */
@@ -30,6 +31,35 @@ export function addAnimation(scene: Scene, key: string, texture: string, frames:
 /** A pixel-art sprite standing with its feet (bottom centre) at x, y, scaled up to design pixels. */
 export function addPixelSprite(scene: Scene, x: number, y: number, texture: string, frame = 0): GameObjects.Sprite {
   return scene.add.sprite(x, y, texture, frame).setOrigin(0.5, 1).setScale(PIXEL);
+}
+
+/**
+ * A pixel-art bubble or sign big enough for `textWidth` × `textHeight` design pixels of text (plus `pad` around it), made
+ * once per size. Returns the texture key; the image is drawn at PIXEL scale.
+ */
+export function bubbleTexture(scene: Scene, textWidth: number, textHeight: number, frame: FrameName, tail: boolean, pad = 10): string {
+  const w = Math.max(6, Math.ceil((textWidth + pad * 2) / PIXEL));
+  const h = Math.max(5, Math.ceil((textHeight + pad) / PIXEL));
+  const key = `bubble_${frame}_${w}x${h}${tail ? 't' : ''}`;
+  addImageTexture(scene, key, bubbleImage(w, h, FRAME_STYLES[frame], tail));
+  return key;
+}
+
+/** A wooden sign big enough for the text plus `pad` (design pixels) around it, made once per size. Returns the texture key. */
+export function signTexture(scene: Scene, textWidth: number, textHeight: number, pad: number): string {
+  const w = Math.ceil((textWidth + pad * 2) / PIXEL);
+  const h = Math.ceil((textHeight + pad * 2) / PIXEL);
+  const key = `sign_${w}x${h}`;
+  addImageTexture(scene, key, signImage(w, h));
+  return key;
+}
+
+/** A twisted rope `length` design pixels long, made once per length. */
+export function ropeTexture(scene: Scene, length: number): string {
+  const n = Math.round(length / PIXEL);
+  const key = `rope_${n}`;
+  addImageTexture(scene, key, ropeImage(n));
+  return key;
 }
 
 /** The size of a sprite in design pixels. */

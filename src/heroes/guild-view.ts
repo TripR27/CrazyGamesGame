@@ -1,6 +1,7 @@
 import type { GameObjects, Scene } from 'phaser';
 import { HERO_CAULDRON, HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
-import { addAnimation, addPixelSprite, addStripTexture } from '@/app/textures-view';
+import { addAnimation, addPixelSprite, addStripTexture, bubbleTexture } from '@/app/textures-view';
+import { PIXEL } from '@/shared/pixels';
 import type { World } from '@/app/world';
 import { brewProgress } from '@/brewing/brewing';
 import { BOSSES } from '@/heroes/boss-fight';
@@ -14,6 +15,7 @@ import { createFloatingTexts, GOLD_COLOR } from '@/serving/serving-view';
 import { GUILD_ROOM_ID } from '@/rooms/rooms';
 import { textKey } from '@/shared/content';
 import type { GameEvents } from '@/shared/events';
+import { FONT } from '@/config';
 
 const RESTING_TINT = 0x8a8a8a;
 const WALK_MS = 700;
@@ -31,12 +33,36 @@ interface Shown {
   container: GameObjects.Container;
   figure: GameObjects.Sprite;
   hit: GameObjects.Rectangle;
-  label: GameObjects.Text;
+  /** The countdown on a parchment plate (away or resting). */
+  label: Plate;
   mark: GameObjects.Text;
   /** What is on screen now; the view only redraws when it changes. */
   status: HeroStatus | 'none';
   seconds: number;
   walking: boolean;
+}
+
+interface Plate {
+  setText(text: string): void;
+  setVisible(visible: boolean): void;
+}
+
+/** A short text on a pixel-art parchment plate; the bottom of the plate is at x, y. */
+function createPlate(scene: Scene, x: number, y: number): Plate {
+  const PAD = 6;
+  const plate = scene.add.image(x, y, '__DEFAULT').setOrigin(0.5, 1).setScale(PIXEL).setVisible(false);
+  const text = scene.add.text(x, y, '', { fontFamily: FONT, fontSize: '15px', color: '#3b2410' }).setOrigin(0.5).setVisible(false);
+  return {
+    setText(value) {
+      text.setText(value);
+      plate.setTexture(bubbleTexture(scene, text.width, text.height, 'parchment', false, PAD));
+      text.setY(y - (plate.height * PIXEL) / 2);
+    },
+    setVisible(visible) {
+      plate.setVisible(visible);
+      text.setVisible(visible);
+    },
+  };
 }
 
 /** The textures and animations of a hero: standing with a blink now and then, and walking. */
@@ -54,12 +80,9 @@ function createHero(scene: Scene, id: string, spot: Point, world: World): Shown 
   const hit = scene.add.rectangle(0, -44, 56, 92, 0xffffff, 0.001);
   const figure = addPixelSprite(scene, 0, 0, key).play(`${key}-idle`);
   // Above the countdown label, so it is seen while the player holds a drink for a resting hero.
-  const mark = scene.add.text(0, -LABEL_ABOVE - 26, '▼', { fontFamily: 'sans-serif', fontSize: '18px', color: '#3fbf3f' }).setOrigin(0.5, 1).setVisible(false);
+  const mark = scene.add.text(0, -LABEL_ABOVE - 26, '▼', { fontFamily: FONT, fontSize: '18px', color: '#3fbf3f' }).setOrigin(0.5, 1).setVisible(false);
   const container = scene.add.container(spot.x, spot.y, [hit, figure, mark]).setVisible(false);
-  const label = scene.add
-    .text(spot.x, spot.y - LABEL_ABOVE, '', { fontFamily: 'sans-serif', fontSize: '15px', color: '#3b2410', backgroundColor: '#f2dfb0', padding: { x: 6, y: 3 } })
-    .setOrigin(0.5, 1)
-    .setVisible(false);
+  const label = createPlate(scene, spot.x, spot.y - LABEL_ABOVE);
   hit.on('pointerdown', () => clickHero(world, id));
   world.targets.register(`hero:${id}`, () => (container.visible ? { x: spot.x - 25, y: spot.y - 85, w: 50, h: 85 } : null));
   return { id, spot, container, figure, hit, label, mark, status: 'none', seconds: -1, walking: false };

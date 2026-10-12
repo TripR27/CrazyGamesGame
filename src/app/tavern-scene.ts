@@ -1,6 +1,7 @@
 import { Scene, AUTO, Game, Scale } from 'phaser';
 import type { World } from '@/app/world';
 import { addBackdrop } from '@/app/backdrop-view';
+import { startJuice } from '@/app/juice-view';
 import { clickCauldron } from '@/brewing/brewing';
 import { shelfCount, shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
@@ -75,12 +76,14 @@ export class TavernScene extends Scene {
       customers: createCustomersLayer(this, world),
     };
     const stopFeedback = createFeedbackLayer(this, world);
+    const stopJuice = startJuice(this, world);
     // A click on an empty spot puts a picked-up drink back.
     this.input.on('pointerdown', (_pointer: unknown, over: readonly unknown[]) => {
       if (over.length === 0) cancelSelection(world);
     });
     this.events.once('shutdown', () => {
       stopFeedback();
+      stopJuice();
       this.views?.customers.destroy();
     });
   }

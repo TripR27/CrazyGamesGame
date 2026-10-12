@@ -19,6 +19,7 @@ import { mountRecipeBook } from '@/recipes/recipe-book-view';
 import { mountLevelUpToast } from '@/reputation/level-up-view';
 import { toLevelUpView } from '@/reputation/level-up-model';
 import { mountTutorial } from '@/tutorial/tutorial-view';
+import { installPixelCss } from '@/app/pixel-dom-view';
 
 /**
  * Makes the overlay a design-space box that is scaled and centred like the canvas, so HUD elements stay
@@ -73,6 +74,7 @@ export interface UiServices {
 
 /** Builds the DOM overlay on top of the canvas. */
 export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onFit: (fit: Fit) => void, services: UiServices): void {
+  installPixelCss();
   fitToViewport(root, layout, onFit);
   mountHud(root, world.store, world.targets);
   const panels = createSidePanels(root, layout, world.targets);

@@ -8,7 +8,7 @@
   border-radius: 16px;
   background: rgba(27, 18, 9, 0.92);
   color: #fff2cc;
-  font-family: sans-serif;
+  font-family: var(--font);
   text-align: center;
   pointer-events: none;
   animation: level-up-pop 0.35s ease-out;

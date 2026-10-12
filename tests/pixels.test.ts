@@ -7,6 +7,7 @@ import { ingredients } from '@/brewing/ingredients';
 import { DECORATIONS } from '@/decor/decor';
 import { rugImage, TORCHES, TROPHIES } from '@/decor/decor-art';
 import { ART } from '@/dev/art-preview';
+import { bubbleImage, FRAME_SIZE, FRAME_STYLES, frameImage, ropeImage, signImage, TAIL_ROWS } from '@/app/ui-art';
 import { heroFrames } from '@/heroes/hero-art';
 import { HERO_CLASSES } from '@/heroes/heroes';
 import { ROOMS } from '@/rooms/rooms';
@@ -55,6 +56,18 @@ describe('pixel art', () => {
     }
     const plain = builtRoomImage('no_such_room').data.join();
     for (const { id } of ROOMS) expect(builtRoomImage(id).data.join() === plain, id).toBe(false);
+  });
+
+  it('draws bubbles with a tail, wooden signs and 9×9 frames for the DOM', () => {
+    const bubble = bubbleImage(20, 8, FRAME_STYLES.parchment);
+    expect([bubble.width, bubble.height]).toEqual([20, 8 + TAIL_ROWS]);
+    expect(bubble.data[3]).toBe(0); // a cut corner
+    expect(bubble.data[((8 + TAIL_ROWS - 1) * 20 + 10) * 4 + 3]).toBe(255); // the tip of the tail
+    const frame = frameImage(FRAME_STYLES.wood);
+    expect([frame.width, frame.height]).toEqual([FRAME_SIZE, FRAME_SIZE]);
+    const sign = signImage(30, 12);
+    expect(sign.data[((6 * 30) + 15) * 4 + 3]).toBe(255);
+    expect(ropeImage(5).height).toBe(5);
   });
 
   it('reports a row of the wrong width and an unknown colour', () => {

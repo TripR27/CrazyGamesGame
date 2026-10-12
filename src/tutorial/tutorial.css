@@ -1,5 +1,5 @@
 /* Above the side panel and its button (z-index 1 and 2), so the spotlight can point into the panel. */
-.tut { position: absolute; inset: 0; font-family: sans-serif; pointer-events: none; z-index: 3; }
+.tut { position: absolute; inset: 0; font-family: var(--font); pointer-events: none; z-index: 3; }
 .tut[hidden], .tut-spot[hidden], .tut-arrow[hidden] { display: none; }
 
 .tut-spot {
@@ -32,10 +32,11 @@
   gap: 16px;
   width: 640px;
   box-sizing: border-box;
-  padding: 10px 18px;
-  border-radius: 16px;
-  background: #fff7e0;
-  border: 3px solid #5e3a18;
+  padding: 6px 14px;
+  /* The pixel-art parchment frame (app/ui-art.ts), stretched at 4 screen pixels per art pixel. */
+  border: 12px solid transparent;
+  border-image: var(--frame-parchment) 3 fill / 12px;
+  image-rendering: pixelated;
   color: #3b2410;
   font-size: 19px;
   line-height: 1.25;
@@ -55,36 +56,13 @@
 }
 .tut-skip:hover { background: #f5c542; }
 
-/* A grumpy cauldron: dark pot, green brew on top, cross eyes and heavy brows. */
+/* The grumpy cauldron from the game, simmering (four frames of pixel art, app/pixel-dom-view.ts). */
 .tut-mascot {
-  position: relative;
   flex: none;
-  width: 56px;
-  height: 46px;
-  border: 3px solid #1a1a22;
-  border-radius: 50% 50% 42% 42%;
-  background:
-    radial-gradient(circle at 17px 28px, #1a1a22 0 2px, #fff 3px 6px, transparent 7px),
-    radial-gradient(circle at 37px 28px, #1a1a22 0 2px, #fff 3px 6px, transparent 7px),
-    #2b2b33;
+  width: 64px;
+  height: 52px;
+  background: var(--mascot) 0 0 / 256px 52px no-repeat;
+  image-rendering: pixelated;
+  animation: tut-simmer 0.8s steps(4) infinite;
 }
-.tut-mascot::before {
-  content: '';
-  position: absolute;
-  inset: -9px 4px auto;
-  height: 14px;
-  border: 3px solid #45454f;
-  border-radius: 50%;
-  background: #7be05a;
-}
-.tut-mascot::after {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: 8px;
-  width: 14px;
-  height: 3px;
-  background: #1a1a22;
-  transform: rotate(18deg);
-  box-shadow: 20px 0 0 #1a1a22;
-}
+@keyframes tut-simmer { to { background-position: -256px 0; } }
