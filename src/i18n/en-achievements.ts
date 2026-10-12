@@ -50,7 +50,7 @@ export const achievements: Messages = {
   'tutorial.daily_done.text': 'Come back every day: the bonus grows for 7 days in a row. Miss a day and it starts over.',
   'settings.title': 'Settings',
   'settings.volume': 'Volume',
-  'settings.volume_note': 'Sound arrives in a later update.',
+  'settings.volume_note': 'The speaker button next to the cog turns all sound off.',
   'settings.language': 'Language',
   'settings.lang_en': 'English',
   'settings.tutorial_label': 'Tutorial',
@@ -64,7 +64,7 @@ export const achievements: Messages = {
   'settings.reset_label': 'Start over',
   'settings.reset': 'Delete everything',
   'settings.reset_confirm': 'Sure? Click again to delete',
-  'tutorial.settings_tip.text': 'Psst. Volume, language and a copy of your save are behind the cog. Just so you know.',
+  'tutorial.settings_tip.text': 'Psst. The speaker turns the sound off. Volume, language and a copy of your save are behind the cog.',
   'tutorial.trophy_open.text': 'A trophy! Every trophy makes the tavern a little better, for good. Have a look in the Trophies tab.',
   'tutorial.trophy_done.text': 'Here they all are, with how far you got. Your statistics are at the bottom.',
 };
