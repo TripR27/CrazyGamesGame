@@ -12,13 +12,16 @@ export interface HeroClassDef {
   hire: { cost: number } | 'withGuildRoom';
   /** How strongly drinks taken along work for this class (1 is normal). */
   potionPower: number;
+  /** Damage of one good strike against a boss at level 1. */
+  bossPower: number;
 }
 
 /** Placeholder prices, tuned with `npm run simulate`. A new class is data here, a spot in app/layout.ts and its texts. */
 export const HERO_CLASSES: readonly HeroClassDef[] = [
-  { id: 'warrior', hire: 'withGuildRoom', potionPower: 1 },
+  // The warrior hits bosses harder.
+  { id: 'warrior', hire: 'withGuildRoom', potionPower: 1, bossPower: 1.5 },
   // The mage gets more out of every drink taken along.
-  { id: 'mage', hire: { cost: 8000 }, potionPower: 1.5 },
+  { id: 'mage', hire: { cost: 8000 }, potionPower: 1.5, bossPower: 1 },
 ];
 
 /** Placeholder numbers for growth and injuries. */

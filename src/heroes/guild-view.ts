@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from 'phaser';
 import { HERO_CAULDRON, HERO_SPOTS, ROOM_SPOTS, type Point } from '@/app/layout';
 import type { World } from '@/app/world';
 import { brewProgress } from '@/brewing/brewing';
+import { BOSSES } from '@/heroes/boss-fight';
 import { ingredientColor } from '@/brewing/brewing-view';
 import { aimHeroCauldron, clickHero } from '@/heroes/hero-brewing';
 import { guildBuilt, HERO_CLASSES, heroStatus, heroWaitMs, type HeroStatus } from '@/heroes/heroes';
@@ -139,10 +140,12 @@ function createHeroCauldron(scene: Scene, world: World): GuildView {
   };
 }
 
-/** What floats up when a hero is back: the loot, the XP, a new level and an injury. */
+/** What floats up when a hero is back: the loot, the XP, the boss fight, gear, a new level and an injury. */
 function returnLines(event: GameEvents['hero:returned']): { text: string; color: string }[] {
   const lines = Object.entries(event.loot).map(([id, n]) => ({ text: t('heroes.loot', { n, name: t(textKey('ingredients', id, 'name')) }), color: LOOT_COLOR }));
   lines.push({ text: t('heroes.xp_gained', { xp: event.xp }), color: GOLD_COLOR });
+  const boss = t(textKey('bosses', BOSSES[event.dungeon]?.id ?? '', 'name'));
+  if (event.boss !== null) lines.push({ text: t(event.boss === 'won' ? 'heroes.boss_won' : 'heroes.boss_lost', { boss }), color: event.boss === 'won' ? GOLD_COLOR : BAD_COLOR });
   if (event.gear !== null) lines.push({ text: t('gear.found', { name: t(textKey('gear', event.gear, 'name')) }), color: GOLD_COLOR });
   if (event.levelUp) lines.push({ text: t('heroes.level_up', { level: event.level }), color: GOLD_COLOR });
   if (event.injured) lines.push({ text: t('heroes.injured'), color: BAD_COLOR });

@@ -40,6 +40,8 @@ export interface GuideContext {
   heroDrinkIngredient: string | null;
   /** The choice card open right now: whose trip, and its bold option. */
   card: { heroId: string; boldOptionId: string } | null;
+  /** The hero fighting a boss right now. */
+  bossHeroId: string | null;
   /** The side-panel tab on screen ('shop', 'recipes', 'heroes'), or null while the panel is folded away. */
   openTab: string | null;
 }
@@ -202,6 +204,7 @@ export function speech(stepId: string, ctx: GuideContext): string {
     hero: ctx.readyHeroId === null ? '' : t(textKey('heroes', ctx.readyHeroId, 'name')),
     loot: name('ingredients', ctx.lootId ?? undefined),
     cardHero: ctx.card === null ? '' : t(textKey('heroes', ctx.card.heroId, 'name')),
+    bossHero: ctx.bossHeroId === null ? '' : t(textKey('heroes', ctx.bossHeroId, 'name')),
     gear: ctx.affordableGearId === null ? '' : t(textKey('gear', ctx.affordableGearId, 'name')),
     slot: ctx.gearToWear === null ? '' : t(`gear.slot_${ctx.gearToWear.slot}`),
     wearer: ctx.gearToWear === null ? '' : t(textKey('heroes', ctx.gearToWear.heroId, 'name')),

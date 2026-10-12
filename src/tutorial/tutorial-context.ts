@@ -4,6 +4,7 @@ import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import { DECORATIONS, firstBuyableDecor } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { firstAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
+import { currentBoss } from '@/heroes/boss-fight';
 import { firstBuyableGear, gearToWear } from '@/heroes/gear';
 import type { GuildCauldron } from '@/heroes/hero-brewing';
 import { anyHeroTravelled, readyHeroId } from '@/heroes/heroes';
@@ -87,6 +88,7 @@ const CHECKS: Partial<Record<TutorialEvent, Check>> = {
   // A hero with a drink in the bag or on a trip with one: the first hero drink is done already.
   'hero:drink': ({ store }) => Object.values(store.getState().heroes).some((h) => h.bag.length > 0 || (h.expedition?.drinks.length ?? 0) > 0),
   'card:opened': ({ store, clock }) => currentCard(store.getState(), clock.now()) !== undefined,
+  'boss:opened': ({ store, clock }) => currentBoss(store.getState(), clock.now()) !== undefined,
   'shop:opened': ({ openTab }) => openTab() === 'shop',
   'book:opened': ({ openTab }) => openTab() === 'recipes',
 };
@@ -169,6 +171,7 @@ export function createTutorial({ store, bus, floor, station, clock, ingredients,
     gearToWear: gearToWear(store.getState()),
     heroDrinkIngredient: heroDrinkIngredient(store.getState(), ingredients, guild),
     card: openCardHint(store.getState(), clock.now()),
+    bossHeroId: currentBoss(store.getState(), clock.now())?.heroId ?? null,
     openTab: openTab(),
   });
   return { machine, getGuideContext };

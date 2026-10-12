@@ -30,13 +30,15 @@ export interface TripCard {
 
 /**
  * A hero on a trip: which dungeon, the wall-clock time they are back (absolute, so it also runs while the game is closed),
- * the drinks they took along (recipe ids) and the choice cards on the way.
+ * the drinks they took along (recipe ids), the choice cards on the way and the boss fight at the end.
  */
 export interface Expedition {
   dungeon: string;
   endsAt: number;
   drinks: string[];
   cards: TripCard[];
+  /** The fight with the boss at the end, once the player struck: each strike (hit or miss) and when the last one was. */
+  boss?: { hits: boolean[]; lastAt: number };
 }
 
 /**

@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 staan op `step-15b-dungeon-ingredients`, `step-15c-gear` en `step-16-hero-cauldron-cards` (op elkaar gebouwd), klaar om te mergen na akkoord van de eigenaar. **Laatst afgerond stap:** 16 (Heldenketel, drankjes meegeven en keuzekaartjes). **Volgende stap:** 16b (Baasgevecht). Let op: idle zit na stap 16 onder het doel (zie het logboek van stap 16). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b staat op `step-16b-boss-fight`, klaar om te mergen na akkoord van de eigenaar. **Laatst afgerond stap:** 16b (Baasgevecht). **Volgende stap:** 16c (Quartermaster). Let op: idle zit sinds stap 16 onder het doel (zie de logboeken van stap 16 en 16b). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -41,7 +41,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 15b | Kerker-ingrediënten als voorraad en nieuwe recepten | ✅ | `step-15b-dungeon-ingredients` |
 | 15c | Uitrusting | ✅ | `step-15c-gear` |
 | 16 | Heldenketel, drankjes meegeven en keuzekaartjes | ✅ | `step-16-hero-cauldron-cards` |
-| 16b | Baasgevecht (timing-minigame) | ⬜ | |
+| 16b | Baasgevecht (timing-minigame) | ✅ | `step-16b-boss-fight` |
 | 16c | Quartermaster: helden op auto en offline | ⬜ | |
 | 17 | Prestige | ⬜ | |
 | 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
@@ -220,7 +220,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -438,6 +438,18 @@ Alle punten uit IDEAS.md zijn samen doorgenomen. Wat in het plan komt:
 - **Tutorial-hints** (na de uitrustingsles): les `hero_brew` wijst de heldenketel aan en daarna een ingrediënt voor een drankje (alias `guide-hero-drink`), klaar zodra het in een rugzak zit; les `card` wijst bij het eerste open kaartje de gewaagde optie aan (alias `guide-card`) en sluit af met de uitleg over de standaardkeuze. De actiestappen tellen alleen in beeld.
 - **Simulator:** de bot kiest bij een open kaartje de gewaagde optie, brouwt in de heldenketel een gelukdrankje zonder kerker-ingrediënten zolang een held thuis ruimte heeft, en stuurt een held pas op pad met een volle rugzak.
 
+**Gebouwd in stap 16b (Baasgevecht; getallen gekozen door Claude):**
+- **Code:** `heroes/boss-fight.ts` (de baas per kerker, de balk, de uitkomst, de actie `strikeBoss` en `runBoss`, dat in het tick-systeem van de helden draait, na de kaartjes) en `heroes/boss-view.ts` (het vak in beeld, DOM). De uitkomst telt bij terugkomst mee als extra tochtmods (`bossMods`), naast de drankjes en de kaartjes.
+- **De baas:** `BOSSES` per kerker-id; het Moeras heeft de **Bog Witch** (3 levenspunten). Een nieuwe kerker krijgt zijn baas als één regel erbij.
+- **Wanneer:** de baas verschijnt **15 s vóór het eind** van een tocht (`BOSS.windowMs`), gerekend vanaf de eindtijd (die de modder of de helm al korter kon maken). Event `boss:opened`.
+- **De balk:** een wijzer zwaait heen en weer; drie slagen, elke slag sneller (1,6 s, 1,3 s en 1 s per oversteek). Het groene vak in het midden is 18% van de balk, **+6% per kracht-drankje** (keer de drankkracht, dus de magiër en het amulet tellen mee), hooguit 40%. Klik op Strike! of op de balk (pointer-events: muis en touch). Een slag in de laatste seconden houdt de held nog 4 s bij de baas (`graceMs`), zodat een gevecht nooit halverwege afbreekt.
+- **Schade:** een goede slag doet `bossPower` (krijger 1,5, magiër 1) ×(1 + 10% per level boven 1). De krijger wint dus met 2 van de 3 treffers, de magiër op level 1 pas met 3 (vanaf level 6 met 2).
+- **Uitkomst:** gewonnen = **baas-buit** bovenop de tocht: +1 Witch Moss, +1 Bog Pearl en +3% kans op gear. Verloren = niets erbij en niets eraf ("The Bog Witch cackles and flies off. No harm done."). Wie niet slaat, of wiens held terug is vóór de laatste slag, krijgt de **standaarduitkomst**: geen baas-buit, geen straf (niet geslagen slagen tellen als missers). Offline is het altijd de standaard. Event `boss:resolved` (`won`, `lost` of `null`); `hero:returned` meldt de uitkomst ook (`boss`).
+- **In beeld:** een paars vak naast het kaartje en naast de taverneketel (nooit over de bar of de ketel), met "Brakka vs. the Bog Witch!", de balk, per slag 💥, ✖ of ○, en de knop. De uitslag blijft 2,5 s staan. Bij terugkomst zweeft "👑 Beat the Bog Witch!" of "The Bog Witch got away". Het vak blokkeert niets; het spel loopt door.
+- **State:** per tocht `boss` (`{ hits, lastAt }`), pas na de eerste slag. Geen migratie nodig (optioneel veld).
+- **Tutorial-hint** (les `boss`, na de kaartjesles): bij de eerste baas wijst de ketel de knop Strike! aan (doel `boss-strike`), daarna een afsluitzin over de standaarduitkomst en kracht-drankjes. De actiestap telt alleen in beeld en is ook klaar als de held terugkomt zonder gevecht, zodat de les nooit blijft hangen.
+- **Simulator:** de bot slaat zodra de wijzer binnen 1,6× het groene vak staat (ongeveer 60% treffers, zoals een speler); de tijdlijn toont "Brakka beat the boss".
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -491,11 +503,12 @@ ReputationLevel { id, minReputation, teaches?: recipe id[] }
 Upgrade    { id, kind, baseCost, growth, effect, maxLevel? }
 Room       { id, buy: { level, cost }, seats, effects: UpgradeEffect[] }   // stap 14a; tekst rooms.<id>.name/.description
 Decor      { id, buy: { level, cost }, effects: UpgradeEffect[] }          // stap 14b; tekst decor.<id>.name/.description
-HeroClass  { id, hire: { cost } | 'withGuildRoom', potionPower }   // stap 15a, potionPower in 16 (bossPower komt in 16b); tekst heroes.<id>.name/.class/.tagline
+HeroClass  { id, hire: { cost } | 'withGuildRoom', potionPower, bossPower }   // stap 15a, potionPower in 16, bossPower in 16b; tekst heroes.<id>.name/.class/.tagline
 Gear       { id, slot: 'sword' | 'shield' | 'helmet' | 'amulet', power, buy?: { cost } }   // stap 15c (gebouwd); zonder buy: alleen buit; tekst gear.<id>.name
-Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearChance, gearDrops: { gear, weight }[], cards: Card[], boss }   // 15a, 15c (gearChance, gearDrops) en 16
+Dungeon    { id, recommendedLevel, durationSeconds, xp, lootRolls, drops: { ingredient, weight, amount }[], gearChance, gearDrops: { gear, weight }[], cards: Card[] }   // 15a, 15c (gearChance, gearDrops) en 16
+Boss       { id, hp, loot: TripMods }   // stap 16b, in BOSSES per kerker-id; tekst bosses.<id>.name
 Card       { id, options: { id, default?, needsDrink?, mods, boost?: { effect, mods(p) } }[] }   // stap 16 (gebouwd); mods: duur, buit, kans gewond, kans op gear, extra buit
-// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt, drinks, cards: { id, at, choice, drink? }[] } | null, gear, bag } (15a, gear 15c, bag/drinks/cards 16; later auto),
+// State: heroes per klasse { level, xp, injuredUntil, expedition: { dungeon, endsAt, drinks, cards: { id, at, choice, drink? }[], boss?: { hits, lastAt } } | null, gear, bag } (15a, gear 15c, bag/drinks/cards 16, boss 16b; later auto),
 // ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
 ```
 
@@ -653,7 +666,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
   *Klaar wanneer:* elk vak merkbaar zijn rol doet, gekochte en gevonden stukken te dragen zijn, tests slagen.
 - [x] **Stap 16: Heldenketel, drankjes meegeven en keuzekaartjes.** De tweede ketel in de gildekamer (ketel aanklikken, dan ingrediënten; het schap springt daarna terug). Drankjes gaan in de rugzak (max 2), of van de bar naar de held. De vier drankeffecten krijgen elk een rol op expeditie; de magiër haalt er meer uit. 2 keuzekaartjes per expeditie met een standaardkeuze na ~10 s. Receptencontent naar ~20 tot 30. Tutorial-hint: eerste heldendrankje en eerste kaartje.
   *Klaar wanneer:* een heldendrankje komt nooit op de bar en de taverneketel en de brouwer werken door, elk effect is merkbaar op expeditie, kaartjes hebben invloed op buit en duur, niet kiezen geeft de standaard, tests slagen.
-- [ ] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een timing-balk met 3 slagen tegen de moerasheks (muis en touch); kracht-drankjes maken het groene vak groter. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
+- [x] **Stap 16b: Baasgevecht.** Aan het eind van een kerker een timing-balk met 3 slagen tegen de moerasheks (muis en touch); kracht-drankjes maken het groene vak groter. Wie niet meespeelt, krijgt de standaarduitkomst; actief winnen geeft baas-buit. Tutorial-hint: eerste baas.
 - [ ] **Stap 16c: Quartermaster, helden op auto en offline.** Een aankoop geeft elke held een knop Auto (aan/uit, op elk moment). Op Auto vertrekt hij vanzelf opnieuw met standaardkeuzes, ook offline binnen de offline-limiet; zelf kiezen telt altijd. Het offline-rapport noemt de expedities. Daarna `npm run simulate` met helden (idle 30-40% van actief). Tutorial-hint: Auto-knop.
 - [ ] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
@@ -698,6 +711,17 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 16b: Baasgevecht (2026-10-12, `step-16b-boss-fight`)
+- **Gedaan:** (code in `src/heroes/` (nieuw: `boss-fight.ts`, `boss-view.ts`; aangepast: `expedition.ts`, `heroes.ts` (`bossPower`), `trip-cards.ts`, `guild-view.ts`, `heroes.css`), `src/shared/` (state, events, content), `src/tutorial/`, `src/i18n/en-heroes.ts`, `src/app/viewport-view.ts` en `src/dev/` (bot en tijdlijn); tests in `tests/boss.test.ts` (nieuw) en kleine aanpassingen in de stock- en gids-tests)
+  - **Baas, balk, schade, uitkomst, scherm, state, tutorial-hint en simulator:** zie hoofdstuk 4, Helden ("Gebouwd in stap 16b").
+  - Twee code-commits: de feature, en na de browsertest een kleine fix (het vak stond over de taverneketel, en zinnen begonnen met "the Bog Witch" met een kleine letter; nu heet de baas "Bog Witch" en zetten de zinnen er "the"/"The" voor). Daarna deze SPEC-update.
+  - 10 tests erbij (491 totaal): de wijzer heen en terug, het groene vak (kracht-drankjes, de magiër, de bovengrens), schade per klasse en level, winnen, verliezen en de standaard, de baas op het juiste moment met baas-buit thuis, een slag op het laatste moment (de held blijft) en slagen zonder baas, de standaard zonder te spelen, een baas met naam per kerker, en beide routes van de les.
+- **Waarom (keuzes):** de eigenaar liet de details aan Claude. 15 s is genoeg voor drie slagen plus lezen, en kort genoeg om niet te storen. Elke slag sneller geeft spanning zonder extra regels. Verliezen kost niets (helden kunnen niet sterven, hoofdstuk 4), dus de standaarduitkomst is gelijk aan verliezen en meespelen loont altijd. De baas-buit is kerker-ingrediënten, de hoofdbuit van de helden, zodat winnen meteen iets betekent aan de bar. De krijger is sterker tegen de baas (hoofdstuk 4) via `bossPower`; de magiër haalt meer uit kracht-drankjes, dus ook een breder groen vak.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. `npm run simulate -- 60 1` byte-identiek na de fix (alleen tekst en CSS). Simulator 60 minuten, seeds 1 t/m 9 (tussen haakjes stap 16 op `main`): goud op minuut 60 370K (231K) / 176K (92K) / 397K (251K) / 378K (174K) / 454K (142K) / 210K (69K) / 569K (394K) / 231K (78K) / 242K (383K): actief spelen verdient met de baas-buit flink meer, omdat er meer kerkerdrankjes verkocht worden. Gevonden stukken per run 4 / 0 / 4 / 4 / 4 / 1 / 4 / 0 / 3 (stap 16: 3 / 2 / 4 / 2 / 1 / 1 / 4 / 3 / 3), samen ongeveer gelijk. **Idle 25 / 31 / 24 / 23 / 22 / 30 / 22 / 30 / 26%, gemiddeld 25,9%** (stap 16: 26,7%): nog onder het doel, om dezelfde reden als bij stap 16 (idle stuurt geen helden). In de browser (testsave met Brakka op tocht met een Gym Sock Mead, alle lessen tot en met de kaartjes af; daarna weggehaald, er was geen eerdere save): de baas verscheen 15 s voor het eind met de les op Strike!; zonder te slaan kwam Brakka gewoon terug en rondde de les af; drie getimede slagen gaven 💥💥💥, "Victory!" en thuis 4 Bog Pearl en 1 Witch Moss (vanaf 0, dus de baas-buit kwam mee); drie slagen aan de rand gaven ✖✖✖ en "The Bog Witch cackles and flies off."; de uitslag bleef 2,5 s staan. Geen consolefouten.
+- **Afwijkingen van het plan:** geen. Het gevecht staat in een eigen vak in beeld, niet in de gildekamer (de held is dan ver weg in het Moeras).
+- **Nu te proberen:** stuur een held naar het Moeras en wacht tot 15 s voor het eind: sla drie keer als de wijzer in het groen staat. Geef de held eerst een kracht-drankje mee (bijv. Gym Sock Mead) en kijk hoe het groene vak groeit.
+- **Nog te doen / volgende stap:** stap 16c, Quartermaster (helden op auto en offline). **Besluit nodig van de eigenaar** (nog open uit stap 16): idle zit onder het doel (25,9%). Voorstel blijft: zo laten tot 16c, waar helden ook idle en offline lopen. De baas-buit maakt actief spelen nog iets sterker; tilt 16c idle niet genoeg op, dan is de baas-buit (nu +1/+1) een eenvoudige knop om aan te draaien.
 
 ### Chore: werkregel van de eigenaar (2026-10-12, `chore-work-rule`)
 - **Gedaan:** de werkregel van de eigenaar vastgelegd bovenaan CLAUDE.md en in hoofdstuk 1 (regel 10) en 11 (Git-werkwijze, punt 5).

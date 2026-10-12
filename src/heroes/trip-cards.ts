@@ -100,7 +100,7 @@ export function drinkPower(heroId: string, hero: Pick<HeroState, 'gear'>): numbe
 }
 
 /** The power of one effect among these drinks: one drink's power for each drink with that effect. */
-const effectPower = (recipes: readonly RecipeDef[], drinks: readonly string[], effect: Effect, power: number): number =>
+export const effectPower = (recipes: readonly RecipeDef[], drinks: readonly string[], effect: Effect, power: number): number =>
   drinks.filter((id) => effectOf(recipes, id) === effect).length * power;
 
 /** What the drinks along do on the trip (speed is used when the hero leaves, the rest when they are back). */
