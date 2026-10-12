@@ -2,7 +2,7 @@ import { Scene, AUTO, Game, Scale } from 'phaser';
 import type { World } from '@/app/world';
 import { drawBar, drawCauldron, drawCustomerSlots, drawRoomShell, drawShelf, drawTables } from '@/app/backdrop-view';
 import { clickCauldron, clickIngredient } from '@/brewing/brewing';
-import { shelfIds } from '@/brewing/ingredients';
+import { shelfCount, shelfIds } from '@/brewing/ingredients';
 import { createCauldronView, type CauldronView, createReadyView, type ReadyView, createShelfView, type ShelfView } from '@/brewing/brewing-view';
 import { BACKGROUND_COLOR, GAME_HEIGHT, GAME_WIDTH } from '@/config';
 import { createCustomersLayer, type CustomersLayer } from '@/customers/customers-view';
@@ -63,7 +63,12 @@ export class TavernScene extends Scene {
       rooms,
       guild,
       decor,
-      shelf: createShelfView(this, () => shelfIds(world), (id) => clickIngredient(world, id), world.targets),
+      shelf: createShelfView(this, {
+        getShelf: () => shelfIds(world),
+        getCount: (id) => shelfCount(world, id),
+        onClick: (id) => clickIngredient(world, id),
+        targets: world.targets,
+      }),
       cauldron: createCauldronView(this, world.station, () => clickCauldron(world), world.targets),
       ready: createReadyView(this, {
         station: world.station,

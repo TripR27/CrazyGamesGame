@@ -72,7 +72,7 @@ const entry = (entries: BookEntry[], id: string): BookEntry | undefined => entri
 
 describe('the recipe book', () => {
   it('shows progress and how to make every known drink', () => {
-    const view = toBookView({ recipesDiscovered: ['slime_sap', 'glowcap_stout'], reputation: 0, ingredientsBought: [] }, recipes);
+    const view = toBookView({ recipesDiscovered: ['slime_sap', 'glowcap_stout'], reputation: 0, ingredientsBought: [], ingredientStock: {} }, recipes);
     expect(view.progress).toBe(`2/${recipes.length} discovered`);
     expect(entry(view.entries, 'slime_sap')).toEqual({
       kind: 'known',
@@ -85,7 +85,7 @@ describe('the recipe book', () => {
   });
 
   it('shows a hint for a drink that can be discovered, and the level for one that cannot yet', () => {
-    const view = toBookView({ recipesDiscovered: [], reputation: 10, ingredientsBought: [] }, recipes);
+    const view = toBookView({ recipesDiscovered: [], reputation: 10, ingredientsBought: [], ingredientStock: {} }, recipes);
     expect(entry(view.entries, 'bog_lantern')).toMatchObject({ kind: 'hidden', rarity: 'common' });
     expect(entry(view.entries, 'bog_lantern')).toHaveProperty('hint', expect.stringContaining('Swamp'));
     expect(entry(view.entries, 'moonlight_merlot')).toEqual({ kind: 'locked', id: 'moonlight_merlot', unlock: 'Unlocks at Cozy Inn' });
@@ -97,13 +97,13 @@ describe('the recipe book', () => {
     expect(legend.find((l) => l.effect === 'speed')).toEqual({
       effect: 'speed', icon: '⚡', name: 'Speed', does: 'they drink faster and free the seat sooner',
     });
-    const cards = toBookView({ recipesDiscovered: recipes.map((r) => r.id), reputation: 0, ingredientsBought: [] }, recipes).entries;
+    const cards = toBookView({ recipesDiscovered: recipes.map((r) => r.id), reputation: 0, ingredientsBought: [], ingredientStock: {} }, recipes).entries;
     const icons = new Set(legend.map((l) => l.icon));
     expect(cards.every((c) => c.kind === 'known' && icons.has(c.details.at(-1) ?? ''))).toBe(true);
   });
 
   it('lists every recipe, in content order', () => {
-    const view = toBookView({ recipesDiscovered: [], reputation: 0, ingredientsBought: [] }, recipes);
+    const view = toBookView({ recipesDiscovered: [], reputation: 0, ingredientsBought: [], ingredientStock: {} }, recipes);
     expect(view.entries.map((e) => e.id)).toEqual(recipes.map((r) => r.id));
   });
 });

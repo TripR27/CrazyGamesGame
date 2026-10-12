@@ -1,4 +1,5 @@
 import type { World } from '@/app/world';
+import { isStocked, stockOf } from '@/brewing/ingredients';
 import { discoverableNow } from '@/recipes/recipes';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import type { BrewNotice, EventBus, GameEvents } from '@/shared/events';
@@ -68,7 +69,7 @@ export function canGrow(contents: readonly string[], recipes: readonly RecipeDef
   return recipes.some((r) => contents.every((id) => r.ingredients.includes(id)));
 }
 
-const notice = (kind: 'busy' | 'full' | 'fizzle', rng: Rng): BrewEvent => ({
+const notice = (kind: BrewNotice, rng: Rng): BrewEvent => ({
   kind: 'notice',
   notice: kind,
   messageKey: feedbackKey(kind, rng),
@@ -138,9 +139,16 @@ export function startBrewSystem(station: BrewStation, bus: EventBus<GameEvents>)
   });
 }
 
-/** The player clicks an ingredient on the shelf. A finished recipe starts brewing at once. */
+/**
+ * The player clicks an ingredient on the shelf. A finished recipe starts brewing at once. A dungeon ingredient that ran
+ * out stays on the shelf (greyed out) but does nothing except a grumble.
+ */
 export function clickIngredient(world: Pick<World, 'bus' | 'station' | 'rng' | 'store' | 'content'>, ingredientId: string): void {
   const { bus, station, rng, store, content } = world;
+  if (isStocked(content.ingredients, ingredientId) && stockOf(store.getState(), ingredientId) <= 0) {
+    publishBrewEvent(bus, notice('empty', rng));
+    return;
+  }
   bus.emit('ingredient:clicked', { id: ingredientId });
   const known = content.recipes.filter((r) => store.getState().recipesDiscovered.includes(r.id));
   for (const event of addIngredient(station, ingredientId, known, rng, discoverableNow(world))) publishBrewEvent(bus, event);

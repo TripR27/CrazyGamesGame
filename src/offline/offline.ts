@@ -1,3 +1,4 @@
+import { ingredients, usesStock } from '@/brewing/ingredients';
 import { type CustomerDef, VIP_SPAWN } from '@/customers/customer-data';
 import { priciestRecipe, meanSpawnIntervalMs, type CustomerCatalog } from '@/customers/customers';
 import { NIGHT_SHIFT_SHARE } from '@/economy/upgrade-data';
@@ -270,7 +271,8 @@ export function createOffline({ store, bus, clock, catalog }: OfflineDeps): Offl
         limitHours: stats.offlineHours.toNumber(),
         share: stats.offlineShare.toNumber(),
         reputation: state.reputation,
-        knownRecipes: recipes.filter((r) => state.recipesDiscovered.includes(r.id)),
+        // Dungeon ingredients run out, so drinks with them do not count while the player is away.
+        knownRecipes: recipes.filter((r) => state.recipesDiscovered.includes(r.id) && !usesStock(r, ingredients)),
         customerTypes: catalog.customerTypes,
         sellMultiplier: stats.sellPrice,
         vipChance: stats.vipChance.toNumber(),

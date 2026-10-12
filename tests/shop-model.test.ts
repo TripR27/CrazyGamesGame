@@ -47,7 +47,7 @@ describe('shop row view', () => {
 const catalog = { ingredients, recipes };
 const grape = ingredients.find((i) => i.id === 'moon_grape') ?? ingredients[0];
 const state = (reputation: number, gold: number, bought: string[] = []): IngredientShopState => ({
-  reputation, currencies: { gold: num(gold) }, ingredientsBought: bought, recipesDiscovered: ['slime_sap'],
+  reputation, currencies: { gold: num(gold) }, ingredientsBought: bought, recipesDiscovered: ['slime_sap'], ingredientStock: {},
 });
 
 describe('an ingredient in the shop', () => {
@@ -69,7 +69,7 @@ describe('an ingredient in the shop', () => {
 
 describe('the recipe book and the ingredient shop', () => {
   it('tells which shop ingredient a discoverable recipe still needs', () => {
-    const book = (bought: string[]) => toBookView({ recipesDiscovered: [], reputation: 10, ingredientsBought: bought }, recipes);
+    const book = (bought: string[]) => toBookView({ recipesDiscovered: [], reputation: 10, ingredientsBought: bought, ingredientStock: {} }, recipes);
     const hiccup = (bought: string[]) => book(bought).entries.find((e) => e.id === 'dragons_hiccup');
     expect(hiccup([])).toMatchObject({ kind: 'hidden', needs: 'Needs Fire Pepper from the shop' });
     expect(hiccup(['fire_pepper'])).not.toHaveProperty('needs');

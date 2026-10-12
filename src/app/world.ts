@@ -1,8 +1,8 @@
 import { CUSTOMER_SLOTS } from '@/app/layout';
 import { type BrewStation, BREWING, createStation, startBrewSystem } from '@/brewing/brewing';
-import { ingredients, watchIngredientShop, type IngredientDef } from '@/brewing/ingredients';
+import { brewableRecipes, ingredients, orderableRecipeIds, watchIngredientShop, watchStockUse, type IngredientDef } from '@/brewing/ingredients';
 import { customers, type CustomerDef } from '@/customers/customer-data';
-import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFloor } from '@/customers/customers';
+import { startCustomerSystem, type CustomerCatalog, type CustomerFloor, createFloor, waitingCustomers } from '@/customers/customers';
 import { DECORATIONS, type DecorDef, watchDecorShop } from '@/decor/decor';
 import { upgrades, type UpgradeDef } from '@/economy/upgrade-data';
 import { getMultipliers, watchAffordable, generalOnly, seatsOnly, staffOnly } from '@/economy/upgrades';
@@ -52,7 +52,7 @@ export interface CustomerWiring {
   bus: EventBus<GameEvents>;
   rng: Rng;
   floor: CustomerFloor;
-  catalog: CustomerCatalog;
+  catalog: CustomerCatalog & { ingredients: readonly IngredientDef[] };
   /** How the seat numbers are laid out: downstairs, then the rooms. */
   seatPlan: SeatPlan;
 }
@@ -71,7 +71,8 @@ export function startCustomers({ store, bus, rng, floor, catalog, seatPlan }: Cu
       const open = openSeats(seatPlan, Math.floor(stats.seats.toNumber()), state.roomsBuilt);
       return {
         reputation: state.reputation,
-        unlockedRecipeIds: state.recipesDiscovered,
+        // Drinks with a dungeon ingredient only while the stock covers them (on top of the orders already waiting).
+        unlockedRecipeIds: orderableRecipeIds(state, catalog, waitingCustomers(floor)),
         openSeats: open,
         vipChance: stats.vipChance.toNumber(),
         // While a lesson is on screen: one customer at a time, who does not lose patience, so it can always
@@ -90,7 +91,7 @@ export interface StaffWiring {
   floor: CustomerFloor;
   station: BrewStation;
   rng: Rng;
-  catalog: CustomerCatalog;
+  catalog: CustomerCatalog & { ingredients: readonly IngredientDef[] };
 }
 
 /** Puts the hired staff to work: their pace comes from the bought upgrades, and they use the same serving rules as a click. */
@@ -105,7 +106,8 @@ export function startStaffWork({ store, bus, floor, station, rng, catalog }: Sta
       catalog,
       getSellMultiplier: () => getMultipliers(store.getState()).sellPrice,
     },
-    getKnownRecipes: () => catalog.recipes.filter((r) => store.getState().recipesDiscovered.includes(r.id)),
+    // A drink with a dungeon ingredient only while it is in stock.
+    getKnownRecipes: () => brewableRecipes(store.getState(), catalog),
     getRates: () => {
       const stats = getMultipliers(store.getState());
       return { brew: stats.autoBrew.toNumber(), serve: stats.autoServe.toNumber() };
@@ -155,7 +157,7 @@ export interface World {
 
 /** Builds the world once and starts what runs on the tick. The order of the calls below is the order things run. */
 export function createWorld({ store, bus, rng, clock = systemClock, content: c = content }: WorldDeps): World {
-  const catalog: CustomerCatalog = c;
+  const catalog = c;
   // Seat numbers: downstairs first, then the rooms upstairs (built or not; customers only use the open ones).
   const seatPlan = { ground: CUSTOMER_SLOTS.length, rooms: c.rooms };
   const floor = createFloor(totalSeats(seatPlan));
@@ -164,6 +166,8 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   // Announces each new reputation level (the HUD shows a message).
   watchReputationLevels(store, bus);
   recordDiscoveries(store, bus);
+  // Every drink that starts brewing uses up its dungeon ingredients.
+  watchStockUse({ store, bus, content: c });
   const tutorial = createTutorial({ store, bus, floor, station, clock, ingredients: c });
   const inLesson = (): boolean => tutorial.machine.visibleStep() !== null;
   startCustomers({ store, bus, rng, floor, catalog, seatPlan }, inLesson);

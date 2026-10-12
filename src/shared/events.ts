@@ -26,8 +26,8 @@ export function createEventBus<E extends object>(): EventBus<E> {
 
 /** Why a customer left the tavern. */
 export type LeaveReason = 'impatient' | 'served';
-/** Small cauldron messages: it is busy, the bar is full, or the combination failed. */
-export type BrewNotice = 'busy' | 'full' | 'fizzle';
+/** Small cauldron messages: it is busy, the bar is full, the combination failed, or a dungeon ingredient ran out. */
+export type BrewNotice = 'busy' | 'full' | 'fizzle' | 'empty';
 export type RefuseReason = 'nothing-ready' | 'wrong-drink';
 
 /** All events on the game bus. Add new events here as features arrive. */

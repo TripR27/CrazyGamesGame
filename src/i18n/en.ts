@@ -15,6 +15,8 @@ export const book: Messages = {
   'book.locked': 'Unlocks at {level}',
   'book.unknown': 'a later level',
   'book.needs': 'Needs {ingredients} from the shop',
+  'book.needs_dungeon': 'Needs {ingredients} from a dungeon',
+  'book.unknown_ingredient': '?',
   'book.hidden_name': '???',
   'book.eureka': 'Eureka! {drink}!',
   'book.rarity_common': 'Common',
@@ -91,6 +93,8 @@ export const feedback: Messages = {
   'feedback.full.2': 'No room on the bar. Customers, assemble!',
   'feedback.busy.1': 'Patience! The cauldron is already bubbling.',
   'feedback.busy.2': 'One brew at a time. The cauldron is shy.',
+  'feedback.empty.1': 'Out of that one. Send a hero to the swamp for more.',
+  'feedback.empty.2': 'The jar is empty. Heroes fill it, not wishes.',
 };
 
 export const hud: Messages = {
@@ -99,7 +103,9 @@ export const hud: Messages = {
   'hud.skip_tutorial': 'Skip tutorial',
 };
 
+/** `shelf.count` is the stock on a dungeon ingredient. */
 export const ingredients: Messages = {
+  'shelf.count': '×{n}',
   'ingredients.swamp_slime.name': 'Swamp Slime',
   'ingredients.wild_honey.name': 'Wild Honey',
   'ingredients.glowcap.name': 'Glowcap Mushroom',
@@ -143,6 +149,14 @@ export const recipes: Messages = {
   'recipes.dusk_sangria.hint': 'Fire meets moonlight. Very romantic, slightly flammable.',
   'recipes.berserker_brew.name': 'Berserker Brew',
   'recipes.berserker_brew.hint': 'The hottest pepper and the sweatiest troll. Only for heroes and idiots.',
+  'recipes.pearl_mead.name': 'Pearl Mead',
+  'recipes.pearl_mead.hint': 'Something shiny from the bog, drowned in something sweet. Ask a hero where to dig.',
+  'recipes.witchs_kiss.name': "Witch's Kiss",
+  'recipes.witchs_kiss.hint': 'Moss a witch grew on purpose, and a grape that only ripens at night. Charming, in a creepy way.',
+  'recipes.mossy_grog.name': 'Mossy Grog',
+  'recipes.mossy_grog.hint': 'Witchy greens and troll effort. Tastes like a swamp that lifts weights.',
+  'recipes.bog_royale.name': 'Bog Royale',
+  'recipes.bog_royale.hint': 'Everything the swamp has to offer, plus fire. Drinkers leave before they finish their sentence.',
 };
 
 /** Reputation level names, and the HUD message when a new level is reached. */
