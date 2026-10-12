@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`) en 17 (`step-17-prestige`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus alle drie wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 17 (Prestige). **Volgende stap:** 18 (Achievements, dagelijkse bonus, instellingen). Idle zit sinds 16c binnen het doel (gemiddeld 34,2%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`) en 18a (`step-18a-achievements`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 18a (Statistieken en achievements). **Volgende stap:** 18b (Dagelijkse bonus). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -44,7 +44,9 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 16b | Baasgevecht (timing-minigame) | ✅ | `step-16b-boss-fight` |
 | 16c | Quartermaster: helden op auto en offline | ✅ | `step-16c-quartermaster` |
 | 17 | Prestige | ✅ | `step-17-prestige` |
-| 18 | Achievements, dagelijkse bonus, instellingen | ⬜ | |
+| 18a | Statistieken en achievements | ✅ | `step-18a-achievements` |
+| 18b | Dagelijkse bonus | ⬜ | |
+| 18c | Instellingen | ⬜ | |
 | 19 | Audio | ⬜ | |
 | 20 | CrazyGames SDK | ⬜ | |
 | 21 | Art-pass in pixel art + animaties | ⬜ | |
@@ -133,7 +135,7 @@ main.ts
 app/              world.ts (createWorld), Phaser-scene, DOM-schil
    ↓
 features          customers/ brewing/ recipes/ serving/ staff/ economy/ rooms/ decor/
-                  reputation/ offline/ tutorial/ heroes/ prestige/   (later achievements/ audio/ platform/)
+                  reputation/ offline/ tutorial/ heroes/ prestige/ achievements/   (later audio/ platform/)
    ↓
 shared/           state, events, time, numbers, random, pool, targets, content, purchases, save, browser
 ```
@@ -159,10 +161,11 @@ crazyGamesGame/
     app/                    world.ts (createWorld), tavern-scene.ts (Phaser), backdrop-view.ts, layout.ts, ui-model.ts,
                             hud-view.ts, panels-view.ts, viewport-view.ts (DOM-schil)
     customers/  brewing/  recipes/  serving/  staff/  economy/  rooms/  decor/  reputation/  offline/  tutorial/  heroes/  prestige/
+    achievements/
                             per feature: <feature>.ts (regels) en *-view.ts (Phaser of DOM); daarnaast alleen als het
                             echt groot of cyclus-brekend is: *-data.ts (recepten, upgrades, tutorialstappen, klanten) en
                             *-model.ts (pure view-models, bijv. economy/shop-model.ts)
-    i18n/                   translator.ts, en.ts (met en-shop.ts en en-heroes.ts per gebied; later nl.ts)
+    i18n/                   translator.ts, en.ts (met en-shop.ts, en-heroes.ts en en-achievements.ts per gebied; later nl.ts)
     dev/                    simulator.ts, simulator-report.ts
   tests/                    één bestand per feature (spiegelt de featuremappen); flows/ (spelen in de echte `World`), content/ (validatie van de data-tabellen), fixtures.ts
 ```
@@ -220,7 +223,7 @@ Doel: een nieuwe speler leert de basis **door het te doen**, in de echte game, z
   - Hoort tot `gameplayStart`-tijd (geen aparte "pauze").
 - **Opslaan:** voortgang staat in `state.tutorial` (`completedSteps`, `skipped`) en overleeft herladen.
 - **Opnieuw afspelen:** via Settings (stap 18), tot dan via debug-commando.
-- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
+- **Volgorde van de lessen (nu):** basis, voorkeur (♥), upgrade, trophy (sinds stap 18a), plekken, receptenboek, ingrediënt (sinds stap 13c), personeel, VIP, kamer (sinds stap 14a), decoratie (sinds stap 14b), held (sinds stap 15a), buit (sinds stap 15b), uitrusting (sinds stap 15c), heldendrankje en keuzekaartje (sinds stap 16), baas (sinds stap 16b), Auto (sinds stap 16c), prestige (sinds stap 17). Ze lopen één voor één.
 - **Navigatiestappen (sinds stap 13b):** een stap met `onlyWhenShown` (het paneel naar een tabblad openen, de ♥-klant bedienen) wordt alleen afgevinkt door zijn event terwijl hij zelf in beeld is; hij vinkt dus nooit vooruit (en daarmee eerdere lessen) af. Staat de speler al waar de stap om vraagt zodra hij verschijnt (tabblad al open), dan is hij meteen klaar (via `alreadyHolds`, ook voor `shop:opened` en `book:opened`). Zonder deze regel sloeg het vroeg openen van het tabblad Recipes de upgrade- en plekkenlessen over.
 - **In beeld scrollen (sinds stap 14b):** een doel in een scrollende lijst (een koopknop in de winkel) geeft bij het aanmelden ook een `reveal`-functie mee (`shared/targets.ts`). Zodra de pijl naar een nieuw doel springt, roept `tutorial/tutorial-view.ts` die één keer aan; de winkel scrolt de knop dan in beeld (`scrollIntoView`, alleen zo ver als nodig). Zonder dit wees de pijl onder het paneel zodra de winkel langer werd dan het paneel.
 - **Doelen in het paneel (sinds stap 13b):** `panel-button` (de uitklapknop), `tab:<id>` (een tabblad), en de gids-aliassen `guide-shop` en `guide-book`: eerst de knop, dan het tabblad. De winkel-aliassen (`guide-upgrade`, `guide-seats`, `guide-staff`) wijzen eerst de weg naar het Shop-tabblad. Op de bar: `drink:<slot>` en de alias `guide-drink`.
@@ -482,6 +485,36 @@ De eigenaar liet de uitwerking aan Claude ("ga maar gewoon verder"). Alle getall
 - **Tutorial-hint** (les `prestige`, na de Auto-les): zodra verkopen kan, wijst de ketel Menu, het tabblad Legacy en de verkoopknop aan (alias `guide-prestige-sell`); na de verkoop (en het herladen) een bonus om de Golden Hop aan uit te geven (`guide-legacy-buy`). Beide stappen tellen alleen in beeld.
 - **Simulator:** de bot verkoopt zodra het kan en koopt dan de eerste betaalbare bonus. Na een verkoop begint de tijdlijn opnieuw met "eerste keer" (zo zie je de mijlpalen van de nieuwe taverne). Met `npm run simulate -- 240 1` zie je meerdere cycli.
 
+### Statistieken en achievements (gebouwd in stap 18a; uitwerking door Claude)
+
+Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten. De rest koos Claude (de eigenaar zei door te gaan zonder te stoppen).
+
+- **Code:** `achievements/achievements.ts` (de statistieken bijhouden, de achievements en hun bonussen, de view-models; `startAchievements` is één regel in `createWorld`) en `achievements/achievements-view.ts` met `achievements.css` (het tabblad Trophies). De bonussen tellen mee in `getMultipliers` (`achievementBonuses`), dus ook offline.
+- **Statistieken** (`state.stats`, blijven bij het verkopen van de taverne): klanten bediend, VIP's bediend, goud verdiend (prijs en fooi, plus het offline-loon), heldentochten en gewonnen baasgevechten. Recepten en verkochte tavernes komen uit de state die er al was. Tochten die helden op Auto inhalen terwijl de speler weg is (stap 16c), tellen niet mee: daar komt geen melding van.
+- **14 achievements** (`ACHIEVEMENTS`, data; een doel is een statistiek en een getal, de bonus werkt als een upgrade-niveau):
+
+| Achievement | Doel | Bonus |
+|---|---|---|
+| First Pint | 1 klant | drankjes +1% |
+| The Regulars | 100 klanten | drankjes +2% |
+| Packed House | 1.000 klanten | ketel +3% |
+| Royal Treatment | 10 VIP's | VIP-kans ×1,05 |
+| Pocket Money | 10K goud verdiend | drankjes +1% |
+| Gold Rush | 1M goud verdiend | drankjes +3% |
+| Curious Brewer | 5 recepten | ketel +2% |
+| Recipe Hoarder (groot) | alle 21 recepten | drankjes +5% |
+| Legend in a Glass (groot) | een legendarisch recept | drankjes +3% |
+| Adventurer | 10 tochten | ketel +2% |
+| Swamp Veteran | 100 tochten | ketel +3% |
+| Witch Hunter | de baas 1 keer verslagen | drankjes +2% |
+| Legend of the Swamp | de baas 25 keer verslagen | drankjes +3% |
+| Under New Management (groot) | de taverne verkocht | drankjes +5% |
+
+- **Behalen:** bij elke wijziging van de state kijkt het spel of een doel gehaald is; een save die een doel al haalde, krijgt het meteen bij het laden. Event `achievement:unlocked` met `big` (de drie "grote" momenten); `happytime()` daarvoor komt met de SDK in stap 20. State: `achievements` (lijst ids, blijft bij verkopen).
+- **Melding:** dezelfde melding bovenin als bij een nieuw reputatieniveau: "🏆 The Regulars!", de bonus, en "All trophies are in the Trophies tab."
+- **Tabblad Trophies** (vijfde tabblad; de tabbladen zijn smaller gemaakt zodat er vijf passen): "2/14 reached", per achievement 🏆 of 🔒 met naam, doel en bonus ("Serve 100 customers · Drinks +2% pricier") en de voortgang ("37/100"), en onderaan de statistieken.
+- **Tutorial-hint** (les `trophy`, na de upgradeles, omdat de speler dan het paneel en de tabbladen kent; de eerste achievement komt al met de eerste klant): wijst Menu en het tabblad Trophies aan (alias `guide-trophies`), daarna de kop van de lijst (doel `trophies-panel`) met een afsluitzin. De eerste stap telt alleen in beeld.
+
 ### Receptenboek (wens eigenaar, 2026-10-06; gebouwd in stap 12)
 
 - De speler moet altijd kunnen **terugkijken hoe hij een drankje maakt**. Het receptenboek is een zijpaneel (zoals de winkel, via `app/ui-model.ts`; sinds stap 13b het tabblad Recipes van het ene zijpaneel) met een grid van alle drankjes.
@@ -544,6 +577,8 @@ Card       { id, options: { id, default?, needsDrink?, mods, boost?: { effect, m
 // ingredientStock: { [kerker-ingrediënt]: aantal } (15a), gearOwned: id[] (15c)
 LegacyDef  { id, baseCost, maxLevel, effects: UpgradeEffect[], startGold? }   // stap 17; tekst legacy.<id>.name/.description
 // State: prestige: { hops, totalHops, runs, runEarned (Decimal), legacy: { [id]: niveau } } (17)
+AchievementDef { id, stat, goal, bonus: UpgradeEffect, big? }   // stap 18a; tekst achievements.<id>.name
+// State: stats: { served, vipServed, goldEarned (Decimal), trips, bossWins }, achievements: id[] (18a; blijven bij verkopen)
 ```
 
 Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 heldenklassen, 3 kerkers, ~40 upgrades.
@@ -705,7 +740,11 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 17: Prestige.** "Verkoop de taverne", Gouden Hop-formule, permanente tree, wat reset en wat blijft (recepten blijven). Tests voor de formule en reset. Tutorial-hint: eerste prestige.
 
 ### Fase D: Afwerking
-- [ ] **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
+*Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (vier losse onderdelen; de eigenaar zei door te gaan zonder te stoppen). Hieronder eerst de oorspronkelijke omschrijving.*
+- [x] **Stap 18a: Statistieken en achievements.** Een `stats`-sectie, 14 achievements met kleine permanente bonussen, een melding en een tabblad Trophies. Tutorial-hint: eerste trophy. Zie hoofdstuk 4, "Statistieken en achievements".
+- [ ] **Stap 18b: Dagelijkse bonus.** Een beloning bij de eerste keer spelen op een dag, met een reeks dagen. Tutorial-hint: eerste dagbonus.
+- [ ] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
+- (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [ ] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [ ] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 - [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
@@ -745,6 +784,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 18a: Statistieken en achievements (2026-10-12, `step-18a-achievements`)
+- **Gedaan:** (code in `src/achievements/` (nieuw: `achievements.ts`, `achievements-view.ts`, `achievements.css`), `src/economy/upgrades.ts` (`achievementBonuses`), `src/prestige/prestige.ts` (statistieken en achievements blijven bij verkopen), `src/app/` (world, viewport-view met de gedeelde melding, `panels.css` voor vijf tabbladen), `src/shared/` (state, events, content), `src/tutorial/` en `src/i18n/en-achievements.ts` (nieuw); tests in `tests/achievements.test.ts` (nieuw) en aanpassingen in de flow-tests)
+  - **Opsplitsing:** stap 18 had vier losse onderdelen; Claude splitste hem in 18a (dit), 18b (dagelijkse bonus) en 18c (instellingen), zoals eerder bij 15 en 16.
+  - **Statistieken, achievements, melding, tabblad en tutorial-hint:** zie hoofdstuk 4, "Statistieken en achievements".
+  - **Flow-tests:** de les `trophy` staat na de upgradeles, dus tests die "alle lessen tot en met de plekken" als klaar zetten, zetten nu ook `trophy_open` en `trophy_done`; de upgradeles-test ziet daarna de trophy-les; de offline-test met kerkerdrankjes geeft beide saves dezelfde achievements (meer recepten = meer bonussen); de herlaad-test zet ook de nieuwe Decimal-velden terug.
+  - 7 tests erbij (519 totaal): de statistieken, één keer behalen met melding, behalen bij het laden (en welke "groot" zijn), de bonussen in `getMultipliers`, blijven bij verkopen (en Under New Management), teksten en view-models, en de les.
+- **Waarom (keuzes):** kleine bonussen (1-5%) zoals de eigenaar besloot, vooral op de drankprijs en de ketel, zodat ze overal meewerken (ook offline). Doelen verspreid over het hele spel, van de eerste klant tot de eerste verkoop. Een tabblad in plaats van een apart venster, zoals de rest van het spel. De melding deelt de plek met de niveaumelding (één melding tegelijk, de nieuwste wint). Statistieken en achievements blijven bij verkopen (GAME_ANALYSE hoofdstuk 7: achievements blijven).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. Simulator 60 minuten, seeds 1 t/m 9: eerste personeel ongewijzigd (3:48 tot 5:01); **idle 42 / 32 / 35 / 33 / 35 / 35 / 42 / 25 / 33%, gemiddeld 34,7%** (16c: 34,2%). Simulator 180 minuten (seeds 1/2/3): eerste verkoop op 74:21 / 80:53 / 76:34 (17: 84:37 / 90:13 / 86:04), tweede op 122:28 / 131:25 / 126:02. In de browser (testsave met 99 klanten en personeel, de lessen tot en met de upgradeles af; daarna de oorspronkelijke save teruggezet): First Pint werd bij het laden behaald en de les wees Menu en het tabblad Trophies aan; vijf tabbladen stonden eerst te breed ("Trophies" stak buiten het paneel), na de CSS-fix passen ze; het personeel bediende de 100e klant en de melding "🏆 The Regulars! Drinks +2% pricier" verscheen; het tabblad toont "2/14 reached", de lijst met voortgang en de statistieken. Geen consolefouten.
+- **Afwijkingen van het plan:** stap 18 is gesplitst (zie boven). `happytime()` volgt in stap 20.
+- **Nu te proberen:** open het tabblad Trophies en kijk hoe ver je bent; bedien een VIP of versla de heks voor de volgende.
+- **Nog te doen / volgende stap:** stap 18b, Dagelijkse bonus. Mergen van 16b t/m 18a naar `main` wacht op de eigenaar.
 
 ### Stap 17: Prestige (2026-10-12, `step-17-prestige`)
 - **Gedaan:** (code in `src/prestige/` (nieuw: `prestige.ts`, `prestige-view.ts`, `prestige.css`), `src/economy/upgrades.ts` (`prestigeBonuses` in `getMultipliers`), `src/reputation/reputation.ts` (bewaker zakt mee), `src/offline/offline.ts` (event `offline:paid`), `src/app/` (world, viewport-view), `src/shared/` (state, events, purchases, content), `src/tutorial/`, `src/i18n/en-shop.ts` en `src/dev/` (bot en tijdlijn); tests in `tests/prestige.test.ts` (nieuw) en de gids-test)
