@@ -2,6 +2,10 @@
 
 Elke gebruikte asset staat hier met bron en licentie (SPECS.md, hoofdstuk 4, Assets).
 
+## Pixel art (in de code)
+
+Alle sprites en de achtergrond zijn tekstrasters met een palet in de TypeScript-code (`src/**/*-art.ts`), zelf gemaakt voor dit spel en vrij te gebruiken. Er zijn geen beeldbestanden: het spel maakt de textures bij het starten. Voorbeelden: `npm run pixel:preview` (schrijft naar `art/pixel/`).
+
 ## Audio (`public/audio/`)
 
 | bestand | duur | grootte | herkomst en licentie |

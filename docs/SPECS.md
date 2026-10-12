@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`), 19 (`step-19-audio`), 20 (`step-20-crazygames-sdk`) en 19b (`step-19b-audio-files`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 19b (Audio-bestanden; staat op `step-19b-audio-files`, gebouwd op stap 20). **Volgende stap:** 21 (Art-pass in pixel art). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** stap 21 (Art-pass in pixel art), op 2026-10-12 door Claude gesplitst in 21a t/m 21d (zie hoofdstuk 12). 16b t/m 20 en 19b zijn op 2026-10-12 naar `main` gemerged (de eigenaar zei: "push, merge en ga verder"). **Laatst afgerond stap:** 21a (pixel-pijplijn, achtergrond en ketel). **Volgende stap:** 21b (klanten in pixel art, met animaties). Idle zit binnen het doel (gemiddeld 34,7%).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -50,7 +50,10 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 19 | Audio | ✅ | `step-19-audio` |
 | 20 | CrazyGames SDK | ✅ | `step-20-crazygames-sdk` |
 | 19b | Audio-bestanden (echte geluiden en muziek) | ✅ | `step-19b-audio-files` |
-| 21 | Art-pass in pixel art + animaties | ⬜ | |
+| 21a | Pixel-art: pijplijn, achtergrond en ketel | ✅ | `step-21a-pixel-pipeline` |
+| 21b | Pixel-art: klanten met animaties | ⬜ | |
+| 21c | Pixel-art: ingrediënten, helden, kamers en decoraties | ⬜ | |
+| 21d | Pixel-art: effecten, juice en mascotte | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
 
@@ -571,7 +574,9 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 ### Rendering
 
 - Phaser `Scale.FIT`, vaste ontwerpresolutie **1280×720**, gecentreerd, `pixelArt: false`.
-- **Besluit (2026-10-06): de eindstijl wordt pixel art.** De omschakeling hoort bij stap 21 en niet eerder: ontwerpresolutie dan **320×180** (4× opgeschaald naar 1280×720), `pixelArt: true`, en `layout.ts` en de UI-schaling gaan mee. Tot die tijd blijft alles op 1280×720 met placeholders.
+- **Besluit (2026-10-06): de eindstijl wordt pixel art.** Oorspronkelijk plan: ontwerpresolutie 320×180 met `pixelArt: true`.
+- **Uitwerking (stap 21a, 2026-10-12, keuze van Claude na "ga verder" van de eigenaar):** het canvas en alle coördinaten in `layout.ts` blijven **1280×720**; de art wordt getekend op een kwart (één art-pixel = `PIXEL` = 4 ontwerp-pixels, de achtergrond is 320×180) en per texture met nearest-neighbour opgeschaald. Geen globale `pixelArt: true`, omdat die de tekst in het canvas (bestellingen, labels, zwevende tekst) blokkerig maakt; wel `roundPixels: true`. Zo hoeven `layout.ts`, de tutorial-doelen en de UI-schaling niet mee te veranderen.
+- **Pijplijn (stap 21a):** sprites zijn tekstrasters met een palet in de eigen feature (`<feature>/<feature>-art.ts`, puur, dus testbaar); `shared/pixels.ts` heeft de tekenhulpjes (spiegelen, pixels zetten, frames naast elkaar) en `app/textures-view.ts` maakt er bij het starten Phaser-textures en animaties van. Er zijn dus geen beeldbestanden om te laden. De statische achtergrond (muren, vloer, deur, raam, haard, plank, tafels, bar en krukjes) is één beeld uit `app/backdrop-art.ts`. `npm run pixel:preview` schrijft PNG-voorbeelden naar `art/pixel/` (via Vite, zoals de simulator); `src/dev/art-preview.ts` houdt de lijst `ART` van alle sprites bij, die de tests ook nalopen.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft 4 kamervakken (3 in stap 14a; de gildekamer kwam er in stap 15a bij).
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `app/ui-model.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
@@ -580,7 +585,7 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 ### Assets
 
 - **Eerlijke kanttekening:** ik kan geen geschilderde/AI-afbeeldingen genereren. Wel kan ik **pixel-art-sprites schrijven als tekstrasters met een palet** (zie `scripts/pixel/` en `art/pixel/`; een script maakt er PNG's van, zonder dependencies) en **CC0/vrije assets opzoeken** (bijv. Kenney.nl, OpenGameArt; per asset de licentie checken). Downloaden doe ik alleen na jouw akkoord per bestand. Ingewikkelde sprites (zeldzame klanten, helden, gebouwen) kun je beter via een beeldtool of CC0-pakket laten maken; eenvoudige klanten, ingrediënten en meubels lukken in dit formaat.
-- Stap 1 t/m 20: **placeholders** (gekleurde vormen + emoji) zodat spelen niet op art wacht.
+- Stap 1 t/m 20: **placeholders** (gekleurde vormen + emoji) zodat spelen niet op art wacht. Sinds stap 21a wordt de art in code getekend (zie Rendering); emoji in de DOM-panelen blijven.
 - Stap 21: volledige styling-stap in pixel art, met animaties (zie stap 21 in hoofdstuk 12).
 - Elke gebruikte externe asset komt met bron en licentie in `docs/ASSETS.md`.
 - Budget: alle assets samen < 5 MB. Muziek: korte loopbare mp3/ogg (jij levert), < 2 MB per track.
@@ -789,7 +794,12 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
 - [x] **Stap 19b: Audio-bestanden.** De echte geluidsbestanden (10 effecten) en de muzieklus uit een andere chat in `public/audio/` (met de scripts in `scripts/audio/` en de herkomst in `docs/ASSETS.md`); `audio.ts` en `audio-view.ts` laden ze met de Web Audio API in plaats van de placeholder-geluidjes. Gebouwd op stap 20 omdat die al klaar was. Zie hoofdstuk 4, "Audio".
 - [x] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
-- [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
+*Stap 21 is op 2026-10-12 door Claude gesplitst in 21a t/m 21d (de eigenaar zei door te gaan met alle stappen). Hieronder eerst de oorspronkelijke omschrijving.*
+- [x] **Stap 21a: Pijplijn, achtergrond en ketel.** Tekstrasters in de code als bron, textures bij het starten; de achtergrond als één beeld; de ketel (chagrijnig gezicht, pruttelen en koken) en het vuur geanimeerd; de pullen op de bar. Zie hoofdstuk 4, "Rendering".
+- [ ] **Stap 21b: Klanten.** Vier klanttypes in pixel art met lopen, zitten, drinken, blij en boos.
+- [ ] **Stap 21c: Ingrediënten, helden, kamers en decoraties.** Alle overige gekleurde vormen in het canvas.
+- [ ] **Stap 21d: Effecten.** Vallende munten, partikels, schermschud bij legendarisch, de tutorial-mascotte als pixel art, thumbnail-materiaal.
+- (oorspronkelijk) **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
 - [ ] **Stap 22: Performance, QA en indienklaar maken.** Bundel-/assetbudget, Chromebook-test, Chrome + Edge, relatieve paden, aantal bestanden, alle "nog niet gecontroleerd"-punten uit hoofdstuk 2 doornemen, `npm run build` → zip.
 - [ ] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
@@ -826,6 +836,18 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 21a: Pixel-art-pijplijn, achtergrond en ketel (2026-10-12, `step-21a-pixel-pipeline`)
+- **Gedaan:** (code in `src/shared/pixels.ts` (nieuw), `src/app/textures-view.ts` (nieuw), `src/app/backdrop-art.ts` (nieuw), `src/app/backdrop-view.ts`, `src/app/tavern-scene.ts`, `src/brewing/brewing-art.ts` (nieuw), `src/brewing/brewing-view.ts`, `src/rooms/rooms-view.ts` (de balk van de bovenverdieping zit nu in de achtergrond), `src/dev/art-preview.ts` (nieuw) en `scripts/pixel/` (preview via Vite; de oude losse sprites en `backdrop.mjs` zijn verhuisd naar de TypeScript-code); tests in `tests/pixels.test.ts` (nieuw))
+  - **Pijplijn en resolutie:** zie hoofdstuk 4, "Rendering".
+  - **Achtergrond:** muur van planken met balken, de balk van de bovenverdieping, plankenvloer, een deur met ijzeren banden en een zandpad naar buiten, een raam met maan en sterren, een stenen haard met schoorsteen achter de ketel, de plank, tafels met een kaarsje, een bar met panelen en een kruk op elke zitplek (de ovale plek-markeringen zijn weg).
+  - **Ketel:** de chagrijnige ketel uit de tutorial (zware wenkbrauwen, scheel), die rustig pruttelt (4 frames) en kookt met opspattende druppels zolang er gebrouwen wordt (3 frames); het vuur eronder flakkert (3 frames). De pullen op de bar zijn een sprite; een opgepakt drankje kleurt geel en komt omhoog.
+  - 5 tests erbij (544 totaal): geen sprite met ongelijke rijen of onbekende kleuren, alle frames van een animatie even groot, de tekenhulpjes, en de achtergrond van 320×180 zonder doorzichtige pixels.
+- **Waarom (keuzes):** tekstrasters in de code zijn klein (geen beeldbestanden, niets te laden), te testen en makkelijk aan te passen; het experiment uit `chore-pixel-art-experiment` werkte al zo. De resolutie: zie hoofdstuk 4. De ketel kreeg het gezicht van de mascotte, zodat de tutorial-ketel en de spelketel dezelfde zijn.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. In de browser: de achtergrond, de ketel en het vuur staan op hun plek en bewegen; geen consolefouten na het herladen. Geen logica veranderd, dus de simulator blijft gelijk.
+- **Afwijkingen van het plan:** de resolutie (1280×720 met 4× sprites in plaats van 320×180 met `pixelArt: true`, zie hoofdstuk 4). Geen atlas-bestand: de textures worden bij het starten gemaakt.
+- **Nu te proberen:** start het spel en brouw een drankje: de ketel gaat koken en wordt weer rustig als het drankje klaar is.
+- **Nog te doen / volgende stap:** 21b, de klanten. Ingrediënten, voortgangsbalk en de bolletjes in de ketel volgen in 21c.
 
 ### Stap 19b: Audio-bestanden (2026-10-12, `step-19b-audio-files`)
 - **Gedaan:** (code in `src/audio/audio.ts` en `audio-view.ts`, `tests/audio.test.ts`, de bestanden in `public/audio/` (10 effecten en `music_tavern.ogg`), `scripts/audio/` (`make_audio.py`, `review_audio.py`, `REVIEW.md`) en `docs/ASSETS.md`)

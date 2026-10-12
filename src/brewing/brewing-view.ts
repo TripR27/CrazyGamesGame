@@ -1,6 +1,8 @@
 import type { GameObjects, Scene } from 'phaser';
-import { CAULDRON, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } from '@/app/layout';
+import { CAULDRON, FLOOR_Y, INGREDIENT_SLOTS, SHELF, SHELF_GAP, READY_SLOTS } from '@/app/layout';
+import { addAnimation, addPixelSprite, addStripTexture, designSize } from '@/app/textures-view';
 import { brewProgress, type BrewStation } from '@/brewing/brewing';
+import { CAULDRON_BOIL, CAULDRON_FRAMES, CAULDRON_SIMMER, FIRE_FRAMES, MUG as MUG_ART } from '@/brewing/brewing-art';
 import { t } from '@/i18n/translator';
 import { textKey } from '@/shared/content';
 import type { TargetRegistry } from '@/shared/targets';
@@ -36,7 +38,26 @@ export interface CauldronView {
   update(): void;
 }
 
-/** Click target on the cauldron, the ingredients inside and the brew progress bar. */
+const ANIM = { simmer: 'cauldron-simmer', boil: 'cauldron-boil', fire: 'fire' } as const;
+
+/** The grumpy cauldron over its fire: it simmers, and boils while a drink brews. Returns a function that sets which. */
+function createPot(scene: Scene): (boiling: boolean) => void {
+  addStripTexture(scene, 'cauldron', CAULDRON_FRAMES);
+  addStripTexture(scene, 'fire', FIRE_FRAMES);
+  addAnimation(scene, ANIM.simmer, 'cauldron', CAULDRON_SIMMER, 5);
+  addAnimation(scene, ANIM.boil, 'cauldron', CAULDRON_BOIL, 10);
+  addAnimation(scene, ANIM.fire, 'fire', [0, 1, 2], 8);
+  addPixelSprite(scene, CENTER_X, FLOOR_Y, 'fire').play(ANIM.fire);
+  const pot = addPixelSprite(scene, CENTER_X, FLOOR_Y, 'cauldron').play(ANIM.simmer);
+  let boiling = false;
+  return (now) => {
+    if (now === boiling) return;
+    boiling = now;
+    pot.play(now ? ANIM.boil : ANIM.simmer);
+  };
+}
+
+/** The cauldron with its fire, a click target on it, the ingredients inside and the brew progress bar. */
 export function createCauldronView(
   scene: Scene,
   station: BrewStation,
@@ -44,6 +65,7 @@ export function createCauldronView(
   targets: TargetRegistry,
 ): CauldronView {
   targets.register('cauldron', () => CAULDRON);
+  const setBoiling = createPot(scene);
   scene.add
     .zone(CENTER_X, CAULDRON.y + CAULDRON.h / 2, CAULDRON.w, CAULDRON.h)
     .setInteractive({ useHandCursor: true })
@@ -66,6 +88,7 @@ export function createCauldronView(
         if (id !== undefined) dot.setFillStyle(ingredientColor(id));
       });
       const brewing = station.brewing !== null;
+      setBoiling(brewing);
       track.setVisible(brewing);
       fill.setVisible(brewing).setSize(BAR_WIDTH * brewProgress(station), 8);
     },
@@ -164,7 +187,7 @@ export function createShelfView(scene: Scene, { getShelf, getCount, onClick, tar
   };
 }
 
-const MUG = { w: 30, h: 28, color: 0xd9a441, foam: 0xfff2cc, edge: 0x5e3a18, picked: 0xfff36b };
+const MUG = { ...designSize(MUG_ART), picked: 0xfff36b };
 const PICK_LIFT = 8;
 const HIT = { w: 56, h: 56 };
 // Neighbouring labels are wider than the slot gap, so every other one stands higher.
@@ -174,7 +197,7 @@ const READY_LABEL_STYLE = { fontFamily: 'sans-serif', fontSize: '13px', color: '
 
 interface Spot {
   parts: GameObjects.Container;
-  mug: GameObjects.Rectangle;
+  mug: GameObjects.Sprite;
   label: GameObjects.Text;
   shown: string | null;
 }
@@ -192,18 +215,18 @@ export interface ReadyViewDeps {
 }
 
 function createSpot(scene: Scene, x: number, y: number, raised: boolean, onClick: () => void): Spot {
-  const mug = scene.add.rectangle(0, -MUG.h / 2, MUG.w, MUG.h, MUG.color).setStrokeStyle(2, MUG.edge);
-  const foam = scene.add.rectangle(0, -MUG.h - 2, MUG.w, 6, MUG.foam);
-  const label = scene.add.text(0, -MUG.h - 12 - (raised ? LABEL_LIFT : 0), '', READY_LABEL_STYLE).setOrigin(0.5, 1);
+  const mug = addPixelSprite(scene, 0, 0, 'mug');
+  const label = scene.add.text(0, -MUG.h - 6 - (raised ? LABEL_LIFT : 0), '', READY_LABEL_STYLE).setOrigin(0.5, 1);
   // A hit area a bit larger than the mug, so it is easy to grab.
-  const hit = scene.add.rectangle(0, -MUG.h / 2 - 6, HIT.w, HIT.h, 0xffffff, 0.001);
-  const parts = scene.add.container(x, y, [hit, mug, foam, label]).setVisible(false);
+  const hit = scene.add.rectangle(0, -MUG.h / 2 - 4, HIT.w, HIT.h, 0xffffff, 0.001);
+  const parts = scene.add.container(x, y, [hit, mug, label]).setVisible(false);
   hit.setInteractive({ useHandCursor: true }).on('pointerdown', onClick);
   return { parts, mug, label, shown: null };
 }
 
 /** The finished drinks standing on the bar, one per slot. Click one to pick it up for a customer. */
 export function createReadyView(scene: Scene, { station, selected, onClick, targets }: ReadyViewDeps): ReadyView {
+  addStripTexture(scene, 'mug', [MUG_ART]);
   const spots = READY_SLOTS.map((slot, i) => createSpot(scene, slot.x, slot.y, i % 2 === 1, () => onClick(i)));
   spots.forEach((spot, i) => {
     const slot = READY_SLOTS[i] ?? { x: 0, y: 0 };
@@ -220,7 +243,8 @@ export function createReadyView(scene: Scene, { station, selected, onClick, targ
       spots.forEach((spot, i) => {
         const id = i < station.capacity ? station.ready[i] ?? null : null;
         const lit = i === litSlot;
-        spot.mug.setStrokeStyle(lit ? 4 : 2, lit ? MUG.picked : MUG.edge);
+        if (lit) spot.mug.setTint(MUG.picked);
+        else spot.mug.clearTint();
         spot.parts.setY((READY_SLOTS[i]?.y ?? 0) - (lit ? PICK_LIFT : 0));
         if (id === spot.shown) return;
         spot.shown = id;
