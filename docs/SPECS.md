@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** stap 21 (Art-pass in pixel art), op 2026-10-12 door Claude gesplitst in 21a t/m 21d (zie hoofdstuk 12). 16b t/m 20 en 19b zijn op 2026-10-12 naar `main` gemerged (de eigenaar zei: "push, merge en ga verder"). **Laatst afgerond stap:** 21a (pixel-pijplijn, achtergrond en ketel). **Volgende stap:** 21b (klanten in pixel art, met animaties). Idle zit binnen het doel (gemiddeld 34,7%).
+**Nu bezig:** stap 21 (Art-pass in pixel art), op 2026-10-12 door Claude gesplitst in 21a t/m 21d (zie hoofdstuk 12). 16b t/m 20 en 19b zijn op 2026-10-12 naar `main` gemerged (de eigenaar zei: "push, merge en ga verder"). De merge van 21a naar `main` werd door de veiligheidscontrole van Claude Code geblokkeerd; 21a, 21b, … staan daarom op elkaar gebouwd op hun eigen branches en wachten op een merge door de eigenaar (in die volgorde). **Laatst afgerond stap:** 21b (klanten). **Volgende stap:** 21c (ingrediënten, helden, kamers en decoraties). Idle zit binnen het doel (gemiddeld 34,7%).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -51,7 +51,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 20 | CrazyGames SDK | ✅ | `step-20-crazygames-sdk` |
 | 19b | Audio-bestanden (echte geluiden en muziek) | ✅ | `step-19b-audio-files` |
 | 21a | Pixel-art: pijplijn, achtergrond en ketel | ✅ | `step-21a-pixel-pipeline` |
-| 21b | Pixel-art: klanten met animaties | ⬜ | |
+| 21b | Pixel-art: klanten met animaties | ✅ | `step-21b-customers` |
 | 21c | Pixel-art: ingrediënten, helden, kamers en decoraties | ⬜ | |
 | 21d | Pixel-art: effecten, juice en mascotte | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
@@ -577,6 +577,7 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 - **Besluit (2026-10-06): de eindstijl wordt pixel art.** Oorspronkelijk plan: ontwerpresolutie 320×180 met `pixelArt: true`.
 - **Uitwerking (stap 21a, 2026-10-12, keuze van Claude na "ga verder" van de eigenaar):** het canvas en alle coördinaten in `layout.ts` blijven **1280×720**; de art wordt getekend op een kwart (één art-pixel = `PIXEL` = 4 ontwerp-pixels, de achtergrond is 320×180) en per texture met nearest-neighbour opgeschaald. Geen globale `pixelArt: true`, omdat die de tekst in het canvas (bestellingen, labels, zwevende tekst) blokkerig maakt; wel `roundPixels: true`. Zo hoeven `layout.ts`, de tutorial-doelen en de UI-schaling niet mee te veranderen.
 - **Pijplijn (stap 21a):** sprites zijn tekstrasters met een palet in de eigen feature (`<feature>/<feature>-art.ts`, puur, dus testbaar); `shared/pixels.ts` heeft de tekenhulpjes (spiegelen, pixels zetten, frames naast elkaar) en `app/textures-view.ts` maakt er bij het starten Phaser-textures en animaties van. Er zijn dus geen beeldbestanden om te laden. De statische achtergrond (muren, vloer, deur, raam, haard, plank, tafels, bar en krukjes) is één beeld uit `app/backdrop-art.ts`. `npm run pixel:preview` schrijft PNG-voorbeelden naar `art/pixel/` (via Vite, zoals de simulator); `src/dev/art-preview.ts` houdt de lijst `ART` van alle sprites bij, die de tests ook nalopen.
+- **Klanten (stap 21b):** `customers/customer-art.ts` tekent de ridder, de elf, de dwerg en de koning (VIP) op 14×22 art-pixels uit een hoofd en romp per type op gedeelde benen, met tien frames: staan, knipperen, twee loopframes, zitten, zitten met knipperen, drinken (pul opzij en aan de mond), juichen en boos (wenkbrauwen en een rood hoofd). `customers-view.ts` speelt per toestand een animatie (`POSE_FRAMES`): lopen naar de plek en terug, zitten op de kruk met af en toe knipperen, boos zitten zodra het geduld onder 25% komt, juichen met een sprongetje bij het serveren en daarna drinken tot het drankje op is, kort boos kijken (en schudden) bij een weigering. Wie te lang wachtte, loopt rood aangelopen weg. Een klanttype zonder eigen uiterlijk wordt als ridder getekend.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft 4 kamervakken (3 in stap 14a; de gildekamer kwam er in stap 15a bij).
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
 - DOM-overlay (`#ui-root`) bovenop het canvas voor HUD, knoppen en tutorial. Zijpanelen (winkel en receptenboek; vanaf stap 13b één paneel met tabbladen, later ook instellingen en helden) staan **rechts van het spel binnen dezelfde overlay**: `app/ui-model.ts` houdt hun breedte bij (ontwerp-pixels), en spel plus paneel samen vormen één kader dat in het venster past (`fit-root.ts`; `game-viewport.ts` zet het canvas op het spel-deel). Het paneel is dus even hoog als het spel, schaalt mee en loopt nooit door de lege balken van een venster dat niet 16:9 is. Het spel blijft bedienbaar (serveren) terwijl een paneel open staat. Die lege balken gebruiken we nergens voor.
@@ -796,7 +797,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 *Stap 21 is op 2026-10-12 door Claude gesplitst in 21a t/m 21d (de eigenaar zei door te gaan met alle stappen). Hieronder eerst de oorspronkelijke omschrijving.*
 - [x] **Stap 21a: Pijplijn, achtergrond en ketel.** Tekstrasters in de code als bron, textures bij het starten; de achtergrond als één beeld; de ketel (chagrijnig gezicht, pruttelen en koken) en het vuur geanimeerd; de pullen op de bar. Zie hoofdstuk 4, "Rendering".
-- [ ] **Stap 21b: Klanten.** Vier klanttypes in pixel art met lopen, zitten, drinken, blij en boos.
+- [x] **Stap 21b: Klanten.** Vier klanttypes in pixel art met lopen, zitten, drinken, blij en boos. Zie hoofdstuk 4, "Rendering".
 - [ ] **Stap 21c: Ingrediënten, helden, kamers en decoraties.** Alle overige gekleurde vormen in het canvas.
 - [ ] **Stap 21d: Effecten.** Vallende munten, partikels, schermschud bij legendarisch, de tutorial-mascotte als pixel art, thumbnail-materiaal.
 - (oorspronkelijk) **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
@@ -836,6 +837,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 21b: Klanten in pixel art (2026-10-12, `step-21b-customers`)
+- **Gedaan:** (code in `src/customers/customer-art.ts` (nieuw) en `src/customers/customers-view.ts`, `src/app/textures-view.ts` (Phaser alleen nog als type, zodat tests die views laden zonder browser blijven werken) en `src/dev/art-preview.ts`; test in `tests/pixels.test.ts`)
+  - **Klanten en hun animaties:** zie hoofdstuk 4, "Rendering". Het oude lichaam (rechthoek en cirkel) en de losse pul in de hand zijn weg; de bestelbubbel en de geduldbalk staan hoger, boven het hoofd.
+  - 1 test erbij (545 totaal): elk klanttype uit `customer-data.ts` heeft een eigen uiterlijk met alle frames.
+- **Waarom (keuzes):** één set poses voor alle types (dezelfde letters voor huid, ogen, mouwen en pul) houdt de art klein: een nieuw klanttype is een hoofd, een romp en een palet. Zitten op de krukjes uit 21a maakt de plekken zichtbaar zonder de oude ovalen.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt, geen bestand boven 300 regels, geen kringen. In de browser (een uitsnede van het WebGL-canvas uitvergroot, met een back-up van de save die daarna is teruggezet): de ridder loopt naar de kruk en zit; na het serveren juicht hij met een sprongetje en drinkt daarna uit de pul; geen consolefouten. Geen logica veranderd.
+- **Afwijkingen van het plan:** geen zijaanzicht: de klanten kijken altijd naar de speler, ook tijdens het lopen (twee loopframes met het ene en het andere been omhoog). Het boze wegstormen is een rode tint over het loopframe.
+- **Nu te proberen:** laat een klant lang wachten (hij wordt boos en loopt rood weg), geef een verkeerd drankje (boos gezicht) en een goed drankje (juichen en drinken).
+- **Nog te doen / volgende stap:** 21c, ingrediënten, helden, kamers en decoraties.
 
 ### Stap 21a: Pixel-art-pijplijn, achtergrond en ketel (2026-10-12, `step-21a-pixel-pipeline`)
 - **Gedaan:** (code in `src/shared/pixels.ts` (nieuw), `src/app/textures-view.ts` (nieuw), `src/app/backdrop-art.ts` (nieuw), `src/app/backdrop-view.ts`, `src/app/tavern-scene.ts`, `src/brewing/brewing-art.ts` (nieuw), `src/brewing/brewing-view.ts`, `src/rooms/rooms-view.ts` (de balk van de bovenverdieping zit nu in de achtergrond), `src/dev/art-preview.ts` (nieuw) en `scripts/pixel/` (preview via Vite; de oude losse sprites en `backdrop.mjs` zijn verhuisd naar de TypeScript-code); tests in `tests/pixels.test.ts` (nieuw))

@@ -1,5 +1,8 @@
-import { type GameObjects, type Scene, Textures } from 'phaser';
+import type { GameObjects, Scene, Textures } from 'phaser';
 import { PIXEL, type PixelImage, type Sprite, spriteHeight, spriteWidth, stripImage } from '@/shared/pixels';
+
+/** Phaser's `Textures.FilterMode.NEAREST`, as a plain value so this file stays loadable without a browser (tests import views). */
+const NEAREST = 1 as Textures.FilterMode;
 
 /** Turns a pixel image into a texture that stays crisp when scaled (nearest-neighbour for this texture only, so text stays smooth). */
 export function addImageTexture(scene: Scene, key: string, image: PixelImage, frameWidth = image.width): void {
@@ -9,7 +12,7 @@ export function addImageTexture(scene: Scene, key: string, image: PixelImage, fr
   texture.context.putImageData(new ImageData(new Uint8ClampedArray(image.data), image.width, image.height), 0, 0);
   for (let i = 0; i * frameWidth < image.width; i++) texture.add(i, 0, i * frameWidth, 0, frameWidth, image.height);
   texture.refresh();
-  texture.setFilter(Textures.FilterMode.NEAREST);
+  texture.setFilter(NEAREST);
 }
 
 /** A texture with one frame per sprite (frames 0, 1, 2 …), all as large as the largest frame. */
