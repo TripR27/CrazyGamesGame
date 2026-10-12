@@ -1,13 +1,17 @@
 import type { World } from '@/app/world';
 import { createEl, domBounds, type SidePanels } from '@/app/panels-view';
-import { DECORATIONS, buyDecorById } from '@/decor/decor';
-import { buyIngredientById, ingredients } from '@/brewing/ingredients';
+import { DECORATIONS, buyDecorById, decorOffer } from '@/decor/decor';
+import { buyIngredientById, ingredientOffer, ingredients } from '@/brewing/ingredients';
 import { type RowView, toDecorRowView, toIngredientRowView, toRoomRowView, toRowView } from '@/economy/shop-model';
 import { allSightEntries, clearNew, type SightEntry, type SightKind, type SightTab, shopSightEntries, sightRow, sightStatuses, tabHasNew, teaserRow } from '@/economy/shop-sight';
-import { buyUpgradeById, type BuyAmount } from '@/economy/upgrades';
+import { buyUpgradeById, type BuyAmount, quoteFor } from '@/economy/upgrades';
 import { t } from '@/i18n/translator';
 import { recipes } from '@/recipes/recipe-data';
-import { buildRoomById, ROOMS } from '@/rooms/rooms';
+import type { Ads } from '@/platform/platform';
+import { shopAdOffered, topUpForShop } from '@/rewards/rewards';
+import { buildRoomById, ROOMS, roomOffer } from '@/rooms/rooms';
+import type { Num } from '@/shared/numbers';
+import type { OneTimeOffer } from '@/shared/purchases';
 import './shop.css';
 
 /** Scrolls a buy button into view in the shop list (only as far as needed), so the tutorial arrow is never off-screen. */
@@ -24,8 +28,11 @@ export interface UpgradeRow {
  * One line in the shop: name, level, description and a buy button, with a "New!" label when it just came in sight. A
  * teaser is grey, with only the name and what it waits for. Only text and flags change after creation.
  */
-export function createUpgradeRow(onBuy: () => void): UpgradeRow {
+export function createUpgradeRow(onBuy: () => void, onAd?: () => void): UpgradeRow {
   const el = createEl('div', 'shop-row');
+  const ad = createEl('button', 'shop-ad', t('shop.ad_buy'));
+  ad.hidden = true;
+  if (onAd !== undefined) ad.addEventListener('click', onAd);
   const name = createEl('span', 'shop-row-name');
   const fresh = createEl('span', 'shop-row-new', t('shop.new'));
   const level = createEl('span', 'shop-row-level');
@@ -37,7 +44,9 @@ export function createUpgradeRow(onBuy: () => void): UpgradeRow {
   head.append(title, level);
   const info = createEl('div', 'shop-row-info');
   info.append(head, description);
-  el.append(info, buy);
+  const buttons = createEl('div', 'shop-row-buttons');
+  buttons.append(buy, ad);
+  el.append(info, buttons);
   buy.addEventListener('click', onBuy);
 
   return {
@@ -52,6 +61,7 @@ export function createUpgradeRow(onBuy: () => void): UpgradeRow {
       buy.textContent = view.buyLabel;
       buy.disabled = !view.canBuy;
       buy.hidden = view.teaser === true;
+      ad.hidden = view.adBuy !== true;
       el.classList.toggle('shop-row--maxed', view.maxed);
       el.classList.toggle('shop-row--teaser', view.teaser === true);
     },
@@ -79,8 +89,12 @@ interface KindRows {
   /** Tutorial target of the buy button: `<target>:<id>`. */
   target: string;
   view(world: World, id: string, amount: BuyAmount): RowView | undefined;
+  /** What a click on the buy button costs now, while it is for sale. */
+  cost(world: World, id: string, amount: BuyAmount): Num | undefined;
   buy(world: World, id: string, amount: BuyAmount): void;
 }
+
+const forSale = (offer: OneTimeOffer | undefined): Num | undefined => (offer?.status === 'forSale' ? offer.cost : undefined);
 
 const catalog = { ingredients, recipes };
 const byId = <T extends { id: string }>(list: readonly T[], id: string): T | undefined => list.find((item) => item.id === id);
@@ -92,6 +106,10 @@ const KIND_ROWS: Partial<Record<SightKind, KindRows>> = {
       const def = byId(ingredients, id);
       return def && toIngredientRowView(def, store.getState(), catalog);
     },
+    cost: ({ store }, id) => {
+      const def = byId(ingredients, id);
+      return forSale(def && ingredientOffer(store.getState(), def, catalog));
+    },
     buy: (world, id) => buyIngredientById(world, id),
   },
   room: {
@@ -99,6 +117,10 @@ const KIND_ROWS: Partial<Record<SightKind, KindRows>> = {
     view: ({ store }, id) => {
       const room = byId(ROOMS, id);
       return room && toRoomRowView(room, store.getState());
+    },
+    cost: ({ store }, id) => {
+      const room = byId(ROOMS, id);
+      return forSale(room && roomOffer(store.getState(), room));
     },
     buy: (world, id) => buildRoomById(world, id),
   },
@@ -108,6 +130,10 @@ const KIND_ROWS: Partial<Record<SightKind, KindRows>> = {
       const def = byId(DECORATIONS, id);
       return def && toDecorRowView(def, store.getState());
     },
+    cost: ({ store }, id) => {
+      const def = byId(DECORATIONS, id);
+      return forSale(def && decorOffer(store.getState(), def));
+    },
     buy: (world, id) => buyDecorById(world, id),
   },
   upgrade: {
@@ -115,6 +141,11 @@ const KIND_ROWS: Partial<Record<SightKind, KindRows>> = {
     view: ({ store, content }, id, amount) => {
       const def = byId(content.upgrades, id);
       return def && toRowView(def, store.getState(), amount);
+    },
+    cost: ({ store, content }, id, amount) => {
+      const def = byId(content.upgrades, id);
+      const deal = def && quoteFor(store.getState(), def, amount);
+      return deal !== undefined && deal.count > 0 ? deal.cost : undefined;
     },
     buy: (world, id, amount) => buyUpgradeById(world, id, amount),
   },
@@ -132,13 +163,14 @@ interface ShopListHosts {
   root: HTMLElement;
   panel: HTMLElement;
   world: World;
+  ads: Pick<Ads, 'rewarded'>;
 }
 
 /**
  * One row per offer of the Shop tab, under a heading per group (ingredients, rooms, decorations, then the upgrades by
  * kind). Every buy button is a tutorial target. Returns the rows, the headings by group and an unregister function.
  */
-function mountRows({ list, root, panel, world }: ShopListHosts, entries: readonly SightEntry[], amount: () => BuyAmount) {
+function mountRows({ list, root, panel, world, ads }: ShopListHosts, entries: readonly SightEntry[], amount: () => BuyAmount) {
   const headings = new Map<string, HTMLElement>();
   const rows: ShopRow[] = [];
   const removers: Array<() => void> = [];
@@ -150,7 +182,12 @@ function mountRows({ list, root, panel, world }: ShopListHosts, entries: readonl
       headings.set(entry.group, heading);
       list.append(heading);
     }
-    const row = createUpgradeRow(() => kind.buy(world, entry.id, amount()));
+    // After a rewarded ad the missing gold is added, then the normal purchase runs.
+    const withAd = (): void => {
+      const cost = kind.cost(world, entry.id, amount());
+      if (cost !== undefined) ads.rewarded(() => (topUpForShop(world, cost), kind.buy(world, entry.id, amount())));
+    };
+    const row = createUpgradeRow(() => kind.buy(world, entry.id, amount()), withAd);
     list.append(row.el);
     const bounds = () => (panel.hidden || row.el.hidden ? null : domBounds(row.buy, root));
     removers.push(world.targets.register(`${kind.target}:${entry.id}`, bounds, () => reveal(row.buy)));
@@ -173,13 +210,14 @@ export interface ShopHosts {
   /** The scaled overlay box, to measure tutorial targets against. */
   root: HTMLElement;
   panels: SidePanels;
+  ads: Pick<Ads, 'rewarded'>;
 }
 
 /**
  * The Shop tab of the side panel: what came in sight in this tavern, with a "New!" label on what just did, and per group
  * one grey teaser of what comes later (economy/shop-sight.ts); sold-out offers leave. Returns an unmount function.
  */
-export function mountShop({ root, panels }: ShopHosts, world: World): () => void {
+export function mountShop({ root, panels, ads }: ShopHosts, world: World): () => void {
   const { store } = world;
   let amount: BuyAmount = 1;
   const { panel, list, picker } = buildPanel((picked) => {
@@ -187,7 +225,7 @@ export function mountShop({ root, panels }: ShopHosts, world: World): () => void
     render();
   });
   const entries = shopSightEntries(world.content);
-  const { rows, headings, unregister } = mountRows({ list, root, panel, world }, entries, () => amount);
+  const { rows, headings, unregister } = mountRows({ list, root, panel, world, ads }, entries, () => amount);
 
   function render(): void {
     if (panel.hidden) return;
@@ -198,7 +236,9 @@ export function mountShop({ root, panels }: ShopHosts, world: World): () => void
       const status = statuses[entries.indexOf(entry)] ?? 'hidden';
       const view = sightRow(entry, status, state, () => kind.view(world, entry.id, amount) ?? teaserRow(entry, state));
       row.el.hidden = view === null;
-      if (view !== null) row.update(view);
+      if (view === null) continue;
+      const cost = status === 'shown' ? kind.cost(world, entry.id, amount) : undefined;
+      row.update({ ...view, adBuy: cost !== undefined && shopAdOffered(cost, state.currencies.gold, world.clock.now(), state.rewards.shopAdAt) });
     }
     for (const [group, heading] of headings) heading.hidden = rows.every(({ entry, row }) => entry.group !== group || row.el.hidden);
   }

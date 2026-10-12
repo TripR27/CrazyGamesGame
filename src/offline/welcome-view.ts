@@ -22,7 +22,10 @@ export function mountWelcomeBack(root: HTMLElement, world: World, ads: Pick<Ads,
   backdrop.append(card);
   root.append(backdrop);
   let report: OfflineReport | null = null;
-  button.addEventListener('click', () => void (backdrop.hidden = true));
+  button.addEventListener('click', () => {
+    backdrop.hidden = true;
+    world.bus.emit('welcome:closed', {});
+  });
   double.addEventListener('click', () => {
     const shown = report;
     double.disabled = true;

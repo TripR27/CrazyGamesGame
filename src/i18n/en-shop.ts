@@ -57,6 +57,28 @@ export const shop: Messages = {
   'shop.teaser_save': 'Save up to see it',
   'shop.teaser_after': 'Comes after {name}',
   'shop.or': ' or ',
+  'shop.ad_buy': '📺 Ad',
+};
+
+/** Rewarded ads: the peddler, the bag of gold, the power-ups and the shop's 📺 button. */
+export const rewards: Messages = {
+  'rewards.peddler': 'Peddler',
+  'rewards.title': 'A peddler drops by',
+  'rewards.offer_gold': 'Watch an ad and he hands you a bag of {gold} gold.',
+  'rewards.offer_boost': 'Watch an ad for {name}: {does} for {minutes} minutes.',
+  'rewards.watch': '📺 Watch an ad',
+  'rewards.no_thanks': 'No thanks',
+  'rewards.thanks_gold': 'Pleasure doing business! +{gold} gold.',
+  'rewards.thanks_boost': '{name}! {does} for {minutes} minutes.',
+  'rewards.no_ad': 'No ad right now. Maybe next time.',
+  'rewards.running': '{name} {time}',
+  'rewards.happy_hour.name': 'Happy Hour',
+  'rewards.happy_hour.does': 'drinks sell for double',
+  'rewards.extra_hands.name': 'Extra Hands',
+  'rewards.extra_hands.does': 'staff work twice as fast',
+  'rewards.rush.name': 'Rush',
+  'rewards.rush.does': 'the cauldrons brew twice as fast',
+  'tutorial.peddler_spot.text': 'A peddler! Watch an ad for a treat, or send him off. He comes back now and then.',
 };
 
 /** `{amount}` is the effect per level, filled in from the upgrade data (for example "+10%"). */

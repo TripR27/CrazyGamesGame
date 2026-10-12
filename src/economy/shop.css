@@ -58,3 +58,9 @@
 .shop-row-new[hidden], .shop-row-text[hidden], .shop-buy[hidden] { display: none; }
 .shop-row--teaser { opacity: 0.55; filter: grayscale(0.8); }
 .shop-row--teaser .shop-row-head { font-weight: normal; }
+
+/* The 📺 button under the buy button when most of the price is there (a rewarded ad pays the rest). */
+.shop-row-buttons { display: flex; flex-direction: column; gap: 2px; flex: none; }
+.shop-ad { width: 104px; padding: 0 2px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; background: none; color: #3b2410; font-family: var(--font); font-size: 13px; cursor: pointer; }
+.shop-ad:hover { filter: brightness(1.08); }
+.shop-ad[hidden] { display: none; }

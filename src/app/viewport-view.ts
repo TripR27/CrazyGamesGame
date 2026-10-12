@@ -12,6 +12,7 @@ import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
 import { mountHeroes } from '@/heroes/heroes-view';
 import { mountWelcomeBack } from '@/offline/welcome-view';
+import { mountRewards } from '@/rewards/rewards-view';
 import type { Ads } from '@/platform/platform';
 import { mountSettings, type SaveCodes } from '@/settings/settings-view';
 import { mountLegacy } from '@/prestige/prestige-view';
@@ -79,7 +80,7 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   fitToViewport(root, layout, onFit);
   mountHud(root, world.store, world.targets);
   const panels = createSidePanels(root, layout, world.targets);
-  mountShop({ root, panels }, world);
+  mountShop({ root, panels, ads: services.ads }, world);
   mountRecipeBook({ root, panels }, world);
   mountHeroes({ root, panels }, world);
   mountLegacy({ root, panels }, world);
@@ -101,6 +102,7 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   });
   mountWelcomeBack(root, world, services.ads);
   mountDailyBonus(root, world);
+  mountRewards(root, world, services.ads);
   mountSettings(root, world, services);
   mountAudio(root, world, services.silenced);
 }
