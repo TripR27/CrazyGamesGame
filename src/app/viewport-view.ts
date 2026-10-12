@@ -1,6 +1,7 @@
 import { toAchievementToast } from '@/achievements/achievements';
 import { mountTrophies } from '@/achievements/achievements-view';
 import type { World } from '@/app/world';
+import { mountAudio } from '@/audio/audio-view';
 import { mountDailyBonus } from '@/daily/daily-view';
 import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
@@ -87,4 +88,5 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountWelcomeBack(root, world.offline.inbox);
   mountDailyBonus(root, world);
   mountSettings(root, world, saves);
+  mountAudio(root, world);
 }
