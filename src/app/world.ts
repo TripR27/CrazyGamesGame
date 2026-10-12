@@ -25,7 +25,7 @@ import type { Rng } from '@/shared/random';
 import type { GameState, Store } from '@/shared/state';
 import { createTargetRegistry, type TargetRegistry } from '@/shared/targets';
 import { systemClock, type Clock } from '@/shared/time';
-import { type BrewerKettle, createKettle, startStaff } from '@/staff/staff';
+import { brewerLevel, type BrewerKettle, createKettle, kettleSlotsAt, startStaff } from '@/staff/staff';
 import { createTutorial, type TutorialServices } from '@/tutorial/tutorial-context';
 
 /**
@@ -101,7 +101,7 @@ export interface StaffWiring {
   station: BrewStation;
   kettle: BrewerKettle;
   rng: Rng;
-  catalog: CustomerCatalog & { ingredients: readonly IngredientDef[] };
+  catalog: CustomerCatalog & { ingredients: readonly IngredientDef[]; upgrades: readonly UpgradeDef[] };
 }
 
 /** Puts the hired staff to work: their pace comes from the bought upgrades, and they use the same serving rules as a click. */
@@ -120,8 +120,9 @@ export function startStaffWork({ store, bus, floor, station, kettle, rng, catalo
     // A drink with a dungeon ingredient only while it is in stock.
     getKnownRecipes: () => brewableRecipes(store.getState(), catalog),
     getRates: () => {
-      const stats = getMultipliers(store.getState());
-      return { brew: stats.autoBrew.toNumber(), serve: stats.autoServe.toNumber() };
+      const state = store.getState();
+      const stats = getMultipliers(state);
+      return { brew: stats.autoBrew.toNumber(), serve: stats.autoServe.toNumber(), slots: kettleSlotsAt(brewerLevel(state.upgrades, catalog.upgrades)) };
     },
   });
 }

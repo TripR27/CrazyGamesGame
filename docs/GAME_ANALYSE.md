@@ -73,7 +73,7 @@ Held inhuren -> uitrusten -> met drankjes op pad sturen
 
 ### Handmatig versus idle
 - **Actief spelen** geeft altijd meer opbrengst dan niets doen (combo's, snel serveren, bonus bij perfecte timing).
-- **Idle** levert een flink deel van de actieve snelheid zodra personeel is ingehuurd: oorspronkelijk 30 tot 40%; na de eerste speelronde wil de eigenaar meer automatisering (2026-10-12), dus het doel wordt (voorstel) **50 tot 70%**, met volledig getraind personeel dat zo snel werkt dat (bijna) niemand zonder drankje vertrekt. Actief spelen levert altijd het meest op (ontdekken, zelf brouwen naast de brouwer, sneller serveren). Zie SPECS.md, hoofdstuk 4, "Gameplay-ronde na de art-pass" (stap 22c).
+- **Idle** levert een flink deel van de actieve snelheid zodra personeel is ingehuurd: oorspronkelijk 30 tot 40%; na de eerste speelronde wil de eigenaar meer automatisering (2026-10-12), met volledig getraind personeel dat zo snel werkt dat (bijna) niemand zonder drankje vertrekt. Gebouwd in stap 22c: het doel werd **60 tot 80%** (gemeten gemiddeld 75%, met 0% klanten zonder drankje), omdat 50 tot 70% niet samengaat met personeel dat elke klant bedient. Actief spelen levert altijd het meest op (ontdekken, zelf brouwen naast de brouwer, sneller serveren). Zie SPECS.md, hoofdstuk 4, "Gameplay-ronde na de art-pass" (stap 22c).
 - **Nooit vast:** de speler kan altijd zelf brouwen (de brouwer heeft een eigen ketel) en een drankje dat niemand wil weggooien in de slopemmer; het personeel ruimt een volle bar zelf op, zodat idle nooit vastloopt (stap 22b).
 - **Offline-voortgang:** gelimiteerd (bijv. max 2 uur basis, uitbreidbaar via upgrades en rewarded ad voor dubbel).
 

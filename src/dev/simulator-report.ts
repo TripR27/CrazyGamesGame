@@ -44,12 +44,26 @@ export function formatRun(result: SimResult, title: string): string[] {
   ];
 }
 
-/** Idle income (staff only) as a share of active play over the same window. GAME_ANALYSE.md aims at 30-40%. */
+/** Idle income (staff only) as a share of active play over the same window. GAME_ANALYSE.md aims at 60-80% (since step 22c). */
 export function formatIdleShare(active: SimResult, idle: SimResult, fromMinute: number, toMinute: number): string {
   const window = (r: SimResult) => earnedBetween(r.timeline, fromMinute * MINUTE_MS, toMinute * MINUTE_MS);
   const activeGold = window(active);
   const share = activeGold.gt(0) ? window(idle).div(activeGold).toNumber() : 0;
-  return `  idle earns ${Math.round(share * 100)}% of active play in minutes ${fromMinute}-${toMinute} (goal 30-40%)`;
+  return `  idle earns ${Math.round(share * 100)}% of active play in minutes ${fromMinute}-${toMinute} (goal 60-80%)`;
+}
+
+/** Of the customers who left in a window, the share who left without a drink. */
+export function walkoutShare(result: SimResult, fromMinute: number, toMinute: number): number {
+  const inWindow = (ms: number): boolean => ms >= fromMinute * MINUTE_MS && ms < toMinute * MINUTE_MS;
+  const walkouts = result.timeline.walkouts.filter(inWindow).length;
+  const served = result.timeline.earned.filter((e) => inWindow(e.ms)).length;
+  return walkouts + served === 0 ? 0 : walkouts / (walkouts + served);
+}
+
+/** How many customers the staff alone let down: with fully trained staff the goal is at most 5% (step 22c). */
+export function formatWalkouts(idle: SimResult, fromMinute: number, toMinute: number): string {
+  const share = Math.round(walkoutShare(idle, fromMinute, toMinute) * 100);
+  return `  with only the staff at work, ${share}% of customers left without a drink (goal at most 5% once fully trained)`;
 }
 
 export interface ReportOptions {
@@ -76,5 +90,6 @@ export function simulationReport({ minutes, seed }: ReportOptions): string {
     '',
     `== Idle versus active (the player walks away at minute ${idleFrom}) ==`,
     formatIdleShare(active, idle, idleFrom, minutes),
+    formatWalkouts(idle, idleFrom, minutes),
   ].join('\n');
 }

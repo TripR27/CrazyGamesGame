@@ -90,9 +90,10 @@ export const tier01Upgrades: readonly UpgradeDef[] = [
 ];
 
 /**
- * Staff: level 1 is the hire, each further level is training. The effect is actions per second,
- * so one level of the brewer starts a drink every 33 seconds. Fully trained, staff do about a third of
- * what an active player does (GAME_ANALYSE.md: idle 30-40%; measured with `npm run simulate`). Placeholder numbers: tuned in step 13.
+ * Staff: level 1 is the hire, each further level is training. The effect is actions per second, so one level of the
+ * brewer starts a drink every 12.5 seconds and the waitress serves every 10 seconds. Fully trained (level 7) they keep
+ * up with the busiest tavern, so nobody leaves without a drink; idle then earns about three quarters of active play
+ * (GAME_ANALYSE.md: 60-80% since step 22c; measured with `npm run simulate` over seeds 1 to 9).
  */
 export const staffUpgrades: readonly UpgradeDef[] = [
   {
@@ -100,7 +101,7 @@ export const staffUpgrades: readonly UpgradeDef[] = [
     kind: 'staff',
     baseCost: 60,
     growth: 1.8,
-    effect: { stat: 'autoBrew', mode: 'add', perLevel: 0.03 },
+    effect: { stat: 'autoBrew', mode: 'add', perLevel: 0.08 },
     maxLevel: 7,
   },
   {
@@ -108,7 +109,7 @@ export const staffUpgrades: readonly UpgradeDef[] = [
     kind: 'staff',
     baseCost: 90,
     growth: 1.8,
-    effect: { stat: 'autoServe', mode: 'add', perLevel: 0.04 },
+    effect: { stat: 'autoServe', mode: 'add', perLevel: 0.1 },
     maxLevel: 7,
   },
 ];

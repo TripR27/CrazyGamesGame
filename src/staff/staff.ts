@@ -1,15 +1,35 @@
 import type { ActiveBrew, BrewStation } from '@/brewing/brewing';
+import type { UpgradeDef } from '@/economy/upgrade-data';
+import { levelOf } from '@/economy/upgrades';
 import { waitingCustomers, type CustomerFloor } from '@/customers/customers';
 import type { RecipeDef } from '@/recipes/recipe-data';
 import { serveAndPublish, type ServeDeps } from '@/serving/serving';
 import type { EventBus, GameEvents } from '@/shared/events';
 import { feedbackKey, type Rng } from '@/shared/random';
+import type { UpgradeLevels } from '@/shared/state';
 
 /** Placeholder numbers, checked with `npm run simulate`. */
 export const STAFF = {
   /** A full bar with a drink no waiting customer wants: after this long the staff tip the oldest such drink away. */
   clearAfterMs: 20_000,
+  /** Drinks the brewer's kettle holds at once, by the brewer's level (trained brewers brew several at a time). */
+  kettleSlots: [
+    { level: 1, slots: 1 },
+    { level: 4, slots: 2 },
+    { level: 7, slots: 3 },
+  ],
 } as const;
+
+/** The level of the brewer: the highest level of an upgrade that adds to `autoBrew`. */
+export function brewerLevel(levels: UpgradeLevels, upgrades: readonly UpgradeDef[]): number {
+  let level = 0;
+  for (const def of upgrades) if (def.effect.stat === 'autoBrew') level = Math.max(level, levelOf(levels, def));
+  return level;
+}
+
+/** How many drinks the kettle of a brewer at this level brews at once (0 without a brewer). */
+export const kettleSlotsAt = (level: number): number =>
+  STAFF.kettleSlots.reduce<number>((slots, step) => (level >= step.level ? step.slots : slots), 0);
 
 /**
  * How a worker keeps its pace: charge builds up with time and one action costs a full charge.
@@ -35,27 +55,30 @@ export function createCharge(): Charge {
 }
 
 /**
- * The brewer's own kettle, behind the bar: the tavern cauldron is the player's alone. One drink at a time; a finished
- * drink waits in the kettle while the bar has no room for it. Runtime only, like the cauldron.
+ * The brewer's own kettle, behind the bar: the tavern cauldron is the player's alone. It brews as many drinks at once as
+ * the brewer's level allows (`kettleSlotsAt`); a finished drink waits in the kettle while the bar has no room for it.
+ * Runtime only, like the cauldron.
  */
 export interface BrewerKettle {
-  brewing: ActiveBrew | null;
-  /** A finished drink waiting for room on the bar. */
-  done: string | null;
+  brewing: ActiveBrew[];
+  /** Finished drinks waiting for room on the bar, oldest first. */
+  done: string[];
 }
 
-export const createKettle = (): BrewerKettle => ({ brewing: null, done: null });
+export const createKettle = (): BrewerKettle => ({ brewing: [], done: [] });
 
 /** The drinks on their way to the bar or on it: they already answer a waiting customer's order. */
-function coveredDrinks(station: BrewStation, kettle: BrewerKettle): string[] {
-  const covered = [...station.ready];
-  for (const id of [station.brewing?.recipeId, kettle.brewing?.recipeId, kettle.done]) if (id !== undefined && id !== null) covered.push(id);
+export function coveredDrinks(station: BrewStation, kettle: BrewerKettle): string[] {
+  const covered = [...station.ready, ...kettle.done];
+  for (const brew of kettle.brewing) covered.push(brew.recipeId);
+  if (station.brewing !== null) covered.push(station.brewing.recipeId);
   return covered;
 }
 
-/** The order of the oldest waiting customer that no drink on the bar or in a cauldron answers yet (each drink answers one order). */
-export function wantedRecipe(waiting: readonly { recipeId: string }[], covered: readonly string[], known: readonly RecipeDef[]): RecipeDef | undefined {
+/** The orders of waiting customers, oldest first, that no drink on the bar or in a cauldron answers yet (each drink answers one order). */
+export function openOrders(waiting: readonly { recipeId: string }[], covered: readonly string[], known: readonly RecipeDef[]): RecipeDef[] {
   const left = [...covered];
+  const open: RecipeDef[] = [];
   for (const customer of waiting) {
     const i = left.indexOf(customer.recipeId);
     if (i !== -1) {
@@ -63,48 +86,48 @@ export function wantedRecipe(waiting: readonly { recipeId: string }[], covered: 
       continue;
     }
     const recipe = known.find((r) => r.id === customer.recipeId);
-    if (recipe !== undefined) return recipe;
+    if (recipe !== undefined) open.push(recipe);
   }
-  return undefined;
+  return open;
 }
 
-/** Room on the bar for one more drink, keeping a place for the player's drink that is brewing. */
-const barHasRoom = (station: BrewStation): boolean => station.ready.length + (station.brewing === null ? 0 : 1) < station.capacity;
+/** The oldest open order (see `openOrders`): what the brewer starts next. */
+export const wantedRecipe = (waiting: readonly { recipeId: string }[], covered: readonly string[], known: readonly RecipeDef[]): RecipeDef | undefined =>
+  openOrders(waiting, covered, known)[0];
+
+/** Places on the bar still free after the drinks on it, the player's drink that is brewing and `pending` more. */
+const barRoom = (station: BrewStation, pending: number): number =>
+  station.capacity - station.ready.length - (station.brewing === null ? 0 : 1) - pending;
 
 /**
- * The brewer's assistant starts, in the kettle, the drink a waiting customer wants, but only with the kettle free and
- * room on the bar. Returns the recipe started, or undefined.
+ * The brewer's assistant starts, in the kettle, the drink a waiting customer wants, while the kettle has a free place and
+ * the bar has room for every drink in the kettle (one place stays free for the player's brew). Returns the recipe started.
  */
-export function startKettle(kettle: BrewerKettle, station: BrewStation, waiting: readonly { recipeId: string }[], known: readonly RecipeDef[]): RecipeDef | undefined {
-  if (kettle.brewing !== null || kettle.done !== null || !barHasRoom(station)) return undefined;
+export function startKettle(kettle: BrewerKettle, station: BrewStation, waiting: readonly { recipeId: string }[], known: readonly RecipeDef[], slots = 1): RecipeDef | undefined {
+  const inKettle = kettle.brewing.length + kettle.done.length;
+  if (inKettle >= slots || barRoom(station, inKettle) <= 0) return undefined;
   const recipe = wantedRecipe(waiting, coveredDrinks(station, kettle), known);
   if (recipe === undefined) return undefined;
   const totalMs = (recipe.brewSeconds * 1000) / station.speed;
-  kettle.brewing = { recipeId: recipe.id, remainingMs: totalMs, totalMs };
+  kettle.brewing.push({ recipeId: recipe.id, remainingMs: totalMs, totalMs });
   return recipe;
 }
 
-/** Runs the kettle: a finished drink goes onto the bar as soon as there is room. Returns the drink put on the bar, or undefined. */
+/** Runs the kettle: each finished drink goes onto the bar as soon as there is room. Returns the drink put on the bar this tick. */
 export function advanceKettle(kettle: BrewerKettle, station: BrewStation, deltaMs: number): string | undefined {
-  const brew = kettle.brewing;
-  if (brew !== null) {
+  for (let i = kettle.brewing.length - 1; i >= 0; i--) {
+    const brew = kettle.brewing[i];
+    if (brew === undefined) continue;
     brew.remainingMs -= deltaMs;
-    if (brew.remainingMs > 0) return undefined;
-    kettle.brewing = null;
-    kettle.done = brew.recipeId;
+    if (brew.remainingMs > 0) continue;
+    kettle.brewing.splice(i, 1);
+    kettle.done.push(brew.recipeId);
   }
-  if (kettle.done === null || !barHasRoom(station)) return undefined;
-  const drink = kettle.done;
-  kettle.done = null;
+  const drink = kettle.done[0];
+  if (drink === undefined || barRoom(station, 0) <= 0) return undefined;
+  kettle.done.shift();
   station.ready.push(drink);
   return drink;
-}
-
-/** 0 to 1, how far the kettle's drink is; 1 while a finished drink waits for room. */
-export function kettleProgress(kettle: BrewerKettle): number {
-  if (kettle.done !== null) return 1;
-  const brew = kettle.brewing;
-  return brew === null ? 0 : 1 - Math.max(0, brew.remainingMs) / brew.totalMs;
 }
 
 /** The oldest waiting customer whose drink is ready on the bar: who the waitress serves next. */
@@ -140,8 +163,8 @@ export interface StaffDeps {
   serve: Omit<ServeDeps, 'floor' | 'station' | 'rng'>;
   /** Read fresh on every tick, so a newly hired worker starts at once. */
   getKnownRecipes(): readonly RecipeDef[];
-  /** Actions per second for each worker (0 means nobody is hired). */
-  getRates(): { brew: number; serve: number };
+  /** Actions per second for each worker (0 means nobody is hired), and how many drinks the brewer's kettle holds. */
+  getRates(): { brew: number; serve: number; slots: number };
 }
 
 /** The staff tip away the oldest unwanted drink once the bar has been clogged for `STAFF.clearAfterMs`. */
@@ -182,7 +205,7 @@ export function startStaff(deps: StaffDeps): () => void {
       }
     }
     if (brewCharge.ready()) {
-      const recipe = startKettle(kettle, station, waitingCustomers(deps.floor), deps.getKnownRecipes());
+      const recipe = startKettle(kettle, station, waitingCustomers(deps.floor), deps.getKnownRecipes(), rates.slots);
       if (recipe !== undefined) {
         bus.emit('brewer:started', { recipeId: recipe.id });
         brewCharge.spend();

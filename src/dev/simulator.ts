@@ -22,6 +22,8 @@ export interface Timeline {
   purchases: number[];
   /** Gold earned by serving (prices and tips), with the time of each serve. */
   earned: { ms: number; gold: Num }[];
+  /** Times of customers who gave up waiting and left without a drink. */
+  walkouts: number[];
 }
 
 const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'rooms' | 'decor' | 'heroes' | 'gear', id: string): string =>
@@ -29,7 +31,7 @@ const name = (domain: 'upgrades' | 'recipes' | 'reputation' | 'ingredients' | 'r
 
 /** Starts recording; `now` gives the simulated time. Only firsts are written to the timeline, to keep it short. */
 export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Timeline {
-  const timeline: Timeline = { entries: [], purchases: [], earned: [] };
+  const timeline: Timeline = { entries: [], purchases: [], earned: [], walkouts: [] };
   const seen = new Set<string>();
   const once = (key: string, text: string): void => {
     if (seen.has(key)) return;
@@ -40,6 +42,7 @@ export function recordTimeline(bus: EventBus<GameEvents>, now: () => number): Ti
     once('served', 'first customer served');
     timeline.earned.push({ ms: now(), gold: num(gold).add(tip) });
   });
+  bus.on('customer:left', ({ reason }) => void (reason === 'impatient' && timeline.walkouts.push(now())));
   bus.on('upgrade:bought', ({ id, count }) => {
     for (let i = 0; i < count; i++) timeline.purchases.push(now());
     once(`upgrade:${id}`, `first ${name('upgrades', id)}`);

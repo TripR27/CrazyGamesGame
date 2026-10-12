@@ -3,7 +3,8 @@ import { recipes, rng, station, ab, catalog, cde, economy, floorWith } from './f
 import { startBrewSystem } from '@/brewing/brewing';
 import { waitingCustomers } from '@/customers/customers';
 import { createEventBus, type GameEvents } from '@/shared/events';
-import { advanceKettle, barClogged, createCharge, createKettle, readyCustomer, STAFF, startKettle, startStaff, unwantedSlot, wantedRecipe } from '@/staff/staff';
+import { upgrades } from '@/economy/upgrade-data';
+import { advanceKettle, barClogged, brewerLevel, createCharge, createKettle, kettleSlotsAt, readyCustomer, STAFF, startKettle, startStaff, unwantedSlot, wantedRecipe } from '@/staff/staff';
 
 describe('a worker pace', () => {
   it('is ready after enough time for one action and spends it', () => {
@@ -29,7 +30,7 @@ describe('the brewer assistant', () => {
     const s = station();
     const kettle = createKettle();
     expect(startKettle(kettle, s, [{ recipeId: 'cde' }, { recipeId: 'ab' }], recipes)?.id).toBe('cde');
-    expect(kettle.brewing?.recipeId).toBe('cde');
+    expect(kettle.brewing.map((b) => b.recipeId)).toEqual(['cde']);
     expect(s.brewing).toBeNull();
   });
 
@@ -51,7 +52,7 @@ describe('the brewer assistant', () => {
 
   it('waits while the kettle is busy, the bar has no room (keeping one for the player), or nobody waits', () => {
     const busy = createKettle();
-    busy.brewing = { recipeId: 'ab', remainingMs: 1, totalMs: 1 };
+    busy.brewing.push({ recipeId: 'ab', remainingMs: 1, totalMs: 1 });
     expect(startKettle(busy, station(), [{ recipeId: 'cde' }], recipes)).toBeUndefined();
     const full = station(1);
     full.ready.push('ab');
@@ -68,11 +69,25 @@ describe('the brewer assistant', () => {
     startKettle(kettle, s, [{ recipeId: 'ab' }], recipes);
     s.ready.push('cde');
     expect(advanceKettle(kettle, s, 5000)).toBeUndefined();
-    expect(kettle.done).toBe('ab');
+    expect(kettle.done).toEqual(['ab']);
     s.ready.pop();
     expect(advanceKettle(kettle, s, 100)).toBe('ab');
     expect(s.ready).toEqual(['ab']);
-    expect(kettle).toEqual({ brewing: null, done: null });
+    expect(kettle).toEqual({ brewing: [], done: [] });
+  });
+
+  it('brews several drinks at once at higher levels, as the kettle and the bar allow', () => {
+    expect([0, 1, 3, 4, 6, 7].map(kettleSlotsAt)).toEqual([0, 1, 1, 2, 2, 3]);
+    expect(brewerLevel({ brewer_assistant: 5, waitress: 7 }, upgrades)).toBe(5);
+    const s = station(6);
+    const kettle = createKettle();
+    const waiting = [{ recipeId: 'ab' }, { recipeId: 'cde' }, { recipeId: 'ab' }, { recipeId: 'cde' }];
+    for (let i = 0; i < 4; i++) startKettle(kettle, s, waiting, recipes, 3);
+    expect(kettle.brewing.map((b) => b.recipeId)).toEqual(['ab', 'cde', 'ab']);
+    const small = station(2);
+    const crowded = createKettle();
+    for (let i = 0; i < 3; i++) startKettle(crowded, small, waiting, recipes, 3);
+    expect(crowded.brewing).toHaveLength(2);
   });
 });
 
@@ -103,7 +118,8 @@ describe('the waitress', () => {
   });
 });
 
-function crew(rates: { brew: number; serve: number }, orders: Array<[string, string]>, capacity = 3) {
+function crew(pace: { brew: number; serve: number }, orders: Array<[string, string]>, capacity = 3) {
+  const rates = { ...pace, slots: 1 };
   const bus = createEventBus<GameEvents>();
   const s = station(capacity);
   const kettle = createKettle();
@@ -128,7 +144,7 @@ describe('staff at work', () => {
   it('do nothing when nobody is hired', () => {
     const { run, served, s, kettle } = crew({ brew: 0, serve: 0 }, [['plain', 'ab']]);
     run(60_000);
-    expect(kettle.brewing).toBeNull();
+    expect(kettle.brewing).toEqual([]);
     expect(s.ready).toEqual([]);
     expect(served).not.toHaveBeenCalled();
   });
@@ -151,7 +167,7 @@ describe('staff at work', () => {
   it('keep a customer waiting without brewing a drink nobody asked for', () => {
     const { run, s, kettle } = crew({ brew: 1, serve: 1 }, []);
     run(10_000);
-    expect(kettle.brewing).toBeNull();
+    expect(kettle.brewing).toEqual([]);
     expect(s.ready).toEqual([]);
   });
 
