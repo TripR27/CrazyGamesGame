@@ -108,6 +108,8 @@ export interface GameState {
   achievements: string[];
   /** The daily bonus: the local day number it was last claimed, and how many days in a row. */
   daily: { lastDay: number; streak: number };
+  /** The player's settings: volume 0 to 1 (used from step 19, audio) and the language id. */
+  settings: { volume: number; language: string };
   tutorial: TutorialProgress;
 }
 
@@ -129,6 +131,7 @@ export function createInitialState(now: number): GameState {
     stats: { served: 0, vipServed: 0, goldEarned: num(0), trips: 0, bossWins: 0 },
     achievements: [],
     daily: { lastDay: 0, streak: 0 },
+    settings: { volume: 0.8, language: 'en' },
     tutorial: { completedSteps: [], skipped: false },
   };
 }

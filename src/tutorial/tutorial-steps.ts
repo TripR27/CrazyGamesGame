@@ -41,7 +41,7 @@ export const GUIDE_TARGETS = [
 ] as const;
 
 /** Targets registered by the scene and the HUD under a fixed id. */
-export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'daily-claim', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
+export const FIXED_TARGETS = ['cauldron', 'hud-gold', 'panel-button', 'book-panel', 'trophies-panel', 'daily-claim', 'settings-button', 'room:guild_hall', 'hero-cauldron', 'boss-strike'] as const;
 
 export const KNOWN_TARGETS: readonly string[] = [...GUIDE_TARGETS, ...FIXED_TARGETS];
 
@@ -260,6 +260,16 @@ export const dailyLesson: readonly TutorialStep[] = [
   },
 ];
 
+/** A short hint about the settings, after the staff lesson (no start condition: it follows right away). */
+export const settingsLesson: readonly TutorialStep[] = [
+  {
+    id: 'settings_tip',
+    lesson: 'settings',
+    target: 'settings-button',
+    completeOn: { kind: 'after', ms: 5500 },
+  },
+];
+
 /** All tutorial steps in order. A new lesson is one more list (here or in tutorial-later-steps.ts) plus one spread here. */
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...basicsLesson,
@@ -271,6 +281,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   ...bookLesson,
   ...ingredientLesson,
   ...staffLesson,
+  ...settingsLesson,
   ...vipLesson,
   ...roomLesson,
   ...decorLesson,

@@ -33,9 +33,15 @@ debug('save status', status, store.getState());
 const layout = createSideLayout();
 const game = createGame('game', world);
 registerDebugCommands({ replayTutorial: () => world.tutorial.machine.restart() });
-mountUi(document.getElementById('ui-root') as HTMLElement, world, layout, (fit) =>
-  placeGame(document.getElementById('game') as HTMLElement, fit, () => {
-    game.scale.getParentBounds();
-    game.scale.refresh();
-  }),
+const saves = { exportCode: () => manager.exportString(store.getState()), importCode: (code: string) => manager.importString(code) };
+mountUi(
+  document.getElementById('ui-root') as HTMLElement,
+  world,
+  layout,
+  (fit) =>
+    placeGame(document.getElementById('game') as HTMLElement, fit, () => {
+      game.scale.getParentBounds();
+      game.scale.refresh();
+    }),
+  saves,
 );

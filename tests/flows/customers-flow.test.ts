@@ -63,7 +63,7 @@ describe('drinking in the real game', () => {
 
 const EARLIER = [
   'basics_add', 'basics_finish', 'basics_wait', 'basics_pick', 'basics_serve', 'basics_gold', 'likes_spot', 'likes_done',
-  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done',
+  'upgrade_open', 'upgrade_buy', 'upgrade_done', 'trophy_open', 'trophy_done', 'daily_claim', 'daily_done', 'seats_buy', 'seats_done', 'book_open', 'book_read', 'ingredient_buy', 'ingredient_done', 'staff_hire', 'staff_done', 'settings_tip',
 ];
 
 /** Every lesson before the VIP one is done, and the player has `reputation`. */
@@ -176,6 +176,9 @@ describe('the staff hint, played in the real game', () => {
     buyUpgradeById(game.world, 'brewer_assistant', 1);
     expect(game.shown()).toBe('staff_done');
     game.tick(4_600);
+    // Then a short hint about the settings.
+    expect(game.shown()).toBe('settings_tip');
+    game.tick(5_600);
     expect(game.shown()).toBeNull();
   });
 
