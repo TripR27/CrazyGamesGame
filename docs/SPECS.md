@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`), 19 (`step-19-audio`) en 20 (`step-20-crazygames-sdk`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 20 (CrazyGames SDK). **Volgende stap:** 21 (Art-pass in pixel art). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
+**Nu bezig:** niets. 15b, 15c en 16 zijn op 2026-10-12 naar `main` gemerged. 16b (`step-16b-boss-fight`), 16c (`step-16c-quartermaster`), 17 (`step-17-prestige`), 18a (`step-18a-achievements`), 18b (`step-18b-daily-bonus`), 18c (`step-18c-settings`), 19 (`step-19-audio`), 20 (`step-20-crazygames-sdk`) en 19b (`step-19b-audio-files`) zijn klaar en op elkaar gebouwd; de eigenaar gaf akkoord voor de merge van 16b, maar de veiligheidscontrole van Claude Code blokkeerde die, dus ze wachten nog op een merge naar `main` (in die volgorde). **Laatst afgerond stap:** 19b (Audio-bestanden; staat op `step-19b-audio-files`, gebouwd op stap 20). **Volgende stap:** 21 (Art-pass in pixel art). Stap 18 is op 2026-10-12 door Claude gesplitst in 18a, 18b en 18c (zie hoofdstuk 12). Idle zit binnen het doel (gemiddeld 34,7%). Stap 15a is op 2026-10-08 gesplitst in 15a en 15b; de oude 15b (Uitrusting) heet nu 15c.
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -49,6 +49,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 18c | Instellingen | ✅ | `step-18c-settings` |
 | 19 | Audio | ✅ | `step-19-audio` |
 | 20 | CrazyGames SDK | ✅ | `step-20-crazygames-sdk` |
+| 19b | Audio-bestanden (echte geluiden en muziek) | ✅ | `step-19b-audio-files` |
 | 21 | Art-pass in pixel art + animaties | ⬜ | |
 | 22 | Performance, QA, indienklaar | ⬜ | |
 | 23 | Indienen en na-lancering | ⬜ | |
@@ -117,7 +118,7 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com). Opnieuw
 | Lint | ESLint (flat config) + `typescript-eslint` | 10.x | Waarschuwing `max-lines: 300`, fout `max-lines-per-function: 60` |
 | UI | **Vanilla TypeScript + DOM** voor HUD/menu's, Phaser-canvas voor de taverne | n.v.t. | Geen React/Vue (bundlegrootte, eenvoud) |
 | Opslag | via `Storage`-adapter: SDK data-module of `localStorage` | n.v.t. | |
-| Audio | Phaser's eigen audio | n.v.t. | Geen Howler nodig. *Sinds stap 19:* placeholder-geluidjes met de Web Audio API (geen bestanden); echte bestanden en muziek via de browser (zie hoofdstuk 4, Audio) |
+| Audio | Web Audio API (geen Phaser-audio, geen Howler) | n.v.t. | *Sinds stap 19b:* de effecten en de muziek zijn OGG-bestanden in `public/audio/`, door de browser gedecodeerd en afgespeeld met de Web Audio API (zie hoofdstuk 4, Audio) |
 
 Alles buiten deze lijst: eerst vragen.
 
@@ -540,12 +541,12 @@ Besluit eigenaar (2026-10-06): achievements zoals gepland, met kleine permanente
 - **State:** `settings: { volume, language }` (blijft bij het verkopen van de taverne en bij opnieuw beginnen).
 - **Tutorial-hint** (les `settings`, na de personeelsles, zonder startvoorwaarde): de ketel wijst 5,5 s de ⚙ aan: "Volume, language and a copy of your save are behind the cog."
 
-### Audio (gebouwd in stap 19)
+### Audio (gebouwd in stap 19; echte bestanden sinds stap 19b)
 
-- **Code:** `audio/audio.ts` (de geluiden als data, welke game-event welk geluid speelt, de muziekhaak, `effectiveVolume` en `toggleMute`) en `audio/audio-view.ts` met `audio.css` (geluid maken en de luidsprekerknop).
-- **Placeholder-geluiden** (`SOUNDS`): tien korte geluidjes die de browser zelf maakt met de Web Audio API (een paar noten van één golfvorm): `plop` (ingrediënt), `bubble` (drankje klaar), `coin` (klant betaalt, ook via personeel; dagbonus), `buzz` (weigering), `buy` (aankoop van upgrade, ingrediënt, kamer, decoratie of uitrusting), `eureka` (ontdekking), `fanfare` (nieuw niveau, achievement, taverne verkocht), `horn` (held terug), `hit` en `miss` (slag tegen de baas). Hetzelfde geluid start nooit twee keer binnen 60 ms. Echte bestanden vervangen ze later met dezelfde ids (stap 21, of eerder als de eigenaar ze aanlevert).
+- **Code:** `audio/audio.ts` (de geluids-ids, welke game-event welk geluid speelt, de muziek, `effectiveVolume` en `toggleMute`) en `audio/audio-view.ts` met `audio.css` (laden, afspelen en de luidsprekerknop).
+- **Geluiden** (`SOUND_IDS`, elk een bestand `public/audio/<id>.ogg`): tien korte effecten: `plop` (ingrediënt), `bubble` (drankje klaar), `coin` (klant betaalt, ook via personeel; dagbonus), `buzz` (weigering), `buy` (aankoop van upgrade, ingrediënt, kamer, decoratie of uitrusting), `eureka` (ontdekking), `fanfare` (nieuw niveau, achievement, taverne verkocht), `horn` (held terug), `hit` en `miss` (slag tegen de baas). Ze zijn met code gegenereerd (`scripts/audio/make_audio.py`, review in `scripts/audio/REVIEW.md`, herkomst en groottes in `docs/ASSETS.md`). Na de eerste klik haalt `audio-view.ts` ze op en decodeert ze (`decodeAudioData`); een bestand dat niet laadt laat alleen dat geluid stil. Hetzelfde geluid start nooit twee keer binnen 60 ms. Een nieuw geluid is een bestand plus een id in `SOUND_IDS`.
 - **Haken** (`SOUND_EVENTS`): per game-event een geluid, of een functie die er een kiest (de baas: raak of mis). Een nieuw geluid is één regel.
-- **Muziek:** `MUSIC.src` is leeg tot de eigenaar een bestand levert (in `public/audio/`); dan speelt het als loop op de helft van het volume.
+- **Muziek:** `music_tavern.ogg` (90 s, 845 KB; `MUSIC` in `audio.ts`) speelt als gapless loop van een gedecodeerde buffer, op de helft van het volume (`MUSIC.share`). Het volume volgt het volume, dempen en ads (elke 300 ms en bij elke state-wijziging).
 - **Volume en dempen:** het volume uit de instellingen (stap 18c) en een **luidsprekerknop** 🔊/🔇 links van de ⚙ (`settings.muted`). `effectiveVolume` neemt ook "gedempt door het platform" mee: `muteAudio` van de CrazyGames-SDK gaat voor (aansluiten in stap 20).
 - **Browsers:** er wordt pas geluid gemaakt na de eerste klik van de speler (AudioContext pas dan).
 - **Tutorial-hint:** de instellingenhint (stap 18c) noemt nu ook de luidspreker: "Psst. The speaker turns the sound off. Volume, language and a copy of your save are behind the cog."
@@ -786,6 +787,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 18c: Instellingen.** Het instellingenpaneel uit de omschrijving hieronder.
 - (oorspronkelijk) **Stap 18: Achievements, dagelijkse bonus, statistieken, instellingen.** Settings-paneel (volume, taalkeuze-mechaniek met alleen EN, save reset/export/import, **tutorial opnieuw afspelen**). Achievements zijn een eigen systeem (de SDK heeft geen achievement-module; alleen `happytime()` voor grote momenten), met een `stats`-sectie in de state. Besluit eigenaar (2026-10-06): zoals gepland, met kleine permanente bonussen; `happytime()` alleen bij de grote momenten (eerste prestige, alle recepten ontdekt, legendarisch drankje). Per CrazyGames-account komt vanzelf via de data-module (cloud-save).
 - [x] **Stap 19: Audio.** Sfx-hooks, muziek-hook (jij levert later het bestand), mute-knop, eigen volume; `muteAudio` van de SDK krijgt voorrang.
+- [x] **Stap 19b: Audio-bestanden.** De echte geluidsbestanden (10 effecten) en de muzieklus uit een andere chat in `public/audio/` (met de scripts in `scripts/audio/` en de herkomst in `docs/ASSETS.md`); `audio.ts` en `audio-view.ts` laden ze met de Web Audio API in plaats van de placeholder-geluidjes. Gebouwd op stap 20 omdat die al klaar was. Zie hoofdstuk 4, "Audio".
 - [x] **Stap 20: CrazyGames SDK.** Platform-laag: init, loading/gameplay-events, data-module als `StorageAdapter`, midgame- en rewarded ads (3 min-regel, adblock-veilig), gebruikersnaam, `happytime()` bij zeldzame achievements. Het weekly leaderboard is **niet** onderdeel van de MVP (alleen voor uitgenodigde games); zie IDEAS.md. Test met mock én met CrazyGames' preview/QA-tool.
 - [ ] **Stap 21: Art-pass in pixel art (volledige styling-stap, met animaties).** Omschakelen naar ontwerpresolutie 320×180 met `pixelArt: true` (`layout.ts`, scene en UI-schaling meenemen). Alle placeholders vervangen door pixel-art-sprites: de pijplijn uit `scripts/pixel/` (tekstrasters naar PNG/spritesheet, uit te breiden met een atlas) en eventueel CC0-assets of extern gemaakte art, na akkoord per bestand. **Animaties:** klanten (lopen, zitten, drinken, blij en boos), ketel (borrelen, vuur), vallende munten, held-animaties, tutorial-mascotte. Juice (partikels, schermschud bij legendarisch), thumbnail-materiaal. `docs/ASSETS.md` bijwerken.
   *Klaar wanneer:* geen gekleurde-vorm-placeholders meer in het spel, alle klantacties hebben een animatie, 60 FPS blijft gehaald, assets blijven binnen het budget (hoofdstuk 8).
@@ -824,6 +826,16 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 ```
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
+
+### Stap 19b: Audio-bestanden (2026-10-12, `step-19b-audio-files`)
+- **Gedaan:** (code in `src/audio/audio.ts` en `audio-view.ts`, `tests/audio.test.ts`, de bestanden in `public/audio/` (10 effecten en `music_tavern.ogg`), `scripts/audio/` (`make_audio.py`, `review_audio.py`, `REVIEW.md`) en `docs/ASSETS.md`)
+  - **Bestanden, laden, muziek-loop en volume:** zie hoofdstuk 4, "Audio". De placeholder-geluidjes (`SOUNDS`) en de lege muziekhaak (`MUSIC.src`) zijn weg; `SOUND_IDS` en `MUSIC.id` verwijzen naar de bestanden. Na de eerste klik haalt `audio-view.ts` alle bestanden op en decodeert ze; de muziek start als gapless loop van een buffer. Hoofdstuk 3 (tech stack) is aangepast: audio gaat via de Web Audio API, niet via Phaser.
+  - Test aangepast (539 totaal, evenveel als voorheen): elk geluid en de muziek bestaan, de effecten samen < 400 KB, de muziek < 2 MB, en de paden zijn relatief.
+- **Waarom (keuzes):** de eigenaar leverde de geluiden en de muziek (met code gegenereerd in een andere chat). Web Audio met gedecodeerde buffers geeft een gapless loop (een `<audio>`-element of Phaser-audio laat een kleine stilte bij het herhalen horen) en korte latency voor de effecten. Een bestand dat niet laadt laat alleen dat geluid stil, zodat het spel nooit op audio blokkeert.
+- **Gemeten / gecontroleerd:** `npm run check` slaagt (539 tests), geen bestand boven 300 regels, geen kringen. `public/audio/` is 944 KB (muziek 845 KB, effecten samen ca. 82 KB). In de browser op localhost (testsave met de tutorial klaar; oorspronkelijke save daarna teruggezet): na de eerste klik worden alle 11 bestanden opgehaald zonder consolefouten; de muziek start als loop van 90 s; een klik op een ingrediënt speelt `plop` (0,16 s), een klaar drankje `bubble` (0,36 s), de dagbonus `coin` (0,26 s) en het serveren van het verkeerde drankje een geluid van 0,26 s (waarschijnlijk `buzz`; het goud bleef gelijk); met de luidsprekerknop op 🔇 start er geen nieuw geluid, na 🔊 weer wel.
+- **Afwijkingen van het plan:** de geluiden kwamen eerder dan stap 21 (het plan zei: "stap 21, of eerder als de eigenaar ze aanlevert"). De branch is gebouwd op stap 20 en niet op `main`, omdat 16b t/m 20 nog niet gemerged zijn. Een geserveerde klant (`coin` via serveren) is in de browser niet apart gehoord: mijn test gaf een weigering (geen goud erbij), en `coin` is wel bevestigd via de dagbonus; de koppeling event naar geluid staat in `SOUND_EVENTS` en is getest. Het volume van de effecten (nu `volume` uit de instellingen) en de muziek (de helft daarvan) is nog niet door de eigenaar beoordeeld.
+- **Nu te proberen:** start het spel, klik ergens (daarna speelt de muziek), klik op een ingrediënt, brouw een drankje en serveer het; zet de luidsprekerknop uit en aan; zet het volume in de instellingen hoger en lager.
+- **Nog te doen / volgende stap:** stap 21, Art-pass in pixel art (de eigenaar beslist eerst over de aanpak; zie hoofdstuk 4, "Rendering"). Mergen van 16b t/m 20 en 19b naar `main` wacht op de eigenaar (in die volgorde).
 
 ### Stap 20: CrazyGames SDK (2026-10-12, `step-20-crazygames-sdk`)
 - **Gedaan:** (code in `src/platform/` (nieuw: `platform.ts`, `crazygames.ts`), `src/main.ts` (wacht op de SDK, save via het platform, gameplay, ads, pauze), `index.html` (het SDK-script), `eslint.config.js` (uitzondering voor `platform/crazygames.ts`), `src/shared/time.ts` (`skip()`), `src/offline/` (`payOfflineAgain`; het welkom-view-model verhuisde naar het nieuwe `welcome-model.ts` omdat `offline.ts` anders boven 300 regels kwam; het welkom-venster kreeg de knop), `src/audio/audio-view.ts` en `src/settings/settings-view.ts` (demping en gebruikersnaam), `src/app/viewport-view.ts` (`UiServices`) en i18n; tests in `tests/platform.test.ts` (nieuw) en de offline-test (import)
