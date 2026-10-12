@@ -165,6 +165,13 @@ export interface GameEvents {
   'heroes:closed': Record<string, never>;
   /** A staff upgrade was bought (a hire or a training level). */
   'staff:hired': { id: string };
+  /** The peddler walked in with an offer (`gold` or a power-up id), and left again. */
+  'peddler:arrived': { offer: string };
+  'peddler:left': Record<string, never>;
+  /** A rewarded ad paid out: a bag of gold (`gold`) or a power-up (`offer`, gold 0). */
+  'reward:granted': { offer: string; gold: Num };
+  /** The welcome-back window was closed (a natural moment for a midgame ad). */
+  'welcome:closed': Record<string, never>;
   /** Something new came in sight in the shop while the side panel is folded away (the Menu button gets a dot). */
   'shop:new': Record<string, never>;
   /** The shop panel was opened or closed (the tutorial follows this). */

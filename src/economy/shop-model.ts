@@ -21,6 +21,8 @@ export interface RowView {
   teaser?: boolean;
   /** Just came in sight: a "New!" label until its tab was open. */
   fresh?: boolean;
+  /** Most of the price is there: a 📺 button pays the rest after a rewarded ad. */
+  adBuy?: boolean;
 }
 
 /** Stats that are a share (0 to 1): an added amount reads as a percentage too. */

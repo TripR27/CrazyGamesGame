@@ -15,6 +15,7 @@ import { startHeroes } from '@/heroes/expedition';
 import { createGuildCauldron, type GuildCauldron, startGuildCauldron } from '@/heroes/hero-brewing';
 import { createOffline, type OfflineServices } from '@/offline/offline';
 import { startPrestige } from '@/prestige/prestige';
+import { type RewardServices, startRewards } from '@/rewards/rewards';
 import { recipes, type RecipeDef } from '@/recipes/recipe-data';
 import { recordDiscoveries } from '@/recipes/recipes';
 import { watchReputationLevels } from '@/reputation/reputation';
@@ -169,6 +170,8 @@ export interface World {
   targets: TargetRegistry;
   tutorial: TutorialServices;
   offline: OfflineServices;
+  /** Rewarded ads: the peddler and the bag of gold. */
+  rewards: RewardServices;
 }
 
 /** Builds the world once and starts what runs on the tick. The order of the calls below is the order things run. */
@@ -205,7 +208,9 @@ export function createWorld({ store, bus, rng, clock = systemClock, content: c =
   startAchievements({ store, bus });
   // Says when a new day's bonus can be claimed while the game is open.
   startDaily({ store, bus, clock });
+  // Ended power-ups, and the peddler who comes by now and then with an offer for an ad.
+  const rewards = startRewards({ store, bus, clock, tutorial });
   const offline = createOffline({ store, bus, rng, clock, content: c });
   const selection = createDrinkSelection(station);
-  return { store, bus, rng, clock, content: c, floor, station, kettle, selection, guild, targets: createTargetRegistry(), tutorial, offline };
+  return { store, bus, rng, clock, content: c, floor, station, kettle, selection, guild, targets: createTargetRegistry(), tutorial, offline, rewards };
 }

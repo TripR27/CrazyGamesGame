@@ -41,6 +41,12 @@ const LOOKS: Readonly<Record<string, Look>> = {
     head: ['...g..g', '...gjgg', '..kgggg', '..khsss', '..khsss', '..khsss', '..khses', '..khhss', '..khhhm', '...khhh'],
     body: ['.kwwxww', '.kvkccc', '.kvkccd', '.kvkccd', '.kskccd', '..kdddd', '..kCccd'],
   },
+  // The peddler (not a customer: he comes by with an offer for a rewarded ad): a green hood and a brown travelling cloak.
+  peddler: {
+    palette: { g: 0x3f7a4a, G: 0x2f5530, v: 0x8a5a3a, c: 0x8a5a3a, C: 0x6b4423, d: 0xd9a441, p: 0x4a3424, b: 0x2b1a10 },
+    head: ['.......', '....kkk', '...kggg', '..kgggg', '..kgGgg', '..kgsss', '..kgses', '..kgsss', '...kssm', '....kkk'],
+    body: ['.kgcccc', '.kvkcCc', '.kvkccc', '.kvkcCc', '.kskddd', '..kcccc', '..kcCcc'],
+  },
 };
 
 const LEGS = {
@@ -99,5 +105,5 @@ export function figureFrames(look: Look): Sprite[] {
   ];
 }
 
-/** The customer types that have their own look; any other type is drawn as the knight. */
+/** The figures that have their own look (the customer types and the peddler); any other type is drawn as the knight. */
 export const CUSTOMER_LOOKS = Object.keys(LOOKS);

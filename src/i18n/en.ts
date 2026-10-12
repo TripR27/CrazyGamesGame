@@ -1,6 +1,6 @@
 import { achievements } from '@/i18n/en-achievements';
 import { heroes } from '@/i18n/en-heroes';
-import { decor, rooms, shop, upgrades } from '@/i18n/en-shop';
+import { decor, rewards, rooms, shop, upgrades } from '@/i18n/en-shop';
 import type { Messages } from '@/i18n/translator';
 
 /** The recipe book panel, and the "Eureka!" line when a recipe is discovered. */
@@ -248,6 +248,7 @@ export const en: Messages = {
   ...feedback,
   ...tutorial,
   ...shop,
+  ...rewards,
   ...upgrades,
   ...welcome,
   ...book,

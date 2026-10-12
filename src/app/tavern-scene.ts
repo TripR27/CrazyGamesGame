@@ -14,6 +14,7 @@ import { createRoomsView, type RoomsView } from '@/rooms/rooms-view';
 import { cancelSelection, clickReadyDrink } from '@/serving/serving';
 import { createFeedbackLayer } from '@/serving/serving-view';
 import { createStaffView, type StaffView } from '@/staff/staff-view';
+import { createPeddlerView } from '@/rewards/rewards-view';
 
 export const BOOT_SCENE_KEY = 'boot';
 
@@ -36,6 +37,7 @@ interface Views {
   cauldron: CauldronView;
   ready: ReadyView;
   staff: StaffView;
+  peddler: { update(): void };
   rooms: RoomsView;
   guild: GuildView;
   decor: DecorView;
@@ -77,6 +79,8 @@ export class TavernScene extends Scene {
         onClick: (slot) => clickReadyDrink(world, slot),
         targets: world.targets,
       }),
+      // The peddler stands by the door; customers walking in pass in front of him.
+      peddler: createPeddlerView(this, world),
       customers: createCustomersLayer(this, world),
     };
     const stopFeedback = createFeedbackLayer(this, world);
@@ -101,6 +105,7 @@ export class TavernScene extends Scene {
     this.views.rooms.update();
     this.views.guild.update();
     this.views.decor.update();
+    this.views.peddler.update();
     this.views.customers.update();
   }
 }

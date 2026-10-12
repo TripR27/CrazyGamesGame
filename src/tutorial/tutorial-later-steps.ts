@@ -33,6 +33,20 @@ export const slopLesson: readonly TutorialStep[] = [
   },
 ];
 
+/**
+ * The hint for the peddler (rewarded ads), after the settings hint: at his first visit the kettle points at him. He comes
+ * by every few minutes (never while a lesson is on screen), so the lesson never waits long.
+ */
+export const peddlerLesson: readonly TutorialStep[] = [
+  {
+    id: 'peddler_spot',
+    lesson: 'peddler',
+    startWhen: { kind: 'event', event: 'peddler:arrived' },
+    target: 'peddler',
+    completeOn: { kind: 'after', ms: 6500 },
+  },
+];
+
 /** The hint for the first room: starts once one can be built, then points at it on the upper floor. */
 export const roomLesson: readonly TutorialStep[] = [
   {

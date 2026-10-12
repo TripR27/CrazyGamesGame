@@ -112,6 +112,8 @@ export interface GameState {
   achievements: string[];
   /** The daily bonus: the local day number it was last claimed, and how many days in a row. */
   daily: { lastDay: number; streak: number };
+  /** Rewarded ads: the power-up running ('' for none) and when it ends, and when the shop's 📺 button was last used. */
+  rewards: { boost: string; boostEndsAt: number; shopAdAt: number };
   /** The player's settings: volume 0 to 1, sound off (`muted`, the speaker button) and the language id. */
   settings: { volume: number; muted: boolean; language: string };
   tutorial: TutorialProgress;
@@ -137,6 +139,7 @@ export function createInitialState(now: number): GameState {
     stats: { served: 0, vipServed: 0, goldEarned: num(0), trips: 0, bossWins: 0 },
     achievements: [],
     daily: { lastDay: 0, streak: 0 },
+    rewards: { boost: '', boostEndsAt: 0, shopAdAt: 0 },
     settings: { volume: 0.8, muted: false, language: 'en' },
     tutorial: { completedSteps: [], skipped: false },
   };
