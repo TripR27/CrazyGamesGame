@@ -23,7 +23,10 @@ export default tseslint.config(
   },
   {
     files: ['scripts/**/*.mjs'],
-    languageOptions: { globals: { console: 'readonly', process: 'readonly' } },
+    // Node 22 has fetch, WebSocket, URL and the timers built in (scripts/trailer drives Chrome with them).
+    languageOptions: {
+      globals: { console: 'readonly', process: 'readonly', fetch: 'readonly', WebSocket: 'readonly', URL: 'readonly', setTimeout: 'readonly' },
+    },
     rules: { 'no-console': 'off' },
   },
   {

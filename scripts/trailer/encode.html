@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<body style="margin:0;background:#000">
+<canvas id="c"></canvas>
+<script type="module">
+// Part of `npm run trailer` (scripts/trailer/encode.mjs serves this page in headless Chrome). Encodes the recorded frames
+// to H.264 with WebCodecs, frame by frame with exact 30 fps timestamps (not in real time, so nothing can stutter): the
+// cover for 1 s, then `dur` seconds of play from `start`. Portrait is a 720x1080 slice around the cauldron, scaled 1.5x
+// (one art pixel becomes exactly 9 video pixels). The samples and the decoder config go back to the server.
+const params = new URLSearchParams(location.search);
+const mode = params.get('mode');
+const start = Number(params.get('start'));
+const dur = Number(params.get('dur'));
+const FPS = 30;
+const KEY_EVERY = 2 * FPS;
+const PORTRAIT_CROP_X = 700;
+const size = mode === 'portrait' ? { w: 1080, h: 1620 } : { w: 1920, h: 1080 };
+const canvas = document.getElementById('c');
+Object.assign(canvas, { width: size.w, height: size.h });
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+async function load(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url}: ${res.status}`);
+  return createImageBitmap(await res.blob());
+}
+
+async function run() {
+  const times = await (await fetch('/frames.json')).json();
+  const pick = (t) => {
+    let lo = 0, hi = times.length - 1;
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (times[mid] <= t) lo = mid; else hi = mid - 1; }
+    return lo;
+  };
+  const cover = await load(`/covers/cover-${mode}.png`);
+  const plays = Array.from({ length: Math.round(dur * FPS) }, (_, k) => pick(start + k / FPS));
+  const samples = [];
+  let description = null;
+  let failure = null;
+  const encoder = new VideoEncoder({
+    output: (chunk, meta) => {
+      const data = new Uint8Array(chunk.byteLength);
+      chunk.copyTo(data);
+      samples.push({ key: chunk.type === 'key', data });
+      if (meta?.decoderConfig?.description) description = new Uint8Array(meta.decoderConfig.description);
+    },
+    error: (e) => (failure = String(e)),
+  });
+  encoder.configure({ codec: 'avc1.640028', width: size.w, height: size.h, bitrate: 10_000_000, framerate: FPS, latencyMode: 'quality', avc: { format: 'avc' } });
+  let index = 0;
+  const encodeCanvas = async () => {
+    const frame = new VideoFrame(canvas, { timestamp: Math.round((index * 1e6) / FPS), duration: Math.round(1e6 / FPS) });
+    encoder.encode(frame, { keyFrame: index % KEY_EVERY === 0 });
+    frame.close();
+    index++;
+    while (encoder.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 5));
+  };
+  ctx.drawImage(cover, 0, 0, size.w, size.h);
+  for (let k = 0; k < FPS; k++) await encodeCanvas();
+  let next = load(`/frames/${plays[0]}.jpg`);
+  for (let i = 0; i < plays.length; i++) {
+    const img = await next;
+    if (i + 1 < plays.length) next = load(`/frames/${plays[i + 1]}.jpg`);
+    if (mode === 'portrait') ctx.drawImage(img, PORTRAIT_CROP_X, 0, 720, 1080, 0, 0, size.w, size.h);
+    else ctx.drawImage(img, 0, 0, size.w, size.h);
+    img.close();
+    await encodeCanvas();
+  }
+  await encoder.flush();
+  if (failure) throw new Error(failure);
+  const all = new Uint8Array(samples.reduce((n, s) => n + s.data.length, 0));
+  samples.reduce((at, s) => (all.set(s.data, at), at + s.data.length), 0);
+  const meta = { width: size.w, height: size.h, fps: FPS, avcC: btoa(String.fromCharCode(...description)), samples: samples.map((s) => ({ key: s.key, size: s.data.length })) };
+  await fetch(`/out/${mode}.json`, { method: 'POST', body: JSON.stringify(meta) });
+  await fetch(`/out/${mode}.h264`, { method: 'POST', body: all });
+}
+
+run().then(() => (window.__done = true), (e) => (window.__done = String(e)));
+</script>
+</body>
+</html>

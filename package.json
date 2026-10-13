@@ -13,6 +13,7 @@
     "pixel:preview": "node scripts/pixel/preview.mjs",
     "simulate": "node scripts/simulate.mjs",
     "zip": "node scripts/zip-build.mjs",
+    "trailer": "node scripts/trailer/trailer.mjs",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run lines && npm run cycles && npm run test"
   },
