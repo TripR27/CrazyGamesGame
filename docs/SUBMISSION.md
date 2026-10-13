@@ -11,14 +11,15 @@ Het indienpakket voor Brewmaster's Tavern (stap 23). De eisen zelf staan in [SPE
 | Cover vierkant 800×800 | `art/covers/cover-square.png` | idem |
 | Cover staand 800×1200 | `art/covers/cover-portrait.png` | idem |
 | Beschrijving en besturing | hieronder (paragraaf 3) | |
-| Trailer (preview-video) | **nog te maken door jou**, zie paragraaf 4 | |
+| Trailer landscape 1920×1080, 20 s, MP4 (H.264), zonder geluid | `release/trailer-landscape.mp4` (niet in git) | `npm run trailer` (paragraaf 4) |
+| Trailer portrait 1080×1620 (2:3), 20 s, MP4 (H.264), zonder geluid | `release/trailer-portrait.mp4` (niet in git) | idem |
 
 ## 2. Stappen (door de eigenaar)
 
 1. Maak een developer-account op developer.crazygames.com.
 2. Kies daar een nieuwe game toevoegen (HTML5). Vul titel, beschrijving en besturing in (paragraaf 3).
 3. Upload de zip. Kies **landscape** als oriëntatie en **alleen desktop** als platform (de game is niet getest op telefoons en tablets).
-4. Upload de drie covers en de twee trailers (landscape en portrait).
+4. Upload de drie covers en de twee trailers (`release/trailer-landscape.mp4` en `release/trailer-portrait.mp4`).
 5. Draai de **QA-tool** in het portal en loop de lijst in paragraaf 5 af.
 6. Dien in. Het QA-team speelt de game; daarna start de **Basic Launch** (ads staan dan uit, zie paragraaf 6).
 7. Een update later: `npm run build`, `npm run zip`, de nieuwe zip uploaden en ter goedkeuring indienen (meestal dezelfde werkdag verwerkt).
@@ -49,16 +50,15 @@ Mouse only.
 
 **Tags (voorstel):** Idle, Clicker, Tycoon, Management, Fantasy, Pixel, Casual.
 
-## 4. Trailer (preview-video) maken
+## 4. Trailer (preview-video)
 
 Eisen (CrazyGames, 2026-10-12): 15 tot 20 seconden, hooguit 50 MB, **geen geluid**, niet versneld, de cover als eerste beeld, geen zwarte balken, **geen muiscursor zichtbaar**, geen "Play now" of andere tekst, geen logo-animaties. Twee versies: **landscape 1080p (16:9)** en **portrait 1080p (2:3)**.
 
-Er is op deze computer geen ffmpeg, dus zo kan het met wat Windows al heeft:
+**Klaar:** `npm run trailer` maakt beide (ongeveer 4 minuten; Chrome moet geïnstalleerd zijn, anders `CHROME=<pad naar chrome.exe>`). Wat erin zit: 1 s de cover, dan 19 s een volle taverne (de save van de simulator na 70 minuten): klanten, personeel, munten, de speler brouwt een drankje en ontdekt het legendarische Bog Royale (sterretjes en schermschud), en daarna bestellen de VIP-koningen het. Portrait is de strook rond de ketel. Beide: 20,00 s, 30 fps, H.264, zonder geluidsspoor, zonder cursor, 7 tot 10 MB.
 
-1. Start de game in Chrome of Edge op volledig scherm (F11) met een save waarin de taverne vol zit (kamers gebouwd, personeel, helden). Zet het geluid uit en klap het menu dicht.
-2. Neem 25 seconden op met de Xbox Game Bar (`Win+Alt+R` start en stopt). Beweeg de muis niet of zet de cursor in een hoek buiten beeld; klik alleen op ingrediënten en drankjes als dat in beeld mag (een klik zonder cursor is prima).
-3. Open de opname in Clipchamp (staat op Windows 11): knip naar 15-20 s, zet de landscape-cover als eerste beeld (1 s), haal het geluid weg, exporteer in 1080p.
-4. Voor portrait: maak in Clipchamp een project met beeldverhouding 2:3 (of 9:16 en dan bijsnijden), schuif het beeld zo dat de ketel en de bar in het midden staan, zet de staande cover als eerste beeld, exporteer in 1080p.
+Hoe het werkt (`scripts/trailer/`): Vite serveert het spel, headless Chrome neemt het op terwijl de klok van de pagina op een vijfde loopt (zo zijn er genoeg beelden voor een vloeiende video, ook op een trage computer), en Chrome's eigen encoder (WebCodecs) maakt er beeld voor beeld H.264 van; het script schrijft de MP4. Geen extra programma's of pakketten. Wil je een andere scène of andere klikken, pas dan `SCRIPT` en `loadSave` in `scripts/trailer/record.mjs` aan.
+
+Liever zelf opnemen? Dat kan met de Xbox Game Bar (`Win+Alt+R`) en Clipchamp: knip naar 15-20 s, cover als eerste beeld, geluid weg, export 1080p; voor portrait een project in 2:3.
 
 ## 5. Nakijken in de QA-tool
 
