@@ -1,6 +1,6 @@
 # Brewmaster's Tavern
 
-Idle/tycoon-game voor CrazyGames (HTML5, TypeScript, Phaser, Vite).
+Idle/tycoon-game voor het web (HTML5, TypeScript, Phaser, Vite): eerst voor CrazyGames, sinds stap 25 ook een Poki-build (`npm run build:poki`).
 
 **Lees `docs/SPECS.md` volledig vóór je code schrijft of wijzigt.** Context over het spel staat in `docs/GAME_ANALYSE.md` (met in hoofdstuk 11 het architectuurdiagram), open ideeën in `docs/IDEAS.md`. Alle documentatie staat in `docs/` (alleen dit bestand blijft in de hoofdmap).
 

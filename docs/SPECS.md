@@ -9,7 +9,7 @@
 
 *Wordt na elke stap bijgewerkt. Details per stap: logboek (hoofdstuk 14). Uitleg per stap: hoofdstuk 12.*
 
-**Nu bezig:** niets. Alles tot en met stap 22e staat op `main` (gemerged op 2026-10-12 op verzoek van de eigenaar). Stap 22f (leesbaarheid, `step-22f-readability`) en stap 23 (indienpakket, `step-23-submission`, gemaakt vanaf 22f, dus een merge van 23 neemt 22f mee) zijn klaar en wachten op het akkoord van de eigenaar om te mergen. **Laatst afgerond stap:** 23 (het deel dat Claude kan doen). **Volgende stap:** de eigenaar dient in volgens [SUBMISSION.md](SUBMISSION.md) (account, upload van zip, covers en trailers, QA-tool); daarna kiest de eigenaar uit de voorstellen 24a t/m 24d (hoofdstuk 12). De zip voor CrazyGames maak je met `npm run build` en daarna `npm run zip` (`release/brewmasters-tavern.zip`). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22e. Daarna wilde de eigenaar meer advertenties en rewarded beloningen: hoofdstuk 4, "Meer advertenties en rewarded beloningen", stap 22d. Idle zit sinds 22c op gemiddeld 75% van actief spelen (doel 60-80%), en met volledig getraind personeel vertrekt niemand meer zonder drankje (zie hoofdstuk 4).
+**Nu bezig:** niets. Alles tot en met stap 22e staat op `main` (gemerged op 2026-10-12 op verzoek van de eigenaar). Stap 22f (`step-22f-readability`), stap 23 (`step-23-submission`, gemaakt vanaf 22f) en stap 25 (`step-25-poki`, gemaakt vanaf 23, dus een merge van 25 neemt 22f en 23 mee) zijn klaar en wachten op het akkoord van de eigenaar om te mergen. **CrazyGames heeft de game afgekeurd** (gemeld door de eigenaar op 2026-10-19); daarom stap 25: een Poki-versie met dezelfde gameplay. **Laatst afgerond stap:** 25 (Poki-versie). **Volgende stap:** de eigenaar dient in bij Poki volgens [POKI.md](POKI.md) (formulier, Inspector, screenshots); daarna feedback van Poki verwerken of een keuze uit de voorstellen 24a t/m 24d (hoofdstuk 12). De zip voor Poki maak je met `npm run build:poki` en daarna `npm run zip:poki` (`release/brewmasters-tavern-poki.zip`). De zip voor CrazyGames maak je met `npm run build` en daarna `npm run zip` (`release/brewmasters-tavern.zip`). Na de art-pass gaf de eigenaar gameplay-feedback (2026-10-12): die staat in hoofdstuk 4, "Gameplay-ronde na de art-pass", en is verdeeld over de nieuwe stappen 22a, 22b en 22c; de oude stap 22 (Performance, QA en indienklaar) heet nu 22e. Daarna wilde de eigenaar meer advertenties en rewarded beloningen: hoofdstuk 4, "Meer advertenties en rewarded beloningen", stap 22d. Idle zit sinds 22c op gemiddeld 75% van actief spelen (doel 60-80%), en met volledig getraind personeel vertrekt niemand meer zonder drankje (zie hoofdstuk 4).
 
 Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 
@@ -66,6 +66,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 | 24b | Seizoensevents (voorstel) | ⬜ | |
 | 24c | Meer content: kerker, klanten, recepten (voorstel) | ⬜ | |
 | 24d | Tweede prestige-laag (voorstel) | ⬜ | |
+| 25 | Poki-versie (CrazyGames keurde af) | ✅ | `step-25-poki` |
 
 ---
 
@@ -78,7 +79,7 @@ Status: ⬜ te doen · 🔄 bezig · ✅ klaar
 5. **Geen nieuwe dependencies zonder te vragen.** De toegestane lijst staat in hoofdstuk 3.
 6. **Alleen `*-view.ts`, `*-scene.ts` en `main.ts` kennen Phaser en DOM.** Alle andere bestanden zijn puur TypeScript (zie hoofdstuk 4).
 7. **Alle tekst die een speler ziet** staat in i18n-bestanden, nooit hardcoded in logica of UI.
-8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames-regel + laadtijd). Enige uitzondering: het SDK-script van CrazyGames.
+8. **Geen externe links, geen externe advertenties, geen externe login, geen externe fonts/CDN-requests** in de game (CrazyGames- en Poki-regel + laadtijd). Enige uitzondering: het SDK-script van het platform (CrazyGames, of Poki in de Poki-build; `vite.config.ts` zet het juiste in `index.html`).
 9. **Na elke stap wordt SPECS.md bijgewerkt** (voortgangsoverzicht bovenaan, vinkje in hoofdstuk 12, logboek in hoofdstuk 14 met wat/waarom/wat nog). Zonder die update is de stap niet klaar (hoofdstuk 10).
 10. **Git:** één branch per stap, een paar logische commits (ongeveer 2 tot 3), mergen naar `main` pas na jouw akkoord; de eigen branch committen en pushen mag zonder te vragen (besluit 2026-10-12, hoofdstuk 11).
 
@@ -127,6 +128,28 @@ Gecontroleerd op 2026-10-06 in de officiële docs (docs.crazygames.com), en opni
 - **Taal:** Engels is verplicht; een vertaling moet goed zijn en de taal uit de SDK (`locale`) volgen met Engels als terugval. We hebben alleen Engels.
 - **Leesbaarheid (bevinding; opgelost in stap 22f, zie hoofdstuk 4, Rendering):** in het kleinste iframe (821×462) schaalt het spel naar 64%. Tekst van 11 tot 13 ontwerp-pixels wordt dan 7 tot 8 schermpixels: de naambordjes onder de ingrediënten (12 px, ook nog grijs op hout), de HUD-labels, het niveau onder Reputation en de kleine regels in de winkel en de kaartjes zijn nauwelijks leesbaar. Tekst van 16 px en meer (bordjes van de kamers, tutorial, knoppen) is goed. Voorstel: alle tekst minstens 16 ontwerp-pixels (10 px op 821×462) en meer contrast op de ingrediëntbordjes. Dat raakt veel panelen, dus als eigen stap (22f) als de eigenaar dat wil.
 - **Rewarded-plaatsing (aandachtspunt, niet aangepast):** CrazyGames wil geen rewarded knop "op een actief gameplay-scherm" en raadt een alternatief zonder ad aan (bijv. met munten kopen). In een idle-game is de taverne altijd het spelscherm; de marskramer is een korte, wegklikbare keuze en de winkelknop koopt iets wat ook met goud kan. De power-ups zijn alleen via een ad te krijgen. Laten beoordelen in de QA-tool; als het afgekeurd wordt, een goudprijs voor de power-ups toevoegen.
+
+## 2b. Geverifieerde Poki-eisen
+
+Gecontroleerd op 2026-10-19 in de officiële docs (developers.poki.com: Working with Poki, Requirements & Quality, HTML5 SDK, Share your game) voor stap 25. Indienen: [POKI.md](POKI.md).
+
+| Eis | Waarde | Gevolg voor ons |
+|---|---|---|
+| Kosten en deal | gratis; opbrengst 50/50 via Poki, 100% bij eigen verkeer; **alleen op Poki op het web** (Steam en app-stores mogen) | Niet meer op een ander webportaal zetten |
+| Platforms | desktop, mobiel en tablet; op mobiel het volle scherm, staand, liggend of beide | Liggend; staand een melding "Turn your device sideways to play."; zoomen uit (meta viewport) |
+| Beeldverhouding | 16:9, schaalt mee (640×360, 836×470, 1031×580) | Al zo (`Scale.FIT`, 1280×720) |
+| Incognito | localStorage in try/catch, het spel blijft speelbaar | Al zo (`createLocalStorageAdapter` valt terug op geheugen) |
+| Externe requests | Poki blokkeert alles behalve de SDK | Alleen het SDK-script |
+| Branding | geen splash, geen uitgaande links; logo van de studio mag op het laadscherm | We hebben geen van beide |
+| SDK-script | `https://game-cdn.poki.com/scripts/v2/poki-sdk.js`, `PokiSDK.init()` en het spel start ook als `init` faalt | `platform/poki.ts` |
+| Events | `gameLoadingFinished()` na laden; `gameplayStart()` pas bij de eerste input; `gameplayStop()` bij pauze, menu, level-einde; nooit twee keer hetzelfde event; geen events tijdens een ad | `createGameplay` met de redenen `loading`, `input`, `menu`, `hidden`, `ad` |
+| Midgame | `commercialBreak()` als de speler uit een pauze/menu terugkomt (vóór `gameplayStart`); **geen eigen timers**, Poki bepaalt hoe vaak | `POKI_ADS`: geen wachttijd, `menuBreaks` |
+| Rewarded | `rewardedBreak()` geeft `true` alleen na de hele video; één video per beloning; vooraf zeggen dat er een ad komt; de gewone knop is er altijd, even groot of groter, naast of boven de ad-knop; **een ad-knop is nooit groen** en toont een 🎬 | Alle ad-knoppen in hout of goud, met 🎬, de gewone knop erboven |
+| Geluid | uit tijdens een ad | Al zo (`playing()`) |
+| Adblocker | spel blijft speelbaar, geen beloning, **geen eigen melding** (Poki toont die) | `explainOff: false` |
+| Pagina | pijltjes, spatie en scrollwiel mogen de pagina niet laten scrollen | `preventPageScroll` in `shared/browser.ts`, `overscroll-behavior` in `index.html` |
+| Monetisatie | geen aankopen, geen andere ad-systemen, rewarded altijd optioneel | Al zo |
+| Thumbnails | stilstaand én bewegend; vierkant minstens 628×628 | Cover en trailer uit stap 23 als begin |
 
 ---
 
@@ -710,6 +733,7 @@ De eigenaar wil iets meer advertenties: **tussendoor iets meer (niet te veel)**,
   - **DOM:** elke lettergrootte in de CSS is `max(<grootte>, var(--min-font, 0px))`. `fitToViewport` (`app/viewport-view.ts`) zet `--min-font` op `minFontPx(scale)` (`app/ui-model.ts`): zoveel ontwerp-pixels dat tekst minstens `MIN_TEXT_SCREEN_PX` (10) schermpixels is. In een venster van 1280×720 of groter verandert er niets (de CSS-groottes zijn al groter); in een klein venster groeit de tekst mee (op 821×462 16 ontwerp-pixels, met het paneel open 21). Een nieuwe CSS-regel met een lettergrootte gebruikt dezelfde `max(...)`.
   - **Panelen:** de vijf tabbladen gaan naar een tweede rij als ze niet passen (in plaats van "Rec…"); de naamkolom bij de uitrusting groeit mee.
   - **Canvas:** alle tekst minstens 16 ontwerp-pixels (10 schermpixels op 821×462): de naambordjes onder de ingrediënten (lichte letters met een donkere rand voor meer contrast; elk tweede bordje hangt lager aan touwtjes dicht bij elkaar, `TAG.lowDrop` en `lowReach`, omdat de bordjes breder zijn dan de 68 pixels tussen twee potten), de voorraadteller, de namen van de drankjes op de bar (op twee regels, om en om hoger: `LABEL_LIFT` 40), de bestelwolkjes en het bordje van een held.
+- **Telefoons (stap 25, voor Poki):** de pagina zoomt niet (`minimum-scale=1, maximum-scale=1` in de meta viewport): zonder dat zoomde een telefoon uit tot de 1280 pixels van de overlay (die is pas na de `transform` klein). Op een aanraakscherm dat staand gehouden wordt, toont `mountTurnNotice` (`app/viewport-view.ts`) over het hele venster "Turn your device sideways to play."; liggend speelt het spel met balken opzij als de telefoon breder is dan 16:9.
 - **Thumbnails (stap 21d):** `npm run pixel:preview` schrijft ook `art/pixel/thumbnail-landscape.png` (1920×1080), `thumbnail-square.png` (800×800) en `thumbnail-portrait.png` (800×1200): ruw materiaal voor de CrazyGames-covers; titel en logo komen er later in een beeldprogramma op.
 - Doorsnede-taverne: kamers als vaste "slots" in één scene; nieuwe kamer = nieuwe slot zichtbaar maken, geen camerabeweging. De bovenverdieping heeft 4 kamervakken (3 in stap 14a; de gildekamer kwam er in stap 15a bij).
 - Objectpools voor klanten, muntjes en partikels. Maximaal ~30 gelijktijdige klanten-sprites.
@@ -762,7 +786,7 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 
 ---
 
-## 6. Platform-laag (CrazyGames)
+## 6. Platform-laag (CrazyGames en Poki)
 
 `src/platform/` is de **enige** plek die `window.CrazyGames` aanraakt. *Gebouwd in stap 20 (API gecontroleerd op docs.crazygames.com op 2026-10-12, SDK v3.8.0 in de lokale test):*
 
@@ -775,6 +799,13 @@ Contentomvang MVP: ~30 recepten, ~25 ingrediënten, 8 klanttypes, 3 kamers, 4 he
 - **Geluid:** `muted()` van de SDK (`game.settings.muteAudio`) gaat voor de eigen instelling; tijdens een ad is alles stil.
 - **Gebruiker:** met een CrazyGames-account staat in de instellingen een regel dat de voortgang in het account is opgeslagen.
 - **Direct in gameplay:** er is geen hoofdmenu. De speler staat meteen in de taverne met de eerste klant; instellingen via een tandwiel.
+
+**Poki (stap 25).** `platform/poki.ts` (`createPokiPlatform`) is de tweede echte implementatie van `Platform`. `main.ts` kiest hem als de build in de modus `poki` draait (`npm run build:poki`, `npm run dev:poki`: `import.meta.env.MODE`); `vite.config.ts` zet dan Poki's SDK-script in `index.html` in plaats van dat van CrazyGames (de plek staat als `<!-- platform-sdk -->` in `index.html`).
+- **Regels als data:** `AdRules` (`gapMs`, `newPlayerMs`, `menuBreaks`, `explainOff`) per platform: `CRAZYGAMES_ADS` (4 min tussen midgame-ads, niet in de eerste 5 min, geen ads na menu's, wel uitleg als ads uit staan) en `POKI_ADS` (geen eigen wachttijd, ads na menu's, geen eigen uitleg). Ze staan op `Platform.adRules` en `Ads.rules`; de mock gebruikt die van CrazyGames. `ADS` houdt alleen `afterLevelMs`.
+- **Gameplay:** `gameplayStart` komt op beide platforms pas bij de eerste klik (reden `input`, Poki-eis). Met `menuBreaks` (`startMenuBreaks`) is het open zijpaneel of het instellingenvenster een stop (reden `menu`); als het laatste menu sluit, vraagt het spel eerst een midgame-ad (als het een rustig moment is, `quietMoment`) en haalt het pas daarna `menu` weg, zodat `gameplayStart` na de ad komt. Event `settings:closed` is daarvoor nieuw.
+- **Ads:** `requestAd('midgame')` is `commercialBreak` (telt als gespeeld, ook als Poki niets toonde), `requestAd('rewarded')` is `rewardedBreak` (`finished` alleen bij `true`). Faalt `init()` of ontbreekt het script, dan is er een adblocker: elke ad geeft `unavailable` en `hasAdblock()` geeft `true`, dus de marskramer en de 🎬-knoppen verdwijnen, zonder melding.
+- **Wat Poki niet heeft:** geen data-module (de save staat in localStorage), geen eigen dempknop (`muted()` is `false`), geen account (`username()` is `null`), geen happytime.
+- **Ad-knoppen (op beide platforms):** het icoon is nu 🎬 (een pixel-klapbord) in plaats van 📺. De knoppen van de marskramer en het welkom-venster zijn van hout (niet groen), de gewone knop staat boven de ad-knop en ze zijn altijd even hoog (een grid met gelijke rijen). Het winkelknopje 🎬 Ad blijft goud, onder de groene koopknop. Zo voldoen ze aan CrazyGames (even groot, zelfde letter en kleur) én Poki (gewone knop erboven, ad-knop niet groen).
 
 ---
 
@@ -954,6 +985,8 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 - [x] **Stap 23: Indienen en na-lancering.** Checklist voor Basic Launch, daarna Full Launch (jij maakt het developer-account en dient in). Daarna: events, content, tweede prestige-laag, Nederlandse vertaling.
   *Gedaan door Claude (2026-10-12):* het indienpakket in [SUBMISSION.md](SUBMISSION.md): de zip, de drie covers met titel, de Engelse teksten (beschrijving, besturing, tags), een recept voor de trailer, wat je in de QA-tool nakijkt, en wat Basic en Full Launch inhouden. *Door de eigenaar:* het account, de upload, de trailer en het indienen. Het "daarna" is opgesplitst in voorstellen 24a t/m 24d hieronder, omdat elk een eigen stap is.
 *Voorstellen voor na de lancering (Claude, 2026-10-12; de eigenaar kiest de volgorde of iets anders, liefst op basis van de cijfers uit de Basic Launch).*
+- [x] **Stap 25: Poki-versie (opdracht eigenaar, 2026-10-19: CrazyGames keurde de game af).** Dezelfde game op Poki, met alles erop en eraan: Poki's SDK als tweede platform, een aparte build en zip, Poki's ad-regels (geen eigen timer, een ad bij het sluiten van een menu, geen eigen adblock-melding), `gameplayStart` pas bij de eerste klik, ad-knoppen die bij beide portalen passen (🎬, niet groen, de gewone knop erboven), geen paginascroll, een draai-je-telefoon-melding, en een indiengids ([POKI.md](POKI.md)). Zie hoofdstuk 2b en 6. Geen nieuwe speler-functie, dus geen tutorial-hint.
+  *Klaar wanneer:* `npm run build:poki` en `npm run zip:poki` maken een zip met Poki's SDK; in `npm run dev:poki` komen de SDK-events in de goede volgorde en spelen midgame- en rewarded test-ads; de CrazyGames-build blijft zoals hij was; tests slagen; de simulator blijft byte-identiek.
 - [ ] **Stap 24a (voorstel): Nederlandse vertaling.** `i18n/nl.ts` (en de gebiedsbestanden), Nederlands in de taalkeuze, en de taal uit de SDK (`user.systemInfo.locale`) bij een eerste start, met Engels als terugval (CrazyGames-eis voor vertalingen). *Klaar wanneer:* elke sleutel heeft een Nederlandse tekst (een test bewaakt dat), de taal wisselt zonder herladen of na één herlaad, tests slagen.
 - [ ] **Stap 24b (voorstel): Seizoensevents.** Een tijdelijk event (bijv. een oogstfeest) met een eigen klant, een eigen recept en een kleine beloning, als data met een begin- en einddatum. Tutorial-hint bij het eerste event.
 - [ ] **Stap 24c (voorstel): Meer content.** Een tweede kerker met een eigen baas en buit, een of twee klanttypes en een paar recepten (de contentomvang uit hoofdstuk 5 was ~30 recepten en 3 kerkers), afgesteld met de simulator.
@@ -974,6 +1007,7 @@ Zeg: "Doe stap N". Elke stap is los te testen. Stappen bouwen op elkaar, dus vol
 | Twee tabs tegelijk overschrijven elkaars save (zelfde `localStorage`) | CrazyGames toont de game normaal in één iframe; de data-module van de SDK (stap 20) synchroniseert per account. Eventueel later: `storage`-event of een tab-lock als dit een probleem blijkt |
 | Art-kwaliteit van zelfgeschreven pixel art | Eenvoudige sprites lukken (experiment gelukt); complexe sprites extern laten maken of CC0 gebruiken; thumbnail apart aandacht |
 | Tutorial irriteert of loopt vast | Altijd overslaanbaar, beloont echte acties i.p.v. klikken op "volgende", test op vastlopers |
+| Poki keurt het mobiele beeld af (balken opzij op brede telefoons, alleen liggend) | Gemeld in POKI.md; als Poki het vraagt een stap waarin de achtergrond tot de rand doorloopt (stap 25) |
 
 ---
 
@@ -989,6 +1023,21 @@ Na elke stap voegt Claude hier bovenaan (nieuwste eerst) een entry toe in dit fo
 - **Nu te proberen:** ...
 - **Nog te doen / volgende stap:** ...
 ```
+
+### Stap 25: Poki-versie (2026-10-19, `step-25-poki`)
+- **Gedaan:** (nieuw `src/platform/poki.ts`, `docs/POKI.md`; bijgewerkt `src/platform/platform.ts`, `src/platform/crazygames.ts`, `src/main.ts`, `src/shared/browser.ts`, `src/shared/events.ts`, `src/app/viewport-view.ts`, `src/app/hud.css`, `src/app/icon-art.ts`, `src/rewards/rewards-view.ts` en `rewards.css`, `src/offline/welcome-view.ts` en `welcome.css`, `src/settings/settings-view.ts`, de i18n-bestanden, `index.html`, `vite.config.ts`, `package.json`, `eslint.config.js`, `scripts/zip-build.mjs`, `.gitignore`; tests in `tests/platform.test.ts` en `tests/rewards.test.ts`)
+  - **Poki als platform:** `createPokiPlatform` met `init`, `gameLoadingFinished`, `gameplayStart/Stop`, `commercialBreak` en `rewardedBreak`; een adblocker (init faalt of geen script) zet ads uit voor de sessie. Details: hoofdstuk 6, "Poki (stap 25)".
+  - **Twee builds:** `npm run build` / `npm run zip` blijven CrazyGames; `npm run build:poki` (naar `dist-poki/`) en `npm run zip:poki` (`release/brewmasters-tavern-poki.zip`, 16 bestanden, 1,35 MB) zijn Poki; `npm run dev:poki` draait lokaal met Poki's SDK in testmodus. `vite.config.ts` zet het juiste SDK-script in `index.html`.
+  - **Ad-regels per platform als data** (`AdRules`, `CRAZYGAMES_ADS`, `POKI_ADS`), **menu's als pauze met een ad bij het sluiten** (`startMenuBreaks`, alleen Poki), en **`gameplayStart` bij de eerste klik** (beide platforms).
+  - **Ad-knoppen:** 🎬 in plaats van 📺 (nieuw pixel-icoon), hout in plaats van groen, de gewone knop boven de ad-knop en even hoog. De "No ads here"-uitleg alleen waar het platform dat wil (CrazyGames ja, Poki nee).
+  - **Pagina en telefoon:** pijltjes, spatie en scrollwiel scrollen de pagina niet (de lijsten in het menu wel); de pagina zoomt niet meer uit op een telefoon; staand verschijnt "Turn your device sideways to play.".
+  - **POKI.md:** voorwaarden, wat klaarstaat, de stappen in het formulier, Engelse teksten (ook "waarom past de game bij Poki"), wat je in de Inspector nakijkt, en de aandachtspunten.
+  - 5 tests erbij (582): geen eigen wachttijd op Poki, menu's als pauze met een ad vóór de herstart, menu's doen niets op CrazyGames, `rewardedBreak`/`commercialBreak` naar het juiste resultaat, en geen ads als `init` faalt of het script ontbreekt.
+- **Waarom (keuzes):** de verschillen tussen de portalen zijn regels, geen andere game; daarom één `AdRules`-object per platform in plaats van `if (poki)` door de code. De ad-knoppen zijn op beide platforms hetzelfde gemaakt, omdat de Poki-regels (gewone knop erboven, niet groen) de CrazyGames-regels (even groot, zelfde kleur) niet breken; zo is er één versie van de knoppen. `gameplayStart` bij de eerste klik geldt ook voor CrazyGames: het is daar ook juist (de speler speelt pas als hij iets doet). De platformkeuze zit in de Vite-modus, niet in een `.env`-bestand (die staan in `.gitignore`).
+- **Gemeten / gecontroleerd:** `npm run check` slaagt (582 tests); de simulator is byte-identiek met `step-23-submission`. Beide builds gemaakt: `dist/index.html` heeft het CrazyGames-script, `dist-poki/index.html` dat van Poki. In de ingebouwde browser met `npm run dev:poki` (poort 5175, een eigen testsave; de save van de eigenaar op 5173 is niet aangeraakt): `init`, `gameLoadingFinished`, `gameplayStart` pas bij de eerste klik, `gameplayStop` bij het openen van het menu, `commercialBreak` bij het sluiten (een test-ad speelde, het schild hield klikken tegen) en `gameplayStart` pas na de ad (spoor met stacktraces op de SDK-functies); de 🎬-knop in de winkel riep `rewardedBreak` aan en na de video was het tekort bijgelegd en de upgrade gekocht. Het kaartje van de marskramer en het welkom-venster bekeken: "No thanks"/"Back to work!" boven de ad-knop, even groot, hout. Mobiel 375×812: de melding om te draaien; 812×375: het spel gecentreerd met balken opzij.
+- **Afwijkingen van het plan:** geen plan vooraf (nieuwe opdracht). Gevonden en meteen opgelost: een telefoon zoomde uit naar 1280 pixels breed (de overlay telt mee voor de paginabreedte), dus de pagina mag niet meer zoomen; dat geldt ook voor de CrazyGames-build.
+- **Nu te proberen:** `npm run dev:poki` en open de console (filter "POKI"): klik, open en sluit het menu, en kijk welke events komen; een test-ad speelt. Lees [POKI.md](POKI.md).
+- **Nog te doen / volgende stap:** de eigenaar dient in bij Poki (POKI.md, paragraaf 3). Open punten: op telefoons breder dan 16:9 blijven smalle balken (Poki wil het volle scherm; zo nodig een eigen stap), nog niet op een echte telefoon gespeeld, en de thumbnails volgens Poki's gids zodra het portaal ze vraagt.
 
 > **Let op bij oude entries:** de logboek-entries hieronder en de stapbeschrijvingen in hoofdstuk 12 noemen de paden van vóór de vlakke architectuur (`systems/`, `wiring/`, `core/`, `data/`, `scene/`, `ui/`, `sim/`). De paden-tabel in de entry "Chore: vlakke architectuur" laat zien waar die nu staan.
 
