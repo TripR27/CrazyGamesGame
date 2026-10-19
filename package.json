@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:poki": "vite --mode poki",
     "build": "tsc --noEmit && vite build",
+    "build:poki": "tsc --noEmit && vite build --mode poki --outDir dist-poki",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lines": "node scripts/check-lines.mjs",
@@ -13,6 +15,7 @@
     "pixel:preview": "node scripts/pixel/preview.mjs",
     "simulate": "node scripts/simulate.mjs",
     "zip": "node scripts/zip-build.mjs",
+    "zip:poki": "node scripts/zip-build.mjs dist-poki brewmasters-tavern-poki.zip",
     "trailer": "node scripts/trailer/trailer.mjs",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run lines && npm run cycles && npm run test"

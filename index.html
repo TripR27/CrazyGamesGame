@@ -2,10 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- No zooming on phones: the overlay is wider than the screen before it is scaled, so a phone would zoom out to fit it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Brewmaster's Tavern</title>
-    <!-- The CrazyGames SDK: the only external script (SPECS chapter 1, rule 8). Without it the game uses a stand-in. -->
-    <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+    <!-- The platform's SDK, the only external script (SPECS chapter 1, rule 8): vite.config.ts puts in CrazyGames' or,
+         with `--mode poki`, Poki's. Without it the game uses a stand-in. -->
+    <!-- platform-sdk -->
     <style>
       /* Pixelify Sans (SIL Open Font License, public/fonts/PixelifySans-OFL.txt): the game's lettering, in the DOM and the canvas. */
       @font-face {
@@ -16,6 +18,8 @@
       }
       :root { --font: 'Pixelify Sans', sans-serif; }
       html, body { margin: 0; height: 100%; background: #1b1209; overflow: hidden; }
+      /* A list that reaches its end never scrolls the page around the game (Poki rule). */
+      * { overscroll-behavior: contain; }
       body { user-select: none; font-family: var(--font); }
       #game { position: absolute; }
       #ui-root { position: absolute; top: 0; left: 0; pointer-events: none; }

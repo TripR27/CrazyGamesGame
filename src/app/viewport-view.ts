@@ -7,6 +7,7 @@ import { mountHud } from '@/app/hud-view';
 import { createSidePanels } from '@/app/panels-view';
 import { computeFit, type Fit, minFontPx, type SideLayout } from '@/app/ui-model';
 import { GAME_HEIGHT, GAME_WIDTH } from '@/config';
+import { t } from '@/i18n/translator';
 import { mountNewBadges, mountShop } from '@/economy/shop-view';
 import { mountBossFight } from '@/heroes/boss-view';
 import { mountTripCards } from '@/heroes/cards-view';
@@ -80,11 +81,26 @@ function mountAdShield(root: HTMLElement, ads: Pick<Ads, 'busy'>): void {
   window.setInterval(() => void (shield.hidden = !ads.busy()), SHIELD_CHECK_MS);
 }
 
+/**
+ * The game is landscape: on a touch screen held upright the whole window says to turn it, instead of a thin strip of
+ * tavern (Poki wants the game to fill the screen on phones). Gone again once the device is turned.
+ */
+function mountTurnNotice(): void {
+  const notice = document.createElement('div');
+  notice.className = 'turn-notice';
+  notice.textContent = t('viewport.turn');
+  document.body.append(notice);
+  const touch = window.matchMedia('(pointer: coarse)');
+  const apply = (): void => void (notice.hidden = !touch.matches || window.innerWidth >= window.innerHeight);
+  apply();
+  window.addEventListener('resize', apply);
+}
+
 /** What the overlay gets from main.ts besides the world: saves as text, ads, and the platform's mute and user name. */
 export interface UiServices {
   saves: SaveCodes;
-  ads: Pick<Ads, 'rewarded' | 'available' | 'busy'>;
-  /** True while sound must be off for the platform: muted by CrazyGames, or an ad is playing. */
+  ads: Pick<Ads, 'rewarded' | 'available' | 'busy' | 'rules'>;
+  /** True while sound must be off for the platform: muted by the platform (CrazyGames), or an ad is playing. */
   silenced(): boolean;
   username(): Promise<string | null>;
 }
@@ -122,4 +138,5 @@ export function mountUi(root: HTMLElement, world: World, layout: SideLayout, onF
   mountSettings(root, world, services);
   mountAudio(root, world, services.silenced);
   mountAdShield(root, services.ads);
+  mountTurnNotice();
 }

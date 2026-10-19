@@ -14,18 +14,18 @@ import { PIXEL } from '@/shared/pixels';
 import './rewards.css';
 
 const TEXTURE = 'peddler';
-/** He stands in the doorway (clear of the first table's seat); the 📺 above his head says what he is there for. */
+/** He stands in the doorway (clear of the first table's seat); the 🎬 above his head says what he is there for. */
 const SPOT = { x: DOOR_ENTRY.x + 20, y: DOOR_ENTRY.y } as const;
 const WALK_MS = 900;
 const HIT = { w: 64, h: 100 };
 
-/** The peddler in the scene: he walks in through the door, waits with a 📺 over his head, and walks out. Target `peddler`. */
+/** The peddler in the scene: he walks in through the door, waits with a 🎬 over his head, and walks out. Target `peddler`. */
 export function createPeddlerView(scene: Scene, world: World): { update(): void } {
   addStripTexture(scene, TEXTURE, customerFrames('peddler'));
   addAnimation(scene, 'peddler-walk', TEXTURE, [F.walkA, F.walkB], 6);
   addAnimation(scene, 'peddler-idle', TEXTURE, [F.stand, F.stand, F.stand, F.stand, F.stand, F.blink], 3);
   const figure = addPixelSprite(scene, DOOR_ENTRY.x, SPOT.y, TEXTURE).setVisible(false);
-  const sign = scene.add.image(SPOT.x, SPOT.y - 100, iconTexture(scene, '📺')).setScale(PIXEL / 2 + 1).setVisible(false);
+  const sign = scene.add.image(SPOT.x, SPOT.y - 100, iconTexture(scene, '🎬')).setScale(PIXEL / 2 + 1).setVisible(false);
   world.targets.register('peddler', () => (figure.visible ? { x: SPOT.x - HIT.w / 2, y: SPOT.y - HIT.h, w: HIT.w, h: HIT.h } : null));
   const walk = (from: number, to: number, after: () => void): void => {
     figure.setX(from).setFlipX(to < from).setVisible(true).play('peddler-walk');
@@ -74,7 +74,9 @@ function buildCard() {
   const watch = createEl('button', 'rewards-watch', t('rewards.watch'));
   const skip = createEl('button', 'rewards-skip', t('rewards.no_thanks'));
   const badge = createEl('div', 'rewards-badge');
-  card.append(title, line, watch, skip);
+  const choice = createEl('div', 'rewards-choice');
+  choice.append(skip, watch);
+  card.append(title, line, choice);
   box.append(card, badge);
   return { box, card, title, line, watch, skip, badge };
 }
@@ -82,11 +84,12 @@ function buildCard() {
 const ADS_OFF_MS = 8000;
 
 /**
- * The peddler's offer as a small card under the HUD while he is in the tavern ("📺 Watch an ad" or "No thanks", alike in
- * size and colour as CrazyGames asks), and a badge with the power-up that runs and its time left. The same card says
- * when an ad did not come ("No ad right now") or when ads are off for the session, so no ad button ever does nothing.
+ * The peddler's offer as a small card under the HUD while he is in the tavern ("No thanks" above "🎬 Watch an ad", alike
+ * in size and colour as CrazyGames and Poki ask), and a badge with the power-up that runs and its time left. The same
+ * card says when an ad did not come ("No ad right now"), and on CrazyGames (`explainOff`) when ads are off for the
+ * session, so no ad button ever does nothing.
  */
-export function mountRewards(root: HTMLElement, world: World, ads: Pick<Ads, 'rewarded'>): () => void {
+export function mountRewards(root: HTMLElement, world: World, ads: Pick<Ads, 'rewarded' | 'rules'>): () => void {
   const { store, clock, bus, rewards, targets } = world;
   const ui = buildCard();
   root.append(ui.box);
@@ -130,7 +133,7 @@ export function mountRewards(root: HTMLElement, world: World, ads: Pick<Ads, 're
   const stops = [
     bus.on('reward:granted', ({ offer, gold }) => notice(t('rewards.title'), thanksText(offer, formatNumber(gold)), THANKS_MS)),
     bus.on('ad:none', () => notice(t('rewards.title'), t('rewards.no_ad'), THANKS_MS)),
-    bus.on('rewards:off', () => notice(t('rewards.ads_off_title'), t('rewards.ads_off'), ADS_OFF_MS)),
+    bus.on('rewards:off', () => ads.rules.explainOff && notice(t('rewards.ads_off_title'), t('rewards.ads_off'), ADS_OFF_MS)),
     targets.register('peddler-watch', () => (ui.card.hidden || ui.watch.hidden ? null : domBounds(ui.watch, root))),
   ];
   const timer = window.setInterval(render, REFRESH_MS);

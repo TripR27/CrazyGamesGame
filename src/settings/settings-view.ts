@@ -1,6 +1,7 @@
 import type { World } from '@/app/world';
 import { createEl, domBounds } from '@/app/panels-view';
 import { t } from '@/i18n/translator';
+import type { Ads } from '@/platform/platform';
 import { importGame, LANGUAGES, resetGame, setLanguage, setVolume } from '@/settings/settings';
 import type { GameState } from '@/shared/state';
 import './settings.css';
@@ -15,6 +16,13 @@ export interface SaveCodes {
   exportCode(): string;
   /** Throws when the text is not a valid save. */
   importCode(code: string): GameState;
+}
+
+/** What the window gets from main.ts: saves as text, the platform's user name, and its ad rules. */
+interface SettingsServices {
+  saves: SaveCodes;
+  username(): Promise<string | null>;
+  ads: Pick<Ads, 'rules'>;
 }
 
 const row = (label: string, ...parts: HTMLElement[]): HTMLElement => {
@@ -62,7 +70,7 @@ function buildWindow() {
  * the save as text (export and import) and starting over (two clicks). A reset or an import reloads the page. The
  * button is the tutorial target `settings-button`. Returns an unmount function.
  */
-export function mountSettings(root: HTMLElement, world: World, { saves, username }: { saves: SaveCodes; username(): Promise<string | null> }): () => void {
+export function mountSettings(root: HTMLElement, world: World, { saves, username, ads }: SettingsServices): () => void {
   const { store, bus, clock, tutorial, targets } = world;
   const button = createEl('button', 'side-button settings-button', '⚙');
   const ui = buildWindow();
@@ -77,13 +85,17 @@ export function mountSettings(root: HTMLElement, world: World, { saves, username
     ui.message.textContent = '';
     ui.reset.textContent = t('settings.reset');
     ui.user.textContent = '';
-    // CrazyGames: a feature that is off because of an ad blocker gets a notice (not a popup) saying why.
-    ui.ads.textContent = world.rewards.enabled() ? '' : t('settings.ads_off');
+    // CrazyGames: a feature that is off because of an ad blocker gets a notice (not a popup) saying why. Poki forbids it.
+    ui.ads.textContent = world.rewards.enabled() || !ads.rules.explainOff ? '' : t('settings.ads_off');
     void username().then((name) => void (ui.user.textContent = name === null ? '' : t('settings.signed_in', { name })));
     ui.overlay.hidden = false;
     bus.emit('settings:opened', {});
   };
-  const shut = (): void => void (ui.overlay.hidden = true);
+  const shut = (): void => {
+    if (ui.overlay.hidden) return;
+    ui.overlay.hidden = true;
+    bus.emit('settings:closed', {});
+  };
   button.addEventListener('click', open);
   ui.close.addEventListener('click', shut);
   ui.volume.addEventListener('input', () => setVolume(world, Number(ui.volume.value) / 100));

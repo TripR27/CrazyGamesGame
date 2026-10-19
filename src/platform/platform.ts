@@ -12,13 +12,37 @@ export type AdType = 'midgame' | 'rewarded';
  */
 export type AdResult = 'finished' | 'failed' | 'unavailable';
 
+/** How ads go on a platform: its rules as data, so the game asks no questions about which platform it is on. */
+export interface AdRules {
+  /** Least time between two midgame ads (a rewarded ad counts too); 0 when the platform sets the pace itself. */
+  gapMs: number;
+  /** No midgame ad in a new game's first minutes; 0 when the platform decides that itself. */
+  newPlayerMs: number;
+  /** A menu (the side panel, the settings) stops gameplay, and coming back from it is a moment for a midgame ad. */
+  menuBreaks: boolean;
+  /** Say why the rewarded offers are gone when ads are off for the session (a notice, never a popup). */
+  explainOff: boolean;
+}
+
 /**
- * The game's platform (one of the real seams, like time and storage): CrazyGames through its SDK, or a stand-in when
- * there is no SDK (tests, the simulator, development without internet). Only `platform/crazygames.ts` touches the SDK.
+ * CrazyGames asks for at least 3 minutes between midgame ads (we keep 4), forbids midgame ads after menu and shop
+ * buttons, and wants a feature that an ad blocker switched off to say why. No midgame ad in a new game's first minutes.
+ */
+export const CRAZYGAMES_ADS: AdRules = { gapMs: 240_000, newPlayerMs: 300_000, menuBreaks: false, explainOff: true };
+
+/** After a new level the midgame ad waits until its message is gone (on every platform). */
+export const ADS = { afterLevelMs: 5_000 } as const;
+
+/**
+ * The game's platform (one of the real seams, like time and storage): CrazyGames or Poki through their SDK, or a
+ * stand-in when there is no SDK (tests, the simulator, development without internet). Only `platform/crazygames.ts`
+ * and `platform/poki.ts` touch an SDK.
  */
 export interface Platform {
-  /** 'crazygames', 'local' (the SDK's own test mode on localhost) or 'none' (the stand-in). */
+  /** 'crazygames', 'local' (the CrazyGames SDK's test mode on localhost), 'poki' or 'none' (the stand-in). */
   environment: string;
+  /** The platform's rules for ads. */
+  adRules: AdRules;
   /** Where saves go on CrazyGames (the data module, synced with the account); null means localStorage. */
   storage: StorageAdapter | null;
   loadingStart(): void;
@@ -41,6 +65,7 @@ export interface Platform {
 export function createMockPlatform(): Platform {
   return {
     environment: 'none',
+    adRules: CRAZYGAMES_ADS,
     storage: null,
     loadingStart: () => debug('platform: loadingStart'),
     loadingStop: () => debug('platform: loadingStop'),
@@ -85,20 +110,16 @@ export function createGameplay(
   };
 }
 
-/**
- * Placeholder rules for ads. CrazyGames asks for at least 3 minutes between midgame ads (rewarded ones count too); we
- * keep 4. No midgame ad in the first minutes of a new game, and one after a new level waits until its message is gone.
- */
-export const ADS = { gapMs: 240_000, newPlayerMs: 300_000, afterLevelMs: 5_000 } as const;
-
 export interface Ads {
+  /** The platform's rules for ads. */
+  rules: AdRules;
   /** An ad is on screen: the game is muted (CrazyGames: mute only once the ad really starts). */
   playing(): boolean;
   /** From the request until the ad is over: the game is paused and the player cannot act (CrazyGames asks for both). */
   busy(): boolean;
   /** Ads can play in this session; false after an ad blocker or a Basic Launch, so rewarded offers are hidden. */
   available(): boolean;
-  /** A midgame ad at a natural moment, unless one played less than `gapMs` ago or one is on its way. */
+  /** A midgame ad at a natural moment, unless one played less than `gapMs` ago or one is on its way (Poki: commercialBreak). */
   midgame(): void;
   /**
    * A rewarded ad the player asked for; `onReward` only when it played to the end, otherwise `onNone`, with `unavailable`
@@ -108,11 +129,11 @@ export interface Ads {
 }
 
 /**
- * Ads with the 3-minute rule. `onPause` is told when an ad is requested and when it is over (pause the game,
- * gameplayStop); `onUnavailable` once, when ads turn out to be off for the session (an ad blocker, a Basic Launch).
+ * Ads with the platform's gap between midgame ads. `onPause` is told when an ad is requested and when it is over (pause
+ * the game, gameplayStop); `onUnavailable` once, when ads turn out to be off for the session (an ad blocker, a Basic Launch).
  */
 export function createAds(
-  platform: Pick<Platform, 'requestAd' | 'hasAdblock'>,
+  platform: Pick<Platform, 'requestAd' | 'hasAdblock' | 'adRules'>,
   clock: Clock,
   onPause: (paused: boolean) => void,
   onUnavailable: () => void = () => undefined,
@@ -147,11 +168,12 @@ export function createAds(
       });
   };
   return {
+    rules: platform.adRules,
     playing: () => playing,
     busy: () => busy,
     available: () => available,
     midgame() {
-      if (available && !busy && clock.now() - lastAt >= ADS.gapMs) void show('midgame');
+      if (available && !busy && clock.now() - lastAt >= platform.adRules.gapMs) void show('midgame');
     },
     rewarded(onReward, onNone) {
       if (busy || !available) return onNone?.(!available);
@@ -166,22 +188,22 @@ export function createAds(
 type AdWorld = Pick<World, 'bus' | 'store' | 'clock' | 'tutorial'>;
 
 /** A natural pause for a midgame ad: not in a new game's first minutes, and never during a lesson, a choice card or a boss fight. */
-export function quietMoment({ store, clock, tutorial }: Omit<AdWorld, 'bus'>): boolean {
+export function quietMoment({ store, clock, tutorial }: Omit<AdWorld, 'bus'>, rules: AdRules): boolean {
   const state = store.getState();
   const now = clock.now();
-  if (now - state.meta.createdAt < ADS.newPlayerMs || tutorial.machine.visibleStep() !== null) return false;
+  if (now - state.meta.createdAt < rules.newPlayerMs || tutorial.machine.visibleStep() !== null) return false;
   return currentCard(state, now) === undefined && currentBoss(state, now) === undefined;
 }
 
 /**
  * The game's moments for the platform: a midgame ad at a natural pause (a hero comes back, a new level once its message
- * is gone; at most every 4 minutes), and happytime for the great achievements. Never straight after a button: CrazyGames
- * forbids midgame ads on shop and menu buttons, and a midgame ad right after a rewarded offer. One call in main.ts.
+ * is gone; on CrazyGames at most every 4 minutes), and happytime for the great achievements. On CrazyGames never straight
+ * after a button: it forbids midgame ads on shop and menu buttons (Poki's menus: `startMenuBreaks`). One call in main.ts.
  */
-export function startPlatform(world: AdWorld, platform: Pick<Platform, 'happytime'>, ads: Pick<Ads, 'midgame'>): void {
+export function startPlatform(world: AdWorld, platform: Pick<Platform, 'happytime'>, ads: Pick<Ads, 'midgame' | 'rules'>): void {
   const { bus, clock } = world;
   const maybe = (): void => {
-    if (quietMoment(world)) ads.midgame();
+    if (quietMoment(world, ads.rules)) ads.midgame();
   };
   let levelAdAt = 0;
   bus.on('hero:returned', maybe);
@@ -194,4 +216,34 @@ export function startPlatform(world: AdWorld, platform: Pick<Platform, 'happytim
   bus.on('achievement:unlocked', ({ big }) => {
     if (big) platform.happytime();
   });
+}
+
+/**
+ * Menus as a stop in gameplay (`menuBreaks`, Poki): while the side panel or the settings are open the platform hears
+ * gameplayStop, and closing the last one is the moment for a midgame ad before gameplay starts again (Poki wants its
+ * commercialBreak exactly there). Without `menuBreaks` (CrazyGames) menus change nothing. Returns what the side panel
+ * reports to: `menu(id, open)`.
+ */
+export function startMenuBreaks(
+  world: AdWorld,
+  ads: Pick<Ads, 'midgame' | 'rules'>,
+  pause: (on: boolean) => void,
+): (id: string, open: boolean) => void {
+  const open = new Set<string>();
+  const menu = (id: string, isOpen: boolean): void => {
+    if (!ads.rules.menuBreaks || isOpen === open.has(id)) return;
+    if (isOpen) {
+      open.add(id);
+      if (open.size === 1) pause(true);
+      return;
+    }
+    open.delete(id);
+    if (open.size > 0) return;
+    // The ad is asked for first, so gameplay only starts again once it is over.
+    if (quietMoment(world, ads.rules)) ads.midgame();
+    pause(false);
+  };
+  world.bus.on('settings:opened', () => menu('settings', true));
+  world.bus.on('settings:closed', () => menu('settings', false));
+  return menu;
 }

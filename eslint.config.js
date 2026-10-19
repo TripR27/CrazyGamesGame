@@ -2,13 +2,13 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 // Only presentation files know Phaser and the DOM; everything else must also run in Node (tests, simulator).
-// shared/browser.ts (loop, autosave, localStorage) and platform/crazygames.ts (the CrazyGames SDK) are the two other
-// places that touch the browser.
-const PRESENTATION_FILES = ['src/**/*-view.ts', 'src/**/*-scene.ts', 'src/main.ts', 'src/shared/browser.ts', 'src/platform/crazygames.ts'];
+// shared/browser.ts (loop, autosave, localStorage), platform/crazygames.ts and platform/poki.ts (the platform SDKs) are
+// the other places that touch the browser.
+const PRESENTATION_FILES = ['src/**/*-view.ts', 'src/**/*-scene.ts', 'src/main.ts', 'src/shared/browser.ts', 'src/platform/crazygames.ts', 'src/platform/poki.ts'];
 const BANNED_FOR_LOGIC = ['phaser', '**/*-view', '**/*-scene'];
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage'] },
+  { ignores: ['dist', 'dist-poki', 'node_modules', 'coverage'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

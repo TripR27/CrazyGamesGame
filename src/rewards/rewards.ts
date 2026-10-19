@@ -14,7 +14,7 @@ export const REWARDS = {
   goldMinutes: 3,
   /** The peddler: the first visit after this much play in a session, then one every `everyMs`, staying `staysMs`. */
   peddler: { firstAfterMs: 300_000, everyMs: 300_000, staysMs: 30_000 },
-  /** A shop row whose price the player has at least this share of gets a 📺 button; at most once per `cooldownMs`. */
+  /** A shop row whose price the player has at least this share of gets a 🎬 button; at most once per `cooldownMs`. */
   shop: { share: 0.7, cooldownMs: 300_000 },
 } as const;
 
@@ -55,7 +55,7 @@ export function goldBag(reputation: number, earnedLately: number): Num {
   return num(Math.round(Math.max(least, earnedLately)));
 }
 
-/** Whether a shop row gets the 📺 button: most of the price is there, not all of it, and the last one was long enough ago. */
+/** Whether a shop row gets the 🎬 button: most of the price is there, not all of it, and the last one was long enough ago. */
 export function shopAdOffered(cost: Num, gold: Num, now: number, lastAt: number): boolean {
   return gold.lt(cost) && gold.gte(cost.mul(REWARDS.shop.share)) && now - lastAt >= REWARDS.shop.cooldownMs;
 }

@@ -57,3 +57,6 @@
 /* Over everything while an ad is on its way or playing, so the player cannot act (CrazyGames rule). */
 .ad-shield { position: absolute; inset: 0; pointer-events: auto; z-index: 10; }
 .ad-shield[hidden] { display: none; }
+/* On a phone held upright: the whole window asks to turn it (the game is landscape). Window pixels, not design pixels. */
+.turn-notice { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 24px; background: #1b1209; color: #f5c542; font-family: var(--font); font-size: 24px; text-align: center; }
+.turn-notice[hidden] { display: none; }

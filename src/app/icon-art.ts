@@ -38,7 +38,8 @@ export const ICONS: Readonly<Record<string, Sprite>> = {
   '⛑': sprite({ k: K, a: 0xb8c0cc, A: 0xe8eef4 }, ['..kkkk..', '.kaaaak.', 'kaAaaaak', 'kaAaaaak', 'kkkkkkkk', 'kak..kak', 'kak..kak', '.k....k.']),
   '📿': sprite({ k: K, y: GOLD.y, j: 0x58d6d0, J: 0xe8fffe }, ['y......y', '.y....y.', '..y..y..', '..kyyk..', '.kjjjjk.', '.kjJjjk.', '..kjjk..', '...kk...']),
   '☰': sprite({ k: INK }, ['........', 'kkkkkkkk', '........', '........', 'kkkkkkkk', '........', '........', 'kkkkkkkk']),
-  '📺': sprite({ k: K, s: 0x5ad1ff, S: 0xe8fffe }, ['..k..k..', '...kk...', 'kkkkkkkk', 'ksSssssk', 'kSsssssk', 'kssssssk', 'kkkkkkkk', '.k....k.']),
+  // A clapperboard: Poki wants rewarded buttons to show it.
+  '🎬': sprite({ k: K, w: 0xf2f2f2, s: 0x4a5060 }, ['kkkkkkk.', 'kwkkwkkk', 'kkkkkkkk', 'kwkwkwkw', 'kkkkkkkk', 'kssssssk', 'kswwwwsk', 'kkkkkkkk']),
   '✕': sprite({ k: INK }, CROSS),
   '✖': sprite({ k: 0xe2364b }, CROSS),
   '⚙': sprite({ k: INK }, ['...kk...', '.kkkkkk.', '.kk..kk.', 'kkk..kkk', 'kkk..kkk', '.kk..kk.', '.kkkkkk.', '...kk...']),

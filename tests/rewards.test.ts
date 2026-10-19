@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DAILY } from '@/daily/daily';
 import { getMultipliers } from '@/economy/upgrades';
-import { ADS, startPlatform } from '@/platform/platform';
+import { ADS, CRAZYGAMES_ADS, startPlatform } from '@/platform/platform';
 import { BOOSTS, goldBag, PEDDLER_OFFERS, REWARDS, shopAdOffered, topUpForShop } from '@/rewards/rewards';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
@@ -94,7 +94,7 @@ describe('the bag of gold', () => {
   });
 });
 
-describe('the shop 📺 button', () => {
+describe('the shop 🎬 button', () => {
   it('shows with most of the price there, not all of it, and not again too soon', () => {
     const cost = num(100);
     expect(shopAdOffered(cost, num(69), 1e9, 0)).toBe(false);
@@ -117,11 +117,11 @@ describe('midgame ads at natural moments', () => {
 
   it("wait out a new game's first minutes, then come with a hero and (a moment later) a new level, never after a shop button", () => {
     const g = game(0);
-    const ads = { midgame: vi.fn() };
+    const ads = { midgame: vi.fn(), rules: CRAZYGAMES_ADS };
     startPlatform(g.world, { happytime: vi.fn() }, ads);
     g.world.bus.emit('hero:returned', hero);
     expect(ads.midgame).not.toHaveBeenCalled();
-    g.at(ADS.newPlayerMs);
+    g.at(CRAZYGAMES_ADS.newPlayerMs);
     g.world.bus.emit('room:built', { id: 'extension' });
     expect(ads.midgame).not.toHaveBeenCalled();
     g.world.bus.emit('hero:returned', hero);
@@ -133,9 +133,9 @@ describe('midgame ads at natural moments', () => {
   });
 
   it('never come while a lesson is on screen', () => {
-    const g = newGame(createInitialState(0), { now: () => ADS.newPlayerMs * 2 });
+    const g = newGame(createInitialState(0), { now: () => CRAZYGAMES_ADS.newPlayerMs * 2 });
     g.world.floor.customers.length = 0;
-    const ads = { midgame: vi.fn() };
+    const ads = { midgame: vi.fn(), rules: CRAZYGAMES_ADS };
     startPlatform(g.world, { happytime: vi.fn() }, ads);
     g.tick(4_000); // the first customer arrives and the first lesson shows
     expect(g.shown()).not.toBeNull();

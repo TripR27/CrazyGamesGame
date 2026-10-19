@@ -126,6 +126,7 @@ export const ingredients: Messages = {
 export const panel: Messages = {
   'panel.open': '☰ Menu',
   'panel.close': '✕',
+  'viewport.turn': 'Turn your device sideways to play.',
 };
 
 export const recipes: Messages = {
@@ -229,7 +230,7 @@ export const welcome: Messages = {
   'welcome.night_shift': 'Buy Night Shift in the shop and they keep working while you are away.',
   'welcome.capped': 'Staff stop working after {limit} away.',
   'welcome.heroes': 'Your heroes on Auto made {trips} trips and brought home {loot}.',
-  'welcome.double': '📺 Double it (watch an ad)',
+  'welcome.double': '🎬 Double it (watch an ad)',
   'welcome.doubled': 'Doubled!',
   'welcome.no_ad': 'No ad right now. Try again?',
   'welcome.ads_off': 'Ads are blocked or off here',
