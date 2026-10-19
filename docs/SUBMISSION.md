@@ -65,7 +65,7 @@ Liever zelf opnemen? Dat kan met de Xbox Game Bar (`Win+Alt+R`) en Clipchamp: kn
 - De game start meteen in de taverne (geen menu); de tutorial is over te slaan.
 - `gameplayStart` / `gameplayStop` en `loadingStart` / `loadingStop` komen door (de tool laat ze zien).
 - De save gaat naar de data-module: speel even, herlaad, en de voortgang is er nog (ook ingelogd en uitgelogd).
-- Ads: een midgame-ad komt pas na 5 minuten spelen (bij een held die terugkomt of een nieuw niveau), nooit tijdens een tutorial-les. De 📺-knoppen (marskramer, winkel, welkom-venster) geven alleen na een hele ad een beloning. Met een adblocker verdwijnen ze en staat de uitleg in de instellingen.
+- Ads: een midgame-ad komt pas na 5 minuten spelen (bij een held die terugkomt of een nieuw niveau), nooit tijdens een tutorial-les. De 🎬-knoppen (sinds stap 25; eerst 📺) (marskramer, winkel, welkom-venster) geven alleen na een hele ad een beloning. Met een adblocker verdwijnen ze en staat de uitleg in de instellingen.
 - Leesbaarheid in het kleine venster (821×462) en op volledig scherm.
 - Als het kan: even op een Chromebook spelen (moet vlot lopen met 4 GB).
 - Twee punten om bewust naar te kijken (zie SPECS hoofdstuk 2): de rewarded knoppen staan in het spelscherm (in een idle-game is dat altijd zo), en de power-ups van de marskramer zijn alleen via een ad te krijgen. Keurt de QA ze af, dan krijgen de power-ups een goudprijs.
