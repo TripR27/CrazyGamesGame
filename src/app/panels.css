@@ -15,7 +15,7 @@
   image-rendering: pixelated;
   background: none;
   color: #3b2410;
-  font-size: 20px;
+  font-size: max(20px, var(--min-font, 0px));
   font-weight: bold;
   cursor: pointer;
   z-index: 2;
@@ -45,20 +45,21 @@
 }
 .side-panel[hidden] { display: none; }
 
-/* Five wooden tabs share the width: they shrink to fit (min-width 0); the open one is gold. */
-.side-tabs { display: flex; gap: 2px; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 4px solid #2a1608; }
+/* Five wooden tabs share the width; in a small window their text grows (--min-font) and they wrap onto a second row
+   instead of cutting the names off. The open one is gold. */
+.side-tabs { display: flex; flex-wrap: wrap; gap: 2px; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 4px solid #2a1608; }
 .side-tab {
   text-shadow: none;
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
-  padding: 2px 0;
+  padding: 2px 4px;
   border: 6px solid transparent;
   border-image: var(--frame-wood) 3 fill / 6px;
   image-rendering: pixelated;
   background: none;
   color: #2a1608;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: max(14px, var(--min-font, 0px));
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;

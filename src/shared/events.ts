@@ -155,8 +155,9 @@ export interface GameEvents {
   /** The daily bonus can be claimed (a new day began), and it was claimed: day `day` of the streak, for `gold`. */
   'daily:available': Record<string, never>;
   'daily:claimed': { day: number; gold: Num };
-  /** The settings window opened, and a whole game replaced the current one (a reset or an import); the page reloads. */
+  /** The settings window opened or closed, and a whole game replaced the current one (a reset or an import); the page reloads. */
   'settings:opened': Record<string, never>;
+  'settings:closed': Record<string, never>;
   'game:replaced': Record<string, never>;
   /** Something in the scene (a hero in the guild hall) asks the side panel to open on the Heroes tab. */
   'heroes:requested': Record<string, never>;

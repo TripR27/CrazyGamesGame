@@ -1,13 +1,13 @@
-// Zips the production build for CrazyGames: `npm run zip` (after `npm run build`) writes release/brewmasters-tavern.zip
-// with index.html at the top. No dependency: Node's zlib deflates, the zip records are written here. Paths use forward
+// Zips the production build: `npm run zip` (after `npm run build`) writes release/brewmasters-tavern.zip for CrazyGames
+// with index.html at the top; `npm run zip:poki` (after `npm run build:poki`) zips dist-poki for Poki. No dependency: Node's zlib deflates, the zip records are written here. Paths use forward
 // slashes (Windows' Compress-Archive writes backslashes, which unpack as flat file names on a Linux server).
 import { Buffer } from 'node:buffer';
 import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { deflateRawSync } from 'node:zlib';
 
-const SOURCE = 'dist';
-const TARGET = join('release', 'brewmasters-tavern.zip');
+const SOURCE = process.argv[2] ?? 'dist';
+const TARGET = join('release', process.argv[3] ?? 'brewmasters-tavern.zip');
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -62,7 +62,7 @@ function entry(name, data, offset) {
 }
 
 const files = filesUnder(SOURCE).sort();
-if (!files.some((f) => relative(SOURCE, f) === 'index.html')) throw new Error('No dist/index.html: run `npm run build` first.');
+if (!files.some((f) => relative(SOURCE, f) === 'index.html')) throw new Error(`No ${SOURCE}/index.html: build first.`);
 const bodies = [];
 const centrals = [];
 let offset = 0;

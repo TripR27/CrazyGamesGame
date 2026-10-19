@@ -67,7 +67,7 @@ export const achievements: Messages = {
   'settings.reset': 'Delete everything',
   'settings.reset_confirm': 'Sure? Click again to delete',
   'settings.signed_in': 'Signed in on CrazyGames as {name}: your progress is saved to your account.',
-  'settings.ads_off': 'Ads are blocked or switched off, so the peddler and the 📺 rewards stay away. Everything else plays the same.',
+  'settings.ads_off': 'Ads are blocked or switched off, so the peddler and the 🎬 rewards stay away. Everything else plays the same.',
   'tutorial.settings_tip.text': 'Psst. The speaker turns the sound off. Volume, language and a copy of your save are behind the cog.',
   'tutorial.trophy_open.text': 'A trophy! Every trophy makes the tavern a little better, for good. Have a look in the Trophies tab.',
   'tutorial.trophy_done.text': 'Here they all are, with how far you got. Your statistics are at the bottom.',

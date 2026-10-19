@@ -20,14 +20,14 @@
 
 .level-up-title {
   margin: 0 0 4px;
-  font-size: 26px;
+  font-size: max(26px, var(--min-font, 0px));
   font-weight: bold;
   color: #f5c542;
 }
 
 .level-up-line {
   margin: 2px 0 0;
-  font-size: 16px;
+  font-size: max(16px, var(--min-font, 0px));
 }
 
 @keyframes level-up-pop {

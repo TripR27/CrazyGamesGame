@@ -112,7 +112,7 @@ export interface GameState {
   achievements: string[];
   /** The daily bonus: the local day number it was last claimed, and how many days in a row. */
   daily: { lastDay: number; streak: number };
-  /** Rewarded ads: the power-up running ('' for none) and when it ends, and when the shop's 📺 button was last used. */
+  /** Rewarded ads: the power-up running ('' for none) and when it ends, and when the shop's 🎬 button was last used. */
   rewards: { boost: string; boostEndsAt: number; shopAdAt: number };
   /** The player's settings: volume 0 to 1, sound off (`muted`, the speaker button) and the language id. */
   settings: { volume: number; muted: boolean; language: string };

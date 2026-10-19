@@ -57,22 +57,22 @@ export const shop: Messages = {
   'shop.teaser_save': 'Save up to see it',
   'shop.teaser_after': 'Comes after {name}',
   'shop.or': ' or ',
-  'shop.ad_buy': '📺 Ad',
+  'shop.ad_buy': '🎬 Ad',
 };
 
-/** Rewarded ads: the peddler, the bag of gold, the power-ups and the shop's 📺 button. */
+/** Rewarded ads: the peddler, the bag of gold, the power-ups and the shop's 🎬 button. */
 export const rewards: Messages = {
   'rewards.peddler': 'Peddler',
   'rewards.title': 'A peddler drops by',
   'rewards.offer_gold': 'Watch an ad and he hands you a bag of {gold} gold.',
   'rewards.offer_boost': 'Watch an ad for {name}: {does} for {minutes} minutes.',
-  'rewards.watch': '📺 Watch an ad',
+  'rewards.watch': '🎬 Watch an ad',
   'rewards.no_thanks': 'No thanks',
   'rewards.thanks_gold': 'Pleasure doing business! +{gold} gold.',
   'rewards.thanks_boost': '{name}! {does} for {minutes} minutes.',
   'rewards.no_ad': 'No ad right now. Maybe next time.',
   'rewards.ads_off_title': 'No ads here',
-  'rewards.ads_off': 'Ads are blocked or switched off, so the peddler and the 📺 rewards stay away. Everything else plays the same.',
+  'rewards.ads_off': 'Ads are blocked or switched off, so the peddler and the 🎬 rewards stay away. Everything else plays the same.',
   'rewards.running': '{name} {time}',
   'rewards.happy_hour.name': 'Happy Hour',
   'rewards.happy_hour.does': 'drinks sell for double',

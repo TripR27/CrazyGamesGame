@@ -88,6 +88,17 @@ export interface Fit {
   top: number;
 }
 
+/**
+ * CrazyGames wants text readable in its smallest window (821×462, devicePixelRatio 1). No text in the overlay gets
+ * smaller than this on screen: the CSS uses `max(<size>, var(--min-font))`.
+ */
+export const MIN_TEXT_SCREEN_PX = 10;
+
+/** The smallest font size in design pixels at this scale, so text stays `MIN_TEXT_SCREEN_PX` on screen. */
+export function minFontPx(scale: number): number {
+  return Math.ceil(MIN_TEXT_SCREEN_PX / scale);
+}
+
 /** Same rule as Phaser's Scale.FIT with centring: largest uniform scale that fits, centred. */
 export function computeFit(viewW: number, viewH: number, designW: number, designH: number): Fit {
   const scale = Math.min(viewW / designW, viewH / designH);

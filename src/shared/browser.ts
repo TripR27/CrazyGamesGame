@@ -65,6 +65,28 @@ export function registerDebugCommands(commands: DebugCommands): void {
   (window as unknown as { bt?: DebugCommands }).bt = commands;
 }
 
+const SCROLL_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'PageUp', 'PageDown', 'Home', 'End'];
+
+/** Whether the wheel turns over a list that can scroll (the shop, the recipe book): that one may scroll. */
+function overScrollList(target: EventTarget | null): boolean {
+  for (let el = target instanceof Element ? target : null; el !== null; el = el.parentElement) {
+    if (el.scrollHeight > el.clientHeight && /auto|scroll/.test(getComputedStyle(el).overflowY)) return true;
+  }
+  return false;
+}
+
+/**
+ * Keys and the wheel never scroll the page around the game's iframe (Poki asks for it). Typing in a text field and the
+ * lists in the panels still work; `overscroll-behavior` in index.html keeps a list at its end from scrolling the page.
+ */
+export function preventPageScroll(): void {
+  window.addEventListener('keydown', (event) => {
+    const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement;
+    if (!typing && SCROLL_KEYS.includes(event.key)) event.preventDefault();
+  });
+  window.addEventListener('wheel', (event) => !overScrollList(event.target) && event.preventDefault(), { passive: false });
+}
+
 const PROBE_KEY = '__bt_probe__';
 
 function usableStorage(candidate?: Storage): Storage | null {

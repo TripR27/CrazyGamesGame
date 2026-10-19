@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { newGame } from './flows/helpers';
 import { payOfflineAgain, type OfflineReport } from '@/offline/offline';
-import { ADS, type AdResult, createAds, createGameplay, createMockPlatform, startPlatform } from '@/platform/platform';
+import { type AdResult, createAds, createGameplay, createMockPlatform, CRAZYGAMES_ADS, startMenuBreaks, startPlatform } from '@/platform/platform';
+import { createPokiPlatform, POKI_ADS } from '@/platform/poki';
 import { num } from '@/shared/numbers';
 import { createInitialState } from '@/shared/state';
 
@@ -14,7 +15,7 @@ function testClock(start = 1_000_000) {
 function adPlatform() {
   const pending: { type: string; start: () => void; end: (r: AdResult) => void }[] = [];
   const requestAd = (type: string, start: () => void): Promise<AdResult> => new Promise((end) => pending.push({ type, start, end }));
-  return { pending, requestAd, hasAdblock: (): Promise<boolean> => Promise.resolve(false) };
+  return { pending, requestAd, hasAdblock: (): Promise<boolean> => Promise.resolve(false), adRules: CRAZYGAMES_ADS };
 }
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
@@ -58,7 +59,7 @@ describe('ads', () => {
     expect(ads.playing()).toBe(false);
     expect(ads.busy()).toBe(false);
     expect(pauses).toEqual([true, false]);
-    clock.advance(ADS.gapMs - 1000);
+    clock.advance(CRAZYGAMES_ADS.gapMs - 1000);
     ads.midgame();
     expect(platform.pending).toHaveLength(1);
     clock.advance(1000);
@@ -113,7 +114,7 @@ describe('ads', () => {
   it('are asked for when a hero comes back, and happytime comes with the great achievements', () => {
     const g = newGame(createInitialState(0));
     const platform = { happytime: vi.fn() };
-    const ads = { midgame: vi.fn() };
+    const ads = { midgame: vi.fn(), rules: CRAZYGAMES_ADS };
     startPlatform(g.world, platform, ads);
     g.world.bus.emit('hero:returned', { id: 'warrior', dungeon: 'swamp', loot: {}, gear: null, xp: 40, level: 1, levelUp: false, injured: false, boss: null });
     g.world.bus.emit('achievement:unlocked', { id: 'first_pint', big: false });
@@ -126,6 +127,75 @@ describe('ads', () => {
     const started = vi.fn();
     expect(await createMockPlatform().requestAd('rewarded', started)).toBe('finished');
     expect(started).toHaveBeenCalled();
+  });
+});
+
+describe('ads on Poki', () => {
+  it('leave the pace of midgame ads to the platform: no gap of our own', async () => {
+    const platform = { ...adPlatform(), adRules: POKI_ADS };
+    const ads = createAds(platform, testClock(), () => undefined);
+    ads.midgame();
+    platform.pending[0]?.end('finished');
+    await flush();
+    ads.midgame();
+    expect(platform.pending).toHaveLength(2);
+  });
+
+  it('stop gameplay while a menu is open and ask for an ad before it starts again', () => {
+    const g = newGame(createInitialState(0));
+    const calls: string[] = [];
+    const ads = { midgame: () => void calls.push('ad'), rules: POKI_ADS };
+    const menu = startMenuBreaks(g.world, ads, (open) => void calls.push(open ? 'stop' : 'start'));
+    menu('panel', true);
+    g.world.bus.emit('settings:opened', {});
+    menu('panel', false);
+    expect(calls).toEqual(['stop']);
+    g.world.bus.emit('settings:closed', {});
+    expect(calls).toEqual(['stop', 'ad', 'start']);
+  });
+
+  it('leave menus alone on CrazyGames, which forbids ads after menu buttons', () => {
+    const g = newGame(createInitialState(0));
+    const calls: string[] = [];
+    const menu = startMenuBreaks(g.world, { midgame: () => void calls.push('ad'), rules: CRAZYGAMES_ADS }, () => void calls.push('pause'));
+    menu('panel', true);
+    menu('panel', false);
+    expect(calls).toEqual([]);
+  });
+});
+
+describe('the Poki SDK', () => {
+  const withSdk = (sdk: object | undefined) => vi.stubGlobal('window', { PokiSDK: sdk });
+  const fakeSdk = (init: Promise<void>, watched = true) => ({
+    init: () => init,
+    gameLoadingFinished: vi.fn(),
+    gameplayStart: vi.fn(),
+    gameplayStop: vi.fn(),
+    commercialBreak: (start: () => void) => (start(), Promise.resolve()),
+    rewardedBreak: (start: () => void) => (start(), Promise.resolve(watched)),
+  });
+
+  it('rewards only a video watched to the end, and counts a commercial break as played', async () => {
+    withSdk(fakeSdk(Promise.resolve(), false));
+    const platform = await createPokiPlatform();
+    const started = vi.fn();
+    expect(await platform.requestAd('midgame', started)).toBe('finished');
+    expect(await platform.requestAd('rewarded', started)).toBe('failed');
+    expect(started).toHaveBeenCalledTimes(2);
+    expect(await platform.hasAdblock()).toBe(false);
+    vi.unstubAllGlobals();
+  });
+
+  it('starts the game anyway without ads when init fails or the script is blocked (an ad blocker)', async () => {
+    withSdk(fakeSdk(Promise.reject(new Error('blocked'))));
+    const failed = await createPokiPlatform();
+    expect(await failed.requestAd('rewarded', vi.fn())).toBe('unavailable');
+    expect(await failed.hasAdblock()).toBe(true);
+    withSdk(undefined);
+    const missing = await createPokiPlatform();
+    missing.gameplayStart();
+    expect(await missing.requestAd('midgame', vi.fn())).toBe('unavailable');
+    vi.unstubAllGlobals();
   });
 });
 

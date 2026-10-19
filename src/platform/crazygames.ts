@@ -1,4 +1,4 @@
-import type { AdResult, AdType, Platform } from '@/platform/platform';
+import { type AdResult, type AdType, CRAZYGAMES_ADS, type Platform } from '@/platform/platform';
 import { debug } from '@/shared/events';
 import type { StorageAdapter } from '@/shared/save';
 
@@ -54,6 +54,7 @@ export async function createCrazyGamesPlatform(): Promise<Platform | null> {
   if (s.environment === 'disabled') return null;
   return {
     environment: s.environment,
+    adRules: CRAZYGAMES_ADS,
     storage: s.environment === 'crazygames' ? dataStorage(s) : null,
     loadingStart: () => s.game.loadingStart(),
     loadingStop: () => s.game.loadingStop(),

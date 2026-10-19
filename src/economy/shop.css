@@ -1,5 +1,5 @@
 .shop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.shop-title { margin: 0; font-size: 20px; }
+.shop-title { margin: 0; font-size: max(20px, var(--min-font, 0px)); }
 .shop-amounts { display: flex; gap: 4px; }
 .shop-amount {
   padding: 0 6px;
@@ -9,7 +9,7 @@
   background: none;
   color: #2a1608;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: max(14px, var(--min-font, 0px));
   cursor: pointer;
 }
 .shop-amount--on { border-image: var(--frame-gold) 3 fill / 6px; font-weight: bold; }
@@ -28,9 +28,9 @@
 .shop-row--maxed { opacity: 0.6; }
 .shop-row[hidden], .shop-kind[hidden] { display: none; }
 .shop-row-info { flex: 1; min-width: 0; }
-.shop-row-head { display: flex; justify-content: space-between; gap: 8px; font-weight: bold; font-size: 16px; }
-.shop-row-level { font-size: 13px; font-weight: normal; opacity: 0.75; }
-.shop-row-text { margin: 2px 0 0; font-size: 13px; line-height: 1.25; }
+.shop-row-head { display: flex; justify-content: space-between; gap: 8px; font-weight: bold; font-size: max(16px, var(--min-font, 0px)); }
+.shop-row-level { font-size: max(13px, var(--min-font, 0px)); font-weight: normal; opacity: 0.75; }
+.shop-row-text { margin: 2px 0 0; font-size: max(13px, var(--min-font, 0px)); line-height: 1.25; }
 
 .shop-buy {
   flex: none;
@@ -42,7 +42,7 @@
   background: none;
   color: #1f3a10;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: max(14px, var(--min-font, 0px));
   font-weight: bold;
   cursor: pointer;
 }
@@ -50,17 +50,17 @@
 .shop-buy:active:not(:disabled) { transform: translateY(2px); }
 .shop-buy:disabled { border-image: var(--frame-stone) 3 fill / 6px; color: #7b6f4f; cursor: default; }
 
-.shop-kind { margin: 6px 0 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.shop-kind { margin: 6px 0 0; font-size: max(13px, var(--min-font, 0px)); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
 
 /* Offers come in sight one by one (economy/shop-sight.ts): a "New!" label on what just did, and a grey teaser per group. */
 .shop-row-title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; min-width: 0; }
-.shop-row-new { color: #f5c542; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.shop-row-new { color: #f5c542; font-size: max(12px, var(--min-font, 0px)); text-transform: uppercase; letter-spacing: 0.06em; }
 .shop-row-new[hidden], .shop-row-text[hidden], .shop-buy[hidden] { display: none; }
 .shop-row--teaser { opacity: 0.55; filter: grayscale(0.8); }
 .shop-row--teaser .shop-row-head { font-weight: normal; }
 
-/* The 📺 button under the buy button when most of the price is there (a rewarded ad pays the rest). */
+/* The 🎬 button under the buy button when most of the price is there (a rewarded ad pays the rest). */
 .shop-row-buttons { display: flex; flex-direction: column; gap: 2px; flex: none; }
-.shop-ad { width: 104px; padding: 0 2px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; background: none; color: #3b2410; font-family: var(--font); font-size: 13px; cursor: pointer; }
+.shop-ad { width: 104px; padding: 0 2px; border: 6px solid transparent; border-image: var(--frame-gold) 3 fill / 6px; image-rendering: pixelated; background: none; color: #3b2410; font-family: var(--font); font-size: max(13px, var(--min-font, 0px)); cursor: pointer; }
 .shop-ad:hover { filter: brightness(1.08); }
 .shop-ad[hidden] { display: none; }
